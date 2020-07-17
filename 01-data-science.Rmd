@@ -1,4 +1,10 @@
 
+```{r setup, include=FALSE, echo=FALSE}
+install.packages(c('kableExtra', 'readtext', 'stringr', 'dplyr', 'ggplot2'), 
+                 repos = "http://cran.us.r-project.org")
+```
+
+
 # Data Science
 
 Data Science is about drawing useful conclusions from large and diverse data sets through exploration, prediction, and inference. Exploration involves identifying patterns in information. Prediction involves using information we know to make informed guesses about values we wish we knew. Inference involves quantifying our degree of certainty: will the patterns that we found in our data also appear in new observations? How accurate are our predictions? Our primary tools for exploration are visualizations and descriptive statistics, for prediction are machine learning and optimization, and for inference are statistical tests and models.
