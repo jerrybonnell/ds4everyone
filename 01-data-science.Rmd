@@ -17,9 +17,9 @@ Applying this approach requires learning to program a computer, and so this text
 
 ### Computational Tools 
 
-This text uses the Python 3 programming language, along with a standard set of numerical and data visualization tools that are used widely in commercial applications, scientific experiments, and open-source projects. Python has recruited enthusiasts from many professions that use data to draw conclusions. By learning the Python language, you will join a million-person-strong community of software developers and data scientists.
+This text uses the R programming language, along with a standard set of numerical and data visualization tools that are used widely in commercial applications, scientific experiments, and open-source projects. R has recruited enthusiasts from many professions that use data to draw conclusions. By learning the R language, you will join a million-person-strong community of software developers and data scientists.
 
-__Getting Started.__ The easiest and recommended way to start writing programs in Python is to log into the companion site for this text, datahub.berkeley.edu. If you have a @berkeley.edu email address, you already have full access to the programming environment hosted on that site. If not, please complete this form to request access.
+__Getting Started.__ The easiest and recommended way to start writing programs in Python is to log into the companion site for this text, datahub.berkeley.edu. If you have a @berkeley.edu email address, you already have full access to the programming environment hosted on that site. If not, please complete this form to request access. __needs to be rewritten__
 
 You are not at all restricted to using this web-based programming environment. A Python program can be executed by any computer, regardless of its manufacturer or operating system, provided that support for the language is installed. If you wish to install the version of Python and its accompanying libraries that will match this text, we recommend the Anaconda distribution that packages together the Python 3 language interpreter, IPython libraries, and the Jupyter notebook environment.
 
@@ -33,4 +33,222 @@ Data science extends the field of statistics by taking full advantage of computi
 
 Applications to real data sets motivate the statistical techniques that we describe throughout the text. Real data often do not follow regular patterns or match standard equations. The interesting variation in real data can be lost by focusing too much attention on simplistic summaries such as average values. Computers enable a family of methods based on resampling that apply to a wide range of different inference problems, take into account all available information, and require few assumptions or conditions. Although these techniques have often been reserved for advanced courses in statistics, their flexibility and simplicity are a natural fit for data science applications.
 
+## Why Data Science?
+
+Most important decisions are made with only partial information and uncertain outcomes. However, the degree of uncertainty for many decisions can be reduced sharply by access to large data sets and the computational tools required to analyze them effectively. Data-driven decision making has already transformed a tremendous breadth of industries, including finance, advertising, manufacturing, and real estate. At the same time, a wide range of academic disciplines are evolving rapidly to incorporate large-scale data analysis into their theory and practice.
+
+Studying data science enables individuals to bring these techniques to bear on their work, their scientific endeavors, and their personal decisions. Critical thinking has long been a hallmark of a rigorous education, but critiques are often most effective when supported by data. A critical analysis of any aspect of the world, may it be business or social science, involves inductive reasoning; conclusions can rarely been proven outright, but only supported by the available evidence. Data science provides the means to make precise, reliable, and quantitative arguments about any set of observations. With unprecedented access to information and computing, critical thinking about any aspect of the world that can be measured would be incomplete without effective inferential techniques.
+
+The world has too many unanswered questions and difficult challenges to leave this critical reasoning to only a few specialists. All educated members of society can build the capacity to reason about data. The tools, techniques, and data sets are all readily available; this text aims to make them accessible to everyone.
+
+## Plotting the classics
+
+In this example, we will explore statistics for two classic novels: *The Adventures of Huckleberry Finn* by Mark Twain, and *Little Women* by Louisa May Alcott. The text of any book can be read by a computer at great speed. Books published before 1923 are currently in the public domain, meaning that everyone has the right to copy or use the text in any way. [Project Gutenberg](http://www.gutenberg.org/) is a website that publishes public domain books online. Using R, we can load the text of these books directly from the web.
+
+This example is meant to illustrate some of the broad themes of this text. Don't worry if the details of the program don't yet make sense. Instead, focus on interpreting the images generated below. Later sections of the text will describe most of the features of the R programming language used below.
+
+First, we read the text of both books into lists of chapters, called `huck_finn_chapters` and `little_women_chapters`. In R, a name cannot contain any spaces, and so we will often use an underscore `_` to stand in for a space. The `<-` in the lines below give a name on the left to the result of some computation described on the right. A *uniform resource locator* or *URL* is an address on the Internet for some content; in this case, the text of a book. The `#` symbol starts a comment, which is ignored by the computer but helpful for people reading the code.
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+library(kableExtra)
+library(readtext)
+library(stringr)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+# Read two books, fast!
+huck_finn_url <- 'https://www.inferentialthinking.com/data/huck_finn.txt'
+huck_finn_text <- readtext(huck_finn_url)
+huck_finn_chapters <- unlist(str_split(huck_finn_text, fixed("CHAPTER"))) %>% 
+  str_trim(side="left") %>% 
+  str_replace_all("\\s+", " ") %>%
+  tail(-44)
+
+little_women_url <- 'https://www.inferentialthinking.com/data/little_women.txt'
+little_women_text <- readtext(little_women_url)
+little_women_chapters <- unlist(str_split(little_women_text, fixed("CHAPTER"))) %>% 
+  str_trim(side="left") %>% 
+  str_replace_all("\\s+", " ") %>%
+  tail(-1)
+```
+
+While a computer cannot understand the text of a book, it can provide us with some insight into the structure of the text. The name `huck_finn_chapters` is currently bound to a list of all the chapters in the book. We can place them into a table, or data frame, to see how each chapter begins.
+
+```{r, results='hide'}
+# Display the chapters of Huckleberry Finn in a table.
+huck_finn_df <- data.frame("chapters" = huck_finn_chapters)
+huck_finn_df
+```
+
+```{r, echo=FALSE}
+# some sneaky changes to the code here (but just for presentation)
+huck_finn_chapters_tmp <- unlist(str_split(huck_finn_text, fixed("CHAPTER"))) %>% 
+  str_trim(side="both") %>% 
+  str_replace_all("\n", " ") %>%
+  str_sub(end = 100) %>%
+  tail(-44)
+disp_df <- data.frame("chapters" = huck_finn_chapters_tmp)
+
+knitr::kable(
+  head(disp_df, 5), booktabs = TRUE) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F) %>%
+  column_spec(1, width = "30em")
+```
+
+Each chapter begins with a chapter number in Roman numerals, followed by the first sentence of the chapter. Project Gutenberg has printed the first word of each chapter in upper case.
+
+### Literary Characters
+
+*The Adventures of Huckleberry Finn* describes a journey that Huck and Jim take along the Mississippi River. Tom Sawyer joins them towards the end as the action heats up. Having loaded the text, we can quickly visualize how many times these characters have each been mentioned at any point in the book.
+
+```{r, fig.align="center", out.width='60%'}
+# Count how many times the names Jim, Tom, and Huck appear in each chapter.
+huck_finn_df <- huck_finn_df %>%
+  mutate(
+    jim_count = str_count(chapters, "Jim"), 
+    huck_count = str_count(chapters, "Huck"),
+    tom_count = str_count(chapters, "Tom")
+  ) %>%
+  mutate(
+    jim_c_sum = cumsum(jim_count),
+    huck_c_sum = cumsum(huck_count),
+    tom_c_sum = cumsum(tom_count)
+  )
+# Plot the cumulative counts:
+# how many times in Chapter 1, how many times in Chapters 1 and 2, and so on.
+ggplot(data = huck_finn_df) + 
+  geom_point(mapping = aes(x = 1:nrow(huck_finn_df), y = jim_c_sum, color = "Jim")) +
+  geom_point(mapping = aes(x = 1:nrow(huck_finn_df), y = huck_c_sum, color = "Huck")) +
+  geom_point(mapping = aes(x = 1:nrow(huck_finn_df), y = tom_c_sum, color = "Tom")) +
+  xlab("Chapter") +
+  ylab("Cumulative sum") + 
+  labs(colour = "Character")
+```
+
+In the plot above, the horizontal axis shows chapter numbers and the vertical axis shows how many times each character has been mentioned up to and including that chapter.
+
+You can see that Jim is a central character by the large number of times his name appears. Notice how Tom is hardly mentioned for much of the book until he arrives and joins Huck and Jim, after Chapter 30. His curve and Jim's rise sharply at that point, as the action involving both of them intensifies. As for Huck, his name hardly appears at all, because he is the narrator.
+
+*Little Women* is a story of four sisters growing up together during the civil war. In this book, chapter numbers are spelled out and chapter titles are written in all capital letters.
+
+```{r, results='hide'}
+# The chapters of Little Women, in a table
+little_women_df <- data.frame("chapters" = little_women_chapters)
+little_women_df
+```
+
+```{r, echo=FALSE}
+# some sneaky changes to the code here (but just for presentation)
+little_women_chapters_tmp <- unlist(str_split(little_women_text, fixed("CHAPTER"))) %>% 
+  str_trim(side="both") %>% 
+  str_replace_all("\n", " ") %>%
+  str_sub(end = 100) %>%
+  tail(-1)
+disp_df <- data.frame("chapters" = little_women_chapters_tmp)
+
+knitr::kable(
+  head(disp_df, 5), booktabs = TRUE) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F) %>%
+  column_spec(1, width = "30em")
+```
+
+We can track the mentions of main characters to learn about the plot of this book as well. The protagonist Jo interacts with her sisters Meg, Beth, and Amy regularly, up until Chapter 27 when she moves to New York alone.
+
+```{r, fig.align="center", out.width='60%'}
+# Counts of names in the chapters of Little Women
+little_women_df <- little_women_df %>%
+  mutate(
+    amy_count = str_count(chapters, "Amy"), 
+    beth_count = str_count(chapters, "Beth"),
+    jo_count = str_count(chapters, "Jo"),
+    meg_count = str_count(chapters, "Meg"),
+    laurie_count = str_count(chapters, "Laurie")
+  ) %>%
+  mutate(
+    amy_c_sum = cumsum(amy_count),
+    beth_c_sum = cumsum(beth_count),
+    jo_c_sum = cumsum(jo_count),
+    meg_c_sum = cumsum(meg_count),
+    laurie_c_sum = cumsum(laurie_count),
+  )
+# Plot the cumulative counts:
+# how many times in Chapter 1, how many times in Chapters 1 and 2, and so on.
+ggplot(data = little_women_df) + 
+  geom_point(mapping = aes(x = 1:nrow(little_women_df), y = amy_c_sum, color = "Amy")) +
+  geom_point(mapping = aes(x = 1:nrow(little_women_df), y = beth_c_sum, color = "Beth")) +
+  geom_point(mapping = aes(x = 1:nrow(little_women_df), y = jo_c_sum, color = "Jo")) +
+  geom_point(mapping = aes(x = 1:nrow(little_women_df), y = meg_c_sum, color = "Meg")) +
+  geom_point(mapping = aes(x = 1:nrow(little_women_df), y = laurie_c_sum, color = "Laurie")) +
+  xlab("Chapter") +
+  ylab("Cumulative sum") +
+  labs(colour = "Character")
+```
+
+Laurie is a young man who marries one of the girls in the end. See if you can use the plots to guess which one.
+
+### Another Kind of Character
+
+In some situations, the relationships between quantities allow us to make predictions. This text will explore how to make accurate predictions based on incomplete information and develop methods for combining multiple sources of uncertain information to make decisions.
+
+As an example of visualizing information derived from multiple sources, let us first use the computer to get some information that would be tedious to acquire by hand. In the context of novels, the word "character" has a second meaning: a printed symbol such as a letter or number or punctuation symbol. Here, we ask the computer to count the number of characters and the number of periods in each chapter of both *Huckleberry Finn* and *Little Women*.
+
+```{r}
+# In each chapter, count the number of all characters;
+# call this the "length" of the chapter.
+# Also count the number of periods.
+huck_finn_df <- huck_finn_df %>%
+  mutate(char_count = str_length(chapters), 
+         sent_count = str_count(chapters, fixed("."))) 
+chars_periods_huck_finn <- huck_finn_df %>% select(char_count, sent_count)
+
+little_women_df <- little_women_df %>%
+  mutate(char_count = str_length(chapters), 
+         sent_count = str_count(chapters, fixed("."))) 
+chars_periods_little_women <- little_women_df %>% select(char_count, sent_count)
+```
+
+Here are the data for *Huckleberry Finn*. Each row of the table corresponds to one chapter of the novel and displays the number of characters as well as the number of periods in the chapter. Not surprisingly, chapters with fewer characters also tend to have fewer periods, in general: the shorter the chapter, the fewer sentences there tend to be, and vice versa. The relation is not entirely predictable, however, as sentences are of varying lengths and can involve other punctuation such as question marks.
+
+```{r, results='hide'}
+head(chars_periods_huck_finn)
+```
+
+```{r, echo=FALSE}
+knitr::kable(
+  head(chars_periods_huck_finn), booktabs = TRUE) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+Here are the corresponding data for *Little Women*.
+
+```{r, results='hide'}
+head(chars_periods_little_women)
+```
+
+```{r, echo=FALSE}
+knitr::kable(
+  head(chars_periods_little_women), booktabs = TRUE) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+
+You can see that the chapters of *Little Women* are in general longer than those of *Huckleberry Finn*. Let us see if these two simple variables – the length and number of periods in each chapter – can tell us anything more about the two books. One way to do this is to plot both sets of data on the same axes.
+
+In the plot below, there is a dot for each chapter in each book. Blue dots correspond to *Huckleberry Finn* and gold dots to *Little Women*. The horizontal axis represents the number of periods and the vertical axis represents the number of characters.
+
+```{r, out.width='60%', fig.align='center'}
+ggplot() + 
+  geom_point(data = chars_periods_huck_finn, aes(x = sent_count, y = char_count), color="navy") +
+  geom_point(data = chars_periods_little_women, aes(x = sent_count, y = char_count), color="gold") +
+  xlab("Number of periods in chapter") +
+  ylab("Number of characters in chapter")
+```
+
+The plot shows us that many but not all of the chapters of *Little Women* are longer than those of *Huckleberry Finn*, as we had observed by just looking at the numbers. But it also shows us something more. Notice how the blue points are roughly clustered around a straight line, as are the yellow points. Moreover, it looks as though both colors of points might be clustered around the same straight line.
+
+Now look at all the chapters that contain about 100 periods. The plot shows that those chapters contain about 10,000 characters to about 15,000 characters, roughly. That's about 100 to 150 characters per period.
+
+Indeed, it appears from looking at the plot that on average both books tend to have somewhere between 100 and 150 characters between periods, as a very rough estimate. Perhaps these two great 19th century novels were signaling something so very familiar to us now: the 140-character limit of Twitter.
 
