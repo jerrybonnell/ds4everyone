@@ -1,8 +1,8 @@
 
-```{r setup, include=FALSE, echo=FALSE}
-install.packages(c('kableExtra', 'readtext', 'stringr', 'dplyr', 'ggplot2', 'pdftools'), 
-                 repos = "http://cran.us.r-project.org")
-```
+# ```{r setup, include=FALSE, echo=FALSE}
+# install.packages(c('kableExtra', 'readtext', 'stringr', 'dplyr', 'ggplot2', 'pdftools'), 
+#                  repos = "http://cran.us.r-project.org")
+# ```
 
 
 # Data Science
