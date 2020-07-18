@@ -5,7 +5,9 @@ cache:
   - _book
 
 before_script:
-  - sudo apt-get install libpoppler-cpp-dev
+  - sudo add-apt-repository -y ppa:cran/poppler
+  - sudo apt-get update
+  - sudo apt-get install -y libpoppler-cpp-dev
   - sudo apt-get install libapparmor-dev
   - chmod +x ./_build.sh
   - chmod +x ./_deploy.sh
