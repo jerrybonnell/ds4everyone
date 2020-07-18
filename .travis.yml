@@ -3,7 +3,12 @@ cache:
   packages: true
   directories:
   - _book
-  
+
+apt:
+  packages:
+    - libpoppler-cpp-dev
+    - libapparmor-dev
+
 r_packages:
   - kableExtra
   - readtext
@@ -14,8 +19,6 @@ r_packages:
   - svglite
 
 before_script:
-  - sudo apt-get install libpoppler-cpp-dev
-  - sudo apt-get install libapparmor-dev
   - chmod +x ./_build.sh
   - chmod +x ./_deploy.sh
 
