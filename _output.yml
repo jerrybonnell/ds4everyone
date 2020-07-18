@@ -1,5 +1,4 @@
 bookdown::gitbook:
-  dev: svglite
   css: css/style.css
   split_by: section
   config:
@@ -9,9 +8,3 @@ bookdown::gitbook:
         <li><a href="./">data science for everyone</a></li>
       after: |
         <li><a href="https://bookdown.org" target="_blank">Published with bookdown</a></li>
-    download: [pdf, epub, mobi]
-bookdown::html_chapters:
-  css: [css/style.css, css/toc.css]
-bookdown::epub_book:
-  dev: svglite
-  stylesheet: css/style.css

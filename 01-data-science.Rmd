@@ -1,8 +1,15 @@
 
 ```{r setup, include=FALSE, echo=FALSE}
- install.packages(c('kableExtra', 'readtext', 'stringr', 'dplyr', 'ggplot2', 'pdftools',
-                    'svglite'),
-                  repos = "http://cran.us.r-project.org")
+library(kableExtra)
+library(readtext)
+library(stringr)
+library(dplyr)
+library(ggplot2)
+library(pdftools)
+library(svglite)
+# install.packages(c('kableExtra', 'readtext', 'stringr', 'dplyr', 'ggplot2', 'pdftools',
+# 'svglite'),
+# repos = "http://cran.us.r-project.org")
 ```
 
 
