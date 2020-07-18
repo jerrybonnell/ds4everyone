@@ -1,5 +1,17 @@
 language: r
-pandoc_version: 1.19.2.1
+cache:
+  packages: true
+  directories:
+  - _book
+  
+r_packages:
+  - kableExtra
+  - readtext
+  - stringr
+  - dplyr
+  - ggplot2
+  - pdftools
+  - svglite
 
 before_script:
   - sudo apt-get install libpoppler-cpp-dev
