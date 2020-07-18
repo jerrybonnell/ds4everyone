@@ -1,18 +1,4 @@
 
-# ```{r setup, include=FALSE, echo=FALSE}
-# library(kableExtra)
-# library(readtext)
-# library(stringr)
-# library(dplyr)
-# library(ggplot2)
-# library(pdftools)
-# library(svglite)
-# # install.packages(c('kableExtra', 'readtext', 'stringr', 'dplyr', 'ggplot2', 'pdftools',
-# # 'svglite'),
-# # repos = "http://cran.us.r-project.org")
-# ```
-
-
 # Data Science
 
 Data Science is about drawing useful conclusions from large and diverse data sets through exploration, prediction, and inference. Exploration involves identifying patterns in information. Prediction involves using information we know to make informed guesses about values we wish we knew. Inference involves quantifying our degree of certainty: will the patterns that we found in our data also appear in new observations? How accurate are our predictions? Our primary tools for exploration are visualizations and descriptive statistics, for prediction are machine learning and optimization, and for inference are statistical tests and models.
@@ -117,7 +103,7 @@ Each chapter begins with a chapter number in Roman numerals, followed by the fir
 
 *The Adventures of Huckleberry Finn* describes a journey that Huck and Jim take along the Mississippi River. Tom Sawyer joins them towards the end as the action heats up. Having loaded the text, we can quickly visualize how many times these characters have each been mentioned at any point in the book.
 
-```{r, fig.align="center", out.width='60%'}
+```{r, fig.align="center", fig.asp = 1/2}
 # Count how many times the names Jim, Tom, and Huck appear in each chapter.
 huck_finn_df <- huck_finn_df %>%
   mutate(
@@ -170,7 +156,7 @@ knitr::kable(
 
 We can track the mentions of main characters to learn about the plot of this book as well. The protagonist Jo interacts with her sisters Meg, Beth, and Amy regularly, up until Chapter 27 when she moves to New York alone.
 
-```{r, fig.align="center", out.width='60%'}
+```{r, fig.align="center", fig.asp = 1/2}
 # Counts of names in the chapters of Little Women
 little_women_df <- little_women_df %>%
   mutate(
@@ -252,7 +238,7 @@ You can see that the chapters of *Little Women* are in general longer than those
 
 In the plot below, there is a dot for each chapter in each book. Blue dots correspond to *Huckleberry Finn* and gold dots to *Little Women*. The horizontal axis represents the number of periods and the vertical axis represents the number of characters.
 
-```{r, out.width='60%', fig.align='center'}
+```{r, fig.asp=1/2, fig.align='center'}
 ggplot() + 
   geom_point(data = chars_periods_huck_finn, aes(x = sent_count, y = char_count), color="navy") +
   geom_point(data = chars_periods_little_women, aes(x = sent_count, y = char_count), color="gold") +
