@@ -10,5 +10,6 @@ Imports:
   stringr,
   dplyr,
   ggplot2,
+  tidyverse,
   svglite
 Remotes: rstudio/bookdown

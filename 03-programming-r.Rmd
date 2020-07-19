@@ -1,0 +1,243 @@
+# Programming in R
+
+Programming can dramatically improve our ability to collect and analyze information about the world, which in turn can lead to discoveries through the kind of careful reasoning demonstrated in the previous section. In data science, the purpose of writing a program is to instruct a computer to carry out the steps of an analysis. Computers cannot study the world on their own. People must describe precisely what steps the computer should take in order to collect and analyze data, and those steps are expressed through programs.
+
+## Expressions
+
+Programming languages are much simpler than human languages. Nonetheless, there are some rules of grammar to learn in any language, and that is where we will begin. In this text, we will use the [R](https://www.r-project.org/) programming language. Learning the grammar rules is essential, and the same rules used in the most basic programs are also central to more sophisticated programs.
+
+Programs are made up of *expressions*, which describe to the computer how to combine pieces of data. For example, a multiplication expression consists of a `*` symbol between two numerical expressions. Expressions, such as `3 * 4`, are *evaluated* by the computer. The value (the result of *evaluation*) of the last expression in each cell, `12` in this case, is displayed below the cell.
+
+```{r}
+3 * 4
+```
+
+The grammar rules of a programming language are rigid. In R, the `*` symbol cannot appear twice in a row. The computer will not try to interpret an expression that differs from its prescribed expression structures. Instead, it will show an error. The *syntax* of a language is its set of grammar rules, and the error here indicates that an expression structure doesn't match any of the rules of the language.
+
+```{r, error=TRUE}
+3 * * 4
+```
+
+Small changes to an expression can change its meaning entirely. Below, the space between the `*`'s has been removed. Because `**` appears between two numerical expressions, the expression is a well-formed *exponentiation* expression (the first number raised to the power of the second: 3 times 3 times 3 times 3). The symbols `*` and `**` are called *operators*, and the values they combine are called *operands*.
+
+```{r}
+3 ** 4
+```
+
+__Common Operators.__ Data science often involves combining numerical values, and the set of operators in a programming language are designed to so that expressions can be used to express any sort of arithmetic. In R, the following operators are essential.
+
+```{r, echo=FALSE}
+operators <- data.frame(Expression.Type=c("Addition", "Subtraction","Multiplication", "Division", "Remainder", "Exponentiation"), Operator=c("+", "-", "*", "/", "%", "**"), Example=c("2 + 3", "2 - 3", "2 * 3", "7 / 3", "7 % 3", "2 ** 0.5"), Value=c("5", "-1", "6", "2.66667", "1", "1.41421"))
+knitr::kable(operators, col.names = gsub("[.]", " ", names(operators)))
+# knitr::kable(
+#   head(mtcars[, 1:8], 10), booktabs = TRUE,
+#   caption = 'A table of the first 10 rows of the mtcars data.'
+
+```
+
+R expressions obey the same familiar rules of precedence as in algebra: multiplication and division occur before addition and subtraction. Parentheses can be used to group together smaller expressions within a larger expression.
+
+```{r}
+1 + 2 * 3 * 4 * 5 / 6 ** 3 + 7 + 8 - 9 + 10
+```
+
+```{r}
+1 + 2 * (3 * 4 * 5 / 6) ** 3 + 7 + 8 - 9 + 14
+```
+
+This chapter introduces many types of expressions. Learning to program involves trying out everything you learn in combination, investigating the behavior of the computer. What happens if you divide by zero? What happens if you divide twice in a row? You don't always need to ask an expert (or the Internet); many of these details can be discovered by trying them out yourself.
+
+## Names 
+
+Names are given to values in R using an assignment statement. In an assignment, a name is followed by `<-`, which is followed by any expression. The value of the expression to the right of `<-` is *assigned* to the name. Once a name has a value assigned to it, the value will be substituted for that name in future expressions.
+
+```{r}
+a <- 10
+b <- 20
+a + b
+```
+
+A previously assigned name can be used in the expression to the right of *<-*.
+
+```{r}
+quarter <- 1/4
+half <- 2 * quarter
+half
+```
+
+However, only the current value of an expression is assigned to a name. If that value changes later, names that were defined in terms of that value will not change automatically.
+
+```{r}
+quarter <- 4
+half
+```
+
+Names must start with a letter, but can contain both letters and numbers. A name cannot contain a space; instead, it is common to use an underscore character _ to replace each space. Names are only as useful as you make them; it's up to the programmer to choose names that are easy to interpret. Typically, more meaningful names can be invented than a and b. For example, to describe the sales tax on a $5 purchase in Berkeley, CA, the following names clarify the meaning of the various quantities involved.
+
+```{r}
+purchase_price <- 5
+state_tax_rate <- 0.075
+county_tax_rate <- 0.02
+city_tax_rate <- 0
+sales_tax_rate <- state_tax_rate + county_tax_rate + city_tax_rate
+sales_tax <- purchase_price * sales_tax_rate
+sales_tax
+```
+
+### Example: Growth Rates
+
+The relationship between two measurements of the same quantity taken at different times is often expressed as a *growth rate*. For example, the United States federal government [employed](http://www.bls.gov/opub/mlr/2013/article/industry-employment-and-output-projections-to-2022-1.htm) 2,766,000 people in 2002 and 2,814,000 people in 2012. To compute a growth rate, we must first decide which value to treat as the `initial` amount. For values over time, the earlier value is a natural choice. Then, we divide the difference between the `changed` and `initial` amount by the `initial` amount.
+
+```{r}
+initial = 2766000
+changed = 2814000
+(changed - initial) / initial
+```
+
+It is also typical to subtract one from the ratio of the two measurements, which yields the same value.
+
+```{r}
+(changed/initial) - 1
+```
+
+This value is the growth rate over 10 years. A useful property of growth rates is that they don't change even if the values are expressed in different units. So, for example, we can express the same relationship between thousands of people in 2002 and 2012.
+
+```{r}
+initial <- 2766
+changed <- 2814
+(changed/initial) - 1
+```
+
+In 10 years, the number of employees of the US Federal Government has increased by only 1.74%. In that time, the total expenditures of the US Federal Government increased from \$2.37 trillion to \$3.38 trillion in 2012.
+
+```{r}
+initial <- 2.37
+changed <- 3.38
+(changed/initial) - 1
+```
+
+A 42.6% increase in the federal budget is much larger than the 1.74% increase in federal employees. In fact, the number of federal employees has grown much more slowly than the population of the United States, which increased 9.21% in the same time period from 287.6 million people in 2002 to 314.1 million in 2012.
+
+```{r}
+initial <- 287.6
+changed <- 314.1
+(changed/initial) - 1
+```
+
+A growth rate can be negative, representing a decrease in some value. For example, the number of manufacturing jobs in the US decreased from 15.3 million in 2002 to 11.9 million in 2012, a -22.2% growth rate.
+
+```{r}
+initial <- 15.3
+changed <- 11.9
+(changed/initial) - 1
+```
+
+An annual growth rate is a growth rate of some quantity over a single year. An annual growth rate of 0.035, accumulated each year for 10 years, gives a much larger ten-year growth rate of 0.41 (or 41%).
+
+```{r}
+1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 - 1
+```
+
+This same computation can be expressed using names and exponents.
+
+```{r}
+annual_growth_rate <- 0.035
+ten_year_growth_rate <- (1 + annual_growth_rate) ** 10 - 1
+ten_year_growth_rate
+```
+
+Likewise, a ten-year growth rate can be used to compute an equivalent annual growth rate. Below, `t` is the number of years that have passed between measurements. The following computes the annual growth rate of federal expenditures over the last 10 years.
+
+```{r}
+initial <- 2.37
+changed <- 3.38
+t <- 10
+(changed/initial) ** (1/t) - 1
+```
+
+The total growth over 10 years is equivalent to a 3.6% increase each year.
+
+In summary, a growth rate `g` is used to describe the relative size of an initial amount and a changed amount after some amount of time `t`. To compute $changed$, apply the growth rate `g` repeatedly, `t` times using exponentiation.
+
+`initial * (1 + g) ** t`
+
+To compute `g`, raise the total growth to the power of `1/t` and subtract one.
+
+`(changed/initial) ** (1/t) - 1`
+
+
+## Call Expressions
+
+*Call expressions* invoke functions, which are named operations. The name of the function appears first, followed by expressions in parentheses.
+
+```{r}
+abs(-12)
+```
+
+```{r}
+round(5 - 1.3)
+```
+
+```{r}
+max(2, 2 + 3, 4)
+```
+
+In this last example, the `max` function is *called* on three *arguments*: 2, 5, and 4. The value of each expression within parentheses is passed to the function, and the function *returns* the final value of the full call expression. The `max` function can take any number of arguments and returns the maximum.
+
+Because the R language was written for use in statistical computing, many mathematical
+functions you would expect to use are available by default, such as `abs` and `round`. Other functions that are built into the R language, e.g., for loading in text from a URL or plotting diagrams, are stored in a collection of functions called a *package*. These can be imported by running the function call `library()`, such as `readtext` or `ggplot2`. We used these earlier to conduct our literary analysis in \@ref(literary). We will be making use of another package called [tidyverse](https://www.tidyverse.org/) which is a suite of packages designed for doing data science. We can import it in just one line.    
+
+```{r, warning=FALSE}
+library(tidyverse)
+```
+
+This line will also tell you which functions from `tidyverse` conflict with functions in base R (or from other packages you have loaded). If this is the first time you are running this, you will get an error message indicating "there is no package called `tidyverse`". You will need to first install it, then run `library()` once again. 
+
+```{r, eval=FALSE}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+Operators and call expressions can be used together in an expression. The *percent difference* between two values is used to compare values for which neither one is obviously `initial` or `changed.` For example, in 2014 Florida farms produced 2.72 billion eggs while Iowa farms produced 16.25 billion eggs (http://quickstats.nass.usda.gov/). The percent difference is 100 times the absolute value of the difference between the values, divided by their average. In this case, the difference is larger than the average, and so the percent difference is greater than 100.
+
+```{r}
+florida = 2.72
+iowa = 16.25
+100*abs(florida-iowa)/((florida+iowa)/2)
+```
+
+Learning how different functions behave is an important part of learning a programming language. R Studio can assist in remembering the names and effects of different functions. When editing a code cell, press the *tab* key after typing the beginning of a name to bring up a list of ways to complete that name. For example, press *tab* after `log` to see all of the functions available that begin with `log`. Typing will narrow down the list of options. To learn more about a function, place a `?` before its name. For example, typing `?log` will bring up a description of the `log` function in the "Help" window.
+
+```{r, eval=FALSE}
+?log
+```
+
+The documentation indicates that `log` can be called with an argument providing a base. That is, log can be called with either one or two arguments.
+
+```{r}
+log(16, 2)
+```
+
+```{r}
+log(16)/log(2)
+```
+
+The list of [R's built-in functions](https://cran.r-project.org/doc/contrib/Baggott-refcard-v2.pdf) is quite long and includes many functions that will not be covered during the course. This is a list of the [packages in the core tidyverse](https://www.tidyverse.org/packages/#core-tidyverse). Explore these and the large collection of functions that are offered by each. This text will introduce the most important parts in context, rather than expecting the reader to memorize or understand these lists. 
+
+## Introduction to Tables
+
+We can now apply R to analyze data. We will work with data stored in data frame structures.
+
+Tables are a fundamental way of representing data sets. A table can be viewed in two ways:
+
+* a sequence of named columns that each describe a single attribute of all entries in 
+  a data set, or
+* a sequence of rows that each contain all information about a single individual in 
+  a data set.
+  
+We will study tables in great detail in the next several chapters. For now, we will just introduce a few methods without going into technical details.
+
+The table cones has been imported for us; later we will see how, but here we will 
+just work with it. First, let's take a look at it.
+
+
