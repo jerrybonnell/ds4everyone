@@ -225,7 +225,7 @@ log(16)/log(2)
 
 The list of [R's built-in functions](https://cran.r-project.org/doc/contrib/Baggott-refcard-v2.pdf) is quite long and includes many functions that will not be covered during the course. This is a list of the [packages in the core tidyverse](https://www.tidyverse.org/packages/#core-tidyverse). Explore these and the large collection of functions that are offered by each. This text will introduce the most important parts in context, rather than expecting the reader to memorize or understand these lists. 
 
-## Introduction to Tables
+## Introduction to Tables {#introtables}
 
 We can now apply R to analyze data. We will work with data stored in structures called data frames.
 

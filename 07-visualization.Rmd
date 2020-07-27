@@ -1,0 +1,145 @@
+# Visualization 
+
+Tables are a powerful way of organizing and visualizing data. However, large tables of numbers can be difficult to interpret, no matter how organized they are. Sometimes it is much easier to interpret graphs than numbers.
+
+## First Steps
+
+In this chapter we will develop some of the fundamental graphical methods of data analysis. Our source of data is the `mpg` dataset, which contains observations collected by the US Environmental Protection Agency on 38 models of car between 1999 and 2008. We visited this dataset briefly in Section \@ref(introtables), but we turn to it again to reveal interesting properties about it, made possible by visualization. 
+
+R provides many facilities for creating visualizations, but `ggplot2` provides one of the most elegant and flexible ways of doing so. Moreover, `ggplot2` is based on a system called the *grammar of graphics*, and learning it will allow you to apply the tool to many visualization tasks. 
+
+### Prerequisites
+
+This chapter will make great use of `ggplot2`, which is also a component of the tidyverse. Loading in the tidyverse will also load in `ggplot2`. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### The `mpg` data frame  
+
+The table has 234 rows and 11 columns. Use `?mpg` open its help page. Let's have a look at a snapshot of the data again.  
+
+```{r}
+mpg
+```
+
+Another way to preview the data is by using `glimpse()`. 
+
+```{r}
+glimpse(mpg)
+```
+
+__Terminology.__ A *variable* is a formal name for what we have been calling a "feature", such as "highway miles per gallon." The term variable emphasizes that the feature can have different values for different individuals – the numbers of movies that actors have been in varies across all the actors.
+
+Variables that have numerical values, such as 'highway miles per gallon' or 'engine displacement' are called *quantitative* or *numerical* variables.
+
+### The layered grammar of graphics
+
+The grammar of graphics states that every plot can be built from the same few components: (1) a __dataset__, (2) a set of __geoms__, and (3) a __coordinate system__. These are built in *layers*. 
+
+A plot is built using the `ggplot()` function. This creates a default coordinate system where layers can be added on. The first argument is the dataset to use in the graph. For example, `ggplot(data = mpg)` tells `ggplot2` to set up an empty graph where the `mpg` dataset will be the data used for plotting. 
+
+The layers we add are geometrical objects called __geoms__. We have a natural intuition for the type of geom a plot uses, e.g., bar charts use *bar* geoms and line charts use *line* geoms. Scatter plots, however, use *point* geoms. There are many more geoms available; the `ggplot2` [cheatsheet provides a nice overview](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf). 
+
+To display data values, variables in the dataset are mapped to *aesthetic*, or visual, properties of the geom, such as shape, size, and x and y locations. So each geom function will take an argument called `mapping` paired with a function call to `aes()` to specify the mapping from variable to aesthetic. `ggplot2` will look for the mapped variables inside the data argument; in this case, `mpg`. Let's see how these components come together in a scatter plot.    
+
+### Scatter Plots 
+
+A *scatter plot* displays the relation between two numerical variables. You saw an example of a scatter plot in an early section where we looked at the number of periods and number of characters in two classic novels. We will use a scatter plot here to visualize the relationship between a car's fuel efficiency (`hwy`) and the number of engines it has (`displ`).
+
+```{r, fig.align="center", dpi=80}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+Here, a point geom is used where the variables `displ` and `hwy` from `mpg` are mapped to the aesthetics `x` and `y`. Each point corresponds to one car model in the dataset. You can see that it slopes downward, in general. The more engines a car has, the less fuel efficient it is -- in general. 
+
+Formally, we say that the plot shows an *association* between the variables, and that the association is *negative*: high values of one variable tend to be associated with low values of the other, and low values of one with high values of the other, in general. Later in the course we will study how to quantify association. For the moment, we will just think about it qualitatively.
+
+Of course there is some variability. For instance, observe the group of car models that have a large numbers of engines, yet are still fuel efficient. We are suspect that these points are *outliers* because they lie outside the general range of the data. 
+
+How can we explain these points? One way is to introduce a new variable `class` to visualize how the "type" of car impacts its fuel efficiency. The plot above can be amended to include a color aesthetic, where the type of car is mapped to a color. 
+
+```{r, fig.align="center", dpi=80}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+```
+
+This visualization makes one thing very clear: the outliers are sports cars! Even though sports cars have larger engines, they are more efficient than other cars with more engines because of their smaller body form, compared to SUVs.
+
+__Other types of aesthetics.__ It is possible to include other types of aesthetics other than the color used in the above plot. For instance, the class can be mapped to `shape` or `alpha` aesthetics. 
+
+```{r, fig.align="center", dpi=80, warning = FALSE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+```
+
+### Positional Adjustments
+
+The careful reader will observe that there are 234 entries in the dataset. However, much less (only 109 to be exact) appears in the scatterplot. The issue is that the points are rounded so the points appear on a grid and many points overlap each other. This problem is known as __overplotting__. This makes it hard to see where the mass of the data is. 
+
+The gridding can be avoided by setting the position adjustment to “jitter” in the geom.  `position = "jitter"` adds a small amount of random noise to each point. This spreads the points out because no two points are likely to receive the same amount of random noise.
+
+```{r, fig.align="center", dpi=80}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy), position = "jitter")
+```
+
+### Line Graphs
+
+Line graphs are among the most common visualizations and are often used to study chronological trends and patterns. For instance, we can use a line graph to study `airmiles`, which contains data on passenger miles on commercial US airlines between 1937 and 1960. 
+
+```{r, echo = FALSE}
+df_airmiles <- data.frame(
+  miles = as.matrix(airmiles), date = time(airmiles))
+```
+
+```{r echo = FALSE, out.width = "50%", fig.align="default", message = FALSE}
+ggplot(data = df_airmiles) + 
+  geom_line(mapping = aes(x = date, y = miles))
+ggplot(data = df_airmiles) + 
+  geom_smooth(mapping = aes(x = date, y = miles))
+```
+
+The line geom creates the familiar line graph while the smooth geom "smooths" the line to aid the eye in seeing overall patterns; the line geom, in contrast, is much more "ridgy". The smooth geom also adds confidence bands on the smooth.
+
+The smooth geom can be useful to confirm the negative trend observed in the `mpg` data frame. 
+
+```{r, fig.align="center", dpi=80, message = FALSE, warning = FALSE, results = FALSE}
+ggplot(data = mpg) + 
+    geom_point(mapping = aes(x = displ, y = hwy, color = class)) + 
+    geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+Here we have layered *two* geoms in the same graph: a point geom and a smooth geom. Note how the outlier points have influenced the overall shape of the curve to bend upward, muddying the claim that there is a strong negative trend present in the data. Armed with our understanding about sports cars, we can adjust the visualization by setting aside points with `class == "2seater"`.         
+
+```{r, fig.align="center", dpi=80, message = FALSE, warning = FALSE, results = FALSE}
+no_sports_cars <- filter(mpg, class != "2seater")
+ggplot(data = no_sports_cars) + 
+    geom_point(mapping = aes(x = displ, y = hwy, color = class)) + 
+    geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+This plots shows a much more graceful trend downward. Before moving on, we point out some redundancy present in our plotting code. Namely, we have defined the same mapping for `x` and `y` in two different places. This could cause some unexpected surprises when writing code: imagine if we wanted to change the y-axis to `cty` instead of `hwy`, but we forgot to change both occurrences of `hwy`. This can be amended by moving the mapping to `ggplot()`.     
+
+```{r, eval = FALSE}
+no_sports_cars <- filter(mpg, class != "2seater")
+ggplot(data = no_sports_cars, mapping = aes(x = displ, y = hwy)) + 
+    geom_point(mapping = aes(color = class)) + 
+    geom_smooth()
+```
+
+We can extend this idea further to specify different `data` for each layer. Here, the smooth geom displays only a subset of the data, the sports cars.  
+
+```{r, eval = FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+    geom_point(mapping = aes(color = class)) + 
+    geom_smooth(data = filter(mpg, class != "2seater"))
+```
+
+In both of the rewritings we have taken here, the same plot will be obtained. 
+
+
+
+
