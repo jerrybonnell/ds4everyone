@@ -316,26 +316,26 @@ knitr::kable(
   head(select(trees, c(Height, Volume))), booktabs = TRUE)
 ```
 
-You can also *drop* columns you don't want. The table above can be created by dropping the *Girth* column. Note the use of the `!` operator. 
+You can also *drop* columns you don't want. The table above can be created by dropping the *Girth* column. Note the use of the `-` operator. 
 
 ```{r, eval=FALSE}
-select(trees, !Girth)
+select(trees, -Girth)
 ```
 
 ```{r, echo=FALSE}
 knitr::kable(
-  head(select(trees, !Girth)), booktabs = TRUE)
+  head(select(trees, -Girth)), booktabs = TRUE)
 ```
 
 You can name this new table and look at it again by just typing its name.
 
 ```{r, eval=FALSE}
-no_girth <- select(trees, !Girth)
+no_girth <- select(trees, -Girth)
 no_girth
 ```
 
 ```{r, echo=FALSE}
-no_girth <- select(trees, !Girth)
+no_girth <- select(trees, -Girth)
 knitr::kable(
   head(no_girth), booktabs = TRUE)
 ```
