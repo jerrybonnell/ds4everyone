@@ -2,7 +2,7 @@
 
 Tables are a powerful way of organizing and visualizing data. However, large tables of numbers can be difficult to interpret, no matter how organized they are. Sometimes it is much easier to interpret graphs than numbers.
 
-## Scatter plots and Line graphs
+## Visualizing with `ggplot2`
 
 In this chapter we will develop some of the fundamental graphical methods of data analysis. Our source of data is the `mpg` dataset, which contains observations collected by the US Environmental Protection Agency on 38 models of car between 1999 and 2008. We visited this dataset briefly in Section \@ref(introtables), but we turn to it again to reveal interesting properties about it, made possible by visualization. 
 
@@ -340,6 +340,242 @@ This can also be a neat trick for eliminating the (awkward) gap between the bars
 
 ## Visualizing Numerical Distributions 
 
-hi
+Many of the variables that data scientists study are *quantitative* or *numerical*. Their values are numbers on which you can perform arithmetic. Examples that we have seen include the number of periods in chapters of a book, the amount of money made by movies, and the age of people in the United States.
+
+The values of a categorical variable can be given numerical codes, but that doesn't make the variable quantitative. In the example in which we studied MBA student data broken down by marks on a "happiness" scale, the categorial variable `love` had the numerical codes 1 for "lonely," 2 for "secure relationship," and 3 for "feelings of belonging and caring". While 1, 2, and 3 are numbers, in this context it doesn't make sense to subtract 1 from 2, or take the average of 1, 2, and 3, or perform other arithmetic on the three values. `love` is a categorical variable even though the values have been given a numerical code.
+
+For our main example, we will return to a dataset we studied when we were learning scatter and line plots. It is the table `mpg`, which consists of data on fuel efficiency of popular car models. Use `?mpg` for a description of the dataset. 
+
+### Visualizing the Distribution of Highway Miles per Gallon
+
+In this section we will draw graphs of the distribution of the numerical variable in the column `hwy`, which describes miles per gallon of car models on the highway. For simplicity, let's create a subset of the table that includes only the information we need. We'll show a snapshot of this table by sampling 10 random rows from it.  
+
+```{r}
+mpg_sub <- select(mpg, manufacturer, model, hwy)
+slice_sample(mpg_sub, n = 10)
+```
+
+### A Histogram 
+
+A *histogram* of a numerical dataset looks very much like a bar chart, though it has some important differences that we will examine in this section. First, let's just draw a histogram of the highway miles per gallon.
+
+The geom histogram generates a histogram of the values in a column. The `y` aesthetic is mapped to a computed variable `..density..`. The histogram shows the distribution of `hwy`. 
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(mpg_sub, aes(x = hwy)) +
+  geom_histogram(aes(y = ..density..))
+```
+
+### The Horizontal Axis 
+
+The amounts have been grouped into contiguous intervals called bins. The histogram geom has an endpoint convention: bins include the data at their right endpoint, but not the data at their left endpoint. We will use the notation (a, b] for the bin that starts at a and ends at b but doesn't include a. Sometimes, adjustments have to be made in the first or last bin, to ensure that the smallest and largest values of the variable are included. 
+
+We can see that there are about 30 bins (bars with no height are hard to distinguish), and that they all have the same width. We can also see that no car models had less than 10 highway miles per gallon. 
+
+It is a little harder to see exactly where the ends of the bins are situated. For example, it is not easy to pinpoint exactly where the value 22 lies on the horizontal axis. So it is hard to judge exactly where one bar ends and the next begins.
+
+The optional argument `breaks` can be used with the histogram geom to specify the endpoints of the bins. It must consist of a sequence of numbers that starts with the left end of the first bin and ends with the right end of the last bin, which is provided by the function `seq()`.  We will start by setting the numbers in bins to be 10, 11, 12, and so on, ending with 50.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+bins <- seq(10,50,1)
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(aes(y = ..density..), color = "gray", breaks = bins)
+```
+
+The tallest bar contains car models with `hwy` equal to 26. A small number of cars have `hwy ` greater than 30.  
+
+### The Counts in the Bins 
+
+The counts of values in the bins can be computed from a table using `cut()`, which takes a column of data and the bin boundaries. The result is a tabular form of a histogram. It lists the right endpoints of the bins (but see the note about the final value, below) and the counts of all values in the hwy column that are in the corresponding bin. That is, it counts all the hwy values that are greater than or equal to the value in bin, but less than the next value in bin.
+
+```{r}
+binned <- mpg_sub %>%
+  mutate(bin = cut(hwy, breaks = bins)) %>%
+  count(bin, .drop = FALSE) %>%
+  print(n = Inf)
+```
+
+Notice the bin value 10 in the first row. That's not the right end-point of any bar – it's the left end point of the first bar. By the endpoint convention, the data there are not included. So the corresponding count is recorded as 0, and would have been recorded as 0 even if there had been cars with less than 10 hwy. When either the geom hist or cut is called with a breaks argument, the graph only considers values that are in the specified bins. Once values have been binned, the resulting counts can be used by ggplot2 to generate a histogram.  
+
+### The Vertical Axis: Density Scale 
+
+The horizontal axis of a histogram is straightforward to read, once we have taken care of details like the ends of the bins. The features of the vertical axis require a little more attention. We will go over them one by one.
+
+Let's start by examining how to calculate the numbers on the vertical axis. If the calculation seems a little strange, have patience – the rest of the section will explain the reasoning.
+
+__Calculation.__ The height of each bar is the percent of elements that fall into the corresponding bin, relative to the width of the bin.
+
+```{r}
+binned %>%
+  mutate(percents = n / nrow(mpg_sub) * 100, 
+         height = percents / 100) %>%
+  print(n = Inf)
+```
+
+Go over the numbers on the vertical axis of the histogram above to check that the column `height` looks correct.
+
+The calculations will become clear if we just examine the first row of the table.
+
+Remember that there are 234 rows in the dataset. The (25, 26] bin contains 32 cars. That's 13.67% of all the cars: 
+
+\[ Percent= \frac{32}{234} * 100 = 13.67 \]
+
+The width of the (25, 26] bin is  $26 - 25 = 1$. So 
+
+\[ Height = \frac{13.67}{100} = 0.1367 \]
+
+The code for calculating the heights used the facts that there are 234 cars in all and that the width of each bin is 1.
+
+This method of drawing histograms creates a vertical axis that is said to be *on the density scale*. The height of bar is __not__ the percent of entries in the bin; it is the percent of entries in the bin relative to the amount of space in the bin. That is why the height measures crowdedness or *density*.
+
+Let's see why this matters.
+
+### Unequal Bins
+
+An advantage of the histogram over a bar chart is that a histogram can contain bins of unequal width. Below, the values in the `hwy` column are binned into three uneven categories.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+uneven_bins <- c(10, 15, 30, 45)
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(aes(y = ..density..), color = "grey", 
+                 breaks = uneven_bins, position = "identity")
+
+```
+
+Here are the counts in the three bins.
+
+```{r}
+mpg_sub %>%
+  mutate(bin = cut(hwy, breaks = uneven_bins)) %>%
+  count(bin, .drop = FALSE)
+```
+
+Although the ranges (10, 15] and (30, 45] have nearly identical counts, the bar over the former is twice as tall as the latter because it is only half as wide. The density of values in the (10, 15] is twice as much as the density in (30, 45].
+
+Histograms help us visualize where on the number line the data are most concentrated, especially when the bins are uneven.
+
+### The Problem with Simply Plotting Counts 
+
+It is possible to display counts directly in a chart, by omitting the aesthetic mapping from `y` to `..density..`. The resulting chart has the same shape as a histogram when the bins all have equal widths, though the numbers on the vertical axis are different.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(color = "grey", breaks = bins, position = "identity")
+```
+
+While the count scale is perhaps more natural to interpret than the density scale, the chart becomes highly misleading when bins have different widths. Below, it appears (due to the count scale) that car models with high miles per gallon on the highway are more common than before, when in fact we have seen that they are relatively rare.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(color = "grey", breaks = uneven_bins, position = "identity")
+```
+
+Even though the geom used is a histogram, the figure above is __NOT A HISTOGRAM__. It misleadingly exaggerates the proportion of car models with `hwy` between 30 and 45 because the count of 10 to 15 is 17 and the count between 30 to 45 is 22. However, in the graph, the area of 10 to 15 is almost one-third of 30 to 45, which does not align with the true proportion. The height of each bar is simply plotted at the number of car models in the bin, without accounting for the difference in the widths of the bins.
+
+The picture becomes even more absurd if the last two bins are combined.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+very_uneven_bins <- c(10, 15, 45)
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(color = "grey", breaks = very_uneven_bins, position = "identity")
+```
+
+In this count-based figure, the shape of the distribution of highway mileage per gallon is lost entirely.
+
+### The Histogram: General Principles and Calculation 
+
+The figure above shows that what the eye perceives as "big" is area, not just height. This observation becomes particularly important when the bins have different widths.
+That is why a histogram has two defining properties:
+
+1. The bins are drawn to scale and are contiguous (though some might be empty), because the values on the horizontal axis are numerical.
+
+2. The __area__ of each bar is proportional to the number of entries in the bin.
+
+Property 2 is the key to drawing a histogram, and is usually achieved as follows:
+
+\[ \text{area of bar} = \text{percent of entries in bin} \]
+
+The calculation of the heights just uses the fact that the bar is a rectangle:
+
+\[ \text{area of bar} = \text{height of bar} × \text{width of bin} \]
+
+and so
+
+\[ \text{height of bar} = 
+    \frac{\text{area of bar}}{\text{width of bin}} = 
+    \frac{\text{percent of entries in bin}}{\text{width of bin}} \]
+
+The units of height are "percent per unit on the horizontal axis."
+
+When drawn using this method, the histogram is said to be drawn on the density scale. On this scale:
+
+* The area of each bar is equal to the percent of data values that are in the corresponding bin.
+
+* The total area of all the bars in the histogram is 100%. Speaking in terms of proportions, we say that the areas of all the bars in a histogram "sum to 1".
+
+
+### Flat Tops and the Level of Detail 
+
+Even though the density scale correctly represents percents using area, some detail is lost by grouping values into bins.
+
+Take another look at the (10, 15] bin in the figure below. The flat top of the bar, at the density level 0.0145, hides the fact that the highway mileage is somewhat unevenly distributed across that bin.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(aes(y = ..density..), 
+                 color = "grey",breaks = uneven_bins, position = "identity")
+```
+
+To see this, let us split the (10, 15] bin into 4 narrower bins, each of width 1.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+tiny_bins <- c(10, 11, 12, 13, 14, 15, 30, 45)
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(aes(y = ..density..), color = "grey",
+                 breaks = tiny_bins, position = "identity")
+```
+
+Some of the skinny bars are taller than 0.0145 and others are shorter; (10, 11] and  (12, 13] have heights of 0 because there is no data in these intervals. By putting a flat top at the level 0.0145 across the whole bin, we are deciding to ignore the finer detail and are using the flat level as a rough approximation. Often, though not always, this is sufficient for understanding the general shape of the distribution.
+
+__The height as a rough approximation.__ This observation gives us a different way of thinking about the height. Look again at the (10, 15] bin in the earlier histograms. As we have seen, the bin is 5 hwy wide and contains 7.3% of the data. Therefore the height of the corresponding bar is at density level 0.0145.
+
+Now think of the bin as consisting of 5 narrow bins that are each 1 wide. The bar's height of 0.0145 means that as a rough approximation, 1.45% of car models are in each of those 5 skinny bins of width 1 highway mile per gallon. 
+
+Notice that because we have the entire dataset that is being used to draw the histograms, we can draw the histograms to as fine a level of detail as the data and our patience will allow. However, if you are looking at a histogram in a book or on a website, and you don't have access to the underlying dataset, then it becomes important to have a clear understanding of the "rough approximation" created by the flat tops.
+
+### Histograms Q&A
+
+Let's draw the histogram again, this time with four bins, and check our understanding of the concepts.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+some_new_bins <- c(10, 15, 23, 45)
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(aes(y = ..density..), color = "grey",
+                 breaks = some_new_bins, position = "identity")
+```
+
+```{r}
+mpg_sub %>%
+  mutate(bin = cut(hwy, breaks = some_new_bins)) %>%
+  count(bin, .drop = FALSE) 
+```
+
+Look again at the histogram, and compare the (15, 23] bin with the (23, 45] bin.
+
+__Q__: Which has more car models in it?
+
+__A__: The (23, 45] bin. It has 129 cars, compared with 88 cars in the (15, 23] bin.
+
+__Q__: Then why is the (23, 45] bar shorter than the (15, 23] bar?
+
+__A__: Because height represents density per unit of space in the bin, not the number of car models in the bin. The (23, 45] bin does have more car models than the (15, 23] bin, but it is also a whole lot wider. So it is less crowded. The density of car models in it is much lower.
+
+### Differences Between Bar Charts and Histograms 
+
+* Bar charts display one quantity per category. They are often used to display the distributions of categorical variables. Histograms display the distributions of quantitative variables.
+
+* All the bars in a bar chart have the same width, and there is an equal amount of space between consecutive bars. The bars of a histogram can have different widths, and they are contiguous.
+
+* The lengths (or heights, if the bars are drawn vertically) of the bars in a bar chart are proportional to the value for each category. The heights of bars in a histogram measure densities; the areas of bars in a histogram are proportional to the numbers of entries in the bins.
 
 
