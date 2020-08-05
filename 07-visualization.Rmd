@@ -346,7 +346,7 @@ The values of a categorical variable can be given numerical codes, but that does
 
 For our main example, we will return to a dataset we studied when we were learning scatter and line plots. It is the table `mpg`, which consists of data on fuel efficiency of popular car models. Use `?mpg` for a description of the dataset. 
 
-### Visualizing the Distribution of Highway Miles per Gallon
+### Visualizing the Distribution of `hwy`
 
 In this section we will draw graphs of the distribution of the numerical variable in the column `hwy`, which describes miles per gallon of car models on the highway. For simplicity, let's create a subset of the table that includes only the information we need. We'll show a snapshot of this table by sampling 10 random rows from it.  
 
@@ -359,7 +359,7 @@ slice_sample(mpg_sub, n = 10)
 
 A *histogram* of a numerical dataset looks very much like a bar chart, though it has some important differences that we will examine in this section. First, let's just draw a histogram of the highway miles per gallon.
 
-The geom histogram generates a histogram of the values in a column. The `y` aesthetic is mapped to a computed variable `..density..`. The histogram shows the distribution of `hwy`. 
+The geom histogram generates a histogram of the values in a column. Note how the `y` aesthetic is mapped to a computed variable `..density..` (we will see what is being computed in just a moment). The histogram below shows the distribution of `hwy`. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(mpg_sub, aes(x = hwy)) +
@@ -386,7 +386,7 @@ The tallest bar contains car models with `hwy` equal to 26. A small number of ca
 
 ### The Counts in the Bins 
 
-The counts of values in the bins can be computed from a table using `cut()`, which takes a column of data and the bin boundaries. The result is a tabular form of a histogram. It lists the right endpoints of the bins (but see the note about the final value, below) and the counts of all values in the hwy column that are in the corresponding bin. That is, it counts all the hwy values that are greater than or equal to the value in bin, but less than the next value in bin.
+The counts of values in the bins can be computed from a data frame using `cut()`, which takes a column of data and the bin boundaries. The result is a tabular form of a histogram. It lists the right endpoints of the bins (but see the note about the final value, below) and the counts of all values in the hwy column that are in the corresponding bin. That is, it counts all the hwy values that are greater than or equal to the value in bin, but less than the next value in bin.
 
 ```{r}
 binned <- mpg_sub %>%
@@ -395,7 +395,7 @@ binned <- mpg_sub %>%
   print(n = Inf)
 ```
 
-Notice the bin value 10 in the first row. That's not the right end-point of any bar – it's the left end point of the first bar. By the endpoint convention, the data there are not included. So the corresponding count is recorded as 0, and would have been recorded as 0 even if there had been cars with less than 10 hwy. When either the geom hist or cut is called with a breaks argument, the graph only considers values that are in the specified bins. Once values have been binned, the resulting counts can be used by ggplot2 to generate a histogram.  
+Notice the bin value 10 in the first row. That's not the right end-point of any bar – it's the left end point of the first bar. By the endpoint convention, the data there are not included. So the corresponding count is recorded as 0, and would have been recorded as 0 even if there had been cars with `hwy` less than 10. When either the histogram geom or `cut()` is called with a breaks argument, the graph only considers values that are in the specified bins. Once values have been binned, the resulting counts can be used by `ggplot2` to generate a histogram.  
 
 ### The Vertical Axis: Density Scale 
 
