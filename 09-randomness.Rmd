@@ -1,10 +1,235 @@
 # Randomness 
 
-intro goes here
+In the previous chapters we developed skills needed to make insightful descriptions of data. Data scientists also have to be able to understand randomness. For example, they have to be able to assign individuals to treatment and control groups at random, and then try to say whether any observed differences in the outcomes of the two groups are simply due to the random assignment or genuinely due to the treatment.
+
+In this chapter, we begin our analysis of randomness. To start off, we will use R to make choices at random. R contains many functions that involve random selection. One of these functions is called `sample()`. It picks one item at random from an array, and it is equally likely to pick any of the items. The function call is `sample(vector_name, size)`, where `vector_name` is the name of the vector from which to make the choice and `size` is the number of items to choose. 
+
+Thus the following code evaluates to treatment with chance 50%, and control with chance 50%.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+```{r}
+two_groups <- c("treatment", "control")
+sample(two_groups, size = 1)
+```
+
+The big difference between the code above and all the other code we have run thus far is that the code above doesn't always return the same value. It can return either `treatment` or `control`, and we don't know ahead of time which one it will pick. We can repeat the process by adjusting the `size` argument. Moreover, we will set `replace` to `TRUE` as we want to allow repetition in our draws, e.g., it should be permissible to draw from the `treatment` group more than once. 
+
+```{r}
+two_groups <- c("treatment", "control")
+sample(two_groups, size = 10, replace = TRUE)
+```
+
+A fundamental question about random events is whether or not they occur. For example:
+
+* Did an individual get assigned to the treatment group, or not?
+* Is a gambler going to win money, or not?
+* Has a poll made an accurate prediction, or not?
+
+Once the event has occurred, you can answer "yes" or "no" to all these questions. In programming, it is conventional to do this by labeling statements as True or False. For example, if an individual did get assigned to the treatment group, then the statement, "The individual was assigned to the treatment group" would be `TRUE`. If not, it would be `FALSE`.
+
+__Booleans and Comparison__
+
+In R, Boolean values, named for the logician [George Boole](https://en.wikipedia.org/wiki/George_Boole), represent truth and take only two possible values: True and False. Whether problems involve randomness or not, Boolean values most often arise from comparison operators. Python includes a variety of operators that compare values. For example, `3` is larger than `1 + 1`.
+
+```{r}
+3 > 1 + 1
+```
+
+The value `TRUE` indicates that the comparison is valid; R has confirmed this simple fact about the relationship between `3` and `1 + 1`. The full set of common comparison operators are listed below.
+
+```{r, echo=FALSE}
+table <- tribble(~Comparison, ~Operator, ~True.Example, ~False.Example, 
+                 "Less than", "<", "2 < 3", "2 < 2",
+                 "Greater than", ">", "3 > 2", "3 > 3",
+                 "Less than or equal", "<=", "2 <= 2", "3 <= 2",
+                 "Greater or equal", ">=", "3 >= 3", "2 >= 3",
+                 "Equal", "==", "3 == 3", "3 == 2",
+                 "Not equal", "!=", "3 != 2", "2 != 2")
+knitr::kable(table, col.names = gsub("[.]", " ", names(table)))
+```
+
+Notice the two equal signs `==` in the comparison to determine equality. This is necessary because Python already uses `=` to mean assignment to a name, as we have seen. It can't use the same symbol for a different purpose. Thus if you want to check whether 5 is equal to the 10/2, then you have to be careful: `5 = 10/2` returns an error message because R assumes you are trying to assign the value of the expression 10/2 to a name that is the numeral 5. Instead, you must use `5 == 10/2`, which evaluates to `TRUE`.
+
+```{r, error=TRUE}
+5 = 10/2
+```
+
+```{r}
+5 == 10/2
+```
+
+__Comparing Strings__
+
+Strings can also be compared, and their order is alphabetical. 
+
+```{r}
+print("Dog" > "Cat")
+print("Alabama" > "Cat")
+```
+
+__Comparing an Array and a Value__
+
+Recall that we can perform arithmetic operations on many numbers in a vector at once. For example, `c(0, 5, 2)*2` is equivalent to `c(0, 10, 4)`. In similar fashion, if we compare a vector and one value, each element of the vector is compared to that value, and the comparison evaluates to a vector of Booleans.
+
+```{r}
+tosses <- c("Tails", "Heads", "Tails", "Heads", "Heads")
+tosses == "Heads"
+```
+
+While Booleans are logical data types and are therefore different from numerical data types, they are internally represented as `0` (for `FALSE`) and '1' (for `TRUE`). The `sum` function can be used to evaluate the number of non-zero (that is, `TRUE`) elements of the array.
+
+```{r}
+sum(tosses == "Heads")
+```
 
 ## Conditional Statements
 
-TBA
+In many situations, actions and results depends on a specific set of conditions being satisfied. For example, individuals in randomized controlled trials receive the treatment if they have been assigned to the treatment group. A gambler makes money if she wins her bet.
+
+In this section we will learn how to describe such situations using code. A *conditional statement* is a multi-line statement that allows Python to choose among different alternatives based on the truth value of an expression. While conditional statements can appear anywhere, they appear most often within the body of a function in order to express alternative behavior depending on argument values.
+
+A conditional statement always begins with an `if` header, which is a single line followed by an indented body. The body is only executed if the expression directly following `if` (called the *if expression*) evaluates to a true value. If the *if expression* evaluates to a false value, then the body of the `if` is skipped.
+
+Let us start defining a function that returns the sign of a number.
+
+```{r}
+sign <- function(x) {
+  if (x > 0) {
+    return("Positive")
+  }
+}
+sign(3)
+```
+
+This function returns the correct sign if the input is a positive number. But if the input is not a positive number, then the *if expression* evaluates to a false value, and so the `return` statement is skipped and the function call has no value.
+
+```{r}
+print(sign(-3))
+```
+
+So let us refine our function to return `Negative` if the input is a negative number. We can do this by adding an `else if` clause.
+
+```{r}
+sign <- function(x) {
+  if (x > 0) {
+    return("Positive")
+  } else if (x < 0) {
+    return("Negative")
+  }
+}
+```
+
+Now `sign` returns the correct answer when the input is -3:
+
+```{r}
+sign(-3)
+```
+
+What if the input is 0? To deal with this case, we can add another `else if` clause:
+
+```{r}
+sign <- function(x) {
+  if (x > 0) {
+    return("Positive")
+  } else if (x < 0) {
+    return("Negative")
+  } else if (x == 0) {
+    return("Neither positive nor negative")
+  }
+}
+```
+
+```{r}
+sign(0)
+```
+
+Equivalently, we can replace the final `else if` clause by an `else` clause, whose body will be executed only if all the previous comparisons are false; that is, if the input value is equal to 0.
+
+```{r}
+sign <- function(x) {
+  if (x > 0) {
+    return("Positive")
+  } else if (x < 0) {
+    return("Negative")
+  } else {
+    return("Neither positive nor negative")
+  }
+}
+```
+
+```{r}
+sign(0)
+```
+
+### The General Form
+
+A conditional statement can also have multiple clauses with multiple bodies, and only one of those bodies can ever be executed. The general format of a multi-clause conditional statement appears below.
+
+```
+if (<if expression>) {
+    <if body>
+} else if (<elif expression 0>) {
+    <elif body 0>
+} else if (<elif expression 1>) {
+    <elif body 1>
+...
+} else {
+    <else body>
+}
+```
+
+There is always exactly one `if` clause, but there can be any number of `else if` clauses. R will evaluate the `if` and `else if` expressions in the headers in order until one is found that is a true value, then execute the corresponding body. The `else` clause is optional. When an `else` header is provided, its *else body* is executed only if none of the header expressions of the previous clauses are true. The `else` clause must always come at the end (or not at all).
+
+### Example: Betting on a Die
+
+Suppose I bet on a roll of a fair die. The rules of the game:
+
+* If the die shows 1 spot or 2 spots, I lose a dollar.
+* If the die shows 3 spots or 4 spots, I neither lose money nor gain money.
+* If the die shows 5 spots or 6 spots, I gain a dollar.
+
+We will now use conditional statements to define a function `one_bet` that takes the number of spots on the roll and returns my net gain.
+
+```{r}
+one_bet <- function(x) {
+  if (x <= 2) {
+    return(-1)
+  } else if (x <= 4) {
+    return(0)
+  } else if (x <= 6) {
+    return(1)
+  }
+}
+```
+
+Let's check that the function does the right thing for each different number of spots.
+
+```{r}
+c(one_bet(1), one_bet(2), one_bet(3), one_bet (4), one_bet(5), one_bet(6))
+```
+
+As a review of how conditional statements work, let's see what `one_bet` does when the input is 3.
+
+* First it evaluates the `if` expression, which is `3 <= 2` which is `False`. So `one_bet` doesn't execute the `if` body.
+* Then it evaluates the first `else if` expression, which is `3 <= 4`, which is `True`. So `one_bet` executes the first `else if` body and returns 0.
+* Once the body has been executed, the process is complete. The next `else if` expression is not evaluated.
+
+If for some reason we use an input greater than 6, then the `if` expression evaluates to False as do both of the `else if` expressions. So one_bet does not execute the if body nor the two `else if` bodies, and there is no value when you make the call below.
+
+```{r}
+print(one_bet(17))
+```
+
+To play the game based on one roll of a die, you can use `sample()` to generate the number of spots and then use that as the argument to `one_bet()`. Run the cell a few times to see how the output changes.
+
+```{r}
+one_bet(sample(1:6, size = 1))
+```
+
+At this point it is natural to want to collect the results of all the bets so that we can analyze them. In the next section we develop a way to do this without running the cell over and over again.
 
 ## Iteration
 
@@ -244,5 +469,144 @@ Math is the main tool for finding probabilities exactly, though computers are us
 
 We will use the standard notation $P(event)$ to denote the probability that "event" happens, and we will use the words "chance" and "probability" interchangeably.
 
+### Prerequisites
 
+As usual, we will make use of the tidyverse. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### When an Event Doesn't Happen 
+
+If the chance that event happens is 40%, then the chance that it doesn't happen is 60%. This natural calculation can be described in general as follows:
+
+\[ P(\text{an event doesn't happen}) = 1 - P(\text{the event happens})\]
+
+### When All Outcomes are Equally Likely
+
+If you are rolling an ordinary die, a natural assumption is that all six faces are equally likely. Then probabilities of how one roll comes out can be easily calculated as a ratio. For example, the chance that the die shows an even number is
+
+\[ \frac{\text{number of even faces}}{\text{number of all faces}} = \frac{\#\{2,4,6\}}{\#\{1,2,3,4,5,6\} } = \frac{3}{6}\]
+
+Similarly, 
+
+\[ P(\text{die shows a multiple of 3}) = \frac{\#\{3, 6\}}{\#\{1,2,3,4,5,6\} } = \frac{2}{6}\]
+
+In general,
+
+\[ P(\text{an event happens}) = \frac{\#\{\text{outcomes that make the event happen}\}}{\#\{\text{all outcomes}\} }\]
+
+provided all the outcomes are equally likely.
+
+Not all random phenomena are as simple as one roll of a die. The two main rules of probability, developed below, allow mathematicians to find probabilities even in complex situations.
+
+### When Two Events Must Both Happen 
+
+Suppose you have a box that contains three tickets: one red, one blue, and one green. Suppose you draw two tickets at random without replacement; that is, you shuffle the three tickets, draw one, shuffle the remaining two, and draw another from those two. What is the chance you get the green ticket first, followed by the red one?
+
+There are six possible pairs of colors: RB, BR, RG, GR, BG, GB (we've abbreviated the names of each color to just its first letter). All of these are equally likely by the sampling scheme, and only one of them (GR) makes the event happen. So
+
+\[ P(\text{green first, then red}) = \frac{\#\{\text{GR}\}}{\#\{\text{RB, BR, RG, GR, BG, GB}\} } = \frac{1}{6}\]
+
+But there is another way of arriving at the answer, by thinking about the event in two stages. First, the green ticket has to be drawn. That has chance $1/3$, which means that the green ticket is drawn first in about $1/3$ of all repetitions of the experiment. But that doesn't complete the event. *Among the 1/3 of repetitions when green is drawn first*, the red ticket has to be drawn next. That happens in about $1/2$ of those repetitions, and so:
+
+\[ P(\text{green first, then red}) = \frac{1}{2} \text{ of } \frac{1}{3} = \frac{1}{6}\]
+
+This calculation is usually written "in chronological order," as follows.
+
+\[ P(\text{green first, then red}) = \frac{1}{2} \text{ × } \frac{1}{3} = \frac{1}{6}\]
+
+The factor of $1/2$ is called "the conditional chance that the red ticket appears second, given that the green ticket appeared first."
+
+In general, we have the __multiplication rule__:
+
+\[P(\text{two events both happen}) \]
+\[= P(\text{one event happens}) × P(\text{the other event happens, given that the first one happened}) \]
+
+Thus, when there are two conditions – one event must happen, as well as another – the chance is a *fraction of a fraction*, which is smaller than either of the two component fractions. The more conditions that have to be satisfied, the less likely they are to all be satisfied.
+
+### When an Event Can Happen in Two Different Ways 
+
+Suppose instead we want the chance that one of the two tickets is green and the other red. This event doesn't specify the order in which the colors must appear. So they can appear in either order.
+
+A good way to tackle problems like this is to partition the event so that it can happen in exactly one of several different ways. The natural partition of "one green and one red" is: GR, RG.
+
+Each of GR and RG has chance $1/6$ by the calculation above. So you can calculate the chance of "one green and one red" by adding them up.
+
+\[P(\text{one green and one red}) = P(\text{GR}) + P(\text{RG}) = \frac{1}{6} + \frac{1}{6} = \frac{2}{6} \]
+
+In general, we have the __addition rule__:
+
+\[P(\text{an event happens}) = P(\text{first way it can happen}) + P(\text{second way it can happen})\]
+
+provided the event happens in exactly one of the two ways.
+
+Thus, when an event can happen in one of two different ways, the chance that it happens is a sum of chances, and hence bigger than the chance of either of the individual ways.
+
+The multiplication rule has a natural extension to more than two events, as we will see below. So also the addition rule has a natural extension to events that can happen in one of several different ways.
+
+We end the section with examples that use combinations of all these rules.
+
+### At Least One Success
+
+Data scientists often work with random samples from populations. A question that sometimes arises is about the likelihood that a particular individual in the population is selected to be in the sample. To work out the chance, that individual is called a "success," and the problem is to find the chance that the sample contains a success.
+
+To see how such chances might be calculated, we start with a simpler setting: tossing a coin two times.
+
+If you toss a coin twice, there are four equally likely outcomes: HH, HT, TH, and TT. We have abbreviated "Heads" to H and "Tails" to T. The chance of getting at least one head in two tosses is therefore 3/4.
+
+Another way of coming up with this answer is to work out what happens if you *don't* get at least one head: both the tosses have to land tails. So
+
+\[P(\text{at least one head in two tosses}) = 1 - P(\text{both tails}) = 1 - \frac{1}{4} = \frac{3}{4}  \]
+
+Notice also that
+
+\[P(\text{both tails}) = \frac{1}{4} = \frac{1}{2} * \frac{1}{2} = (\frac{1}{2})^2  \]
+
+by the multiplication rule.
+
+These two observations allow us to find the chance of at least one head in any given number of tosses. For example,
+
+\[P(\text{at least one head in 17 tosses}) = 1 - P(\text{all 17 are tails}) = 1 - (\frac{1}{2})^{17} \]
+
+And now we are in a position to find the chance that the face with six spots comes up at least once in rolls of a die.
+
+For example,
+
+\[P(\text{a single roll is not 6}) = P(1) + P(2) + P(3) + P(4) + P(5) = \frac{5}{6} \]
+
+Therefore,
+
+\[P(\text{at least one 6 in two rolls}) = 1 - P(\text{both rolls are not 6}) = 1 - (\frac{5}{6})^2 \]
+
+and
+
+\[P(\text{at least one 6 in 17 rolls}) = 1 - (\frac{5}{6})^{17} \]
+
+The table below shows these probabilities as the number of rolls increases from 1 to 50.
+
+```{r}
+rolls <- 1:51
+results <- tibble(rolls = rolls,
+                  prob_of_at_least_one_six = 1 - (5/6) ** rolls)
+results
+```
+
+The chance that a 6 appears at least once rises rapidly as the number of rolls increases.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(results) + 
+  geom_point(aes(x = rolls, y = prob_of_at_least_one_six))
+```
+
+In 50 rolls, you are almost certain to get at least one 6.
+
+```{r}
+filter(results, rolls == 50) %>% as.data.frame()
+```
+
+If you have ever played games that rely heavily on "RNG" (*r*andom *n*umber *g*enerator), chances are you intuitively exploited this finding: just keep "rolling" until you find that rare item! 
+
+Calculations like these can be used to find the chance that a particular individual is selected in a random sample. The exact calculation will depend on the sampling scheme. But what we have observed above can usually be generalized: increasing the size of the random sample increases the chance that an individual is selected.
 
