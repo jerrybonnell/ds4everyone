@@ -89,6 +89,16 @@ sum(tosses == "Heads")
 
 In many situations, actions and results depends on a specific set of conditions being satisfied. For example, individuals in randomized controlled trials receive the treatment if they have been assigned to the treatment group. A gambler makes money if she wins her bet.
 
+### Prerequisites
+
+As usual, we will make use of the tidyverse. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### The `if` statement
+
 In this section we will learn how to describe such situations using code. A *conditional statement* is a multi-line statement that allows Python to choose among different alternatives based on the truth value of an expression. While conditional statements can appear anywhere, they appear most often within the body of a function in order to express alternative behavior depending on argument values.
 
 A conditional statement always begins with an `if` header, which is a single line followed by an indented body. The body is only executed if the expression directly following `if` (called the *if expression*) evaluates to a true value. If the *if expression* evaluates to a false value, then the body of the `if` is skipped.
@@ -233,7 +243,257 @@ At this point it is natural to want to collect the results of all the bets so th
 
 ## Iteration
 
-TBA
+It is often the case in programming – especially when dealing with randomness – that we want to repeat a process multiple times. For example, recall the game of betting on one roll of a die with the following rules:
+
+* If the die shows 1 or 2 spots, my net gain is -1 dollar.
+* If the die shows 3 or 4 spots, my net gain is 0 dollars.
+* If the die shows 5 or 6 spots, my net gain is 1 dollar.
+
+### Prerequisites
+
+As usual, we will make use of the tidyverse. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### Betting on a Die
+
+The function `bet_on_one_roll` takes no argument. Each time it is called, it simulates one roll of a fair die and returns the net gain in dollars.
+
+```{r}
+bet_on_one_roll <- function(x) {
+  # Returns my net gain on one bet
+  x <- sample(1:6, size = 1) # roll a die once and record the number of spots
+  if (x <= 2) {
+    return(-1)
+  } else if (x <= 4) {
+    return(0)
+  } else if (x <= 6) {
+    return(1)
+  }
+}
+```
+
+Playing this game once is easy:
+
+```{r}
+bet_on_one_roll()
+```
+
+To get a sense of how variable the results are, we have to play the game over and over again. We could run the cell repeatedly, but that's tedious, and if we wanted to do it a thousand times or a million times, forget it.
+
+A more automated solution is to use a `for` statement to loop over the contents of a sequence. This is called *iteration*. A `for` statement begins with the word `for`, followed by a name we want to give each item in the sequence, followed by the word `in`, and ending with an expression that evaluates to a sequence. The indented body of the `for` statement is executed once *for each item in that sequence*.
+
+```{r}
+for (animal in c("cat", "dog", "rabbit")) {
+  print(animal)
+}
+```
+
+Here we use a `for` statement in a more realistic way: we print the results of betting five times on the die as described earlier. This is called *simulating* the results of five bets. We use the word *simulating* to remind ourselves that we are not physically rolling dice and exchanging money but using R to mimic the process.
+
+To repeat a process `n` times, it is common to use the sequence `1:n` in the for statement. It is also common to use a very short name for each item. In our code we will use the name `i` to remind ourselves that it refers to an item.
+
+```{r}
+for (i in 1:5) {
+  print(bet_on_one_roll())
+}
+```
+
+In this case, we simply perform exactly the same (random) action several times, so the code in the body of our `for` statement does not actually refer to `i`.
+
+While the `for` statement above does simulate the results of five bets, the results are simply printed and are not in a form that we can use for computation. A vector of results would be more useful. Thus a typical use of a `for` statement is to create a vector of results. 
+
+### Example: Betting on 5 rolls 
+
+Our experiment will simulate five bets on a die and collect the results in an vector that we will call `outcomes`. To be efficient, we will use the knowledge of the total number of simulations to pre-define the length of `outcomes`; this will help R speed up the computation. 
+
+```{r}
+num_rolls <- 5
+outcomes <- vector("integer", num_rolls)  # create a vector with length num_rolls
+for (i in 1:num_rolls) {
+  outcomes[i] <- bet_on_one_roll()
+}
+```
+
+```{r}
+outcomes
+```
+
+This will do the job. The body of this `for` statement contains two actions: (1) run the betting function `bet_on_one_roll()`, and (2) store the result into `i`th slot of the `outcomes` vector. Both actions are executed for each item in the sequence `1:num_rolls`.
+
+You may have noticed how cycling through the `outcomes` vector this way, individually assigning each element the result of one bet, can be cumbersome. If so, you would be in good company. The philosophy of R prefers to operate on vectors in whole, rather than in pieces as in the code we saw just above. In this way, we can eliminate the need for many common `for` statements. To demonstrate this, we introduce the idea of *maps* and *functionals*. 
+
+### Maps and Functionals
+
+Your midterm asks you to write code to capitalize the elements in a character vector. 
+
+```{r}
+some_characters <- c("b", "a", "N", "a", "N", "A", "!")
+```
+
+How can we do this with a computer? We know that the `toupper()` function can be used to capitalize a character (actually, it can do all of the work for us but let's not spoil the fun). We can try solving the problem using this function... 
+
+```{r}
+capitalized <- vector("character", length(some_characters))
+capitalized[1] <- toupper(some_characters[1])
+capitalized[2] <- toupper(some_characters[2])
+capitalized[3] <- toupper(some_characters[3])
+capitalized[4] <- toupper(some_characters[4])
+capitalized[5] <- toupper(some_characters[5])
+capitalized[6] <- toupper(some_characters[6])
+capitalized[7] <- toupper(some_characters[7])
+capitalized
+```
+
+Full marks. But what if the vector given was bigger? There wouldn't be any time left to work on the other problems! One way out of this jam is to observe the repetition in the code we have just written. We just learned that `for` statements are useful for performing the same action multiple times. In a ray of brilliance, the following revised code is produced.
+
+```{r}
+my_upper_function <- function(x) {
+  capitalized <- vector("character", length(x))
+  for (i in 1:length(x)) {
+    capitalized[i] <- toupper(x[i])
+  }
+  return(capitalized)
+}
+my_upper_function(some_characters)
+``` 
+
+Much better! Moving on, you realize the next question asks you to convert the characters in the vector to *lowercase*. Another dilemma -- the function we wrote only works for capitalization! We need another for converting to lowercase. In a haste, you come up the following.  
+
+```{r}
+my_lower_function <- function(x) {
+  lowered <- vector("character", length(x))
+  for (i in 1:length(x)) {
+    lowered[i] <- tolower(x[i])
+  }
+  return(lowered)
+}
+my_lower_function(some_characters)
+``` 
+
+Does this do the job? Yes. Full marks? Not a chance! We did not learn our lesson from last time: there is repetition in the code again! Besides name changes, a brand new function was written to make only one change: adjust the `toupper()` function call to `tolower()`. Moreover, there is ample room for introducing mistakes. If you were writing this on a computer and copy-and-pasting your capitalization code, it is all too easy to forget changing `toupper()` to `tolower()`, especially if we needed to call these functions more than once.       
+
+The better approach here is to leverage the power of R and make use of *functionals*. Instead of writing two separate functions that perform common list challenges, use one function and pass it an additional *functional* argument. That is, 
+
+```{r}
+my_map_function <- function(x, func) {
+  transformed <- vector("character", length(x))
+  for (i in 1:length(x)) {
+    transformed[i] <- func(x[i])
+  }
+  return(transformed)
+}
+```
+
+We can call this new function by passing in the same vector `some_characters` and a functional argument `func` that will be either `tolower()` or `toupper()`. 
+
+```{r}
+my_map_function(some_characters, toupper)
+my_map_function(some_characters, tolower)
+```
+
+By passing in different functional arguments, we are effectively transforming this *generalized* function into the lower and uppercase versions in our first draft. The grader is sure to be content with this solution (as well as the R gurus :-). 
+
+The idea of passing a function to another function is an extremely powerful idea. However, the careful reader would beg to differ: how can this be used to *eliminate* writing `for` statements?  
+
+To this end, we will make use of the [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf) package available in tidyverse, which provides many functions that can be used to replace common `for` statements. The goal of using `purrr` functions is to break up common list manipulation challenges into smaller pieces by solving the problem first for a single element in the vector. From this, we can build up solutions for more complex problems. 
+
+The main construct we will be using from `purrr` is the *map*. The `my_map_function()` we just wrote is one such example of a map: it applies a function (in this case, `toupper()` or `tolower()`) to each element of a vector or list. `purrr` offers many flavors of map, depending on what the output vector should look like: 
+
+* `map_lgl()` outputs a logical vector.
+* `map_int()` outputs an integer vector.
+* `map_dbl()` outputs a double vector.
+* `map_chr()` outputs a character vector.
+
+We could easily have replaced our `my_map_function()` with a `purrr` version. 
+
+```{r}
+map_chr(some_characters, toupper)
+map_chr(some_characters, tolower)
+```
+
+Here are some more examples of using map. Note how we can define a function and pass it in on the spot. We call these *anonymous functions*. The following is an identity function: it simply outputs what it takes in.  
+
+```{r}
+map_int(1:5, function(x) x)
+```
+
+This one is more useful. It computes the square of each element, i.e., $x^2$. 
+
+```{r}
+map_dbl(1:5, function(x) x ** 2)
+```
+
+> __Why use map_dbl() instead of map_int()?__ By default, R treats numbers as doubles. While `1:5` is a vector of integers, each element is subject to the expression `x ** 2`, where `x` is an integer and `2` is a double. To make this operation compatible, R will "promote" `x` to a double, making the output of this expression a double as well.  
+
+This one will always return a vector of 5's. Can you see why? 
+
+```{r}
+map_dbl(1:5, function(x) 5)
+```
+
+While map eliminates the need to write `for` statements in common situations, keep in mind that R internally must still perform a `for` loop. Therefore, the chief benefit of using constructs like map is not for its speed, but clarity: it is much easier to read and write.
+
+We now have all the pieces we need to take on the die roll simulation. 
+
+### Example: Betting on 5 Rolls (revisited)
+
+Let's recall the code we wrote earlier to perform the simulation.
+
+```{r}
+num_rolls <- 5
+outcomes <- vector("integer", num_rolls)  # create a vector with length num_rolls
+for (i in 1:num_rolls) {
+  outcomes[i] <- bet_on_one_roll()
+}
+```
+
+Using what we have learned about map, we can rewrite this simulation to just two lines. 
+
+```{r}
+num_rolls <- 5
+outcomes <- map_dbl(1:num_rolls, bet_on_one_roll)
+```
+
+```{r}
+outcomes
+```
+
+Note how the input vector `1:num_rolls` serves as a placeholder. Meaning, the values in this vector do not matter as they will be overwritten with the results from the bet; only the length of the vector is important. 
+
+We can use `sum()` to count the number of times money changed hands.
+
+```{r}
+sum(outcomes)
+```
+
+### Example: Betting on 300 Rolls
+
+Iteration using maps is a powerful technique. For example, we can see the variation in the results of 300 bets by running exactly the same code for 300 bets instead of five.
+
+```{r}
+num_rolls <- 300
+outcomes <- map_dbl(1:num_rolls, bet_on_one_roll)
+```
+
+The vector `outcomes` contains the results of all 300 bets.
+
+```{r}
+length(outcomes)
+```
+
+To see how often the three different possible results appeared, we can create a tibble from `outcomes` and then use `ggplot2`.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+outcome_df <- tibble(outcomes)
+ggplot(outcome_df, aes(x = outcomes)) + 
+  geom_bar() + 
+  coord_flip()
+```
+
+Not surprisingly, each of the three outcomes -1, 0, and 1 appeared about about 100 of the 300 times, give or take. We will examine the "give or take" amounts more closely in later chapters.
 
 ## Simulation
 
