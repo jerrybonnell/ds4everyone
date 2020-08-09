@@ -347,7 +347,7 @@ capitalized[7] <- toupper(some_characters[7])
 capitalized
 ```
 
-Full marks. But what if the vector given was bigger? There wouldn't be any time left to work on the other problems! One way out of this jam is to observe the repetition in the code we have just written. We just learned that `for` statements are useful for performing the same action multiple times. In a ray of brilliance, the following revised code is produced.
+This would earn full marks. But what if the vector given was bigger? There wouldn't be any time left to work on the other problems! One way out of this jam is to observe the repetition in the code we have just written. We just learned that `for` statements are useful for performing the same action multiple times. In a ray of brilliance, the following revised code is produced.
 
 ```{r}
 my_upper_function <- function(x) {
@@ -375,7 +375,7 @@ my_lower_function(some_characters)
 
 Does this do the job? Yes. Full marks? Not a chance! We did not learn our lesson from last time: there is repetition in the code again! Besides name changes, a brand new function was written to make only one change: adjust the `toupper()` function call to `tolower()`. Moreover, there is ample room for introducing mistakes. If you were writing this on a computer and copy-and-pasting your capitalization code, it is all too easy to forget changing `toupper()` to `tolower()`, especially if we needed to call these functions more than once.       
 
-The better approach here is to leverage the power of R and make use of *functionals*. Instead of writing two separate functions that perform common list challenges, use one function and pass it an additional *functional* argument. That is, 
+The better approach here is to leverage the power of R and make use of *functionals*. Instead of writing two separate functions, recycle one function and pass it an additional *functional* argument. That is, 
 
 ```{r}
 my_map_function <- function(x, func) {
@@ -398,7 +398,7 @@ By passing in different functional arguments, we are effectively transforming th
 
 The idea of passing a function to another function is an extremely powerful idea. However, the careful reader would beg to differ: how can this be used to *eliminate* writing `for` statements?  
 
-To this end, we will make use of the [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf) package available in tidyverse, which provides many functions that can be used to replace common `for` statements. The goal of using `purrr` functions is to break up common list manipulation challenges into smaller pieces by solving the problem first for a single element in the vector. From this, we can build up solutions for more complex problems. 
+To this end, we will make use of the [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf) package available in tidyverse, which provides many functions that can be used to replace common `for` statements. The goal of using `purrr` functions is to break up common list manipulation challenges into smaller pieces by solving first the problem for a single element in the vector. From this, we can build up solutions to more complex problems. 
 
 The main construct we will be using from `purrr` is the *map*. The `my_map_function()` we just wrote is one such example of a map: it applies a function (in this case, `toupper()` or `tolower()`) to each element of a vector or list. `purrr` offers many flavors of map, depending on what the output vector should look like: 
 
@@ -406,6 +406,7 @@ The main construct we will be using from `purrr` is the *map*. The `my_map_funct
 * `map_int()` outputs an integer vector.
 * `map_dbl()` outputs a double vector.
 * `map_chr()` outputs a character vector.
+* `map()` outputs a list.
 
 We could easily have replaced our `my_map_function()` with a `purrr` version. 
 
@@ -428,13 +429,13 @@ map_dbl(1:5, function(x) x ** 2)
 
 > __Why use map_dbl() instead of map_int()?__ By default, R treats numbers as doubles. While `1:5` is a vector of integers, each element is subject to the expression `x ** 2`, where `x` is an integer and `2` is a double. To make this operation compatible, R will "promote" `x` to a double, making the output of this expression a double as well.  
 
-This one will always return a vector of 5's. Can you see why? 
+This one will always return a vector of 5's, regardless of the input. Can you see why? 
 
 ```{r}
-map_dbl(1:5, function(x) 5)
+map_dbl(1:6, function(x) 5)
 ```
 
-While map eliminates the need to write `for` statements in common situations, keep in mind that R internally must still perform a `for` loop. Therefore, the chief benefit of using constructs like map is not for its speed, but clarity: it is much easier to read and write.
+While map eliminates the need to write `for` statements in common situations, keep in mind that R internally must still perform a `for` loop. Therefore, the chief benefit of using constructs like map is not for its speed, but clarity: it is much easier to read and write (once you wrap your head around it :-).
 
 We now have all the pieces we need to take on the die roll simulation. 
 
@@ -461,7 +462,7 @@ outcomes <- map_dbl(1:num_rolls, bet_on_one_roll)
 outcomes
 ```
 
-Note how the input vector `1:num_rolls` serves as a placeholder. Meaning, the values in this vector do not matter as they will be overwritten with the results from the bet; only the length of the vector is important. 
+Note how the input vector `1:num_rolls` serves as a placeholder here. Meaning, the values in this vector do not matter as they will be overwritten with the results from the bet; only the length of the vector is important. 
 
 We can use `sum()` to count the number of times money changed hands.
 
@@ -497,7 +498,195 @@ Not surprisingly, each of the three outcomes -1, 0, and 1 appeared about about 1
 
 ## Simulation
 
-TBA
+Simulation is the process of using a computer to mimic a physical experiment. In this class, those experiments will almost invariably involve chance.
+
+We have seen how to simulate the results of tosses of a coin. The steps in that simulation were examples of the steps that will constitute every simulation we do in this course. In this section we will set out those steps and follow them in examples.
+
+### Step 1: What to Simulate
+
+Specify the quantity you want to simulate. For example, you might decide that you want to simulate the outcomes of tosses of a coin.
+
+### Step 2: Simulating One Value 
+
+Figure out how to simulate one value of the quantity you specified in Step 1. In our example, you have to figure out how to simulate the outcome of one toss of a coin. If your quantity is more complicated, you might need several lines of code to come up with one simulated value.
+
+### Step 3: Number of Repetitions 
+
+Decide how many times you want to simulate the quantity. You will have to repeat Step 2 that many times. In one of our earlier examples we had decided to simulate the outcomes of 1000 tosses of a coin, and so we needed 1000 repetitions of generating the outcome of a single toss.
+
+### Step 4: Coding the Simulation
+
+Put it all together in code.
+
+* Create a "repetitions sequence," that is, a sequence whose length is the number of repetitions you specified in Step 3. For n repetitions we will almost always use the sequence `1:n`.
+
+* Create an "experiment" function to simulate one value based on the code you developed in Step 2. 
+
+* Create a `map` where the first argument is the repetition sequence and the 
+second argument is the experiment function to simulate one value. 
+  * Choose the correct map function depending on the resulting data type.
+  * Store the resulting to a variable. We call this the "outcomes" vector.
+  * A general format takes the form: `outcomes <- map_*(1:n, experiment_func)`
+
+That's it! Once you have carried out the steps above, your simulation is done. The outcomes vector contains all the simulated values.
+
+At this point you can use the outcomes vector as you would any other vector. You can visualize the distribution of the simulated values, count how many simulated values fall into a particular category, and so on.
+
+### Number of Heads in 100 Tosses
+
+It is natural to expect that in 100 tosses of a coin, there will be 50 heads, give or take a few.
+
+But how many is "a few"? What's the chance of getting exactly 50 heads? Questions like these matter in data science not only because they are about interesting aspects of randomness, but also because they can be used in analyzing experiments where assignments to treatment and control groups are decided by the toss of a coin.
+
+In this example we will simulate the number of heads in 100 tosses of a coin. The histogram of our results will give us some insight into how many heads are likely.
+
+Let's get started on the simulation, following the steps above.
+
+### Step 1: What to Simulate
+
+The quantity we are going to simulate is the number of heads in 100 tosses.
+
+### Step 2: Simulating One Value
+
+We have to figure out how to make one set of 100 tosses and count the number of heads. Let's start by creating a coin.
+
+```{r}
+coin <- c("Heads", "Tails")
+```
+
+In our earlier example we used `sample()` and a map to generate multiple tosses. Recall that the size argument of `sample()` can be used to specify the number of times to toss.
+
+Here are the results of 10 tosses.
+
+```{r}
+ten_tosses <- sample(coin, size = 10, replace = TRUE)
+ten_tosses
+```
+
+We can count the number of heads by using `sum()` as before:
+
+```{r}
+sum(ten_tosses == "Heads")
+```
+
+Our goal is to simulate the number of heads in 100 tosses, not 10. To do that we can just repeat the same code, replacing 10 by 100.
+
+```{r}
+outcomes <- sample(coin, size = 100, replace = TRUE)
+num_heads <- sum(outcomes == "Heads")
+num_heads
+```
+
+Let's wrap this up in a function we can use in our simulation. 
+
+```{r}
+coin_flip_experiment <- function(x) {
+  outcomes <- sample(coin, size = 100, replace = TRUE)
+  num_heads <- sum(outcomes == "Heads")
+  return(num_heads)
+} 
+```
+
+
+### Step 3: Number of Repetitions
+
+How many repetitions we want is up to us. The more we use, the more reliable our simulations will be, but the longer it will take to run the code. R is pretty fast at tossing coins. Let's go for 10,000 repetitions. That means we are going to do the following 10,000 times:
+
+* Toss a coin 100 times and count the number of heads.
+
+That's a lot of tossing! It's good that we have R to do it for us.
+
+### Step 4: Coding the Simulation
+
+We are ready to write the code to execute the entire simulation.
+
+```{r}
+# Number of repetitions
+num_repetitions <- 10000
+
+# simulate the experiment!
+heads <- map_dbl(1:num_repetitions, coin_flip_experiment)
+
+# That's it! The simulation is done.
+```
+
+Check that the vector `heads` contains 10,000 entries, one for each repetition of the experiment.
+
+```{r}
+length(heads)
+```
+
+To get a sense of the variability in the number of heads in 100 tosses, we can collect the results in a table and draw a histogram.
+
+```{r}
+simulation_results <- tibble(
+  repetition = 1:num_repetitions,
+  num_heads = heads
+)
+```
+
+```{r}
+simulation_results
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(simulation_results) + 
+  geom_histogram(aes(x = num_heads, y = ..density..), breaks = seq(30.5, 69.6, 1))
+```
+
+Each bins has width 1 and is centered at each value of the number of heads.
+
+Not surprisingly, the histogram looks roughly symmetric around 50 heads. The height of the bar at 50 is about 8% per unit. Since each bin is 1 unit wide, this is the same as saying that about 8% of the repetitions produced exactly 50 heads. That's not a huge percent, but it's the largest compared to the percent at every other number of heads.
+
+The histogram also shows that in almost all of the repetitions, the number of heads in 100 tosses was somewhere between 35 and 65. Indeed, the bulk of the repetitions produced numbers of heads in the range 45 to 55.
+
+While in theory it is *possible* that the number of heads can be anywhere between 0 and 100, the simulation shows that the range of probable values is much smaller.
+
+This is an instance of a more general phenomenon about the variability in coin tossing, as we will see later in the course.
+
+### Moves in Monopoly
+
+Each move in the game Monopoly is determined by the total number of spots of two rolls of a die. If you play Monopoly, what should you expect to get when you roll the die two times?
+
+We can explore this by simulating the sum of two rolls of a die. We will run the simulation 10,000 times as we did in the previous example. Notice that is this paragraph we have completed Steps 1 and 3 of our simulation process.
+
+Step 2 is the one in which we simulate one pair of rolls and add up the number of spots.
+
+```{r}
+pair_of_rolls_experiment <- function(x) {
+  dice <- 1:6
+  num_spots <- sum(sample(dice, size = 2, replace = TRUE))
+  return(num_spots)
+} 
+```
+
+```{r}
+pair_of_rolls_experiment()
+```
+
+That simulates one value of the sum of two rolls. We are now all set to run the simulation according to the steps that are now familiar.
+
+```{r}
+num_repetitions <- 10000
+
+moves <- map_dbl(1:num_repetitions, pair_of_rolls_experiment)
+```
+
+Here is a histogram of the results.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+
+results <- tibble(
+  repetition = 1:num_repetitions,
+  sum_of_two_rolls = moves
+)
+
+ggplot(results) + 
+  geom_histogram(aes(x = sum_of_two_rolls, y = ..density..), color = "gray",
+                 breaks = seq(1.5, 12.6, 1))
+```
+
+Seven is the most common value, with the frequencies falling off symmetrically on either side.
 
 ## The Monty Hall Problem
 
@@ -611,7 +800,7 @@ If the contestant happens to pick one of the goats, then the other goat is revea
 If the contestant happens to pick the car, then Monty reveals one of the goats and the other goat is behind the remaining door.
 
 ```{r}
-monty_hall_game <- function() {
+monty_hall_game <- function(x) {
   # Returns (contestant's guess, what Monty reveals, what remains behind the other door)
   pick <- sample(hidden_behind_doors, size = 1) 
   if (pick == "goat1") {
@@ -643,45 +832,56 @@ To gauge the frequency with which the different results occur, we have to play t
 
 It's time to run the whole simulation.
 
-We will play the game 10,000 times and collect the results in a table. Each row of the table will contain the result of one play.
+We will play the game 10,000 times and collect the results in a vector called `games` using the map construct. However, our application of map this time is not as straightforward. That is, the experiment function `monty_hall_game()` returns a character vector of size 3, where each element is a string. So far the experiment functions we have seen have returned vectors of size 1. 
 
-One way to grow a table by adding a new row is to use the `add_row()` function. If `df` is a data frame, or more conveniently, a `tibble`, and `new_row` is a vector (say, of size 2) containing the entries in a new row, then 
-`add_row(df, column_a = new_row[1], column_b = new_row[2])` adds the new row to the bottom of `my_table`.
-
-Note that `add_row()` does not create a new table. It changes `df` to have one more row than it did before, which must then be stored back in `df` if we wish to preserve those changes.  
-
-First let's create a table `games` that has three empty columns. We can do this by just specifying a list of the column labels, as follows.
+We can overcome this complexity by using a more general version of `map` which behaves exactly the same way, but returns a *list* rather than a vector. Let's run the simulation first; we'll take care of the output afterward.  
 
 ```{r}
-games <- tibble(
-  guess = character(),
-  revealed = character(),
-  remaining = character()
+num_repetitions <- 10000
+games <- map(1:num_repetitions, monty_hall_game)
+```
+
+The simulation is done. It would be best to transform `games` into a table which makes it easier to analyze and visualize the results. Let's first inspect some elements inside `games`.  
+
+```{r}
+games[[1]]
+games[[2]]
+games[[3]]
+```
+
+Each element of this list contains one game play, represented by a character vector. That character vector has 3 elements: (1) the guess, (2) the door Monty reveals, and (3) the remaining door. We can use another map to extract each piece, i.e., taking the first element of each character vector in the list will give us all the guesses, the second all the revealed doors, and so on. This will directly form a column of data for our table. 
+
+Let's try this first for the guess column. Note how the functional here returns the first element of each vector in the list. 
+
+```{r}
+guess_column = map_chr(games, function(x) x[1])
+head(guess_column)
+```
+
+Let's do this for the other two columns. 
+
+```{r}
+revealed_column = map_chr(games, function(x) x[2])
+remaining_column = map_chr(games, function(x) x[3])
+```
+
+We are now ready to present the results of the simulation in a tibble called `game_results`. Each row of the table will contain the result of one play of Monty's game. Notice that we have chosen the order of the columns to be the same as the order in which `monty_hall_game()` returns the result of one game.
+
+```{r}
+game_results <- tibble(
+  guess = guess_column,
+  revealed = revealed_column,
+  remaining = remaining_column
 )
+game_results
 ```
-
-Notice that we have chosen the order of the columns to be the same as the order in which `monty_hall_game()` returns the result of one game.
-
-Now we can add 10,000 rows to trials. Each row will represent the result of one play of Monty's game.
-
-```{r}
-for (i in 1:10000) {
-  one_game <- monty_hall_game()
-  games <- add_row(games, 
-                   guess = one_game[1], 
-                   revealed = one_game[2], 
-                   remaining = one_game[3])
-}
-```
-
-The simulation is done. Notice how short the code is. The majority of the work was done in simulating the outcome of one game.
 
 ### Visualization
 
 To see whether the contestant should stick with her original choice or switch, let's see how frequently the car is behind each of her two options.
 
 ```{r}
-original_choice <- games %>% 
+original_choice <- game_results %>% 
   group_by(guess) %>%
   count() %>%
   mutate(which_door = "original")
@@ -689,7 +889,7 @@ original_choice
 ```
 
 ```{r}
-remaining_doors <- games %>% 
+remaining_doors <- game_results %>% 
   group_by(remaining) %>%
   count() %>%
   mutate(which_door = "remaining")
