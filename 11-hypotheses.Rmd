@@ -69,14 +69,29 @@ The classic interpretation of `rmultinom()` is that you have some marbles to put
 
 It returns a vector containing the number of marbles in each category in a random sample of the given size taken from the population. Because this distribution is so special, statisticians have given it a name: the *multinomial distribution*.
 
-To see how to use this, remember that according to our model, the panel is selected at random from a population of men among whom 26% were black and 74% were not. Thus the distribution of the two categories can be represented as the vector `c(0.26, 0.74)`, which we have assigned to the name `eligible_population`. Now let's sample once from this distribution, and see the counts in each of the two categories we get in our sample.
+To see how to use this, remember that according to our model, the panel is selected at random from a population of men among whom 26% were black and 74% were not. Thus the distribution of the two categories can be represented as the vector `c(0.26, 0.74)`, which we have assigned to the name `eligible_population`. Now let's sample 100 times from this distribution to create *one* sample vector of counts. This vector tells us the counts in each of the two categories we get in our sample.
 
 ```{r}
 eligible_population <- c(0.26, 0.74)
-rmultinom(n = 1, size = 100, prob = eligible_population)
+sample_vector <- rmultinom(n = 1, size = 100, prob = eligible_population)
+sample_vector
 ```
 
-That was easy! The number of black men in the random sample is at index 1 of the output vector.
+That was easy! The number of black men in the random sample is at index 1 of the sample vector.
+
+It can be easier to understand the *proportion* of the two categories we get in our sample, rather than raw counts. Proportions are useful because they tell us about the distribution of the categories present in our sample vector. For this interpretation, we divide `sample_vector` by the 100 total number of men in the sample. 
+
+```{r}
+sample_vector / 100
+```
+
+So we can just as easily simulate proportions instead of counts, and access the proportion of black men only.
+
+```{r}
+(rmultinom(n = 1, size = 100, prob = eligible_population) / 100)[1]
+```
+
+Run the cell a few times to see how the output varies.
 
 #### Running the Simulation
 
@@ -87,8 +102,8 @@ The code follows the same steps that we have used in every simulation. First, we
 ```{r}
 one_simulated_count <- function(x) {
   eligible_population <- c(0.26, 0.74)
-  sample <- rmultinom(n = 1, size = 100, prob = eligible_population)
-  return(sample[1])
+  sample_vector <- rmultinom(n = 1, size = 100, prob = eligible_population)
+  return(sample_vector[1])
 }
 ```
 
@@ -110,7 +125,9 @@ ggplot(tibble(counts)) +
 
 The histogram tells us what the model of random selection predicts about our statistic, the count of black men in the sample.
 
-To generate each simulated count, we drew at 100 times at random from a population in which 26% were black. So, as you would expect, most of the simulated counts are around 26. They are not exactly 26: there is some variation. The counts range from about 10 to about 45.
+To generate each simulated count, we drew 100 times at random from a population in which 26% were black. This gave us a sample vector containing counts, in which the count of black men in the sample corresponds to the first index; this is our simulated count.    
+
+So, as you would expect, most of the simulated counts are around 26. They are not exactly 26: there is some variation. The counts range from about 10 to about 45.
 
 ### Comparing the Prediction and the Data
 
@@ -119,7 +136,7 @@ Though the simulated counts are quite varied, very few of them came out to be ei
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(counts)) +
   geom_histogram(aes(x = counts, y = ..density..), binwidth = 1, color = 'gray') +
-  geom_point(aes(x=8, y=0), size = 4, color="red")
+  geom_point(aes(x=8, y=0), size = 3, color="red")
 ```
 
 The simulation shows that if we select a panel of 100 jurors at random from the eligible population, we are very unlikely to get counts of black men as low as the eight that were in Swain's jury panel. This is evidence that the model of random selection of the jurors in the panel is not consistent with the data from the panel.
@@ -193,11 +210,11 @@ model_proportions <- c(0.75, 0.25)
 ```
 
 ```{r}
-num_purple_in_sample <- rmultinom(n = 1, size = 929, prob = model_proportions)[1]
-distance_from_75(num_purple_in_sample / 929)
+sample_vector <- rmultinom(n = 1, size = 929, prob = model_proportions) / 929
+distance_from_75(sample_vector[1])
 ```
 
-That's one simulated value of the distance between the sample percent of purple-flowering plants and 75% as predicted by Mendel's model.
+That's one simulated value of the distance between the sample percent of purple-flowering plants and 75% as predicted by Mendel's model. Note how the sample vector here is a *proportion* of the categories, not a count.
 
 #### Running the Simulation
 
@@ -207,8 +224,8 @@ We will generate 10,000 values of the distance. As before, we will first use the
 
 ```{r}
 one_simulated_distance <- function(x) {
-  num_purple_in_sample <- rmultinom(n = 1, size = 929, prob = model_proportions)[1]
-  return(distance_from_75(num_purple_in_sample / 929))
+  sample_vector <- rmultinom(n = 1, size = 929, prob = model_proportions) / 929
+  return(distance_from_75(sample_vector[1]))
 }
 ```
 
@@ -225,7 +242,8 @@ The empirical histogram of the simulated values shows the distribution of the di
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(counts)) +
-  geom_histogram(aes(x = counts, y = ..density..), color = 'gray', breaks = 0:10/2)
+  geom_histogram(aes(x = counts, y = ..density..), color = 'gray', 
+                 breaks = seq(0,5))
 ```
 
 Look on the horizontal axis to see the typical values of the distance, as predicted by the model. They are rather small. For example, a high proportion of the distances are in the range 0 to 1, meaning that for a high proportion of the samples, the percent of purple-flowering plants is within 1% of 75%, that is, the sample percent is in the range 74% to 76%.
@@ -251,8 +269,9 @@ The cell below redraws the histogram with the observed value plotted on the hori
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(counts)) +
-  geom_histogram(aes(x = counts, y = ..density..), color = 'gray', breaks = 0:10/2) +
-  geom_point(aes(x=observed_statistic, y=0), size = 4, color="red")
+  geom_histogram(aes(x = counts, y = ..density..), color = 'gray', 
+                 breaks = seq(0, 5)) +
+  geom_point(aes(x=observed_statistic, y=0), size = 3, color="red")
 ```
 
 The observed statistic is like a typical distance predicted by the model. By this measure, the data are consistent with the histogram that we generated under the assumptions of Mendel's model. This is evidence in favor of the model.
@@ -303,52 +322,55 @@ jury
 Some ethnicities are overrepresented and some are underrepresented on the jury panels in the study. A bar chart is helpful for visualizing the differences.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-plotted_df <- tibble(ethnicity = rep(jury$ethnicity, 2),
+plot_df <- tibble(ethnicity = rep(jury$ethnicity, 2),
                     percent = c(jury$eligible, jury$panels),
                     grouping = c(rep("Eligible", 5), rep("Panels", 5)))
 
-jury_plot <- ggplot(plotted_df) + 
-  geom_bar(aes(x = ethnicity, y = percent, fill = grouping), position="dodge", stat = "identity") +
+jury_plot <- ggplot(plot_df) + 
+  geom_bar(aes(x = ethnicity, y = percent, fill = grouping), position="dodge", 
+           stat = "identity") +
   coord_flip()
 jury_plot
 ```
 
 ### Comparison with Panels Selected at Random
 
-What if we select a random sample of 1,453 people from the population of eligible jurors? Will the distribution of their ethnicities look like the distribution of the panels above?
+What if we select a random sample vector of 1,453 people from the population of eligible jurors? Will the distribution of their ethnicities look like the distribution of the panels above?
 
-We can answer these questions by using `rmultinom()` and augmenting the `jury` data frame with a column of the proportions in our sample.
+We can answer these questions by using `rmultinom()` and mutating the `jury` data frame with a column of the proportions in our sample.
 
 __Technical note.__ Random samples of prospective jurors would be selected without replacement. However, when the size of a sample is small relative to the size of the population, sampling without replacement resembles sampling with replacement; the proportions in the population don't change much between draws. The population of eligible jurors in Alameda County is over a million, and compared to that, a sample size of about 1500 is quite small. We will therefore sample with replacement.
 
-In the cell below, we sample at random 1453 times from the distribution of eligible jurors, and display the distribution of the random sample along with the distributions of the eligible jurors and the panel in the data.
+In the cell below, we form a sample vector containing proportions by sampling at random 1453 times from the distribution of eligible jurors. We display the distribution of the sample vector along with the distributions of the eligible jurors and the panel in the data.
 
 ```{r}
 eligible_population <- jury$eligible
-sample_distribution <- rmultinom(n = 1, size = 1453, prob = eligible_population)
+sample_vector <- rmultinom(n = 1, size = 1453, prob = eligible_population) / 1453
 panels_and_sample <- jury %>%
-  mutate(random_sample = sample_distribution / 1453)
+  mutate(sample_vector = sample_vector)
 panels_and_sample
 ```
 
-The distribution of the random sample is quite close to the distribution of the eligible population, unlike the distribution of the panels.
+The distribution of the sample vector is quite close to the distribution of the eligible population, unlike the distribution of the panels.
 
 As always, it helps to visualize.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-plotted_df <- tibble(ethnicity = rep(panels_and_sample$ethnicity, 3),
-                    percent = c(panels_and_sample$eligible, 
-                                panels_and_sample$panels, 
-                                panels_and_sample$random_sample),
-                    grouping = c(rep("Eligible", 5), rep("Panels", 5), rep("Random Sample", 5)))
+plot_df <- tibble(ethnicity = rep(panels_and_sample$ethnicity, 3),
+                  percent = c(panels_and_sample$eligible, 
+                              panels_and_sample$panels, 
+                              panels_and_sample$sample_vector),
+                  grouping = c(rep("Eligible", 5), rep("Panels", 5), 
+                               rep("Sample vector", 5)))
 
-jury_wth_random_plot <- ggplot(plotted_df) + 
-  geom_bar(aes(x = ethnicity, y = percent, fill = grouping), position="dodge", stat = "identity") +
+jury_wth_random_plot <- ggplot(plot_df) + 
+  geom_bar(aes(x = ethnicity, y = percent, fill = grouping), position="dodge", 
+           stat = "identity") +
   coord_flip()
 jury_wth_random_plot
 ```
 
-The bar chart shows that the distribution of the random sample resembles the eligible population but the distribution of the panels does not.
+The bar chart shows that the distribution of the sample vector resembles the eligible population but the distribution of the panels does not.
 
 To assess whether this observation is particular to one random sample or more general, we can simulate multiple panels under the model of random selection and see what the simulations predict. But we won't be able to look at thousands of bar charts like the one above. We need a statistic that will help us assess whether or not the model or random selection is supported by the data.
 
@@ -372,7 +394,7 @@ jury_with_diffs
 
 Take a look at the column `difference` and notice that the sum of its entries is 0: the positive entries add up to 0.14, exactly canceling the total of the negative entries which is -0.14.
 
-This is numerical evidence of the fact that in the bar chart, the gold bars exceed the blue bars by exactly as much as the blue bars exceed the gold. The proportions in each of the two columns `Panels` and `Eligible` add up to 1, and so the give-and-take between their entries must add up to 0.
+This is numerical evidence of the fact that in the bar chart, the red bars exceed the cyan bars by exactly as much as the cyan bars exceed the red. The proportions in each of the two columns `Panels` and `Eligible` add up to 1, and so the give-and-take between their entries must add up to 0.
 
 To avoid the cancellation, we drop the negative signs and then add all the entries. But this gives us two times the total of the positive entries (equivalently, two times the total of the negative entries, with the sign removed). So we divide the sum by 2.
 
@@ -414,11 +436,11 @@ total_variation_distance(jury$panels, jury$eligible)
 
 This agrees with the value that we computed directly without using the function.
 
-In the cell below we use the function to compute the TVD between the distributions of the eligible jurors and one random sample. This is the code for simulating one value of our statistic. Recall that `eligible_population` is the vector containing the distribution of the eligible jurors.
+In the cell below we use the function to compute the TVD between the distributions of the eligible jurors and one sample vector of proportions. This is the code for simulating one value of our statistic. Recall that `eligible_population` is the vector containing the distribution of the eligible jurors.
 
 ```{r}
-sample_distribution <- rmultinom(n = 1, size = 1453, prob = eligible_population) / 1453
-total_variation_distance(sample_distribution, eligible_population)
+sample_vector <- rmultinom(n = 1, size = 1453, prob = eligible_population) / 1453
+total_variation_distance(sample_vector, eligible_population)
 ```
 
 Notice that the distance is quite a bit smaller than 0.14, the distance between the distribution of the panels and the eligible jurors.
@@ -429,17 +451,17 @@ We are now ready to run a simulation to assess the model of random selection.
 
 The total variation distance between the distributions of the random sample and the eligible jurors is the statistic that we are using to measure the distance between the two distributions. By repeating the process of sampling, we can see how much the statistic varies across different random samples.
 
-The code below simulates the statistic based on a large number of replications of the random sampling process, following our usual sequence of steps for simulation. We first define a function that returns one simulated value of the total variation distance under the hypothesis of random selection. Then we use our function in a for loop to create a vector `tvds` consisting of 5,000 such distances.
+The code below simulates the statistic based on a large number of replications of the random sampling process, following our usual sequence of steps for simulation. We first define a function that returns one simulated value of the total variation distance under the hypothesis of random selection. Then we use our function in a `map` to create a vector `tvds` consisting of 5,000 such distances.
 
 ```{r}
 # Simulate one simulated value of 
 # the total variation distance between
-# the distribution of a sample selected at random
+# the distribution of a sample vector
 # and the distribution of the eligible population
 
 one_simulated_tvd <- function(x) {
-  sample_distribution <- rmultinom(n = 1, size = 1453, prob = eligible_population) / 1453
-  return(total_variation_distance(sample_distribution, eligible_population))
+  sample_vector <- rmultinom(n = 1, size = 1453, prob = eligible_population) / 1453
+  return(total_variation_distance(sample_vector, eligible_population))
 }
 ```
 
@@ -458,6 +480,12 @@ ggplot(tibble(tvds), aes(x = tvds, y = ..density..)) +
 ### Assessing the Model of Random Selection
 
 The panels in the study, however, were not quite so similar to the eligible population. The total variation distance between the panels and the population was 0.14, which is far out in the tail of the histogram above. It does not look at all like a typical distance between a random sample and the eligible population.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(tibble(tvds), aes(x = tvds, y = ..density..)) + 
+  geom_histogram(breaks=seq(0, 0.2, 0.005), color = "gray") + 
+  geom_point(aes(x = 0.14, y = 0), size = 3, color = "red")
+```
 
 The data in the panels is not consistent with the predicted values of the statistic based on the model of random selection. So our analysis supports the ACLU's calculation that the panels were not representative of the distribution provided for the eligible jurors.
 
@@ -734,9 +762,94 @@ In the process by which we decide which of two hypotheses is better supported by
 
 If you are testing a null hypothesis against the alternative that the null hypothesis isn't true, then there are four ways of classifying reality and the result of the test.
 
-to be continued.... 
+|     | Null is True | Alternative is True |
+|----:|:-----------------------:|:------------------------:|
+|**Test Favors the Null**| Correct result | Error |
+|**Test Favors the Alternative**| Error | Correct result |
 
+In two out of the four cells of this table, the test result is wrong. One type of error occurs if the test favors the alternative hypothesis when in fact the null hypothesis is true. The other type of error occurs if the test favors the null hypothesis when in fact the alternative hypothesis is true.
 
+Since the null hypothesis is a completely specified chance model, we can estimate the chance of the first type of error. The answer turns out to be essentially the cutoff that we use for the P-value. Let's see how.
 
+### The Chance of an Error
+
+Suppose you want to test whether a coin is fair or not. Then the hypotheses are:
+
+__Null:__ The coin is fair. That is, the results are like draws made at random with replacement from *Heads, Tails*.
+
+__Alternative:__ The coin is not fair.
+
+Suppose you are going to test this hypothesis based on 2000 tosses of the coin. You would expect a fair coin to land heads 1000 times out of 2000, so a reasonable test statistic to use is
+
+\[\text{test statistic = } ∣ \text{number of heads} − 1000 ∣ \]
+
+Small values of this statistic favor the null hypothesis, and large values favor the alternative.
+
+We have simulated this statistic under the null hypothesis many times, and drawn its empirical distribution.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+
+fair_coin <- c(0, 1)
+
+one_simulated_statistic <- function(x) {
+  num_heads <- sum(sample(fair_coin, size = 2000, replace = TRUE))
+  return(abs(num_heads - 1000))
+}
+
+num_repetitions <- 50000
+statistics <- map_dbl(1:num_repetitions, one_simulated_statistic)
+
+ggplot(tibble(statistics)) + 
+  geom_histogram(aes(x = statistics, y = ..density..), 
+                 breaks = seq(0, 100, 5) - 0.01,
+                 color = "gray") +
+  geom_vline(xintercept = 45, size = 1, color = "purple")
+```
+
+The area to the right of 45 (where the purple line is) is about 5%. We can confirm this with a quick numerical test. 
+
+```{r}
+sum(statistics >= 45) / length(statistics)
+```
+
+Large values of the test statistic favor the alternative. So if the test statistic comes out to be 45 or more, the test will conclude that the coin is unfair.
+
+However, as the figure shows, a fair coin can produce test statistics with values 45 or more. In fact it does so with chance about 5%.
+
+So *if the coin is fair* and our test uses a 5% cutoff for deciding whether it is fair or not, then there is about a 5% chance that the test will wrongly conclude that the coin is unfair.
+
+### The Cutoff for the P-value is an Error Probability 
+
+The example above is a special case of a general fact:
+
+> If you use a $p$% cutoff for the P-value, and the null hypothesis happens to be true, then there is about a $p$% chance that your test will conclude that the alternative is true.
+
+The 1% cutoff is therefore more conservative than 5%. There is less chance of concluding "alternative" if the null happens to be true. For this reason, randomized controlled trials of medical treatments usually use 1% as the cutoff for deciding between the following two hypotheses:
+
+__Null Hypothesis.__ The treatment has no effect; observed differences between the outcomes of the treatment and control groups of patients are due to randomization.
+
+__Alternative Hypothesis.__ The treatment has an effect.
+
+The idea is to control the chance of concluding the treatment does something if in fact it does nothing. This reduces the risk of giving patients a useless treatment.
+
+Still, even if you set the cutoff to be as low as 1%, and the treatment does nothing, there is about a 1% chance of concluding that the treatment does something. This is due to chance variation. There is a small chance that data from random samples end up leading you astray.
+
+### Data Snooping and P-Hacking
+
+The discussion above implies that if each of 100 different research groups runs a separate randomized controlled experiment about the effect of a treatment that in fact has no effect, and each experiment uses a 1% cutoff for the P-value, then by chance variation, one of the experiments is expected to wrongly conclude that the treatment does have an effect.
+
+Unfortunately, that could be the one that gets published. This is why it is important that experiments be *replicated*. That is, other researchers ought to be able to carry out the experiment and see if they get similar results.
+
+It is not uncommon for researchers to test multiple hypotheses using the same data. For example, in a randomized controlled trial about the effect of a drug, researchers might test whether the drug has an effect on various different diseases.
+
+Now suppose the drug has no effect on anything. Just by chance variation, a small percent of the tests might conclude that it does have an effect. So, when you read a study that uses tests of hypotheses and concludes that a treatment has an effect, always ask how many different effects were tested before the researchers found the one that was reported.
+
+If the researchers ran multiple different tests before finding one that gave a "highly statistically significant" result, use the result with caution. The study could be marred by *data snooping*, which essentially means torturing the data into making a false confession. This is sometimes also called *p-hacking*.
+
+In such a situation, one way to validate the reported result is by replicating the experiment and testing for that particular effect alone. If it comes out significant again, that will validate the original conclusion.
+
+### Technical Note: The Other Kind of Error
+
+There is, of course, another kind of error: concluding that the treatment does nothing when in fact it does something. Discussions of that error are outside the scope of this course. Just be aware that life isn't easy: if you set up your test to reduce one of the two errors, you almost always increase the other one.
 
 
