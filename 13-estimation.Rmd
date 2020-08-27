@@ -24,11 +24,231 @@ We will start with a preliminary about percentiles. The most famous percentile i
 
 ## Percentiles
 
-TBA 
+Numerical data can be sorted in increasing or decreasing order. Thus the values of a numerical data set have a *rank order*. A percentile is the value at a particular rank.
+
+For example, if your score on a test is on the 95th percentile, a common interpretation is that only 5% of the scores were higher than yours. The median is the 50th percentile; it is commonly assumed that 50% the values in a data set are above the median.
+
+But some care is required in giving percentiles a precise definition that works for all ranks and all lists. To see why, consider an extreme example where all the students in a class score 75 on a test. Then 75 is a natural candidate for the median, but it's not true that 50% of the scores are above 75. Also, 75 is an equally natural candidate for the 95th percentile or the 25th or any other percentile. Ties – that is, equal data values – have to be taken into account when defining percentiles.
+
+You also have to be careful about exactly how far up the list to go when the relevant index isn't clear. For example, what should be the 87th percentile of a collection of 10 values? The 8th value of the sorted collection, or the 9th, or somewhere in between?
+
+In this section, we will give a definition that works consistently for all ranks and all vectors.
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let's load it in as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(readtext)
+```
+
+### A Numerical Example
+
+Before giving a general definition of all percentiles, we will define the 80th percentile of a collection of values to be the smallest value in the collection that is at least as large as 80% of all of the values.
+
+For example, let's consider the sizes of the five largest continents – Africa, Antarctica, Asia, North America, and South America – rounded to the nearest million square miles.
+
+```{r}
+sizes <- c(12, 17, 6, 9, 7)
+```
+
+The 80th percentile is the smallest value that is at least as large as 80% of the elements of `sizes`, that is, four-fifths of the five elements. That's 12:
+
+```{r}
+sort(sizes)
+```
+
+We can compute this with the `quantile()` function in R. 
+
+### The `quantile` function
+
+The `quantile()` function gives the value that cuts off the first *n* percent of the data values when it is sorted in ascending order. Observe what happens when we just pass the vector `sizes` as an argument. 
+
+```{r}
+quantile(sizes)
+```
+
+The corresponding 0th, 25th, 50th, 75th, and 100th percentiles of the vector are returned. Since these percentiles partition the data into quarters, these are given a special name called *quartiles*. 
+
+There are many ways to compute percentiles (see the help page for a sneak peek, with `?quantile`). The one that matches the definition used here corresponds to `type = 1`. Note that for computing quartiles, as we did before, the answer remains the same.     
+
+```{r}
+quantile(sizes, type = 1)
+```
+
+The 80th percentile is a value on the list, namely 12. We can compute this by passing in an additional parameter with the desired percentage ratios. These must be between 0 and 1. This is how  `quantile()` gets its name: *quantiles* are *percentiles* scaled to have a value between 0 and 1, e.g. `0.7` rather than `70`, `0.8` rather than `80`. 
+
+```{r}
+quantile(sizes, c(0.8), type = 1)
+```
+
+You can see that 80% of the values are less than or equal to it, and that it is the smallest value on the list for which this is true.
+
+Analogously, the 70th percentile is the smallest value in the collection that is at least as large as 70% of the elements of `sizes`. Now 70% of 5 elements is "3.5 elements", so the 70th percentile is the 4th element on the list. That's 12, the same as the 80th percentile for these data.
+
+```{r}
+quantile(sizes, c(0.7), type = 1)
+```
+
+### The General Definition
+
+Let $p$ be a number between 0 and 100. The $p$th percentile of a collection is the smallest value in the collection that is at least as large as p% of all the values.
+
+By this definition, any percentile between 0 and 100 can be computed for any collection of values, and it is always an element of the collection.
+
+In practical terms, suppose there are $n$ elements in the collection. To find the  $p$th percentile:
+
+* Sort the collection in increasing order.
+* Find p% of n:  ($p$/100)×$n$ . Call that $k$.
+* If $k$ is an integer, take the $k$th element of the sorted collection.
+* If $k$ is not an integer, round it up to the next integer, and take that element of the sorted collection.
+
+### Example
+
+The table scores_and_sections contains one row for each student in a class of 359 students. The columns are the student's discussion section and midterm score.
+
+```{r message = FALSE, warning = FALSE}
+url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/scores_by_section.csv"
+scores_and_sections <- read_csv(url)
+scores_and_sections
+```
+
+```{r}
+scores_and_sections %>%
+  select(Midterm) %>%
+  ggplot(aes(x = Midterm, y = ..density..)) +
+  geom_histogram(color = "gray", breaks = seq(-0.5, 25.6, 1))
+``` 
+
+What was the 85th percentile of the scores? To use the `quantile()` function, create a vector `scores` containing the midterm scores, and find the 85th percentile:
+
+```{r}
+scores <- pull(scores_and_sections, Midterm)
+quantile(scores, c(0.85), type = 1)
+```
+
+According to the percentile function, the 85th percentile was 22. To check that this is consistent with our new definition, let's apply the definition directly.
+
+First, put the scores in increasing order:
+
+```{r}
+sorted_scores <- sort(pull(scores_and_sections, Midterm))
+```
+
+There are 359 scores in the array. So next, find 85% of 359, which is 305.15.
+
+```{r}
+0.85 * 359
+```
+
+That's not an integer. By our definition, the 85th percentile is the 306th element of `sorted_scores`.
+
+```{r}
+# The 306th element of the sorted array
+
+sorted_scores[306]
+```
+
+That's the same as the answer we got by using `quantile()`. In future, we will just use `quantile()`.
+
+### Quartiles
+
+We mentioned quartiles briefly earlier. The *first quartile* of a numercial collection is the 25th percentile. The terminology arises from the *first quarter*. The second quartile is the median, and the third quartile is the 75th percentile.
+
+For our `scores` data, those values are:
+
+```{r}
+quantile(scores, c(0.25), type = 1)
+```
+
+```{r}
+quantile(scores, c(0.5), type = 1)
+```
+
+```{r}
+quantile(scores, c(0.75), type = 1)
+```
+
+We saw that when omitting the percentage ratios entirely, the default behavior reports the quartiles automatically. 
+
+```{r}
+quantile(scores, type = 1)
+```
+
+Distributions of scores are sometimes summarized by the "middle 50%" interval, between the first and third quartiles.
 
 ## The Bootstrap
 
-TBA
+A data scientist is using the data in a random sample to estimate an unknown parameter. She uses the sample to calculate the value of a statistic that she will use as her estimate.
+
+Once she has calculated the observed value of her statistic, she could just present it as her estimate and go on her merry way. But she's a data scientist. She knows that her random sample is just one of numerous possible random samples, and thus her estimate is just one of numerous plausible estimates.
+
+By how much could those estimates vary? To answer this, it appears as though she needs to draw another sample from the population, and compute a new estimate based on the new sample. But she doesn't have the resources to go back to the population and draw another sample.
+
+It looks as though the data scientist is stuck.
+
+Fortunately, a brilliant idea called the *bootstrap* can help her out. Since it is not feasible to generate new samples from the population, the bootstrap generates new random samples by a method called *resampling*: the new samples are drawn at random *from the original sample*.
+
+In this section, we will see how and why the bootstrap works. In the rest of the chapter, we will use the bootstrap for inference.
+
+### Employee Compensation in the City of San Francisco
+
+[SF OpenData](https://data.sfgov.org/) is a website where the City and County of San Francisco make some of their data publicly available. One of the data sets contains compensation data for employees of the City. These include medical professionals at City-run hospitals, police officers, fire fighters, transportation workers, elected officials, and all other employees of the City.
+
+Compensation data for the calendar year 2015 are in the table `sf2015`.
+
+```{r message = FALSE, warning = FALSE}
+url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/san_francisco_2015.csv"
+sf2015 <- read_csv(url)
+sf2015
+```
+
+There is one row for each of 42,979 employees. There are numerous columns containing information about City departmental affiliation and details of the different parts of the employee's compensation package. Here is the row correspoding to the late Edward Lee, the Mayor at that time.
+
+```{r}
+filter(sf2015, Job == "Mayor")
+```
+
+We are going to study the final column, `Total Compensation`. That's the employee's salary plus the City's contribution towards his/her retirement and benefit plans.
+
+Financial packages in a calendar year can sometimes be hard to understand as they depend on the date of hire, whether the employee is changing jobs within the City, and so on. For example, the lowest values in the `Total Compensation` column look a little strange.
+
+```{r}
+sf2015 %>%
+  arrange(`Total Compensation`) %>%
+  select(`Total Compensation`, everything())
+```
+
+For clarity of comparison, we will focus our attention on those who had at least the equivalent of a half-time job for the whole year. At a minimum wage of about \$10 per hour, and 20 hours per week for 52 weeks, that's a salary of about \$10,000.
+
+```{r}
+sf2015 <- filter(sf2015, Salaries > 10000)
+nrow(sf2015)
+```
+
+### Population and Parameter 
+
+Let this table of just over 36,500 rows be our population. Here is a histogram of the total compensations.
+
+```{r}
+sf_bins <- seq(0, 700000, 25000)
+sf2015 %>%
+  select(`Total Compensation`) %>%
+  ggplot(aes(x = `Total Compensation`, y = ..density..)) + 
+  geom_histogram(breaks = sf_bins, color = "gray")
+```
+
+While most of the values are below $300,000, a few are quite a bit higher. For example, the total compensation of the Chief Investment Officer was almost \$650,000. That is why the horizontal axis stretches to \$700,000.
+
+```{r}
+arrange(sf2015, desc(`Total Compensation`)) %>%
+  select(`Total Compensation`, everything()) %>%
+  head(n = 2)
+```
+
+Now let the parameter be the median of the total compensations.
+
 
 ## Confidence Intervals
 
