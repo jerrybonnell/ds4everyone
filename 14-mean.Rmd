@@ -223,11 +223,497 @@ The mean income is affected by this tail: the farther the tail stretches to the 
 
 ## Variability
 
-TBA
+The mean tells us where a histogram balances. But in almost every histogram we have seen, the values spread out on both sides of the mean. How far from the mean can they be? To answer this question, we will develop a measure of variability about the mean.
+
+We will start by describing how to calculate the measure. Then we will see why it is a good measure to calculate.
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let's load it in as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(gapminder)
+library(nycflights13)
+```
+
+### The Rough Size of Deviations from Average
+
+For simplicity, we will begin our calculations in the context of a simple vector `any_numbers` consisting of just four values. As you will see, our method will extend easily to any other vector of values.
+
+```{r}
+any_numbers <- c(1, 2, 2, 10)
+```
+
+The goal is to measure roughly how far off the numbers are from their average. To do this, we first need the average:
+
+```{r}
+# Step 1. The average.
+
+mean <- mean(any_numbers)
+mean
+```
+
+Next, let's find out how far each value is from the mean. These are called the *deviations from the average*. A "deviation from average" is just a value minus the average. The data frame `calculation_steps` displays the results.
+
+```{r}
+deviations <- any_numbers - mean
+calculation_steps <- tibble(
+  value = any_numbers, 
+  deviation_from_average = deviations
+)
+calculation_steps
+```
+
+Some of the deviations are negative; those correspond to values that are below average. Positive deviations correspond to above-average values.
+
+To calculate roughly how big the deviations are, it is natural to compute the mean of the deviations. But something interesting happens when all the deviations are added together:
+
+```{r}
+sum(deviations)
+```
+
+The positive deviations exactly cancel out the negative ones. This is true of all lists of numbers, no matter what the histogram of the list looks like: __the sum of the deviations from average is zero__.
+
+Since the sum of the deviations is 0, the mean of the deviations will be 0 as well:
+
+```{r}
+mean(deviations)
+```
+
+Because of this, the mean of the deviations is not a useful measure of the size of the deviations. What we really want to know is roughly how big the deviations are, regardless of whether they are positive or negative. So we need a way to eliminate the signs of the deviations.
+
+There are two time-honored ways of losing signs: the absolute value, and the square. It turns out that taking the square constructs a measure with extremely powerful properties, some of which we will study in this course.
+
+So let's eliminate the signs by squaring all the deviations. Then we will take the mean of the squares:
+
+```{r}
+# Step 3. The squared deviations from average
+
+squared_deviations <- deviations ** 2
+calculation_steps <- calculation_steps %>%
+  mutate(sq_deviation_from_average = squared_deviations)
+calculation_steps
+```
+
+```{r}
+# Step 4. Variance = the mean squared deviation from average
+variance <- mean(squared_deviations)
+variance
+```
+
+__Variance:__ The mean squared deviation calculated above is called the variance of the values.
+
+While the variance does give us an idea of spread, it is not on the same scale as the original variable as its units are the square of the original. This makes interpretation very difficult.
+
+So we return to the original scale by taking the positive square root of the variance:
+
+```{r}
+# Step 5.
+# Standard Deviation:    root mean squared deviation from average
+# Steps of calculation:   5    4      3       2             1
+sd <- variance ** 0.5
+sd
+```
+
+### Standard Deviation
+
+The quantity that we have just computed is called the *standard deviation* of the list, and is abbreviated as SD. It measures roughly how far the numbers on the list are from their average.
+
+__Definition.__ The SD of a list is defined as the *root mean square of deviations from average*. That's a mouthful. But read it from right to left and you have the sequence of steps in the calculation.
+
+__Computation.__ The five steps described above result in the SD. You can also use the function `sd` to compute the SD of values in a vector:
+
+```{r}
+sd(any_numbers)
+```
+
+### Working with the SD
+
+To see what we can learn from the SD, let's move to a more interesting dataset than `any_numbers`. The data frame `gapminder` contains a subset of data from the [Gapminder project](http://gapminder.org/), which provides values for life expectancy, GDP per capita, and population, every five years, from 1952 to 2007. For this study, we will concentrate on the data from the most recent year reported, 2007.   
+
+```{r}
+gap2007 <- gapminder %>%
+  filter(year == 2007)
+gap2007
+```
+
+Here is a histogram of life expectancy.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(gap2007) +
+  geom_histogram(aes(x = lifeExp, y = ..density..),
+                 color = "gray", fill = "darkcyan")
+```
+
+It is no surprise that the life expectancy of modern countries clusters around 70 and above. The average life expectancy in 2007 is approximately 67 years old.  
+
+```{r}
+mean_lexp <- mean(pull(gap2007, lifeExp))
+mean_lexp
+```
+
+About how far off are the countries' life expectancy from the average? This is measured by the SD of life expectancy, which is about 12 years.
+
+```{r}
+sd_lexp = sd(pull(gap2007, lifeExp))
+sd_lexp
+```
+
+Japan ranked highest with a life expectancy of 82.6 years. 
+
+```{r}
+arrange(gap2007, desc(lifeExp)) %>%
+  head(5)
+```
+
+Japan was about 15.6 years above the average life expectancy!
+
+```{r}
+82.603 - mean_lexp
+```
+
+That's a deviation from average, and it is about 1.29 times the standard deviation:
+
+```{r}
+(82.603 - mean_lexp) / sd_lexp
+```
+
+In other words, the highest life expectancy for a country in 2007 was about 1.29 SDs above average.
+
+At a life expectancy of approximately 40 years, Swaziland ranked among the lowest in the world with respect to life expectancy. Its life expectancy was about 2.3 SDs below average. 
+
+```{r}
+arrange(gap2007, lifeExp) %>%
+  head(5)
+```
+
+```{r}
+(39.613 - mean_lexp) / sd_lexp
+```
+
+Swaziland (now officially known as Eswatini) experienced [high prevalence of HIV/AIDS](https://reliefweb.int/report/swaziland/swaziland-life-expectancy-drop-40-yrs-2010-report) in the years leading up to 2007, which contributed to a dramatic decline in life expectancy.   
+
+What we have observed is that the highest- and lowest-ranking countries in terms of life expectancy were both just a few SDs away from the average life expectancy. This is an example of why the SD is a useful measure of spread. No matter what the shape of the histogram, the average and the SD together tell you a lot about where the histogram is situated on the number line.
+
+### First main reason for measuring spread by the SD 
+
+__Informal statement.__ In all numerical data sets, the bulk of the entries are within the range "average $\pm$ a few SDs".
+
+For now, resist the desire to know exactly what fuzzy words like "bulk" and "few" mean. We will make them precise later in this section. Let's just examine the statement in the context of some more examples.
+
+We have already seen that the life expectancies of countries around the world in 2007 were in the range "average $\pm$ 3 SDs".
+
+What about GDP per capita? Here is a histogram of the distribution, along with the mean and SD. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(gap2007) +
+  geom_histogram(aes(x = gdpPercap, y = ..density..),
+                 color = "gray", fill = "darkcyan")
+```
+
+```{r}
+mean_gdp <- mean(pull(gap2007, gdpPercap))
+sd_gdp <- sd(pull(gap2007, gdpPercap))
+c(mean_gdp, sd_gdp)
+```
+
+The average GDP per capita was \$11,680.07, and the SD was about \$12,859.94.
+
+How far off is GDP per capita from the average? Just as we did with the heights, let's look at the two extreme values of the ages.
+
+Norway has the highest, at $49,357.19. 
+
+```{r}
+arrange(gap2007, desc(gdpPercap)) %>%
+  head(5)
+```
+
+This is about 2.93 SDs above average.
+
+```{r}
+(49357.19 - mean_gdp) / sd_gdp
+```
+
+The lowest GDP per capita was recorded by Republic of the Congo. This is about 0.89 SDs below average.   
+
+```{r}
+arrange(gap2007, gdpPercap) %>%
+  head(5)
+```
+```{r}
+(277.5519 - mean_gdp) / sd_gdp
+```
+
+What we have observed for life expectancy and GDP per capita is true in great generality. For *all* lists, the bulk of the entries are no more than 2 or 3 SDs away from the average.
+
+### Chebychev's Bounds
+
+The Russian mathematician [Pafnuty Chebychev](https://en.wikipedia.org/wiki/Pafnuty_Chebyshev) (1821-1894) proved a result that makes our rough statements precise.
+
+> For all lists, and all numbers $z$, the proportion of entries that are in the range "average $\pm z$ SDs" is at least $1 - \frac{1}{z^2}$
+
+It is important to note that the result gives a bound, not an exact value or an approximation.
+
+What makes the result powerful is that it is true for all lists – all distributions, no matter how irregular.
+
+Specifically, it says that for every list:
+
+* the proportion in the range "average $\pm$ 2 SDs" is __at least $1 - 1/4$ = 0.75__
+* the proportion in the range "average $\pm$ 3 SDs" is __at least $1 - 1/9$ $\approx$ 0.89__
+* the proportion in the range "average $\pm$ 4.5 SDs" is __at least $1 - 1/{4.5}^2$ $\approx$ 0.95__
+
+As we noted above, Chebychev's result gives a lower bound, not an exact answer or an approximation. For example, the percent of entries in the range "average $\pm$ 2 SDs" might be quite a bit larger than 75%. But it cannot be smaller.
+
+### Standard units
+
+In the calculations above, the quantity $z$ measures *standard units*, the number of standard deviations above average.
+
+Some values of standard units are negative, corresponding to original values that are below average. Other values of standard units are positive. But no matter what the distribution of the list looks like, Chebychev's bounds imply that standard units will typically be in the (-5, 5) range.
+
+To convert a value to standard units, first find how far it is from average, and then compare that deviation with the standard deviation.
+
+\[ z = \frac{\text{value} - \text{average}}{\text{SD}}\]
+
+As we will see, standard units are frequently used in data analysis. It is so useful, in fact, that R provides a function `scale` to convert a vector of numbers to standard units using the above formula. 
+
+### Example
+
+As we saw in an earlier section, the data frame `flights` contains a column `dep_delay` consisting of the departure delay times, in minutes, of over thousands of flights that departed NYC in 2013. We will create a new column called `delay_standard` by applying the function `scale` to the column of delay times. This allows us to see all the delay times in minutes as well as their corresponding values in standard units. Note that we filter any flights where missing data, i.e. `NA`, is present.
+
+```{r}
+flights_standard <- flights %>%
+  drop_na() %>% 
+  transmute(dep_delay,
+            delay_standard = scale(dep_delay))
+flights_standard
+```
+
+The standard units that we can see are consistent with what we expect based on Chebychev's bounds. These are of quite small size. 
+
+But something rather alarming happens when we sort the delay times from highest to lowest. The standard units that we can see are extremely high!
+
+```{r}
+arrange(flights_standard, desc(delay_standard))
+```
+
+What this shows is that it is possible for data to be many SDs above average -- and for flights to be delayed by almost 22 hours, yikes! The highest value of delay is about 32 in standard units.
+
+However, the proportion of these extreme values is small, and Chebychev's bounds still hold true. For example, let us calculate the percent of delay times that are in the range "average $\pm$ 3 SDs". This is the same as the percent of times for which the standard units are in the range (-3, 3). That is about 98%, as computed below, consistent with Chebychev's bound of "at least 89%".
+
+```{r}
+within_3_sd <- nrow(filter(flights_standard, between(delay_standard, -3, 3)))
+within_3_sd / nrow(flights_standard)
+```
+
+The histogram of delay times is shown below, with the horizontal axis in standard units. By the table above, the right hand tail continues all the way out to $z = 32.15$ standard units (1301 minutes). The area of the histogram outside the range $z = -3$ to $z = 3$ is about 2%, put together in tiny little bits that are mostly invisible in the histogram.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(flights_standard) + 
+  geom_histogram(aes(x = delay_standard, y = ..density..),
+                 color = "gray", fill = "darkcyan") + 
+  scale_x_continuous(breaks = seq(-3, 33, 3)) + 
+  xlab("Delay (Standard Units)")
+```
+
 
 ## The SD and the Normal Curve
 
-TBA
+We know that the mean is the balance point of the histogram. Unlike the mean, the SD is usually not easy to identify by looking at the histogram.
+
+However, there is one shape of distribution for which the SD is almost as clearly identifiable as the mean. That is the bell-shaped disribution. This section examines that shape, as it appears frequently in probability histograms and also in some histograms of data.
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let's load it in as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(readtext)
+```
+
+### A Roughly Bell-Shaped Histogram of Data
+
+Let us look at the distribution of heights of mothers in our familiar sample of 1,174 mother-newborn pairs. The mothers' heights have a mean of 64 inches and an SD of 2.5 inches. Unlike the life expectancy of countries around the world, the mothers' heights are distributed fairly symmetrically about the mean in a bell-shaped curve.
+
+```{r message = FALSE}
+url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/baby.csv"
+baby <- read_csv(url)
+```
+
+```{r}
+heights <- pull(baby, `Maternal Height`)
+mean_height <- round(mean(heights), 1)
+mean_height
+```
+
+```{r}
+sd_height <- round(sd(heights), 1)
+sd_height
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(baby) + 
+  geom_histogram(aes(x = `Maternal Height`, y = ..density..), 
+                 color = "gray", fill = "darkcyan",
+                 breaks = seq(55.5, 72.5, 1)) + 
+  scale_x_continuous(breaks = seq(-3, 3.1, 1)*sd_height + mean_height)
+```
+
+The last two lines of code in the cell above change the labeling of the horizontal axis. Now, the labels correspond to "average $\pm z$ SDs" for 
+$z = 0, \pm 1, \pm 2,$ and $\pm 3$. Because of the shape of the distribution, the "center" has an unambiguous meaning and is clearly visible at 64.
+
+### How to Spot the SD on a Bell Shaped Curve
+
+To see how the SD is related to the curve, start at the top of the curve and look towards the right. Notice that there is a place where the curve changes from looking like an "upside-down cup" to a "right-way-up cup"; formally, the curve has a point of inflection. That point is one SD above average. It is the point $z = 1$, which is "average plus 1 SD" = 66.5 inches.
+
+Symmetrically on the left-hand side of the mean, the point of inflection is at $z = -1$, that is, "average minus 1 SD" = 61.5 inches.
+
+In general:
+
+> For bell-shaped distributions, the SD is the distance between the mean and the points of inflection on either side.
+
+### The standard normal curve
+
+All the bell-shaped histograms that we have seen look essentially the same apart from the labels on the axes. Indeed, there is really just one basic curve from which all of these curves can be drawn just by relabeling the axes appropriately.
+
+To draw that basic curve, we will use the units into which we can convert every list: standard units. The resulting curve is therefore called the *standard normal curve*.
+
+The standard normal curve has an impressive equation. But for now, it is best to think of it as a smoothed outline of a histogram of a variable that has been measured in standard units and has a bell-shaped distribution.
+
+$$
+\phi(z) = {\frac{1}{\sqrt{2 \pi}}} e^{-\frac{1}{2}z^2}, ~~ -\infty < z < \infty
+$$
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
+  scale_x_continuous(breaks = seq(-3, 3, 1)) +
+  ylab("ɸ(z)") +
+  xlab("z") +
+  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < ∞") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+As always when you examine a new histogram, start by looking at the horizontal axis. On the horizontal axis of the standard normal curve, the values are standard units.
+
+Here are some properties of the curve. Some are apparent by observation, and others require a considerable amount of mathematics to establish.
+
+* The total area under the curve is 1. So you can think of it as a histogram drawn to the density scale.
+
+* The curve is symmetric about 0. So if a variable has this distribution, its mean and median are both 0.
+
+* The points of inflection of the curve are at -1 and +1.
+
+* If a variable has this distribution, its SD is 1. The normal curve is one of the very few distributions that has an SD so clearly identifiable on the histogram.
+
+Since we are thinking of the curve as a smoothed histogram, we will want to represent proportions of the total amount of data by areas under the curve.
+
+Areas under smooth curves are often found by calculus, using a method called integration. It is a fact of mathematics, however, that the standard normal curve cannot be integrated in any of the usual ways of calculus.
+
+Therefore, areas under the curve have to be approximated. That is why almost all statistics textbooks carry tables of areas under the normal curve. It is also why all statistical systems, especially statistical programming languages like R, include methods that provide excellent approximations to those areas.
+
+### The standard normal "cdf"
+
+The fundamental function for finding areas under the normal curve is `pnorm`. It takes a numerical argument and returns all the area under the curve to the left of that number. Formally, it is called the "cumulative distribution function" of the standard normal curve. That rather unwieldy mouthful is abbreviated as cdf.
+
+Let us use this function to find the area to the left of $z = 1$ under the standard normal curve.
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
+  stat_function(fun = dnorm, 
+                xlim = c(-3,1), geom = "area", fill = "salmon") +
+  scale_x_continuous(breaks = seq(-3, 3, 1)) +
+  ylab("ɸ(z)") +
+  xlab("z") +
+  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < 1") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+The numerical value of the shaded area can be found by calling `pnorm`.
+
+```{r}
+pnorm(1)
+```
+
+That's about 84%. We can now use the symmetry of the curve and the fact that the total area under the curve is 1 to find other areas.
+
+The area to the right of $z = 1$ is about 100% - 84% = 16%.
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
+  stat_function(fun = dnorm, 
+                xlim = c(1,3), geom = "area", fill = "salmon") +
+  scale_x_continuous(breaks = seq(-3, 3, 1)) +
+  ylab("ɸ(z)") +
+  xlab("z") +
+  ggtitle("Normal curve ~ (μ = 0, σ = 1) 1 < z < ∞") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+1 - pnorm(1)
+```
+
+The area between $z = -1$ and $z = 1$ can be computed in several different ways. It is the salmon-colored area under the curve below.
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
+  stat_function(fun = dnorm, 
+                xlim = c(-1,1), geom = "area", fill = "salmon") +
+  stat_function(fun = dnorm, 
+                xlim = c(-3,-1), geom = "area", fill = "darkcyan") +
+  scale_x_continuous(breaks = seq(-3, 3, 1)) +
+  ylab("ɸ(z)") +
+  xlab("z") +
+  ggtitle("Normal curve ~ (μ = 0, σ = 1) -1 < z < 1") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+For example, we could calculate the area as "100% - two equal tails", which works out to roughly 100% - 2x16% = 68%.
+
+Or we could note that the area between $z = 1$ and $z = -1$ is equal to all the area to the left of $z = 1$, minus all the area to the left of $z = -1$. 
+
+```{r}
+pnorm(1) - pnorm(-1)
+```
+
+By a similar calculation, we see that the area between $z = -2$ and $z = 2$ is about 95%.
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
+  stat_function(fun = dnorm, 
+                xlim = c(-2,2), geom = "area", fill = "salmon") +
+  stat_function(fun = dnorm, 
+                xlim = c(-3,-2), geom = "area", fill = "darkcyan") +
+  scale_x_continuous(breaks = seq(-3, 3, 1)) +
+  ylab("ɸ(z)") +
+  xlab("z") + 
+  ggtitle("Normal curve ~ (μ = 0, σ = 1) -2 < z < 2") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+pnorm(2) - pnorm(-2)
+```
+
+In other words, if a histogram is roughly bell shaped, the proportion of data in the range "average $\pm 2$ SDs" is about 95%. 
+
+That is quite a bit more than Chebychev's lower bound of 75%. Chebychev's bound is weaker because it has to work for all distributions. If we know that a distribution is normal, we have good approximations to the proportions, not just bounds.
+
+The table below compares what we know about all distributions and about normal distributions. Notice that when $z = 1$, Chebychev's bound is correct but not illuminating.
+
+| Percent in Range | All Distributions: Bound | Normal Distribution: Approximation |
+|---------------:|:------------------:|:-------------------:|
+|average $\pm$ 1 SD  | at least 0%         | about 68%           |
+|average $\pm$ 2 SDs | at least 75%        | about 95%           |
+|average $\pm$ 3 SDs | at least 88.888...% | about 99.73%        |
+
 
 ## The Central Limit Theorem
 

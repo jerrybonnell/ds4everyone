@@ -411,7 +411,7 @@ The population median of $110,305 is between these two numbers. The interval and
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(resampled_medians) +
   geom_histogram(aes(x = bstrap_medians, y = ..density..), 
-                 bins = 10, color = "darkcyan") + 
+                 bins = 10, color = "gray", fill = "darkcyan") + 
   geom_segment(aes(x = left, y = 0, xend = right, yend = 0), 
                size = 2, color = "salmon") +
   geom_point(aes(x = pop_median, y = 0), color = "red", size = 3)
