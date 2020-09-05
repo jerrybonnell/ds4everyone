@@ -121,7 +121,7 @@ ggplot(data = no_sports_cars) +
     geom_smooth(mapping = aes(x = displ, y = hwy))
 ```
 
-This plots shows a much more graceful trend downward. Before moving on, we point out some redundancy present in our plotting code. Namely, we have defined the same mapping for `x` and `y` in two different places. This could cause some unexpected surprises when writing code: imagine if we wanted to change the y-axis to `cty` instead of `hwy`, but we forgot to change both occurrences of `hwy`. This can be amended by moving the mapping to `ggplot()`.     
+This plot shows a much more graceful trend downward. Before moving on, we point out some redundancy present in our plotting code. Namely, we have defined the same mapping for `x` and `y` in two different places. This could cause some unexpected surprises when writing code: imagine if we wanted to change the y-axis to `cty` instead of `hwy`, but we forgot to change both occurrences of `hwy`. This can be amended by moving the mapping to `ggplot()`.     
 
 ```{r, eval = FALSE}
 no_sports_cars <- filter(mpg, class != "2seater")
@@ -306,7 +306,7 @@ Bar charts are intended as visualizations of categorical variables. When the var
 
 ### Coordinate Systems 
 
-We noted earlier that one of the three motifs of any `ggplot2` plot is its coordinate system. In all of the `ggplot2` code we have seen so far, there has been no explicit mention as to the coordinate system to use. Why? If no coordinate system is specified, `ggplot2` will default to using the Cartesian coordinate system. In Cartesian coordinates, the `x` and `y` coordinates are used to define the location of every point in the dataset, as we have just seen. 
+We noted earlier that one of the three motifs of any `ggplot2` plot is its coordinate system. In all of the `ggplot2` code we have seen so far, there has been no explicit mention as to the coordinate system to use. Why? If no coordinate system is specified, `ggplot2` will default to using the Cartesian (i.e., horizontal and vertical) coordinate system. In Cartesian coordinates, the `x` and `y` coordinates are used to define the location of every point in the dataset, as we have just seen. 
 
 This is not the only coordinate system offered by `ggplot2`, and learning about other coordinate systems that are available can help boost the overall quality of a visualization.
 
@@ -342,7 +342,7 @@ This can also be a neat trick for eliminating the (awkward) gap between the bars
 
 Many of the variables that data scientists study are *quantitative* or *numerical*. Their values are numbers on which you can perform arithmetic. Examples that we have seen include the number of periods in chapters of a book, the amount of money made by movies, and the age of people in the United States.
 
-The values of a categorical variable can be given numerical codes, but that doesn't make the variable quantitative. In the example in which we studied MBA student data broken down by marks on a "happiness" scale, the categorial variable `love` had the numerical codes 1 for "lonely," 2 for "secure relationship," and 3 for "feelings of belonging and caring". While 1, 2, and 3 are numbers, in this context it doesn't make sense to subtract 1 from 2, or take the average of 1, 2, and 3, or perform other arithmetic on the three values. `love` is a categorical variable even though the values have been given a numerical code.
+The values of a categorical variable can be given numerical codes, but that doesn't make the variable quantitative. In the example in which we studied MBA student data broken down by marks on a "happiness" scale, the categorical variable `love` had the numerical codes 1 for "lonely," 2 for "secure relationship," and 3 for "feelings of belonging and caring". While 1, 2, and 3 are numbers, in this context it doesn't make sense to subtract 1 from 2, or take the average of 1, 2, and 3, or perform other arithmetic on the three values. `love` is a categorical variable even though the values have been given a numerical code.
 
 For our main example, we will return to a dataset we studied when we were learning scatter and line plots. It is the table `mpg`, which consists of data on fuel efficiency of popular car models. Use `?mpg` for a description of the dataset. 
 
