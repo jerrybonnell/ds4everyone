@@ -795,11 +795,11 @@ a generic `label`, and likewise `red` with `df`. We also substitute `sum`
 for some functional called `statistic`. 
 
 ```{r}
-one_simulation <- function(x, df, label, statistic, num_draws) {
+one_simulation <- function(x, df, label, func, num_draws) {
   label <- enquo(label) # Create quosure
   
   sample_df <- slice_sample(df, n = num_draws, replace = TRUE)
-  results <- statistic(pull(sample_df, !!label))
+  results <- func(pull(sample_df, !!label))
   return(results)
 }
 ```
@@ -811,7 +811,7 @@ net_gains <- map_dbl(.x = 1:repetitions,
                      .f = one_simulation,
                      df = red,
                      label = winnings_red,
-                     statistic = sum, 
+                     func = sum, 
                      num_draws = num_bets)
 ```
 
@@ -899,7 +899,7 @@ sample_means <- map_dbl(.x = 1:repetitions,
                      .f = one_simulation,
                      df = flights,
                      label = dep_delay,
-                     statistic = mean, 
+                     func = function(x) mean(x), 
                      num_draws = sample_size)
 ```
 
@@ -946,7 +946,7 @@ sample_props <- map_dbl(.x = 1:repetitions,
                      .f = one_simulation,
                      df = model,
                      label = colors,
-                     statistic = flower_proportion, 
+                     func = flower_proportion, 
                      num_draws = num_plants)
 
 ```
@@ -970,7 +970,7 @@ sample_props2 <- map_dbl(.x = 1:repetitions,
                      .f = one_simulation,
                      df = model,
                      label = colors,
-                     statistic = flower_proportion, 
+                     func = flower_proportion, 
                      num_draws = num_plants)
 ```
 
@@ -1032,34 +1032,46 @@ ggplot(flights) +
 ```
 Now let's take random samples and look at the probability distribution of the sample mean. As usual, we will use simulation to get an empirical approximation to this distribution.
 
-We will define a function `simulate_sample_mean` to do this, because we are going to vary the sample size later. The arguments are the name of the table, the label of the column containing the variable, the sample size, and the number of simulations.
+We will define a function `simulate_sample_mean` to do this, because we are going to vary the sample size later. The arguments are the sample size and the number of simulations. This function will re-use the `one_simulation` function we wrote in the previous section. 
 
-```
-one_simulation <- function(x, df, label, statistic, num_draws) {
+```{r}
+one_simulation <- function(x, df, label, func, num_draws) {
   label <- enquo(label) # Create quosure
   
   sample_df <- slice_sample(df, n = num_draws, replace = TRUE)
-  results <- statistic(pull(sample_df, !!label))
-  return(results)
+  result <- func(pull(sample_df, !!label))
+  return(result)
 }
 ```
 
-```
+```{r}
 simulate_sample_mean <- function(sample_size, repetitions) {
   means <- map_dbl(.x = 1:repetitions, 
                    .f = one_simulation,
-                   df = model,
-                   label = colors,
-                   statistic = flower_proportion, 
+                   df = flights,
+                   label = dep_delay,
+                   func = function(x) mean(x), 
                    num_draws = sample_size)
+
   print(paste("Sample size: ", sample_size))
-  print(paste("Population mean: ", sample_size))
+  print(paste("Population mean: ", mean(pull(flights, dep_delay))))
+  print(paste("Average of sample means: ", mean(means)))
+  print(paste("Population SD: ", sd(pull(flights, dep_delay))))
+  print(paste("SD of sample means: ", sd(means)))
+  
+  means_df <- tibble(means)
+  g <- ggplot(means_df) + 
+    geom_histogram(aes(x = means, y = ..density..))
+  return(g)
 }
 ```
 
-Let us simulate the mean of a random sample of 100 delays, then of 400 delays, and finally of 625 delays. We will perform 10,000 repetitions of each of these process. The xlim and ylim lines set the axes consistently in all the plots for ease of comparison. You can just ignore those two lines of code in each cell.
+Let us simulate the mean of a random sample of 100 delays, then of 400 delays, and finally of 625 delays. We will perform 10,000 repetitions of each of these process. 
 
-to be continued..
+```{r}
+g <- simulate_sample_mean(100, 100)
+print(g)
+```
 
 
 ## Choosing a Sample Size
