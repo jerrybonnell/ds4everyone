@@ -105,7 +105,7 @@ mean(same_distribution)
 
 The mean is a physical attribute of the histogram of the distribution. Here is the histogram of the distribution of `not_symmetric` or equivalently the distribution of `same_distribution`.
 
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+```{r dpi=80, fig.align="center", message = FALSE}
 tibble(not_symmetric) %>%
   ggplot() + 
   geom_histogram(aes(x = not_symmetric, y = ..density..),
@@ -717,11 +717,350 @@ The table below compares what we know about all distributions and about normal d
 
 ## The Central Limit Theorem
 
-TBA
+Very few of the data histograms that we have seen in this course have been bell shaped. When we have come across a bell shaped distribution, it has almost invariably been an empirical histogram of a statistic based on a random sample.
+
+The examples below show two very different situations in which an approximate bell shape appears in such histograms.
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let's load it in as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(readtext)
+library(nycflights13)
+```
+
+### Net Gain in Roulette 
+
+In an earlier section, the bell appeared as the rough shape of the total amount of money we would make if we placed the same bet repeatedly on different spins of a roulette wheel.
+
+```{r message=FALSE}
+wheel <- read_csv("data/roulette_wheel.csv")
+wheel
+```
+
+Recall that the bet on red pays even money, 1 to 1. We defined the function `red_winnings` that returns the net winnings on one $1 bet on red. Specifically, the function takes a color as its argument and returns 1 if the color is red. For all other colors it returns -1.
+
+```{r}
+red_winnings <- function(color) {
+  if(color == "red") {
+    return(1)
+  } else {
+    return(-1)
+  }
+}
+```
+
+The data frame `red` shows each pocket's winnings on red.
+
+```{r}
+red <- wheel %>%
+  mutate(winnings_red = map_dbl(color, red_winnings))
+red
+```
+
+Your net gain on one bet is one random draw from the Winnings: Red column. There is an 18/38 chance making \$1, and a 20/38 chance of making -\$1. This probability distribution is shown in the histogram below.
+
+```{r}
+ggplot(red) + 
+  geom_histogram(aes(x = winnings_red, y = ..density..), 
+                 breaks = seq(-1.5, 1.6, 1),
+                 color = "gray", fill = "darkcyan")
+```
+
+Now suppose you bet many times on red. Your net winnings will be the sum of many draws made at random with replacement from the distribution above.
+
+It will take a bit of math to list all the possible values of your net winnings along with all of their chances. We won't do that; instead, we will approximate the probability distribution by simulation, as we have done all along in this course.
+
+The code below simulates your net gain if you bet $1 on red on 400 different spins of the roulette wheel.
+
+```{r}
+one_roulette_simulation <- function(x, num_bets) {
+  spins <- slice_sample(red, n = num_bets, replace = TRUE)
+  net_gain_red <- sum(pull(spins, winnings_red))
+  return(net_gain_red)
+}
+```
+
+```{r}
+num_bets <- 400
+repetitions <- 10000
+net_gains <- map_dbl(1:repetitions, one_roulette_simulation, num_bets)
+```
+
+Let's generalize our simulation function a bit so that we can re-use it in
+later simulations. Mainly we are replacing the column `winnings_red` with 
+a generic `label`, and likewise `red` with `df`. We also substitute `sum`
+for some functional called `statistic`. 
+
+```{r}
+one_simulation <- function(x, df, label, statistic, num_draws) {
+  label <- enquo(label) # Create quosure
+  
+  sample_df <- slice_sample(df, n = num_draws, replace = TRUE)
+  results <- statistic(pull(sample_df, !!label))
+  return(results)
+}
+```
+
+```{r}
+num_bets <- 400
+repetitions <- 10000
+net_gains <- map_dbl(.x = 1:repetitions, 
+                     .f = one_simulation,
+                     df = red,
+                     label = winnings_red,
+                     statistic = sum, 
+                     num_draws = num_bets)
+```
+
+Let's now visualize the results. 
+
+```{r}
+tibble(net_gains) %>%
+  ggplot() + 
+  geom_histogram(aes(x = net_gains, y = ..density..),
+                 breaks = seq(-80, 50, 6),
+                 color = "gray", fill = "darkcyan") + 
+  scale_x_continuous(breaks = seq(-80, 40, 20)) +
+  xlab("Net Gain on Red")
+```
+
+That's a roughly bell shaped histogram, even though the distribution we are drawing from is nowhere near bell shaped.
+
+__Center.__ The distribution is centered near -20 dollars, roughly. To see why, note that your winnings will be \$1 on about 18/38 of the bets, and -\$1 on the remaining 20/38. So your average winnings per dollar bet will be roughly -5.26 cents:
+
+```{r}
+average_per_bet <- 1*(18/38) + (-1)*(20/38)
+average_per_bet
+```
+
+So in 400 bets you expect that your net gain will be about -\$21:
+
+```{r}
+400 * average_per_bet
+```
+
+For confirmation, we can compute the mean of the 10,000 simulated net gains:
+
+```{r}
+mean(net_gains)
+```
+
+__Spread.__ Run your eye along the curve starting at the center and notice that the point of inflection is near 0. On a bell shaped curve, the SD is the distance from the center to a point of inflection. The center is roughly -\$20, which means that the SD of the distribution is around \$20.
+
+In the next section we will see where the \$20 comes from. For now, let's confirm our observation by simply calculating the SD of the 10,000 simulated net gains:
+
+```{r}
+sd(net_gains)
+```
+
+__Summary.__ The net gain in 400 bets is the sum of the 400 amounts won on each individual bet. The probability distribution of that sum is approximately normal, with an average and an SD that we can approximate.
+
+### Average Flight Delay
+
+The data frame `flights` contains data on departure delays of 336,776 flights that departed NYC in 2013. As we have seen before, the distribution of delays has a long right-hand tail.
+
+```{r}
+flights <- flights %>%
+  drop_na()
+```
+
+```{r dpi=80, fig.align="center", message = FALSE, warning = FALSE}
+ggplot(flights) +
+  geom_histogram(aes(x = dep_delay, y = ..density..),
+                 color = "gray", fill = "darkcyan")
+```
+
+The mean delay was about 16.6 minutes and the SD was about 39.5 minutes. Notice how large the SD is, compared to the mean. Those large deviations on the right have an effect, even though they are a very small proportion of the data.
+
+```{r}
+mean_delay <- mean(pull(flights, dep_delay))
+sd_delay <- sd(pull(flights, dep_delay))
+c(mean_delay, sd_delay)
+```
+
+Now suppose we sampled 400 delays at random with replacement. You could sample without replacement if you like, but the results would be very similar to with-replacement sampling. If you sample a few hundred out of 336,776 without replacement, you hardly change the population each time you pull out a value.
+
+In the sample, what could the average delay be? We expect it to be around 12 or 13, because that's the population average; but it is likely to be somewhat off. Let's see what we get by sampling. 
+
+```{r}
+sampled <- slice_sample(flights, n = 400, replace = TRUE)
+mean(pull(sampled, dep_delay))
+```
+
+The sample average varies according to how the sample comes out, so we will simulate the sampling process repeatedly and draw the empirical histogram of the sample average. That will be an approximation to the probability histogram of the sample average.
+
+```{r}
+sample_size <- 400
+repetitions <- 10000
+sample_means <- map_dbl(.x = 1:repetitions, 
+                     .f = one_simulation,
+                     df = flights,
+                     label = dep_delay,
+                     statistic = mean, 
+                     num_draws = sample_size)
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+tibble(sample_means) %>%
+  ggplot() + 
+  geom_histogram(aes(x = sample_means, y = ..density..),
+                 color = "gray", fill = "darkcyan") + 
+  scale_x_continuous(breaks = seq(6, 22, 2))
+```
+
+Once again, we see a rough bell shape, even though we are drawing from a very skewed distribution. The bell is centered somewhere between 12 and 13, as we expect.
+
+### Central Limit Theorem
+
+The reason why the bell shape appears in such settings is a remarkable result of probability theory called the __Central Limit Theorem__.
+
+> The Central Limit Theorem says that the probability distribution of the sum or average of a large random sample drawn with replacement will be roughly normal, *regardless of the distribution of the population from which the sample is drawn*.
+
+As we noted when we were studying Chebychev's bounds, results that can be applied to random samples *regardless of the distribution of the population* are very powerful, because in data science we rarely know the distribution of the population.
+
+The Central Limit Theorem makes it possible to make inferences with very little knowledge about the population, provided we have a large random sample. That is why it is central to the field of statistical inference.
+
+### Proportion of Purple Flowers
+
+Recall Mendel's probability model for the colors of the flowers of a species of pea plant. The model says that the flower colors of the plants are like draws made at random with replacement from {Purple, Purple, Purple, White}.
+
+In a large sample of plants, about what proportion will have purple flowers? We would expect the answer to be about 0.75, the proportion purple in the model. And, because proportions are means, the Central Limit Theorem says that the distribution of the sample proportion of purple plants is roughly normal.
+
+We can confirm this by simulation. Let's simulate the proportion of purple-flowered plants in a sample of 200 plants.
+
+```{r}
+colors <- c('Purple', 'Purple', 'Purple', 'White')
+model <- tibble(colors)
+model
+```
+```{r}
+num_plants <- 200
+repetitions <- 10000
+# define a proportion with a functional 
+flower_proportion <- function(x) sum(x == 'Purple') / length(x)
+
+sample_props <- map_dbl(.x = 1:repetitions, 
+                     .f = one_simulation,
+                     df = model,
+                     label = colors,
+                     statistic = flower_proportion, 
+                     num_draws = num_plants)
+
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+tibble(sample_props) %>%
+  ggplot() + 
+  geom_histogram(aes(x = sample_props, y = ..density..),
+                 breaks = seq(0.65, 0.85, 0.01),
+                 color = "gray", fill = "darkcyan") 
+```
+
+There's that normal curve again, as predicted by the Central Limit Theorem, centered at around 0.75 just as you would expect.
+
+How would this distribution change if we increased the sample size? Let's run the code again with a sample size of 800, and collect the results of simulations in the same table in which we collected simulations based on a sample size of 200. We will keep the number of repetitions the same as before so that the two columns have the same length.
+
+```{r}
+num_plants <- 800
+
+sample_props2 <- map_dbl(.x = 1:repetitions, 
+                     .f = one_simulation,
+                     df = model,
+                     label = colors,
+                     statistic = flower_proportion, 
+                     num_draws = num_plants)
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+# get the sample proportion results in a table-ready form for plotting
+plot_df <- tibble(
+  props = c(sample_props, sample_props2),
+  from =  c(rep("sample proportion: 200", 10000), 
+            rep("sample proportion: 800", 10000))
+)
+
+ggplot(plot_df) + 
+  geom_histogram(aes(x = props, y = ..density.., fill = from),
+                 breaks = seq(0.65, 0.85, 0.01),
+                 alpha = 0.8, position = "identity")
+```
+
+Both distributions are approximately normal but one is narrower than the other. The proportions based on a sample size of 800 are more tightly clustered around 0.75 than those from a sample size of 200. Increasing the sample size has decreased the variability in the sample proportion.
+
+This should not be surprising. We have leaned many times of the intuition that a larger sample size generally reduces the variability of a statistic. However, in the case of a sample average, we can *quantify* the relationship between sample size and variability.
+
+Exactly how does the sample size affect the variability of a sample average or proportion? That is the question we will examine in the next section.
 
 ## The Variability of the Sample Mean
 
-TBA
+By the Central Limit Theorem, the probability distribution of the mean of a large random sample is roughly normal. The bell curve is centered at the population mean. Some of the sample means are higher, and some lower, but the deviations from the population mean are roughly symmetric on either side, as we have seen repeatedly. Formally, probability theory shows that the sample mean is an *unbiased* estimate of the population mean.
+
+In our simulations, we also noticed that the means of larger samples tend to be more tightly clustered around the population mean than means of smaller samples. In this section, we will quantify the variability of the sample mean and develop a relation between the variability and the sample size.
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let's load it in as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(readtext)
+library(nycflights13)
+```
+
+### Flight delays revisited
+
+Let's start with our data frame `flights` of flight delays. The mean delay is about 12.56 minutes, and the distribution of delays is skewed to the right.
+
+```{r}
+flights <- flights %>%
+  drop_na()
+```
+
+```{r}
+pop_mean <- mean(pull(flights, dep_delay))
+pop_mean
+```
+
+```{r dpi=80, fig.align="center", message = FALSE, warning = FALSE}
+ggplot(flights) +
+  geom_histogram(aes(x = dep_delay, y = ..density..),
+                 color = "gray", fill = "darkcyan") + 
+  geom_point(aes(x = pop_mean, y = 0), size = 2, color = "salmon")
+```
+Now let's take random samples and look at the probability distribution of the sample mean. As usual, we will use simulation to get an empirical approximation to this distribution.
+
+We will define a function `simulate_sample_mean` to do this, because we are going to vary the sample size later. The arguments are the name of the table, the label of the column containing the variable, the sample size, and the number of simulations.
+
+```
+one_simulation <- function(x, df, label, statistic, num_draws) {
+  label <- enquo(label) # Create quosure
+  
+  sample_df <- slice_sample(df, n = num_draws, replace = TRUE)
+  results <- statistic(pull(sample_df, !!label))
+  return(results)
+}
+```
+
+```
+simulate_sample_mean <- function(sample_size, repetitions) {
+  means <- map_dbl(.x = 1:repetitions, 
+                   .f = one_simulation,
+                   df = model,
+                   label = colors,
+                   statistic = flower_proportion, 
+                   num_draws = sample_size)
+  print(paste("Sample size: ", sample_size))
+  print(paste("Population mean: ", sample_size))
+}
+```
+
+Let us simulate the mean of a random sample of 100 delays, then of 400 delays, and finally of 625 delays. We will perform 10,000 repetitions of each of these process. The xlim and ylim lines set the axes consistently in all the plots for ease of comparison. You can just ignore those two lines of code in each cell.
+
+to be continued..
+
 
 ## Choosing a Sample Size
 
