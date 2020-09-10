@@ -103,7 +103,7 @@ In this section we will learn how to describe such situations using code. A *con
 
 A conditional statement always begins with an `if` header, which is a single line followed by an indented body. The body is only executed if the expression directly following `if` (called the *if expression*) evaluates to a true value. If the *if expression* evaluates to a false value, then the body of the `if` is skipped.
 
-Let us start defining a function that returns the sign of a number.
+Let us start by defining a function that returns the sign of a number.
 
 ```{r}
 sign <- function(x) {
@@ -327,7 +327,7 @@ You may have noticed how cycling through the `outcomes` vector this way, individ
 
 ### Maps and Functionals
 
-Your midterm asks you to write code to capitalize the elements in a character vector. 
+*Your midterm asks you to write code to capitalize the elements in a character vector.* 
 
 ```{r}
 some_characters <- c("b", "a", "N", "a", "N", "A", "!")
@@ -415,13 +415,15 @@ map_chr(some_characters, toupper)
 map_chr(some_characters, tolower)
 ```
 
-Here are some more examples of using map. Note how we can define a function and pass it in on the spot. We call these *anonymous functions*. The following is an identity function: it simply outputs what it takes in.  
+Here are some more examples of using map. Note how we can define a function and pass it in on the spot. We call these *anonymous functions*. The following is an *identity function*: it simply outputs what it takes in. 
 
 ```{r}
 map_int(1:5, function(x) x)
 ```
 
-This one is more useful. It computes the square of each element, i.e., $x^2$. 
+> A catch here is that the code after the comma, i.e., `function(x) x` specifies *in place* the function to apply to each element of the series preceding the comma `1:5`. The function in question `function(x) x` specifies that the function will receive a value named `x` and *returns* the value of `x` without modification. Thus we call it an identity function. The external function `map_int` states that the result of applying the identify function thus specified with `function(x) x` to each element of the sequence `1:5` will be presented as an integer.
+
+The next one is perhaps more useful than the identify function. It computes the square of each element, i.e., $x^2$. 
 
 ```{r}
 map_dbl(1:5, function(x) x ** 2)
@@ -429,13 +431,13 @@ map_dbl(1:5, function(x) x ** 2)
 
 > __Why use map_dbl() instead of map_int()?__ By default, R treats numbers as doubles. While `1:5` is a vector of integers, each element is subject to the expression `x ** 2`, where `x` is an integer and `2` is a double. To make this operation compatible, R will "promote" `x` to a double, making the output of this expression a double as well.  
 
-This one will always return a vector of 5's, regardless of the input. Can you see why? 
+The next one will always return a vector of 5's, regardless of the input. Can you see why? Do you also see why there are six elements, unlike five elements in the previous examples?
 
 ```{r}
 map_dbl(1:6, function(x) 5)
 ```
 
-While map eliminates the need to write `for` statements in common situations, keep in mind that R internally must still perform a `for` loop. Therefore, the chief benefit of using constructs like map is not for its speed, but clarity: it is much easier to read and write (once you wrap your head around it :-).
+While map eliminates the need to write `for` statements in common situations, keep in mind that R internally must still perform a `for` loop, i.e., the code for map contains a `for` loop and it is not directly visible to those who use map. Therefore, the chief benefit of using constructs like map is not for its speed, but clarity: it is much easier to read and write (once you wrap your head around it :-).
 
 We now have all the pieces we need to take on the die roll simulation. 
 
