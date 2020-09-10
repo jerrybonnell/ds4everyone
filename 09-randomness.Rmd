@@ -32,7 +32,7 @@ Once the event has occurred, you can answer "yes" or "no" to all these questions
 
 __Booleans and Comparison__
 
-In R, Boolean values, named for the logician [George Boole](https://en.wikipedia.org/wiki/George_Boole), represent truth and take only two possible values: True and False. Whether problems involve randomness or not, Boolean values most often arise from comparison operators. Python includes a variety of operators that compare values. For example, `3` is larger than `1 + 1`.
+In R, Boolean values, named for the logician [George Boole](https://en.wikipedia.org/wiki/George_Boole), represent truth and take only two possible values: True and False. Whether problems involve randomness or not, Boolean values most often arise from comparison operators. R includes a variety of operators that compare values. For example, `3` is larger than `1 + 1`.
 
 ```{r}
 3 > 1 + 1
@@ -51,7 +51,7 @@ table <- tribble(~Comparison, ~Operator, ~True.Example, ~False.Example,
 knitr::kable(table, col.names = gsub("[.]", " ", names(table)))
 ```
 
-Notice the two equal signs `==` in the comparison to determine equality. This is necessary because Python already uses `=` to mean assignment to a name, as we have seen. It can't use the same symbol for a different purpose. Thus if you want to check whether 5 is equal to the 10/2, then you have to be careful: `5 = 10/2` returns an error message because R assumes you are trying to assign the value of the expression 10/2 to a name that is the numeral 5. Instead, you must use `5 == 10/2`, which evaluates to `TRUE`.
+Notice the two equal signs `==` in the comparison to determine equality. This is necessary because R already uses `=` to mean assignment to a name, as we have seen. It can't use the same symbol for a different purpose. Thus if you want to check whether 5 is equal to the 10/2, then you have to be careful: `5 = 10/2` returns an error message because R assumes you are trying to assign the value of the expression 10/2 to a name that is the numeral 5. Instead, you must use `5 == 10/2`, which evaluates to `TRUE`.
 
 ```{r, error=TRUE}
 5 = 10/2
@@ -87,7 +87,7 @@ sum(tosses == "Heads")
 
 ## Conditional Statements
 
-In many situations, actions and results depends on a specific set of conditions being satisfied. For example, individuals in randomized controlled trials receive the treatment if they have been assigned to the treatment group. A gambler makes money if she wins her bet.
+In many situations, actions and results depend on a specific set of conditions being satisfied. For example, individuals in randomized controlled trials receive the treatment if they have been assigned to the treatment group. A gambler makes money if she wins her bet.
 
 ### Prerequisites
 
@@ -99,7 +99,7 @@ library(tidyverse)
 
 ### The `if` statement
 
-In this section we will learn how to describe such situations using code. A *conditional statement* is a multi-line statement that allows Python to choose among different alternatives based on the truth value of an expression. While conditional statements can appear anywhere, they appear most often within the body of a function in order to express alternative behavior depending on argument values.
+In this section we will learn how to describe such situations using code. A *conditional statement* is a multi-line statement that allows R to choose among different alternatives based on the truth value of an expression. While conditional statements can appear anywhere, they appear most often within the body of a function in order to express alternative behavior depending on argument values.
 
 A conditional statement always begins with an `if` header, which is a single line followed by an indented body. The body is only executed if the expression directly following `if` (called the *if expression*) evaluates to a true value. If the *if expression* evaluates to a false value, then the body of the `if` is skipped.
 
