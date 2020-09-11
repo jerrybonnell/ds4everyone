@@ -1,3 +1,140 @@
 # Prediction
 
+An important aspect of data science is to find out what data can tell us about the future. What do data about climate and pollution say about temperatures a few decades from now? Based on a person's internet profile, which websites are likely to interest them? How can a patient's medical history be used to judge how well he or she will respond to a treatment?
+
+To answer such questions, data scientists have developed methods for making predictions. In this chapter we will study one of the most commonly used ways of predicting the value of one variable based on the value of another.
+
+The foundations of the method were laid by [Sir Francis Galton](https://en.wikipedia.org/wiki/Francis_Galton). As we saw in Section 7.1, Galton studied how physical characteristics are passed down from one generation to the next. Among his best known work is the prediction of the heights of adults based on the heights of their parents. We have studied the dataset that Galton collected for this. The data frame `galton` contains his data on the midparent height and child's height (all in inches) for a population of 934 adult "children".
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(readtext)
+```
+
+```{r message = FALSE}
+url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/galton.csv"
+galton <- read_csv(url) %>%
+  transmute(midparent = midparentHeight, 
+            child = childHeight)
+galton
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(galton) + 
+  geom_point(aes(x = midparent, y = child), color = "darkcyan", alpha = 0.5)
+```
+
+The primary reason for collecting the data was to be able to predict the adult height of a child born to parents similar to those in the dataset. We made these predictions in Section 7.1, after noticing the positive association between the two variables.
+
+Our approach was to base the prediction on all the points that correspond to a midparent height of around the midparent height of the new person. To do this, we wrote a function called `predict_child` which takes a midparent height as its argument and returns the average height of all the children who had midparent heights within half an inch of the argument.
+
+```{r}
+predict_child <- function(mpht) {
+  mpht <- enquo(mpht)
+  # Return a prediction of the height of a child 
+  # whose parents have a midparent height of mpht.
+  # The prediction is the average height of the children 
+  # whose midparent height is in the range mpht plus or minus 0.5 inches.
+  close_points <- filter(galton, between(midparent, !!mpht-0.5, !!mpht + 0.5))
+  return(mean(pull(close_points, child)))
+}
+```
+
+We applied the function to the column of `midparent` heights, and visualized our results.
+
+```{r}
+galton_with_predictions <- galton %>%
+  mutate(prediction = map_dbl(midparent, predict_child))
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+# JB: for our own note, discussion on pivot 
+# (need to roll this change to earlier sections) https://community.rstudio.com/t/adding-manual-legend-to-ggplot2/41651
+plot_df <- galton_with_predictions %>%
+  pivot_longer(c(child, prediction), names_to = "measure", values_to = "height")
+
+ggplot(plot_df) + 
+  geom_point(aes(x = midparent, y = height, color = measure), alpha = 0.5) + 
+  scale_color_manual(values = c("darkcyan", "salmon"))
+```
+
+The prediction at a given midparent height lies roughly at the center of the vertical strip of points at the given height. This method of prediction is called *regression*. Later in this chapter we will see where this term came from. We will also see whether we can avoid our arbitrary definitions of "closeness" being "within 0.5 inches". But first we will develop a measure that can be used in many settings to decide how good one variable will be as a predictor of another.
+
+## Correlation
+
+In this section we will develop a measure of how tightly clustered a scatter diagram is about a straight line. Formally, this is called measuring *linear association*.
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let's load it in as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(readtext)
+```
+
+### The `hybrid` data frame 
+
+The data frame `hybrid` contains data on hybrid passenger cars sold in the United States from 1997 to 2013. The data were adapted from the online data archive of [Prof. Larry Winner](http://www.stat.ufl.edu/%7Ewinner/) of the University of Florida. The columns:
+
+* `vehicle`: model of the car
+* `year`: year of manufacture
+* `msrp`: manufacturer's suggested retail price in 2013 dollars
+* `acceleration`: acceleration rate in km per hour per second
+* `mpg`: fuel econonmy in miles per gallon
+* `class`: the model's class.
+
+```{r message = FALSE}
+url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/hybrid.csv"
+hybrid <- read_csv(url)
+hybrid
+```
+
+The graph below is a scatter plot of `msrp` versus `acceleration`. That means `msrp` is plotted on the vertical axis and `acceleration` on the horizontal.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(hybrid) + 
+  geom_point(aes(x = acceleration, y = msrp), color = "darkcyan", alpha = 0.5)
+```
+
+Notice the positive association. The scatter of points is sloping upwards, indicating that cars with greater acceleration tended to cost more, on average; conversely, the cars that cost more tended to have greater acceleration on average.
+
+The scatter diagram of MSRP versus mileage shows a negative association. Hybrid cars with higher mileage tended to cost less, on average. This seems surprising till you consider that cars that accelerate fast tend to be less fuel efficient and have lower mileage. As the previous scatter plot showed, those were also the cars that tended to cost more.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(hybrid) + 
+  geom_point(aes(x = mpg, y = msrp), color = "darkcyan", alpha = 0.5)
+```
+
+Along with the negative association, the scatter diagram of price versus efficiency shows a non-linear relation between the two variables. The points appear to be clustered around a curve, not around a straight line.
+
+If we restrict the data just to the SUV class, however, the association between price and efficiency is still negative but the relation appears to be more linear. The relation between the price and acceleration of SUV's also shows a linear trend, but with a positive slope.
+
+```{r}
+# TBA! 
+```
+
+
+## The Regression Line
+
+TBA 
+
+## The Method of Least Squares
+
+TBA 
+
+## Least Squares Regression
+
+TBA 
+
+## Visual Diagnostics
+
 TBA
+
+## Numerical Diagnostics
+
+TBA 
+
+
+
+
