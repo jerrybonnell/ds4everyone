@@ -731,6 +731,13 @@ The solution to the problem is quite straightforward under this assumption, thou
 
 That's it. End of story.
 
+Another way of viewing the problem is as follows. For simplicity, suppose that the contestant has chosen Door 1. The car can be behind Door 1, Door 2, or Door 3, each of the three possibility event occurring with 1/3 of chance.
+
+* Suppose that the car is behind Door 1. Monty may open either Door 2 or Door 3. Either way, by switching the choice, the contestant loses.
+* Suppose that the car is behind Door 2. Monty is forced to open Door 3. By switching the choice, the contestant wins.
+* Suppose that the car is behind Door 3. Monty is forced to open Door 2. By switching the choice, the contestant wins.
+* Thus, if the contestant switches the door  after Monty's revealing a goat behind a door not chosen, the chance that she wins is 2/3. Also, if she chooses to keep her original choice, the chance that she wins is 1/3. 
+
 Not convinced? Then let's simulate the game and see how the results turn out.
 
 ### Simulation
@@ -745,7 +752,7 @@ For each play we will simulate what's behind all three doors:
 * the one that Monty opens
 * the remaining door
 
-So we will be keeping track of three quantitites, not just one.
+So we will be keeping track of three quantities, not just one.
 
 #### Step 2: Simulating One Play {-#my-step2}
 
