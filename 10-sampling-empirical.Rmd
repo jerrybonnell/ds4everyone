@@ -1,12 +1,12 @@
 # Sampling and Empirical Distributions
 
-An important part of data science consists of making conclusions based on the data in random samples. In order to correctly interpret their results, data scientists have to first understand exactly what random samples are.
+An important part of data science consists of making conclusions based on the data in random samples. To make correct interpretations of their results, data scientists must possess first-hand knowledge of exactly what random samples are.
 
 In this chapter we will take a more careful look at sampling, with special attention to the properties of large random samples.
 
 __Prerequisites__
 
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
+We will again make use of the tidyverse in this chapter, so let's load it in as usual.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
@@ -127,7 +127,7 @@ Let's load in the tidyverse as usual.
 library(tidyverse)
 ```
 
-Our setting is a simple experiment: rolling a die multiple times and keeping track of which face appears. The table die contains the numbers of spots on the faces of a die. All the numbers appear exactly once, as we are assuming that the die is fair.
+Our setting is a simple experiment: rolling a die multiple times and keeping track of which face appears. The table `die` contains the numbers of spots on the faces of a die. All the numbers appear exactly once, as we are assuming that the die is fair.
 
 ```{r}
 die <- tibble(face = 1:6)
@@ -282,7 +282,7 @@ empirical_hist_delay(10)
 empirical_hist_delay(100)
 ```
 
-The most consistently visible discrepancies are among the values that are rare in the population. In our example, those values are in the the right hand tail of the distribution. But as the sample size increases, even those values begin to appear in the sample in roughly the correct proportions.
+The most consistently visible discrepancies are among the values that are rare in the population. In our example, those values are in the right hand tail of the distribution. But as the sample size increases, even those values begin to appear in the sample in roughly the correct proportions.
 
 ```{r dpi=80,  fig.align="center", warning = FALSE, message = FALSE}
 empirical_hist_delay(1000)
@@ -343,7 +343,7 @@ Numerical quantities associated with a population are called *parameters*. For t
 median(flights$dep_delay, na.rm = TRUE)
 ```
 
-Note the argument `na.rm` (read: "NaN remove") used in this function call. An interesting property of the `flights` dataset is that it is missing values, e.g., not all rows have a value in the `dep_delay` column. We toggle a flag `na.rm` so that R knows to drop these rows before computing the median.  
+Note the argument `na.rm` (read: "NaN remove") used in this function call. An interesting property of the `flights` dataset is that it has missing values, e.g., not all rows have a value in the `dep_delay` column. We toggle a flag `na.rm` so that R knows to drop these rows before computing the median.  
 
 The function `median()` returns the median (half-way point) of a column or vector. Among all the flights available, the median delay was -2 minute. This isn't surprising: more than 50% of flights in the population had early departures of 2 minutes or more:
 
@@ -353,7 +353,7 @@ nrow(filter(flights, dep_delay <= -2)) / nrow(flights)
 
 Neat!
 
-__Note.__ The percent isn't exactly 50 because of "ties," that is, flights that had early departures of exactly 2 minutes. There were 21516 such flights. Ties are quite common in data sets, and we will not worry about them in this course.
+__Note.__ The percent isn't exactly 50 because of "ties," that is, flights that had early departures of exactly 2 minutes. There were 21,516 such flights. Ties are quite common in data sets, and we will not worry about them in this course.
 
 ```{r}
 nrow(filter(flights, dep_delay == -2))
@@ -388,9 +388,9 @@ Let's recall the main steps in a simulation.
 
 ### Simulating a Statistic 
 
-We will simulate the sample median using the steps we set up in an earlier chapter when we started studying simulation. You can replace the sample size of 1000 by any other sample size, and the sample median by any other statistic.
+We will simulate the sample median using the steps we set up in an earlier chapter when we started studying simulation. You can replace the sample size of 1,000 by any other sample size, and the sample median by any other statistic.
 
-__Step 1: Decide which statistic to simulate.__ We have already decided that: we are going to simulate the median of a random sample of size 1000 drawn from the population of flight delays.
+__Step 1: Decide which statistic to simulate.__ We have already decided that: we are going to simulate the median of a random sample of size 1,000 drawn from the population of flight delays.
 
 __Step 2: Write the code to generate one value of the statistic.__ Draw a random sample of size 1000 and compute the median of the sample. We did this in the code cell above. Here it is again, encapsulated in a function.
 
@@ -403,9 +403,9 @@ random_sample_median <- function(x) {
 
 __Step 3: Decide how many simulated values to generate.__ Let's do 5,000 repetitions.
 
-__Step 4: Write the code to generate an array of simulated values.__ As in all simulations, we start by creating a vector with length 5000 where all the simulated values will be stored. The map will call the `random_sample_median()` function for each of its elements and store the calculated median in the corresponding element of the vector. Upon completion, the vector will contain all the simulated values, and we call this vector `medians`. 
+__Step 4: Write the code to generate an array of simulated values.__ As in all simulations, we start by creating a vector with length 5,000 where all the simulated values will be stored. The map will call the `random_sample_median()` function for each of its elements and store the calculated median in the corresponding element of the vector. Upon completion, the vector will contain all the simulated values, and we call this vector `medians`. 
 
-The simulation takes a noticeable amount of time to run. That is because it is performing 5000 repetitions of the process of drawing a sample of size 1000 and computing its median. That's a lot of sampling and repeating!
+The simulation takes a noticeable amount of time to run. That is because it is performing 5,000 repetitions of the process of drawing a sample of size 1,000 and computing its median. That's a lot of sampling and repeating!
 
 ```{r}
 num_repetitions <- 5000
@@ -430,13 +430,13 @@ ggplot(simulated_medians) +
   geom_histogram(aes(x = sample_median, y = ..density..), color = "gray", bins = 3)
 ```
 
-You can see that the sample median is very likely to be about -2, which was the value of the population median. Since samples of 1000 flight departure delays are likely to resemble the population of delays, it is not surprising that the median delays of those samples should be close to the median delay in the population.
+You can see that the sample median is very likely to be about -2, which was the value of the population median. Since samples of 1,000 flight departure delays are likely to resemble the population of delays, it is not surprising that the median delays of those samples should be close to the median delay in the population.
 
 This is an example of how a statistic can provide a good estimate of a parameter.
 
 ### The Power of Simulation
 
-If we could generate all possible random samples of size 1000, we would know all possible values of the statistic (the sample median), as well as the probabilities of all those values. We could visualize all the values and probabilities in the probability histogram of the statistic.
+If we could generate all possible random samples of size 1,000, we would know all possible values of the statistic (the sample median), as well as the probabilities of all those values. We could visualize all the values and probabilities in the probability histogram of the statistic.
 
 But in many situations including this one, the number of all possible samples is large enough to exceed the capacity of the computer, and purely mathematical calculations of the probabilities can be intractably difficult.
 
