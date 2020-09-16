@@ -100,13 +100,10 @@ It returns the difference between the means of the `True` group and the `False` 
 ```{r message=FALSE, warning=FALSE}
 difference_of_means <- function(df, label, group_label) {
   # @Jerry: https://stackoverflow.com/questions/34186903/error-when-using-dplyr-inside-of-a-function
-  # @Jerry: must explain !!, enquo
-  label <- enquo(label) # Create quosure
-  group_label <- enquo(group_label) # Create quosure
-  
+  # @Jerry: must explain double fencing {{ }}
   means_df <- df %>%
-    group_by(!!group_label, .groups = 'drop') %>%
-    summarize(average = mean(!!label), .groups = 'drop')
+    group_by({{ group_label }}, .groups = 'drop') %>%
+    summarize(average = mean({{ label }}), .groups = 'drop')
   return(means_df$average[2] - means_df$average[1])
 }
 
@@ -174,13 +171,10 @@ It returns the difference between the means of two groups formed by randomly shu
 ```{r message = FALSE, warning = FALSE}
 one_simulated_difference <- function(df, label, group_label, x) {
   # @Jerry: need to discuss pull()
-  label <- enquo(label) # Create quosure
-  group_label <- enquo(group_label) # Create quosure
-  
   shuffled_table <- df %>%
-    mutate(shuffled_label = sample(pull(df, !!group_label)))
+    mutate(shuffled_label = sample(pull(df, {{ group_label }})))
 
-  return(difference_of_means(shuffled_table, !!label, shuffled_label))
+  return(difference_of_means(shuffled_table, {{ label }}, shuffled_label))
 }
   
 ```

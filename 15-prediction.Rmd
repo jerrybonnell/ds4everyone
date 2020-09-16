@@ -30,12 +30,11 @@ Our approach was to base the prediction on all the points that correspond to a m
 
 ```{r}
 predict_child <- function(mpht) {
-  mpht <- enquo(mpht)
   # Return a prediction of the height of a child 
   # whose parents have a midparent height of mpht.
   # The prediction is the average height of the children 
   # whose midparent height is in the range mpht plus or minus 0.5 inches.
-  close_points <- filter(galton, between(midparent, !!mpht-0.5, !!mpht + 0.5))
+  close_points <- filter(galton, between(midparent, {{ mpht }} -0.5, {{ mpht }} + 0.5))
   return(mean(pull(close_points, child)))
 }
 ```
@@ -424,12 +423,11 @@ galton
 
 ```{r}
 predict_child <- function(mpht) {
-  mpht <- enquo(mpht)
   # Return a prediction of the height of a child 
   # whose parents have a midparent height of mpht.
   # The prediction is the average height of the children 
   # whose midparent height is in the range mpht plus or minus 0.5 inches.
-  close_points <- filter(galton, between(midparent, !!mpht-0.5, !!mpht + 0.5))
+  close_points <- filter(galton, between(midparent, {{ mpht }} - 0.5, {{ mpht }} + 0.5))
   return(mean(pull(close_points, child)))
 }
 ```
@@ -476,12 +474,11 @@ We are now ready to modify our prediction function to make predictions on the st
 
 ```{r}
 predict_child_su <- function(mpht_su) {
-  mpht_su <- enquo(mpht_su)
   close = 0.5/sd_midparent
   # Return a prediction of the height (in standard units) of a child 
   # whose parents have a midparent height of mpht_su in standard units.
   close_points <- filter(galton_su, 
-                         between(midparent_su, !!mpht_su - close, !!mpht_su + close))
+                         between(midparent_su, {{ mpht_su }} - close, {{ mpht_su }} + close))
   return(mean(pull(close_points, child_su)))
 }
 ```
@@ -649,19 +646,13 @@ The three functions below compute the correlation, slope, and intercept. All of 
 
 ```{r}
 slope <- function(t, label_x, label_y) {
-  label_x <- enquo(label_x)
-  label_y <- enquo(label_y)
-  
-  r <- cor(pull(t, !!label_x), pull(t, !!label_y) )
-  return (r * sd(pull(t, !!label_y)) / sd(pull(t, !!label_x)))
+  r <- cor(pull(t, {{ label_x }}), pull(t, {{ label_y }}) )
+  return (r * sd(pull(t, {{ label_y }})) / sd(pull(t, {{ label_x }})))
 }
 
 intercept <- function(t, label_x, label_y) {
-  label_x <- enquo(label_x)
-  label_y <- enquo(label_y)
-  
-  return(mean(pull(t, !!label_y)) - 
-           slope(t, !!label_x, !!label_y) * mean(pull(t, !!label_x)))
+  return(mean(pull(t, {{ label_y }})) - 
+           slope(t, {{ label_x }}, {{ label_y }}) * mean(pull(t, {{ label_x }})))
 }
 ```
 
@@ -730,12 +721,9 @@ The predictions all lie on the line and are known as the "fitted values". The fu
 ```{r}
 fit <- function(df, x, y) {
   # Return the height of the regression line at each x value.
-  x <- enquo(x)
-  y <- enquo(y)
-  
-  a <- slope(df, !!x, !!y)
-  b <- intercept(df, !!x, !!y)
-  return(a * pull(df, !!x) + b)
+  a <- slope(df, {{ x }}, {{ y }})
+  b <- intercept(df, {{ x }}, {{ y }})
+  return(a * pull(df, {{ x }}) + b)
 }
 
 ```

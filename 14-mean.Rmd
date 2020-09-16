@@ -802,10 +802,8 @@ for some functional called `statistic`.
 
 ```{r}
 one_simulation <- function(x, df, label, func, num_draws) {
-  label <- enquo(label) # Create quosure
-  
   sample_df <- slice_sample(df, n = num_draws, replace = TRUE)
-  results <- func(pull(sample_df, !!label))
+  results <- func(pull(sample_df, {{ label }}))
   return(results)
 }
 ```
@@ -1042,10 +1040,8 @@ We will define a function `simulate_sample_mean` to do this, because we are goin
 
 ```{r}
 one_simulation <- function(x, df, label, func, num_draws) {
-  label <- enquo(label) # Create quosure
-  
   sample_df <- slice_sample(df, n = num_draws, replace = TRUE)
-  result <- func(pull(sample_df, !!label))
+  result <- func(pull(sample_df, {{ label }} ))
   return(result)
 }
 ```

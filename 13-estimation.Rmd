@@ -360,9 +360,7 @@ one_bootstrap <- function(one_column_df, x) {
 
 ```{r}
 bootstrap_median <- function(original_sample, label, replications, x) {
-  label <- enquo(label) # Create quosure
-  
-  just_one_column <- select(original_sample, !!label)
+  just_one_column <- select(original_sample, {{ label }})
   medians <- map_dbl(.x = 1:replications, 
                      .f = one_bootstrap,
                      one_column_df = just_one_column)
@@ -596,9 +594,7 @@ one_bootstrap <- function(x, one_column_df, statistic) {
 
 ```{r}
 bootstrap <- function(x, original_sample, stat, label) {
-  label <- enquo(label) # Create quosure
-  
-  just_one_column <- select(original_sample, !!label)
+  just_one_column <- select(original_sample, {{ label }})
   estimates <- map_dbl(.x = x,
                    .f = one_bootstrap,
                    one_column_df = just_one_column,
@@ -816,9 +812,7 @@ one_bootstrap <- function(x, one_column_df, statistic) {
 
 ```{r}
 bootstrap <- function(x, original_sample, stat, label) {
-  label <- enquo(label) # Create quosure
-  
-  just_one_column <- select(original_sample, !!label)
+  just_one_column <- select(original_sample, {{ label }})
   estimates <- map_dbl(.x = x,
                    .f = one_bootstrap,
                    one_column_df = just_one_column,
