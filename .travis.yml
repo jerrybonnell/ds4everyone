@@ -9,5 +9,5 @@ before_script:
   - chmod +x ./_deploy.sh
 
 script:
-  - travis_wait 45 ./_build.sh
+  - travis_wait 60 ./_build.sh
   - ./_deploy.sh
