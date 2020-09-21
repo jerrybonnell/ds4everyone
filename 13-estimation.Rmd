@@ -1,26 +1,26 @@
 # Estimation
 
-In the previous chapter we began to develop ways of inferential thinking. In particular, we learned how to use data to decide between two hypotheses about the world. But often we just want to know how big something is.
+In the previous chapter we began to develop ways of inferential thinking. In particular, we learned how to use data to decide between two hypotheses about the world. But often, instead of comparing hypotheses, we just want to know how big something is.
 
-For example, in an earlier chapter we investigated how many warplanes the enemy might have. In an election year, we might want to know what percent of voters favor a particular candidate. To assess the current economy, we might be interested in the median annual income of households in the United States.
+For example, in an earlier chapter we investigated how many warplanes the enemy might have. In a similar vein, in an election year, we might want to know what percent of voters favor a particular candidate. To assess the current economy, we might be interested in the median annual income of households in the United States.
 
 In this chapter, we will develop a way to *estimate* an unknown *parameter*. Remember that a parameter is a numerical value associated with a population.
 
-To figure out the value of a parameter, we need data. If we have the relevant data for the entire population, we can simply calculate the parameter.
+To figure out the value of a parameter, we need data. An implicit property of a parameter is that if we have the relevant data for the entire population, we can calculate the exact value of the parameter using the complete data available to us.
 
-But if the population is very large – for example, if it consists of all the households in the United States – then it might be too expensive and time-consuming to gather data from the entire population. In such situations, data scientists rely on sampling at random from the population.
+Quite often, the population is very large, so large that we cannot hope to have access to its entirety. For example, if it consists of all the households in the United States – then it might be too expensive and time-consuming to gather data from the entire population. In such situations, sampling comes in rescue - data scientists rely on sampling at random from the population.
 
 This leads to a question of inference: How to make justifiable conclusions about the unknown parameter, based on the data in the random sample? We will answer this question by using inferential thinking.
 
-A statistic based on a random sample can be a reasonable estimate of an unknown parameter in the population. For example, you might want to use the median annual income of sampled households as an estimate of the median annual income of all households in the U.S.
+A statistic based on a random sample can be a reasonable estimate of an unknown parameter in the population. For example, you might want to use the *median* annual income of sampled households as an estimate of the median annual income of all households in the U.S.
 
 But the value of any statistic depends on the sample, and the sample is based on random draws. So every time data scientists come up with an estimate based on a random sample, they are faced with a question:
 
 __"How different could this estimate have been, if the sample had come out differently?"__
 
-In this chapter you will learn one way of answering this question. The answer will give you the tools to estimate a numerical parameter and quantify the amount of error in your estimate.
+In this chapter, you will learn one way of answering this question. The answer will give you the tools to estimate a numerical parameter and quantify the amount of error in your estimate.
 
-We will start with a preliminary about percentiles. The most famous percentile is the median, often used in summaries of income data. Other percentiles will be important in the method of estimation that we are about to develop. So we will start by defining percentiles carefully.
+We will start with a preliminary about *percentiles*. The most famous percentile is the median, often used in summaries of income data. Other percentiles will be important in the method of estimation that we are about to develop. So we will start by defining percentiles carefully.
 
 ## Percentiles
 
@@ -150,7 +150,7 @@ That's not an integer. By our definition, the 85th percentile is the 306th eleme
 sorted_scores[306]
 ```
 
-That's the same as the answer we got by using `quantile()`. In future, we will just use `quantile()`.
+That's the same as the answer we received by using `quantile()`. In future, we will just use `quantile()`.
 
 ### Quartiles
 
@@ -213,7 +213,7 @@ sf2015 <- read_csv(url)
 sf2015
 ```
 
-There is one row for each of 42,979 employees. There are numerous columns containing information about City departmental affiliation and details of the different parts of the employee's compensation package. Here is the row correspoding to the late Edward Lee, the Mayor at that time.
+There is one row for each of 42,979 employees. There are numerous columns containing information about City departmental affiliation and details of the different parts of the employee's compensation package. Here is the row corresponding to the late Edward Lee, the Mayor at that time.
 
 ```{r}
 filter(sf2015, Job == "Mayor")
@@ -533,8 +533,6 @@ library(readtext)
 ### Confidence Interval for a Population Median: Bootstrap Percentile Method
 
 We will now use the bootstrap method to estimate an unknown population median. The data come from a sample of newborns in a large hospital system; we will treat it as if it were a simple random sample though the sampling was done in multiple stages. [Stat Labs](https://www.stat.berkeley.edu/~statlabs/) by Deborah Nolan and Terry Speed has details about a larger dataset from which this set is drawn.
-
-The table baby contains the following variables for mother-baby pairs: the baby's birth weight in ounces, the number of gestational days, the mother's age in completed years, the mother's height in inches, pregnancy weight in pounds, and whether or not the mother smoked during pregnancy.
 
 The data frame `baby` contains the following variables for mother-baby pairs: the baby's birth weight in ounces, the number of gestational days, the mother's age in completed years, the mother's height in inches, pregnancy weight in pounds, and whether or not the mother smoked during pregnancy.
 
