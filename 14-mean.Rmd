@@ -124,7 +124,7 @@ Because the mean is a balance point, it is sometimes displayed as a *fulcrum* or
 tibble(not_symmetric) %>%
   ggplot() + 
   geom_histogram(aes(x = not_symmetric, y = ..density..),
-                 color = "gray", fill = "darkcyan", bins = 10) +
+                 color = "gray", fill = "darkcyan", binwidth = 1) +
   geom_point(aes(x = mean(not_symmetric), y = -0.02), 
              color = "salmon", shape = 17, size = 4)
 ```
@@ -219,7 +219,7 @@ mean(compensation)
 
 Distributions of incomes of large populations tend to be right skewed. When the bulk of a population has middle to low incomes, but a very small proportion has very high incomes, the histogram has a long, thin tail to the right.
 
-The mean income is affected by this tail: the farther the tail stretches to the right, the larger the mean becomes. But the median is not affected by values at the extremes of the distribution. That is why economists often summarize income distributions by the median instead of the mean.
+The mean income is affected by this tail: the farther the tail stretches to the right while the remainder stays the same, the larger the mean becomes. But the median is not affected by values at the extremes of the distribution because the bulk of the data is unchanged. That is why economists often summarize income distributions by the median instead of the mean.
 
 ## Variability
 
@@ -527,7 +527,7 @@ ggplot(flights_standard) +
 
 We know that the mean is the balance point of the histogram. Unlike the mean, the SD is usually not easy to identify by looking at the histogram.
 
-However, there is one shape of distribution for which the SD is almost as clearly identifiable as the mean. That is the bell-shaped disribution. This section examines that shape, as it appears frequently in probability histograms and also in some histograms of data.
+However, there is one shape of distribution for which the SD is almost as clearly identifiable as the mean. That is the bell-shaped distribution. This section examines that shape, as it appears frequently in probability histograms and also in some histograms of data.
 
 ### Prerequisites
 
@@ -994,13 +994,13 @@ ggplot(plot_df) +
 
 Both distributions are approximately normal but one is narrower than the other. The proportions based on a sample size of 800 are more tightly clustered around 0.75 than those from a sample size of 200. Increasing the sample size has decreased the variability in the sample proportion.
 
-This should not be surprising. We have leaned many times of the intuition that a larger sample size generally reduces the variability of a statistic. However, in the case of a sample average, we can *quantify* the relationship between sample size and variability.
+This should not be surprising. We have learned many times of the intuition that a larger sample size generally reduces the variability of a statistic. However, in the case of a sample average, we can *quantify* the relationship between sample size and variability.
 
 Exactly how does the sample size affect the variability of a sample average or proportion? That is the question we will examine in the next section.
 
 ## The Variability of the Sample Mean
 
-By the Central Limit Theorem, the probability distribution of the mean of a large random sample is roughly normal. The bell curve is centered at the population mean. Some of the sample means are higher, and some lower, but the deviations from the population mean are roughly symmetric on either side, as we have seen repeatedly. Formally, probability theory shows that the sample mean is an *unbiased* estimate of the population mean.
+By the Central Limit Theorem, the probability distribution of the mean of a large random sample is roughly normal. The bell curve is centered at the population mean. Some of the sample means are higher, and some lower, but the deviations from the population mean are roughly symmetric on either side, as we have seen repeatedly. Formally, probability theory shows that the sample mean is an *unbiased* (i.e., serving to no prior judgment about the matter top be estimated) estimate of the population mean.
 
 In our simulations, we also noticed that the means of larger samples tend to be more tightly clustered around the population mean than means of smaller samples. In this section, we will quantify the variability of the sample mean and develop a relation between the variability and the sample size.
 
