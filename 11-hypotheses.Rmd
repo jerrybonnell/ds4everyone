@@ -376,7 +376,7 @@ To assess whether this observation is particular to one random sample or more ge
 
 ### A New Statistic: The Distance between Two Distributions 
 
-We know how to measure how different two numbers are – if the numbers are $x$ and $y$, the distance between them is $|x - y|$. Now we have to quantify the distance between two distributions. For example, we have to measure the distance between the blue and gold distributions below.
+We know how to measure how different two numbers are – if the numbers are $x$ and $y$, the distance between them is $|x - y|$. Now we have to quantify the distance between two distributions. For example, we have to measure the distance between the cyan and salmon pink distributions below.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 jury_plot
@@ -428,7 +428,7 @@ total_variation_distance <- function(distribution_1, distribution_2) {
 }
 ```
 
-This function will help us calculate our statistic in each repetition of the simulation. But first, let's check that it gives the right answer when we use it to compute the distance between the blue (eligible) and gold (panels) distributions above.
+This function will help us calculate our statistic in each repetition of the simulation. But first, let's check that it gives the right answer when we use it to compute the distance between the salmon pink (eligible) and cyan (panels) distributions above.
 
 ```{r}
 total_variation_distance(jury$panels, jury$eligible)

@@ -109,7 +109,7 @@ The mean is a physical attribute of the histogram of the distribution. Here is t
 tibble(not_symmetric) %>%
   ggplot() + 
   geom_histogram(aes(x = not_symmetric, y = ..density..),
-                 color = "gray", fill = "darkcyan", bins = 10)
+                 color = "gray", fill = "darkcyan", binwidth = 1)
 ```
 
 Imagine the histogram as a figure made out of cardboard attached to a wire that runs along the horizontal axis, and imagine the bars as weights attached at the values 2, 3, and 9. Suppose you try to balance this figure on a point on the wire. If the point is near 2, the figure will tip over to the right. If the point is near 9, the figure will tip over to the left. Somewhere in between is the point where the figure will balance; that point is the 4.25, the mean.
@@ -166,23 +166,23 @@ What if the distribution is not symmetric? Let's compare `symmetric` and `not_sy
 ggplot() + 
   geom_histogram(data = tibble(symmetric), aes(
                        x = symmetric, y = ..density..),
-                 color = "gray", fill = "darkcyan", bins = 10) +
+                 color = "gray", fill = "darkcyan", binwidth = 1) +
   geom_histogram(data = tibble(not_symmetric), aes(
                      x = not_symmetric, y = ..density..), alpha = 0.8,
-                 color = "gray", fill = "salmon", bins = 10) + 
+                 color = "gray", fill = "salmon", binwidth = 1) + 
   geom_point(aes(x = mean(symmetric), y = -0.02), 
              color = "darkcyan", shape = 17, size = 4) + 
   geom_point(aes(x = mean(not_symmetric), y = -0.02), 
              color = "salmon", shape = 17, size = 4)
 ```
 
-The dark cyan histogram represents the original `symmetric` distribution. The salmon colored histogram of `not_symmetric` starts out the same as the blue at the left end, but its rightmost bar has slid over to the value 9. The darker shaded region is where the two histograms overlap.
+The dark cyan histogram represents the original `symmetric` distribution. The salmon pink colored histogram of `not_symmetric` starts out the same as the cyan at the left end, but its rightmost bar has slid over to the value 9. The darker shaded region in salmon pink is where the two histograms overlap.
 
-The median and mean of the blue distribution are both equal to 3. The median of the gold distribution is also equal to 3, though the right half is distributed differently from the left.
+The median and mean of the salmon pink distribution are both equal to 3. The median of the cyan distribution is also equal to 3, though the right half is distributed differently from the left.
 
-But the mean of the gold distribution is not 3: the gold histogram would not balance at 3. The balance point has shifted to the right, to 4.25.
+But the mean of the cyan distribution is not 3: the salmon pink histogram would not balance at 3. The balance point has shifted to the right, to 4.25.
 
-In the gold distribution, 3 out of 4 entries (75%) are below average. The student with a below average score can therefore take heart. He or she might be in the majority of the class.
+In the cyan distribution, 3 out of 4 entries (75%) are below average. The student with a below average score can therefore take heart. He or she might be in the majority of the class.
 
 In general, __if the histogram has a tail on one side (the formal term is "skewed"), then the mean is pulled away from the median in the direction of the tail__.
 
@@ -967,7 +967,7 @@ There's that normal curve again, as predicted by the Central Limit Theorem, cent
 
 How would this distribution change if we increased the sample size? Let's run the code again with a sample size of 800, and collect the results of simulations in the same table in which we collected simulations based on a sample size of 200. We will keep the number of repetitions the same as before so that the two columns have the same length.
 
-```{r}
+```{r} 
 num_plants <- 800
 
 sample_props2 <- map_dbl(.x = 1:repetitions, 
@@ -1253,9 +1253,9 @@ ggplot(coins) +
 
 Remember that the possible values in the population are only 0 and 1.
 
-The blue histogram (50% 1's and 50% 0's) has more spread than the gold. The mean is 0.5. Half the deviations from mean are equal to 0.5 and the other half equal to -0.5, so the SD is 0.5.
+The salmon pink histogram (50% 1's and 50% 0's) has more spread than the dark cyan. The mean is 0.5. Half the deviations from mean are equal to 0.5 and the other half equal to -0.5, so the SD is 0.5.
 
-In the gold histogram, all of the area is being squished up around 1, leading to less spread. 90% of the deviations are small: 0.1. The other 10% are -0.9 which is large, but overall the spread is smaller than in the blue histogram.
+In the dark cyan histogram, all of the area is being squished up around 1, leading to less spread. 90% of the deviations are small: 0.1. The other 10% are -0.9 which is large, but overall the spread is smaller than in the salmon pink histogram.
 
 The same observation would hold if we varied the proportion of 1's or let the proportion of 0's be larger than the proportion of 1's. Let's check this by calculating the SDs of populations of 10 elements that only consist of 0's and 1's, in varying proportions. The function `rep(N, i)` is useful for this. It takes two arguments, the number `N` to repeat and `i` repetitions of it, and returns the desired vector consisting of that many `N`'s, e.g.
 
