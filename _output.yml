@@ -3,7 +3,7 @@ bookdown::gitbook:
   split_by: section
   config:
     toc:
-      collapse: none
+      collapse: section
       before: |
         <li><a href="./">data science for everyone</a></li>
       after: |
