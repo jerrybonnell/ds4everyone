@@ -1,4 +1,4 @@
-# (PART) Regression Analysis {-} 
+# (PART) Making Predictions {-} 
 
 # Prediction
 
