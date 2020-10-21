@@ -216,12 +216,33 @@ What if we only wanted the mango?
 mixed2[[2]][1]
 ```
 
-Delicious!
+Yum!
 
-The difference between `[` and `[[` is easy to confuse. The ["pepper shaker photos" in R for Data Science](https://r4ds.had.co.nz/vectors.html#lists-of-condiments) provides a nice visualization of the different ways to extract pieces from a list. 
+### Visualizing lists 
+
+The difference between `[` and `[[` is important, but easy to get confused. The following visual will clarify the point. 
+
+Suppose that we have the following list `a`. 
+
+```{r}
+a <- list("A big cat", c(1,2,3), 3.14159)
+```
+
+Then we can imagine operations on `a` as the following:
+
+```{r, echo=FALSE, fig.align="center", out.width='80%'}
+knitr::include_graphics('images/list_visual.png')
+```
+
+* `a` is a list 
+* `a[2]` is also a list, this time containing a single element   
+* `a[[2]]` is the second component of the list, a vector 
+* `a[[2]][1]` is the first element of that vector 
+
+Groovy! The ["pepper shaker photos" in R for Data Science](https://r4ds.had.co.nz/vectors.html#lists-of-condiments) provides another nice visualization of the different ways we can extract pieces from a list. 
 
 
-### Dealing with lists 
+### Lists in the wild
 
 We end this section with an educational example of when you might come across a list. First, let's load in the tidyverse. 
 

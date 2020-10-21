@@ -11,6 +11,7 @@ Imports:
   dplyr,
   faraway,
   nycflights13,
+  htmlwidgets,
   gapminder,
   ggplot2,
   tidyverse,
