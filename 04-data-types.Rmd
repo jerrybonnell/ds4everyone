@@ -150,7 +150,7 @@ library(tidyverse)
 
 ### Working with Strings
 
-In much the same way we can add together two numbers, we can add together two *strings*. The `str_c` function can accomplish this for us, which is an abbreviation for **str**ing **c**oncatenate.  
+In much the same way we can add together two numbers, we can add together two *strings*. The `str_c` function can accomplish this for us, which is an abbreviation for **str**ing **c**combine.   
 
 ```{r}
 str_c("data", "science!")
@@ -176,7 +176,7 @@ We can also construct strings with `str_c` that have embedded values.
 str_c("That's ", 1 + 1, ' ', TRUE)
 ```
 
-### String Methods
+### String Functions
 
 From an existing string, related strings can be constructed using string functions, which are functions that operate on strings. These methods are called by placing a dot after the string, then calling the function.
 

@@ -29,6 +29,20 @@ english_parts_of_speech <- c("noun", "pronoun", "verb", "adverb", "adjective",
 english_parts_of_speech
 ```
 
+Formally, R calls strings *character vectors*. We will use *string* and *character vector* interchangeably in the text. 
+
+We access individual elements inside the vector using `[`. For instance, we can extract the "noun" part of speech. 
+
+```{r}
+english_parts_of_speech[1]
+```
+
+We can also extract a *subset* of a vector, say the first three parts of speech. 
+
+```{r}
+english_parts_of_speech[1:3]
+```
+
 Returning to the temperature data, we create vectors of average daily [high temperatures](http://berkeleyearth.lbl.gov/auto/Regional/TMAX/Text/global-land-TMAX-Trend.txt) for the decades surrounding 1850, 1900, 1950, and 2000.
 
 ```{r}
@@ -102,17 +116,23 @@ Each of these functions takes some vector `x` as an argument and returns a vecto
 | `sort(x)`          | Sort the elements                                                    |
 
 
-The `stringr` package from the tidyverse provides us a collection of useful string functions. A full cheat sheet can be found [here](https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf), but listed here are some of the commonly used ones. Following are functions that take a vector of strings as an argument and return a vector.
+The `stringr` package from the tidyverse provides us a collection of useful functions for working with character vectors. A full cheat sheet can be found [here](https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf), but listed here are some of the commonly used ones. Following are functions that take a character vector `x` as an argument and return a vector.  
 
 | **Function**        | **Description**                                              |
 |---------------------|--------------------------------------------------------------|
 | `str_to_lower(x)`     | Lowercase each element                                       |
 | `str_to_upper(x)`     | Uppercase each element                                       |
 | `str_trim(x)`       | Remove spaces at the beginning and/or end of each element        |
+
+The following function takes a character vector `x` with additional arguments, but also returns a vector. 
+
+| **Function**        | **Description**                                              |
+|---------------------|--------------------------------------------------------------|
+|`str_sub(x, start, end)` | Extracts a substring from `x` given by `start` position and `end` position |
 | `str_detect(x, "[:alpha:]")`   | Whether each element is only letters (no numbers or symbols) |
 | `str_detect(x, "[:digit:]")`  | Whether each element is only numeric (no letters)             |
 
-The following functions take both a vector `x` of strings and a *pattern string* to search for. Pattern strings can also be more general like `"[:alpha:]"` or `"[:digit:]"` from the above list (these are also called [regular expressions](https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf) or regexp for short). Each of these functions returns a vector.
+The following functions take both a character vector `x` and a *pattern string* to search for. Pattern strings can be more general like `"[:alpha:]"` or `"[:digit:]"` from the above list (these are also called [regular expressions](https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf) or regexp for short, which we won't cover in detail :-). Each of these functions returns a vector.
 
 | **Function**         | **Description**                                                                  |
 |----------------------|----------------------------------------------------------------------------------|
@@ -121,7 +141,7 @@ The following functions take both a vector `x` of strings and a *pattern string*
 | `str_replace_all(x, pattern)`| Replace all matched patterns in each string |
 | `str_detect(x, ^pattern)` | Whether each element starts with the pattern |
 
-The following function also takes a vector `x` of strings and a pattern string. However, unlike the above table, this function returns a *list*. We will cover this in the next section. 
+The following function also takes a vector `x` of strings and a pattern string. However, unlike the above table, this function returns a *list*. We will cover lists in the next section. 
 
 | **Function**         | **Description**                                                                  |
 |----------------------|----------------------------------------------------------------------------------|
@@ -137,7 +157,131 @@ The following function is a helpful diagnostic tool to view matched patterns.
 
 ## Lists 
 
-TBA. use fruits example
+Like vectors, lists also group values together. However, unlike vectors, lists can hold values that are of *different* types. For instance:
+
+```{r}
+mixed <- list("apple", 1.5, 2L, TRUE)
+mixed
+```
+
+It can be helpful to examine the structure inside the list. We use `str` for this. 
+
+```{r}
+str(mixed)
+```
+
+Lists hold just about anything; they can even contain vectors... 
+
+```{r}
+mixed2 <- list(c("asparagus", "arrowroot", "tomato"), c("mango", "kumquat"), 3.14159)
+str(mixed2)
+```
+
+...or more lists! 
+
+```{r}
+omg <- list(list(1,1), list(2,2,2), "hello world")
+str(omg)
+```
+
+### Working with Lists 
+
+Let's examine the `mixed2` list more closely. 
+
+```{r}
+mixed2
+```
+
+`[` extracts a sub-list. The result is always a list.
+
+```{r}
+str(mixed2[2])
+```
+
+We can also *subset* a list the same way we do with vectors. Remember that the result is still a list. 
+
+```{r}
+str(mixed2[1:2])
+```
+
+If we wish to extract the vector *inside* `mixed2[2]`, we must use `[[`. This extracts a single component from a list. We can use it to retrieve, for example, the vector of fruits: 
+
+```{r}
+mixed2[[2]]
+```
+
+What if we only wanted the mango? 
+
+```{r}
+mixed2[[2]][1]
+```
+
+Delicious!
+
+The difference between `[` and `[[` is easy to confuse. The ["pepper shaker photos" in R for Data Science](https://r4ds.had.co.nz/vectors.html#lists-of-condiments) provides a nice visualization of the different ways to extract pieces from a list. 
+
+
+### Dealing with lists 
+
+We end this section with an educational example of when you might come across a list. First, let's load in the tidyverse. 
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+
+Recall that  `str_locate_all` is a method for working with strings; it returns the positions within each element that a pattern string is found as a *list*. Let's try to use what we know to extract common bird names. 
+
+```{r}
+birds <- c("Black-crowned Night-Heron-Nycticorax", "Little-egret-Egretta garzetta")
+```
+
+The common names are `Black-crowned Night-Heron` and `Little-egret`. We can extract this by looking for the *last* occurrence of the dash (`-`). Here they are: 
+
+```{r}
+str_view_all(birds, "-")
+```
+
+The `str_locate_all` function can tell us the starting and ending positions of all occurrences of the dash. 
+```{r}
+dash_positions <- str_locate_all(birds, "-")
+dash_positions
+```
+
+As expected, we have a list. Let's first examine the results for the Night Heron, which are stored at index 1 of this list. We now know that to pluck out these results we must use `[[`. 
+
+```{r}
+dash_positions[[1]]
+```
+
+Congrats -- we're out of the list! What we have now is three vectors sandwiched together into one, one for each occurrence of the dash. We are only interested in the last one. `tail` is a handy function for extracting the last value of a vector.
+
+```{r}
+tail(dash_positions[[1]], n=1) # why n = 1? why not 2?
+```
+
+Technically, we only care about the ending position of the dash (at index 2) but either value will do. 
+
+```{r}
+last_dash <- tail(dash_positions[[1]], n=1)[1]
+last_dash
+```
+
+We're almost done: we now know that the common name occurs between positions 1 and 25 (why not 26?). We can use `str_sub` to extract the substring. 
+
+```{r}
+str_sub(birds[1], end = last_dash - 1)
+```
+
+Here is everything together: 
+
+```{r}
+dash_positions <- str_locate_all(birds, "-")
+last_dash <- tail(dash_positions[[1]], n=1)[1]
+str_sub(birds[1], end = last_dash - 1)
+```
+
+What would the answer be for extracting `Little-egret`? Try it out!
 
 ## Sequences
 
