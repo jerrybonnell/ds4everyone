@@ -166,7 +166,7 @@ print("data science" < "Data Science")
 print("abc" < "ABC" )
 ```
 
-__Comparing an Array and a Value Element-wise__
+__Making an Element-wise Comparison Between an Array and a Value__
 
 Recall that we can perform arithmetic operations on many numbers in a vector at once. For example, `c(0, 5, 2)*2` means to create a new vector from the vector [0,5,2] by multiplying each by 2 and is equivalent to `c(0, 10, 4)`. In a similar vein, we compare a vector and one value, R compares each element of the vector with the value we provide and produces a vector consisting of the results of the element-wise comparison.
 R is very smart - the vector and the value can switch sides.
@@ -188,15 +188,17 @@ sum(tosses == "Heads")
 
 ## Conditional Executions
 
-It is possible to direct the flow of computation based on a Boolean value.
+A major use of Boolean values in programming is to direct computation based on the value of a Boolean.
 In other words, we can write a program that has two choices for some part of its action where which of the two actions actually occurs is depends on a value of Boolean.
 If we draw the choice-inducing Boolean value from a random generation, we can randomly select among possible actions.
 We call such a "selection of action" based on the value of a Boolean a _conditional execution_.
 Using conditional execution as a weapon, we can examine possible outcomes of a series of actions induced by random events.
+We will now learn how to write conditional executions.
 
 ### Prerequisites
 
-As usual, we will make use of the tidyverse. 
+As usual, we will make use of the tidyverse.
+So, let us set ut up.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
@@ -204,11 +206,24 @@ library(tidyverse)
 
 ### The `if` statement
 
-In this section we will learn how to describe such situations using code. A *conditional statement* is a multi-line statement that allows R to choose among different alternatives based on the truth value of an expression. While conditional statements can appear anywhere, they appear most often within the body of a function in order to express alternative behavior depending on argument values.
+A program unit in a conditional execution is a *conditional statement*.
+A *conditional statement* one that allows selection of an action from multiple possibilities.
+In R and in many other languages, we write a conditional statement as a multi-line statement.
+While it is possible to put everything in just one line, a complex statement appearing in oner line is confusing.
+A most typical place where a conditional statement appears is a function.
+Why?
+Outside functions, an R programmer can examine a value of a variable, and based on the value type (or copy-and-paste) a code she wants to execute.
+By having a block that makes a conditional execution in a function, she can execute the conditional execute any number of times without having to make the manual selection.
+She has written the code for the function by incorporating the conditional execution in it, and so she has only to call the function to dispense with the cumbersome action.
 
-A conditional statement always begins with an `if` header, which is a single line followed by an indented body. The body is only executed if the expression directly following `if` (called the *if expression*) evaluates to a true value. If the *if expression* evaluates to a false value, then the body of the `if` is skipped.
+In R, and in many other programming languages, a conditional statement always begins with an `if` header.
+The the header consists of the keyword `if`.
+What appears after the keyword is a pair of parentheses, in which a condition to examine appears.
+After the condition part appears an action to perform, which is a series of statements flanked by a pair of braces.
+The syntax specifies that if the condition inside the pair of parentheses is true, the program executes the statements appearing in the ensuing pair of braces.
+We call a statement in this form an *if statement*.
 
-Let us start by defining a function that returns the sign of a number.
+Let us see our first example of an if statement, which is a function that returns the sign of a number.
 
 ```{r}
 sign <- function(x) {
@@ -219,13 +234,56 @@ sign <- function(x) {
 sign(3)
 ```
 
-This function returns the correct sign if the input is a positive number. But if the input is not a positive number, then the *if expression* evaluates to a false value, and so the `return` statement is skipped and the function call has no value.
+The function `sign` receives a number and returns a string representing the sign of the number.
+Actually, the return value of the function exists only if the number is strictly positive; otherwise, the function does not return a string as we see next.
 
 ```{r}
 print(sign(-3))
 ```
 
-So let us refine our function to return `Negative` if the input is a negative number. We can do this by adding an `else if` clause.
+The print statement printed nothing, which means that the function did not return a value.
+
+Where is the boundary separating between "Positive" and nothing?
+Since the condition is `x>0`, we can say that the boundary is 0, but 0 falls on the side that produces nothing.
+Can we make is return "Positive" when x is equal 0?
+Sure we can.
+We have only to add the equal sign after the "greater than" sign in the condition part.
+
+```{r}
+sign <- function(x) {
+  if (x >= 0) {
+    return("Positive")
+  }
+}
+print(sign(0))
+print(sign(0.1))
+print(sign(-0.1))
+```
+
+The forciful `print` statement code makes the program prints the value that `sign` returns regardless of whether the return value exists.
+So, in the third case where there is no return value, `NULL` appears.
+
+You can put a series of conditional statements in a function.
+If a conditional statement contains a `return` statement and R executes that statement, R skips the remainder of the code in the function.
+
+```{r}
+sign <- function(x) {
+  if (x > 0) {
+    return("Positive")
+  }
+  if (x < 0) {
+    return("Negative")
+  }
+}
+print(sign(2))
+print(sign(-2))
+print(sign(0))
+```
+
+In the second if statement in the above code, it may make more sense to say "otherwise, if x <0" instead of saying "if x is less than 0".
+In R, the keyword to mean "otherwise" is `else`.
+Ihe code below, `sign` returns "Positive" if the number is greater than 0; "otherwise, if x<0", it returns "Negative".
+(It returns nothing if x is equal to 0.)
 
 ```{r}
 sign <- function(x) {
