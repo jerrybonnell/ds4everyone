@@ -293,15 +293,15 @@ sign <- function(x) {
     return("Negative")
   }
 }
+print(sign(3))
+print(sign(-3))
+print(sign(0))
 ```
 
-Now `sign` returns the correct answer when the input is -3:
 
-```{r}
-sign(-3)
-```
+The code still has no comments to make for 0.
+By adding an `else if`    block to the code, we can make the function return something in the case where the number is 0.
 
-What if the input is 0? To deal with this case, we can add another `else if` clause:
 
 ```{r}
 sign <- function(x) {
@@ -310,7 +310,7 @@ sign <- function(x) {
   } else if (x < 0) {
     return("Negative")
   } else if (x == 0) {
-    return("Neither positive nor negative")
+    return("0 is neither positive nor negative")
   }
 }
 ```
@@ -319,7 +319,7 @@ sign <- function(x) {
 sign(0)
 ```
 
-Equivalently, we can replace the final `else if` clause by an `else` clause, whose body will be executed only if all the previous comparisons are false; that is, if the input value is equal to 0.
+Since the condition `x==0` is exactly the condtion `x` satisfies when the execution reaches the second `else if` block, we can dispense with the `if` and the condtion.
 
 ```{r}
 sign <- function(x) {
@@ -328,7 +328,7 @@ sign <- function(x) {
   } else if (x < 0) {
     return("Negative")
   } else {
-    return("Neither positive nor negative")
+    return("0 is neither positive nor negative")
   }
 }
 ```
@@ -339,7 +339,8 @@ sign(0)
 
 ### The General Form
 
-A conditional statement can also have multiple clauses with multiple bodies, and only one of those bodies can ever be executed. The general format of a multi-clause conditional statement appears below.
+The keyword `else` means "otherwise" and the keyword `else if` is a combination of `else` and `if`.
+We can stack up `else if` after an initial `if` to define a series of alternate options.
 
 ```
 if (<if expression>) {
@@ -354,63 +355,91 @@ if (<if expression>) {
 }
 ```
 
-There is always exactly one `if` clause, but there can be any number of `else if` clauses. R will evaluate the `if` and `else if` expressions in the headers in order until one is found that is a true value, then execute the corresponding body. The `else` clause is optional. When an `else` header is provided, its *else body* is executed only if none of the header expressions of the previous clauses are true. The `else` clause must always come at the end (or not at all).
+Note that `else` cannot be an initial keyword in the series.
+There must exist one `if` clause.
+An `if` without a preceding `else` is a fresh start of an `if` sequence.
+When a stack of `else if` appears after an `if` the stack represents a series of alternates.
+R scans all the conditions appearing after `if` in the sequence and take an action when one that has the value `TRUE` appears.
+It simply ignores the ones before the matching one as well as those after the matching one.
+The optional `else` without `if` takes care of everything that matches none.
 
-### Example: Betting on a Die
-
-Suppose I bet on a roll of a fair die. The rules of the game:
-
-* If the die shows 1 spot or 2 spots, I lose a dollar.
-* If the die shows 3 spots or 4 spots, I neither lose money nor gain money.
-* If the die shows 5 spots or 6 spots, I gain a dollar.
-
-We will now use conditional statements to define a function `one_bet` that takes the number of spots on the roll and returns my net gain.
+Here is a function that takes a string representing
 
 ```{r}
-one_bet <- function(x) {
-  if (x <= 2) {
-    return(-1)
-  } else if (x <= 4) {
-    return(0)
-  } else if (x <= 6) {
-    return(1)
+capitol <- function(x) {
+  if (x == "Florida") {
+    return("Talahassee")
+  } else if (x == "Georgia") {
+    return("Atlanta")
+  } else if (x == "Alabama") {
+    return("Montgomery")
+  } else {
+    return("Sorry, no idea")
   }
 }
 ```
 
-Let's check that the function does the right thing for each different number of spots.
+
+Here is the response of the function for some inquiries.
+Here is a function that takes a string representing
 
 ```{r}
-c(one_bet(1), one_bet(2), one_bet(3), one_bet (4), one_bet(5), one_bet(6))
+print(capitol("Florida"))
+print(capitol("New Jersey"))
+print(capitol("Georgia"))
+print(capitol("North Dakota"))
 ```
 
-As a review of how conditional statements work, let's see what `one_bet` does when the input is 3.
+## A Simple Betting Game and Iteration
 
-* First it evaluates the `if` expression, which is `3 <= 2` which is `False`. So `one_bet` doesn't execute the `if` body.
-* Then it evaluates the first `else if` expression, which is `3 <= 4`, which is `True`. So `one_bet` executes the first `else if` body and returns 0.
-* Once the body has been executed, the process is complete. The next `else if` expression is not evaluated.
+Let us now use condition execution to build a program for a simple betting game.
+You throw a ritual football coin.
+If it shows "Head" you receive a dollar, if it shows "Tail" you lose a dollar.
+We imagine that an R program we will include the action to receive a string and determine how much you gain.
+Naturally we think of a string as the data type to represent the side the coin is showing.
 
-If for some reason we use an input greater than 6, then the `if` expression evaluates to False as do both of the `else if` expressions. So one_bet does not execute the if body nor the two `else if` bodies, and there is no value when you make the call below.
 
 ```{r}
-print(one_bet(17))
+one_flip <- function(x) {
+  if (x == "Head") {
+    return(1)
+  } else if (x == "Tail") {
+    return(-1)
+  } else {
+    return(0)
+  }
+}
 ```
 
-To play the game based on one roll of a die, you can use `sample()` to generate the number of spots and then use that as the argument to `one_bet()`. Run the cell a few times to see how the output changes.
+Since a string may take a value other than the two we are anticipating as the possibilities, we may the program complete (or _overcomplete_, if you dare to say) by attaching the last `else` block.
+In this manner, the program returns one of 1, -1, and 0 given any argument.
+The flow to determine the return value is: (a) check if `x` is equal to "Head", and if so, return 1 and terminate the execution of `one_flip`; (b) otherwise check if `x` is equal to "Tail", and if so, return -1 and terminate the execution of `one_flip`; (c) otherwise, return 0 and terminate the execution of `one_flip`.
+
+Let us see how the program works.
+
 
 ```{r}
-one_bet(sample(1:6, size = 1))
+c(one_flip("Head"), one_flip("Tail"), one_flip("R"), one_flip("Data Sciece"))
 ```
 
-At this point it is natural to want to collect the results of all the bets so that we can analyze them. In the next section we develop a way to do this without running the cell over and over again.
 
-## Iteration
+To play the game based on one flip of a die, you can use `sample()` to generate the number of spots and then use that as the argument to `one_bet()`.
+Recall that `sample` picks an element from a vector.
 
-It is often the case in programming – especially when dealing with randomness – that we want to repeat a process multiple times. For example, recall the game of betting on one roll of a die with the following rules:
+```{r}
+choices = c("Head","Tail")
+print(choices)
+one_flip(sample(choices,size = 1))
+```
 
-* If the die shows 1 or 2 spots, my net gain is -1 dollar.
-* If the die shows 3 or 4 spots, my net gain is 0 dollars.
-* If the die shows 5 or 6 spots, my net gain is 1 dollar.
+The specification of the vector can be part of the argument.
+By embedding, the specification in the code, we obtain a single-line program that uses one_flip to simulate one round of the coin tossing game.
+
+```{r}
+one_flip(sample(c("Head","Tail"),size = 1))
+```
+
+Now let us expand this and develop a multi-round game.
 
 ### Prerequisites
 
@@ -420,63 +449,114 @@ As usual, we will make use of the tidyverse.
 library(tidyverse)
 ```
 
-### Betting on a Die
+## A Betting Game Program
 
-The function `bet_on_one_roll` takes no argument. Each time it is called, it simulates one roll of a fair die and returns the net gain in dollars.
+Previously, we split the game into two actions: a function computing the gain/loss and a program simulating one-round of the game using the gain/loss function.
+We can combine the two into one.
 
 ```{r}
-bet_on_one_roll <- function(x) {
+betting_one_round<- function(x) {
   # Returns my net gain on one bet
-  x <- sample(1:6, size = 1) # roll a die once and record the number of spots
-  if (x <= 2) {
+  x <- sample(c("Head","Tail"), size = 1) # roll a die once and record the number of spots
+  if (x == "Head") {
     return(-1)
-  } else if (x <= 4) {
-    return(0)
-  } else if (x <= 6) {
+  } else if (x == "Tail") {
     return(1)
+  } else {
+    return(0)
   }
 }
 ```
 
-Playing this game once is easy:
+We can play the game by simply calling the function.
 
 ```{r}
-bet_on_one_roll()
+betting_one_round()
 ```
 
-To get a sense of how variable the results are, we have to play the game over and over again. We could run the cell repeatedly, but that's tedious, and if we wanted to do it a thousand times or a million times, forget it.
+You can run the code several times to see (a) the value is sometimes 1 and sometimes -1 and (b) the value is never 0.
 
-A more automated solution is to use a `for` statement to loop over the contents of a sequence. This is called *iteration*. A `for` statement begins with the word `for`, followed by a name we want to give each item in the sequence, followed by the word `in`, and ending with an expression that evaluates to a sequence. The indented body of the `for` statement is executed once *for each item in that sequence*.
+How often do we get to see 1 and how often do we get to see -1?
+Well, the program relies upon an equal possible selection between the two elements in the vector `c("Head","Tail"), and the selections result in 1 and -1, respectively.
+We thus anticipate to see 1 as often as we see -1.
+You can click the "Run" button a few times to and check, of the runs you have clicked, how many times you have seen 1.
+The number of times you have seen -1 is the total number of clicks you have made minus the number of 1's.
+You can then compare how big a difference the two numbers have between them.
+
+That would be kind of cumbersome.
+
+We can task R to take care of the cumbersome action.
+We can instruct a computer program to repeat some action a number of times with a specific instruction with/without some round-specific information, such as, "for round X, use this information".
+*Iteration* is the name we use to refer to repeating things with computer programs.
+In R and in many other programs, a keyword that leads a code for *iteration* is `for`.
+Also, *loop* is the word we use to refer to repeating a process.
+So, a code that repeats a process with `for` as the header is a *for-loop*.
+In R, the way to specify a for-loop is to say: "for each item appearing in the following sequence, starting from the first and towards its end, do this, as we illustrate in the next code.
 
 ```{r}
-for (animal in c("cat", "dog", "rabbit")) {
-  print(animal)
+for (hand in c("rock", "paper", "scissors")) {
+  print(hand)
 }
 ```
 
-Here we use a `for` statement in a more realistic way: we print the results of betting five times on the die as described earlier. This is called *simulating* the results of five bets. We use the word *simulating* to remind ourselves that we are not physically rolling dice and exchanging money but using R to mimic the process.
+```{r}
+for (season in c("spring", "summer", "fall", "winter")) {
+  print(season)
+}
+```
 
-To repeat a process `n` times, it is common to use the sequence `1:n` in the for statement. It is also common to use a very short name for each item. In our code we will use the name `i` to remind ourselves that it refers to an item.
+In the two programs, `hand` and `season` are the names we use to refer to the elements that the item iteration picks from the lists.
+In other words, the first for-loop picks an item from the three-element sequence and we use the name `hand` to access the item.
+The same deal is for the second for-loop.
+
+Our present interest is in writing a program that repeats the betting game many times.
+To repeat an action a number of times, we use a pair of numbers with a colon in between.
+The expression is `X:Y`, where `X` represents the start and `Y` the end.
+The expression represents the series of integers starting from `X` and ending with `Y`.
+Here are some examples.
+```{r, error=TRUE}
+1:5
+30:20
+a = 18
+b = 7
+a:b
+b:a
+```
+
+Wow!
+R is so smart that when the second number is smaller than the first number, decreases the number by 1, instead of increasing it by 1.
+
+Now we can use the sequence generation to write a for-loop.
+Here is a one that prints 1 through 5.
 
 ```{r}
 for (i in 1:5) {
-  print(bet_on_one_roll())
+  print(i)
 }
 ```
 
-In this case, we simply perform exactly the same (random) action several times, so the code in the body of our `for` statement does not actually refer to `i`.
+Using this idea, we can repeat the 
+```{r}
+for (i in 1:10) {
+  print(betting_one_round())
+}
+```
 
-While the `for` statement above does simulate the results of five bets, the results are simply printed and are not in a form that we can use for computation. A vector of results would be more useful. Thus a typical use of a `for` statement is to create a vector of results. 
+Note that the program `better_one_round()' is self-contained, meaning not requiring an argument, and so the code that R runs is identical among the ten iterations.
+However, `betting_one_round` has `sample` that we embedded, and that introduces randomness in the execution, and therefore the results we see in the ten lines are not uniform and can be different each time we run the for-loop.
 
-### Example: Betting on 5 rolls 
+### Fetching the Outcomes
 
-Our experiment will simulate five bets on a die and collect the results in an vector that we will call `outcomes`. To be efficient, we will use the knowledge of the total number of simulations to pre-define the length of `outcomes`; this will help R speed up the computation. 
+Having the program in the above a number of times, you may have wondered "the results of the ten runs disappear; is there a way to record them?"
+The answer is in the positive, and it is not too complicated.
+We create a series of empty boxes to store the results, where the series has the same length as the number of times we will run the betting, and then in the boxes, we will store the results one after another.
+
 
 ```{r}
-num_rolls <- 5
-outcomes <- vector("integer", num_rolls)  # create a vector with length num_rolls
-for (i in 1:num_rolls) {
-  outcomes[i] <- bet_on_one_roll()
+num_rounds <- 10
+outcomes <- vector("integer", num_rounds)  # create a vector with length num_flips
+for (i in 1:num_rounds) {
+  outcomes[i] <- betting_one_round()
 }
 ```
 
@@ -484,7 +564,7 @@ for (i in 1:num_rolls) {
 outcomes
 ```
 
-This will do the job. The body of this `for` statement contains two actions: (1) run the betting function `bet_on_one_roll()`, and (2) store the result into `i`th slot of the `outcomes` vector. Both actions are executed for each item in the sequence `1:num_rolls`.
+This will do the job. The body of this `for` statement contains two actions: (1) run the betting function `betting_one)_round()`, and (2) store the result into `i`th slot of the `outcomes` vector. Both actions are executed for each item in the sequence `1:num_rounds`.
 
 You may have noticed how cycling through the `outcomes` vector this way, individually assigning each element the result of one bet, can be cumbersome. If so, you would be in good company. The philosophy of R prefers to operate on vectors in whole, rather than in pieces as in the code we saw just above. In this way, we can eliminate the need for many common `for` statements. To demonstrate this, we introduce the idea of *maps* and *functionals*. 
 
@@ -604,30 +684,30 @@ While map eliminates the need to write `for` statements in common situations, ke
 
 We now have all the pieces we need to take on the die roll simulation. 
 
-### Example: Betting on 5 Rolls (revisited)
+### Example: Betting on 10 Coin Tosses (revisited)
 
 Let's recall the code we wrote earlier to perform the simulation.
 
 ```{r}
-num_rolls <- 5
-outcomes <- vector("integer", num_rolls)  # create a vector with length num_rolls
-for (i in 1:num_rolls) {
-  outcomes[i] <- bet_on_one_roll()
+num_rounds <- 10
+outcomes <- vector("integer", num_rounds)  # create a vector with length num_roundds
+for (i in 1:num_rounds) {
+  outcomes[i] <- betting_one_round()
 }
 ```
 
 Using what we have learned about map, we can rewrite this simulation to just two lines. 
 
 ```{r}
-num_rolls <- 5
-outcomes <- map_dbl(1:num_rolls, bet_on_one_roll)
+num_rounds <- 10
+outcomes <- map_dbl(1:num_rounds, betting_one_round)
 ```
 
 ```{r}
 outcomes
 ```
 
-Note how the input vector `1:num_rolls` serves as a placeholder here. Meaning, the values in this vector do not matter as they will be overwritten with the results from the bet; only the length of the vector is important. 
+Note how the input vector `1:num_rounds` serves as a placeholder here. Meaning, the values in this vector do not matter as they will be overwritten with the results from the bet; only the length of the vector is important. 
 
 We can use `sum()` to count the number of times money changed hands.
 
@@ -635,13 +715,13 @@ We can use `sum()` to count the number of times money changed hands.
 sum(outcomes)
 ```
 
-### Example: Betting on 300 Rolls
+### Example: Betting on 300 Tosses
 
 Iteration using maps is a powerful technique. For example, we can see the variation in the results of 300 bets by running exactly the same code for 300 bets instead of five.
 
 ```{r}
-num_rolls <- 300
-outcomes <- map_dbl(1:num_rolls, bet_on_one_roll)
+num_rounds <- 300
+outcomes <- map_dbl(1:num_rounds, betting_one_round)
 ```
 
 The vector `outcomes` contains the results of all 300 bets.
@@ -650,7 +730,7 @@ The vector `outcomes` contains the results of all 300 bets.
 length(outcomes)
 ```
 
-To see how often the three different possible results appeared, we can create a tibble from `outcomes` and then use `ggplot2`.
+To see how often the two different possible results appeared, we can create a tibble from `outcomes` and then use `ggplot2`.
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 outcome_df <- tibble(outcomes)
@@ -659,33 +739,70 @@ ggplot(outcome_df, aes(x = outcomes)) +
   coord_flip()
 ```
 
-Not surprisingly, each of the three outcomes -1, 0, and 1 appeared about about 100 of the 300 times, give or take. We will examine the "give or take" amounts more closely in later chapters.
+Not surprisingly, each of the two outcomes -1 and 1 appeared about about 150 of the 300 times, give or take. We will examine the "give or take" amounts more closely in later chapters.
 
 ## Simulation
 
-Simulation is the process of using a computer to mimic a physical experiment. In this class, those experiments will almost invariably involve chance.
+Simulation, in data science, refers to the use of computer programs to imitate a physical process.
+Sometimes we call it "computer simulation" to articulate that the a computer is the do-er of the simulation.
+A simulation consists of multiple steps.
+The first step is to figure out which part of the physical process we want to imitate using computation and decide how we will represent the part numerically.
+The second step is to figure out how to generate values for the numerical representation from the first step using a computer program.
+If some numbers require updates during the imitation procedure, we will figure out how we will update them.
+Also, we often need to incorporate "chances" in the imitation procedure.
+Think of the famous the story of a king awarding a minister with doubling amount of grains.
+There are many versions of the story, but the gist is like this:
+<!-- Please add some formatting -->
+One day a king has decided to award a minister for his great work.
+The kind asks, "Great work, what do you want from me as a reward? You name it, I will make you wish come true."
+The minister says, "Your Majestry, what an honor! If you are so kind as to indulge me, may ask to receive grains of rice on a board chess. We will start with one grain on a space on the board, given one day. The next day, I would like two grains on the next space. The following day, I would like four grains on the third space. Each day, I would like twice as many grains as you have given me on the previous day. In this manner, for the next 64 days, you would be so generous to give me grains of rice. Would that be too imposing to ask?"
+The king says, "You ask so little. That would be so easy to do. Of course, this great King will grant you your request."
 
-We have seen how to simulate the results of tosses of a coin. The steps in that simulation were examples of the steps that will constitute every simulation we do in this course. In this section we will set out those steps and follow them in examples.
+The question is how many grains of rice will this minister would receive at the end of the 64 day period?
 
-### Step 1: What to Simulate
+We know the answer to the question.
+The daily amount doubles each day starting from 1.
+He would thus receive:
+\[
+1 + 2 + 4 + 8 + \cdots + 2^{63}
+\]
+This quantity is equal to $2^{64} - 1$.
+Why? Suppose he has one more grain in his pocket to add to the piles at the end of the 64th day.
+We have
+\[
+1 + 1 + 2 + 4 + 8 + \cdots + 2^{63} - 1
+\]
+as the same total amount.
+The first two occurrences of 1 are equal to 2. So we can simplify the sum as
+\[
+2 + 2 + 4 + 8 + \cdots + 2^{63} - 1
+\]
+We have got rid of the twos.
+By joining the first two 2's, we get
+\[
+4 + 4 + 8 + \cdots + 2^{63} - 1
+\]
+At the end of calculation, we get to
+\[
+2^{63} + 2^{63} - 1
+\]
+and this is equal to $2^{64}-1$, which is by the way an obscenely large number.
+We know the story as a fable that tells us we must think before promising something, and the assume that the story took place hundreds of years ago, where there were no computers.
+For the king to provide the grains he had promised to give to the minister, he would have ordered a clerk to do the calculation.
+If the clerk is super-human, her calculation would be perfect, and so the total amount she would provide exactly what we had anticipated.
+But, hey, she is human, and the humans are to err.
+In the process of writing down numbers, they may be various errors, such as skipping a digit or writing a wrong digit.
+If she does not notice an error, the minister would get a different error at the end of the 64 days.
+Suppose we want to mimic the process of her calculation using a computer, with the chance factor in mind.
+This is where "randomness" comes in to play.
 
-Specify the quantity you want to simulate. For example, you might decide that you want to simulate the outcomes of tosses of a coin.
+The third process of simulation is to run the simulation program and develop insights from the result, possibly using visualization.
 
-### Step 2: Simulating One Value 
-
-Figure out how to simulate one value of the quantity you specified in Step 1. In our example, you have to figure out how to simulate the outcome of one toss of a coin. If your quantity is more complicated, you might need several lines of code to come up with one simulated value.
-
-### Step 3: Number of Repetitions 
-
-Decide how many times you want to simulate the quantity. You will have to repeat Step 2 that many times. In one of our earlier examples we had decided to simulate the outcomes of 1000 tosses of a coin, and so we needed 1000 repetitions of generating the outcome of a single toss.
-
-### Step 4: Coding the Simulation
-
-Put it all together in code.
-
+Note that we have followed these steps in our 300 coin tosses experiment.
+What we did in the development of the code is:
 * Create a "repetitions sequence," that is, a sequence whose length is the number of repetitions you specified in Step 3. For n repetitions we will almost always use the sequence `1:n`.
 
-* Create an "experiment" function to simulate one value based on the code you developed in Step 2. 
+* Create an "experiment" function to simulate one value based on the code we developed.
 
 * Create a `map` where the first argument is the repetition sequence and the 
 second argument is the experiment function to simulate one value. 
@@ -697,118 +814,142 @@ That's it! Once you have carried out the steps above, your simulation is done. T
 
 At this point you can use the outcomes vector as you would any other vector. You can visualize the distribution of the simulated values, count how many simulated values fall into a particular category, and so on.
 
-### Number of Heads in 100 Tosses
+### Difference Between the Number of Heads and the Number of Tails in 100 Coin Tosses
 
-It is natural to expect that in 100 tosses of a coin, there will be 50 heads, give or take a few.
+Let us now return to the coin tosses.
+As we see powers of 10 as the easiest kind of numbers to deal with, let us back down from 300 to 100.
+If the coin is fair, we anticipate a half of the tosses we make is "Head".
+The program we have written receives as the number of repetitions, and returns a vector representing the results of the simulated coin tosses with an added interpretation of "Head" as 1 and "Tail" as -1.
+We can go back to the process of flopping a coin and develop an insight as to when we flip a coin 300 times, how the number of "Heads" is likely to look.
 
-But how many is "a few"? What's the chance of getting exactly 50 heads? Questions like these matter in data science not only because they are about interesting aspects of randomness, but also because they can be used in analyzing experiments where assignments to treatment and control groups are decided by the toss of a coin.
-
-In this example we will simulate the number of heads in 100 tosses of a coin. The histogram of our results will give us some insight into how many heads are likely.
+In this example we will simulate the number of heads in 300 tosses of a coin. The histogram of our results will give us some insight into how many heads are likely.
 
 Let's get started on the simulation, following the steps above.
 
-### Step 1: What to Simulate
+### Step 1: Determining What We Want to Simulate
 
-The quantity we are going to simulate is the number of heads in 100 tosses.
+We want to simulate the process of tossing 300 fair coins, where each coin toss generates "Head" or "Tail" as the outcome.
+There is only one number we are interested in the physical process - the number of "Heads".
 
-### Step 2: Simulating One Value
+### Step 2: Figuring our How to Make a Computer Program to Run the Simulation
 
-We have to figure out how to make one set of 100 tosses and count the number of heads. Let's start by creating a coin.
+Now we know that we want to know the number of "Heads" in 100 coin tosses, we have to figure out how to make one set of 100 tosses and count the number of heads. Let's start by creating a coin.
+We eliminate the gain/loss calculation from the previous program in the ensuing simulation program.
+We start by stating the two possible outcomes of toss.
+What we define is a two-element vector, as before, and we call it `sides`.
 
 ```{r}
-coin <- c("Heads", "Tails")
+sides <- c("Heads", "Tails")
+sides
 ```
 
-In our earlier example we used `sample()` and a map to generate multiple tosses. Recall that the size argument of `sample()` can be used to specify the number of times to toss.
-
-Here are the results of 10 tosses.
+We use `sample()` to sample from the two-element vector.
+Recall that we can specify the number of samples and if we want to replenish the array with the item that the sample has chosen.
+The code below shows how we sample from `sides` 8 times with "replenishment".
 
 ```{r}
-ten_tosses <- sample(coin, size = 10, replace = TRUE)
-ten_tosses
+tosses <- sample(sides, size = 8, replace = TRUE)
+tosses
 ```
 
 We can count the number of heads by using `sum()` as before:
 
 ```{r}
-sum(ten_tosses == "Heads")
+sum(tosses == "Heads")
 ```
 
-Our goal is to simulate the number of heads in 100 tosses, not 10. To do that we can just repeat the same code, replacing 10 by 100.
+Our goal is to simulate the number of heads in 100 tosses.
+We have only to replace the 8 with 100 and then apply `sum` with the argument checking whether the element is equal to "Heads".
 
 ```{r}
-outcomes <- sample(coin, size = 100, replace = TRUE)
+outcomes <- sample(sides, size = 100, replace = TRUE)
 num_heads <- sum(outcomes == "Heads")
 num_heads
 ```
 
-Let's wrap this up in a function we can use in our simulation. 
+Play with the code a few times to see how close the number gets to the expected one half, 150.
 
 ```{r}
-coin_flip_experiment <- function(x) {
-  outcomes <- sample(coin, size = 100, replace = TRUE)
+one_trial <- function(x) {
+  outcomes <- sample(sides, size = 100, replace = TRUE)
   num_heads <- sum(outcomes == "Heads")
   return(num_heads)
 } 
 ```
 
+You can simply call this function to generate an outcome of one experiment.
 
-### Step 3: Number of Repetitions
+```{r}
+one_trial(x)
+```
 
-How many repetitions we want is up to us. The more we use, the more reliable our simulations will be, but the longer it will take to run the code. R is pretty fast at tossing coins. Let's go for 10,000 repetitions. That means we are going to do the following 10,000 times:
+### Step 3: Running a Simulation
 
-* Toss a coin 100 times and count the number of heads.
-
-That's a lot of tossing! It's good that we have R to do it for us.
-
-### Step 4: Coding the Simulation
-
-We are ready to write the code to execute the entire simulation.
+We have programmed `one_trial` so that it executes 100 coin tosses and returns the number of "Heads".
+We can use a for-loop to repeat `one_trial` as many times we want.
+Here we face a critical question, "for our goal of developing an insight about coin tosses, how many times do we want to repeat it?"
+Since R is pretty fast at running the code for `one_trial`.
+We can easily run the code 10,000 times.
+To do that, we use the map.
 
 ```{r}
 # Number of repetitions
 num_repetitions <- 10000
 
 # simulate the experiment!
-heads <- map_dbl(1:num_repetitions, coin_flip_experiment)
+heads <- map_dbl(1:num_repetitions, one_trial)
 
 # That's it! The simulation is done.
+
 ```
 
-Check that the vector `heads` contains 10,000 entries, one for each repetition of the experiment.
+By executing `heads` after this produces all elements of `heads `.
+That will be a lot of lines on the scree, so you may not want to do it!
+Instead, we can ask `heads` how many elements it has, using the `length` function we have seen before.
 
 ```{r}
 length(heads)
 ```
 
-To get a sense of the variability in the number of heads in 100 tosses, we can collect the results in a table and draw a histogram.
+Aha! It has the desired number of elements.
+We can peek at some of the elements in the vector.
 
 ```{r}
-simulation_results <- tibble(
+heads[1]
+heads[2]
+```
+
+Now using `tibble` we can collect the results as a table.
+Recall that `tibble` needs the index values and the data.
+
+```{r}
+results <- tibble(
   repetition = 1:num_repetitions,
   num_heads = heads
 )
 ```
 
 ```{r}
-simulation_results
+results
 ```
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(simulation_results) + 
+ggplot(results) + 
   geom_histogram(aes(x = num_heads, y = ..density..), breaks = seq(30.5, 69.6, 1))
 ```
 
-Each bins has width 1 and is centered at each value of the number of heads.
+In this histogram, each bin has width 1 and we place it centered on the value.
+For example, the vertical bar on 50 is the number of times the simulation generated 50 as the result.
+We see that the histogram looks symmetric with 50 as the center, which is a good sign.
+Why?
+Our expectation is that the number 50 is the ideal number of "Heads" in 100 tosses of a fair coin.
+If the coin is fair, for all number $d$, the event that we see $50-d$ "Heads" is as likely to happen as the event that we see $50+d$ Heads.
+The symmetry that we observe confirms the hypothesis.
+We also see that about 8% (i.e., 0.08 on the y-axis) of the simulation results produced 50.
+Furthermore, we see that very few times we see occurrences of numbers less than 35 or greater than 65.
+We thus conclude from the experiment that the range of thew number is likely to reside in the rnage [35,65].
 
-Not surprisingly, the histogram looks roughly symmetric around 50 heads. The height of the bar at 50 is about 8% per unit. Since each bin is 1 unit wide, this is the same as saying that about 8% of the repetitions produced exactly 50 heads. That's not a huge percent, but it's the largest compared to the percent at every other number of heads.
-
-The histogram also shows that in almost all of the repetitions, the number of heads in 100 tosses was somewhere between 35 and 65. Indeed, the bulk of the repetitions produced numbers of heads in the range 45 to 55.
-
-While in theory it is *possible* that the number of heads can be anywhere between 0 and 100, the simulation shows that the range of probable values is much smaller.
-
-This is an instance of a more general phenomenon about the variability in coin tossing, as we will see later in the course.
-
+<!--
 ### Moves in Monopoly
 
 Each move in the game Monopoly is determined by the total number of spots of two rolls of a die. If you play Monopoly, what should you expect to get when you roll the die two times?
@@ -852,6 +993,8 @@ ggplot(results) +
 ```
 
 Seven is the most common value, with the frequencies falling off symmetrically on either side.
+
+-->
 
 ## The Monty Hall Problem
 
