@@ -1135,10 +1135,13 @@ print(check_duplicate(birthdays))
 
 If we want to compute the number of people with unique birthdays, we need a bit different calculation, which can be a bit more complex.
 For now, we will just need to know whether `num_duplicates` is 0 or not, and so we will not worry about it.
+The above calculation using iteration is a bit cumbersome.
+Fortunately, there is a way to obtain the number of unique values appearing in a vector.
+The method is `unique`.
+It receives a vector and returns the unique number of elements in it.
+We thus start by writing a code for generating the result of one experiment with a number of people as an argument. 
 
-Like before, we run simulations many times.
-We start by writing a code for generating the result of one experiment with a number of people as an argument. 
-
+<!--
 ```{r}
 one_birthday_trial <- function(x) {
   birthdays <- generate_birthdays(x)
@@ -1151,6 +1154,16 @@ one_birthday_trial <- function(x) {
   return (num_duplicates)
 } 
 ```
+-->
+
+```{r}
+one_birthday_trial <- function(x) {
+  birthdays <- generate_birthdays(x)
+  return(x - length(unique(birthdays)))
+} 
+```
+
+The function `one_birthday_trial` generates a random birthday sequence of length `x` and then return `x` minus the length of the `unique` version of the birthday sequence.
 
 ```{r}
 one_birthday_trial(23)
