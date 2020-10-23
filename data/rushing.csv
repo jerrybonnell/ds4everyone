@@ -1,0 +1,501 @@
+﻿Year,Rank,Player,Pos,Cl,Gm,Carries,Net,TDs,Avg,Ydspgm
+2012,1,"Ka'Deem Carey, Arizona",RB,SO,13,303,1929,23,6.37,148.38
+2012,2,"Stefphon Jefferson, Nevada",RB,JR,13,375,1883,24,5.02,144.85
+2012,3,"Le'Veon Bell, Michigan St.",RB,JR,13,382,1793,12,4.69,137.92
+2012,4,"Kenjon Barner, Oregon",RB,SR,13,278,1767,21,6.36,135.92
+2012,5,"Antonio Andrews, Western Ky.",RB,JR,13,304,1728,11,5.68,132.92
+2012,6,"Montee Ball, Wisconsin",RB,SR,14,356,1830,22,5.14,130.71
+2012,7,"Jordan Lynch, Northern Ill.",QB,JR,14,294,1815,19,6.17,129.64
+2012,8,"David Fluellen, Toledo",RB,JR,12,259,1498,13,5.78,124.83
+2012,9,"Johnathan Franklin, UCLA",RB,SR,14,282,1734,13,6.15,123.86
+2012,10,"Beau Blankenship, Ohio",RB,JR,13,312,1604,15,5.14,123.38
+2012,11,"Giovani Bernard, North Carolina",RB,SO,10,184,1228,12,6.67,122.8
+2012,12,"Kasey Carrier, New Mexico",RB,JR,12,255,1469,15,5.76,122.42
+2012,13,"Kerwynn Williams, Utah St.",RB,SR,13,218,1512,15,6.94,116.31
+2012,14,"Zurlon Tipton, Central Mich.",RB,JR,13,252,1497,19,5.94,115.15
+2012,15,"Denard Robinson, Michigan",QB,SR,11,177,1266,7,7.15,115.09
+2012,16,"Robbie Rouse, Fresno St.",RB,SR,13,282,1490,12,5.28,114.62
+2012,17,"James Sims, Kansas",RB,JR,9,218,1013,9,4.65,112.56
+2012,18,"Adam Muema, San Diego St.",RB,SO,13,237,1458,16,6.15,112.15
+2012,19,"Bishop Sankey, Washington",RB,SO,13,289,1439,16,4.98,110.69
+2012,20,"Stepfan Taylor, Stanford",RB,SR,14,322,1530,13,4.75,109.29
+2012,21,"Joseph Randle, Oklahoma St.",RB,JR,13,274,1417,14,5.17,109
+2012,22,"Johnny Manziel, Texas A&M",QB,FR,13,201,1410,21,7.01,108.46
+2012,22,"Jahwan Edwards, Ball St.",RB,SO,13,232,1410,14,6.08,108.46
+2012,24,"Braxton Miller, Ohio St.",QB,SO,12,227,1271,13,5.6,105.92
+2012,25,"Montel Harris, Temple",RB,SR,10,186,1054,12,5.67,105.4
+2012,26,"Venric Mark, Northwestern",RB,JR,13,226,1366,12,6.04,105.08
+2012,27,"Cody Getz, Air Force",RB,SR,12,198,1248,9,6.3,104
+2012,27,"Trent Steelman, Army",QB,SR,12,241,1248,17,5.18,104
+2012,29,"George Winn, Cincinnati",RB,SR,13,243,1334,13,5.49,102.62
+2012,30,"Dri Archer, Kent St.",RB,JR,14,159,1429,16,8.99,102.07
+2012,31,"Raymond Maples, Army",RB,JR,12,223,1215,2,5.45,101.25
+2012,32,"Latavius Murray, UCF",RB,SR,11,198,1106,15,5.59,100.55
+2012,33,"Kenneth Dixon, Louisiana Tech",RB,FR,12,200,1194,27,5.97,99.5
+2012,34,"Todd Gurley, Georgia",RB,FR,14,222,1385,17,6.24,98.93
+2012,35,"Zach Line, SMU",RB,SR,13,277,1278,13,4.61,98.31
+2012,36,"Carlos Hyde, Ohio St.",RB,JR,10,185,970,16,5.24,97
+2012,37,"Tim Cornett, UNLV",RB,JR,13,242,1232,7,5.09,94.77
+2012,38,"John White, Utah",RB,SR,11,218,1041,8,4.78,94.64
+2012,39,"Charles Sims, Houston",RB,JR,9,142,851,11,5.99,94.56
+2012,40,"Eddie Lacy, Alabama",RB,JR,14,204,1322,17,6.48,94.43
+2012,41,"Trayion Durham, Kent St.",RB,SO,14,276,1316,14,4.77,94
+2012,42,"Cody Fajardo, Nevada",QB,SO,12,190,1121,12,5.9,93.42
+2012,43,"Jerome Smith, Syracuse",RB,JR,13,227,1171,3,5.16,90.08
+2012,44,"Mike Gillislee, Florida",RB,SR,13,244,1152,10,4.72,88.62
+2012,45,"Zac Stacy, Vanderbilt",RB,SR,13,207,1141,10,5.51,87.77
+2012,46,"D.J. Harper, Boise St.",RB,SR,13,228,1137,15,4.99,87.46
+2012,47,"Jawon Chisholm, Akron",RB,SO,11,180,953,5,5.29,86.64
+2012,48,"Darrin Reaves, UAB",RB,SO,12,215,1037,13,4.82,86.42
+2012,49,"Kendial Lawrence, Missouri",RB,SR,12,200,1025,12,5.13,85.42
+2012,50,"Ladarius Perkins, Mississippi St.",RB,JR,12,205,1024,8,5,85.33
+2012,51,"Trey Watts, Tulsa",RB,JR,13,186,1108,3,5.96,85.23
+2012,52,"Shawn Southward, Troy",RB,SR,12,194,1012,10,5.22,84.33
+2012,53,"Tre Mason, Auburn",RB,SO,12,171,1002,8,5.86,83.5
+2012,54,"Zach Zwinak, Penn St.",RB,SO,12,203,1000,6,4.93,83.33
+2012,55,"Anthon Samuel, Bowling Green",RB,SO,12,202,998,11,4.94,83.17
+2012,56,"Andre Ellington, Clemson",RB,SR,13,212,1081,8,5.1,83.15
+2012,57,"Bronson Hill, Eastern Mich.",RB,SO,11,140,910,6,6.5,82.73
+2012,58,"Jawan Jamison, Rutgers",RB,SO,13,255,1075,4,4.22,82.69
+2012,59,"David Oku, Arkansas St.",RB,JR,13,243,1061,16,4.37,81.62
+2012,60,"Nathan Jeffery, UTEP",RB,SO,11,184,897,7,4.88,81.55
+2012,61,"Mark Weisman, Iowa",RB,SO,10,159,815,8,5.13,81.5
+2012,62,"Ameer Abdullah, Nebraska",RB,SO,14,226,1137,8,5.03,81.21
+2012,63,"Vintavious Cooper, East Carolina",RB,JR,13,200,1049,7,5.25,80.69
+2012,64,"Ray Graham, Pittsburgh",RB,SR,13,222,1042,11,4.69,80.15
+2012,65,"T.J. Yeldon, Alabama",RB,FR,14,175,1108,12,6.33,79.14
+2012,66,"Duke Johnson, Miami (FL)",RB,FR,12,139,947,10,6.81,78.92
+2012,66,"Dareyon Chance, Western Mich.",RB,JR,12,176,947,4,5.38,78.92
+2012,68,"De'Leon Eskridge, San Jose St.",RB,SR,13,207,1025,11,4.95,78.85
+2012,69,"Storm Woods, Oregon St.",RB,FR,12,192,940,13,4.9,78.33
+2012,70,"Lyle McCombs, Connecticut",RB,SO,11,243,860,6,3.54,78.18
+2012,71,"Lache Seastrunk, Baylor",RB,SO,13,131,1012,7,7.73,77.85
+2012,72,"Kedrick Rhodes, FIU",RB,JR,9,156,699,3,4.48,77.67
+2012,73,"Larry Dixon, Army",RB,SO,11,140,839,6,5.99,76.27
+2012,74,"Silas Redd, Southern California",RB,JR,12,167,905,9,5.42,75.42
+2012,75,"Alonzo Harris, La.-Lafayette",RB,SO,12,170,881,10,5.18,73.42
+2012,76,"John Hubert, Kansas St.",RB,JR,13,189,947,15,5.01,72.85
+2012,77,"Taylor Martinez, Nebraska",QB,JR,14,195,1019,10,5.23,72.79
+2012,78,"Damien Williams, Oklahoma",RB,JR,13,176,946,11,5.38,72.77
+2012,79,"Brandin Byrd, North Texas",RB,JR,12,205,860,4,4.2,71.67
+2012,80,"Donnell Kirkwood, Minnesota",RB,SO,13,218,926,6,4.25,71.23
+2012,81,"Jordan Parker, Middle Tenn.",RB,FR,12,166,851,3,5.13,70.92
+2012,82,"Rajion Neal, Tennessee",RB,JR,10,156,708,5,4.54,70.8
+2012,83,"Collin Klein, Kansas St.",QB,SR,13,207,920,23,4.44,70.77
+2012,84,"Theo Riddick, Notre Dame",RB,SR,13,190,917,5,4.83,70.54
+2012,85,"Jeff Scott, Ole Miss",RB,JR,12,197,846,6,4.29,70.5
+2012,86,"Shadrach Thornton, North Carolina St.",RB,FR,10,154,694,3,4.51,69.4
+2012,87,"Christian Powell, Colorado",RB,FR,10,158,691,7,4.37,69.1
+2012,88,"Cole Gautsche, New Mexico",QB,FR,11,109,760,7,6.97,69.09
+2012,88,"Tony Pierson, Kansas",RB,SO,11,117,760,4,6.5,69.09
+2012,90,"Kain Colter, Northwestern",QB,JR,13,170,894,12,5.26,68.77
+2012,91,"Walter Kazee, San Diego St.",RB,SR,12,161,822,8,5.11,68.5
+2012,92,"Glasco Martin, Baylor",RB,JR,13,179,889,15,4.97,68.38
+2012,93,"Gee Gee Greene, Navy",RB,SR,13,120,877,3,7.31,67.46
+2012,94,"Cierre Wood, Notre Dame",RB,SR,11,114,742,4,6.51,67.45
+2012,95,"Ray Holley, Louisiana Tech",RB,SR,11,142,740,7,5.21,67.27
+2012,96,"Akeem Shavers, Purdue",RB,SR,13,181,871,6,4.81,67
+2012,96,"Kevin Grooms, Marshall",RB,FR,11,121,737,8,6.09,67
+2012,98,"Ja'Terian Douglas, Tulsa",RB,JR,14,137,936,7,6.83,66.86
+2012,99,"C.J. Anderson, California",RB,SR,12,126,790,4,6.27,65.83
+2012,100,"Andrew Buie, West Virginia",RB,SO,13,179,851,7,4.75,65.46
+2011,1,"LaMichael James, Oregon",RB,JR,12,247,1805,18,7.31,150.42
+2011,2,"Bobby Rainey, Western Ky.",RB,SR,12,369,1695,13,4.59,141.25
+2011,3,"Montee Ball, Wisconsin",RB,JR,14,307,1923,33,6.26,137.36
+2011,4,"Ronnie Hillman, San Diego St.",RB,SO,13,311,1711,19,5.5,131.62
+2011,5,"Trent Richardson, Alabama",RB,JR,13,283,1679,21,5.93,129.15
+2011,6,"Bernard Pierce, Temple",RB,JR,12,273,1481,27,5.42,123.42
+2011,7,"Zach Line, SMU",RB,JR,10,208,1224,17,5.88,122.4
+2011,8,"David Wilson, Virginia Tech",RB,JR,14,290,1709,9,5.89,122.07
+2011,9,"Robbie Rouse, Fresno St.",RB,JR,13,329,1549,13,4.71,119.15
+2011,10,"Terrance Ganaway, Baylor",RB,SR,13,250,1547,21,6.19,119
+2011,11,"John White, Utah",RB,JR,13,316,1519,15,4.81,116.85
+2011,12,"Henry Josey, Missouri",RB,SO,10,145,1168,9,8.06,116.8
+2011,13,"Robert Turbin, Utah St.",RB,JR,13,249,1517,19,6.09,116.69
+2011,14,"Branden Oliver, Buffalo",RB,SO,12,306,1395,13,4.56,116.25
+2011,15,"Marcus Coker, Iowa",RB,SO,12,281,1384,15,4.93,115.33
+2011,16,"Chris Polk, Washington",RB,JR,13,293,1488,12,5.08,114.46
+2011,17,"Adonis Thomas, Toledo",RB,SR,10,171,1071,12,6.26,107.1
+2011,18,"Lamar Miller, Miami (FL)",RB,SO,12,227,1272,9,5.6,106
+2011,19,"Rex Burkhead, Nebraska",RB,JR,13,284,1357,15,4.78,104.38
+2011,20,"Michael Dyer, Auburn",RB,SO,12,242,1242,10,5.13,103.5
+2011,21,"Stepfan Taylor, Stanford",RB,JR,13,242,1330,10,5.5,102.31
+2011,22,"Isi Sofele, California",RB,JR,13,252,1322,10,5.25,101.69
+2011,23,"Doug Martin, Boise St.",RB,SR,13,263,1299,16,4.94,99.92
+2011,24,"Alfred Morris, Fla. Atlantic",RB,SR,12,235,1186,9,5.05,98.83
+2011,25,"Chandler Harnish, Northern Ill.",QB,SR,14,194,1379,11,7.11,98.5
+2011,26,"Raymond Maples, Army",RB,SO,11,146,1066,4,7.3,96.91
+2011,27,"Isaiah Pead, Cincinnati",RB,SR,13,237,1259,12,5.31,96.85
+2011,28,"Giovani Bernard, North Carolina",RB,FR,13,239,1253,13,5.24,96.38
+2011,29,"Lyle McCombs, Connecticut",RB,FR,12,275,1151,7,4.19,95.92
+2011,30,"Silas Redd, Penn St.",RB,SO,13,244,1241,7,5.09,95.46
+2011,31,"Cyrus Gray, Texas A&M",RB,SR,11,198,1045,12,5.28,95
+2011,32,"Chris Nwoke, Colorado St.",RB,SO,12,200,1130,9,5.65,94.17
+2011,33,"Anthon Samuel, Bowling Green",RB,FR,9,144,844,5,5.86,93.78
+2011,34,"Joseph Randle, Oklahoma St.",RB,SO,13,208,1216,24,5.85,93.54
+2011,35,"Lance Dunbar, North Texas",RB,SR,12,269,1115,10,4.14,92.92
+2011,36,"Zac Stacy, Vanderbilt",RB,JR,13,201,1193,14,5.94,91.77
+2011,37,"Vick Ballard, Mississippi St.",RB,SR,13,193,1189,10,6.16,91.46
+2011,38,"Andre Ellington, Clemson",RB,JR,13,223,1178,11,5.28,90.62
+2011,39,"Denard Robinson, Michigan",QB,JR,13,221,1176,16,5.32,90.46
+2011,40,"Kedrick Rhodes, FIU",RB,SO,13,234,1149,8,4.91,88.38
+2011,41,"MarQueis Gray, Minnesota",WR,JR,11,199,966,6,4.85,87.82
+2011,42,"Collin Klein, Kansas St.",QB,JR,13,317,1141,27,3.6,87.77
+2011,43,"Antwon Bailey, Syracuse",RB,SR,12,240,1051,6,4.38,87.58
+2011,44,"Fitzgerald Toussaint, Michigan",RB,JR,12,187,1041,9,5.57,86.75
+2011,45,"Asher Clark, Air Force",RB,SR,13,163,1110,7,6.81,85.38
+2011,46,"Cierre Wood, Notre Dame",RB,JR,13,217,1102,9,5.08,84.77
+2011,47,"Lennon Creer, Louisiana Tech",RB,SR,10,198,838,9,4.23,83.8
+2011,48,"Curtis McNeal, Southern California",RB,JR,12,145,1005,6,6.93,83.75
+2011,49,"Kriss Proctor, Navy",QB,SR,11,211,914,14,4.33,83.09
+2011,50,"Kenny Turner, New Mexico St.",RB,JR,13,219,1074,10,4.9,82.62
+2011,51,"Donte Harden, Ohio",RB,SR,12,187,986,2,5.27,82.17
+2011,52,"Brandon Rutley, San Jose St.",RB,SR,11,216,903,12,4.18,82.09
+2011,53,"Cameron Marshall, Arizona St.",RB,JR,13,230,1050,18,4.57,80.77
+2011,54,"Alexander Teich, Navy",RB,SR,11,186,883,4,4.75,80.27
+2011,55,"Jawon Chisholm, Akron",RB,FR,12,218,961,5,4.41,80.08
+2011,56,"Kenjon Barner, Oregon",RB,JR,12,152,939,11,6.18,78.25
+2011,57,"Rodney Stewart, Colorado",RB,SR,11,189,854,4,4.52,77.64
+2011,58,"Tevin Washington, Georgia Tech",QB,JR,13,243,987,14,4.06,75.92
+2011,59,"James Franklin, Missouri",QB,SO,13,217,981,15,4.52,75.46
+2011,60,"Jawan Jamison, Rutgers",RB,SO,12,231,897,9,3.88,74.75
+2011,61,"Davin Meggett, Maryland",RB,SR,12,171,896,4,5.24,74.67
+2011,62,"John Hubert, Kansas St.",RB,SO,13,200,970,3,4.85,74.62
+2011,63,"Malcolm Brown, Texas",RB,FR,10,172,742,5,4.31,74.2
+2011,64,"Darrell Scott, South Fla.",RB,JR,11,153,814,5,5.32,74
+2011,65,"Ed Wesley, TCU",RB,JR,10,120,726,6,6.05,72.6
+2011,66,"Jonas Gray, Notre Dame",RB,SR,11,114,791,12,6.94,71.91
+2011,67,"Chris Rainey, Florida",RB,SR,12,171,861,2,5.04,71.75
+2011,68,"Tyler Smith, Rice",RB,SR,12,155,860,5,5.55,71.67
+2011,68,"Trent Steelman, Army",QB,JR,9,132,645,12,4.89,71.67
+2011,70,"Orleans Darkwa, Tulane",RB,SO,13,210,924,13,4.4,71.08
+2011,71,"Isaiah Crowell, Georgia",RB,FR,12,185,850,5,4.59,70.83
+2011,72,"Matt Brown, Temple",RB,JR,13,155,916,6,5.91,70.46
+2011,73,"Perry Jones, Virginia",RB,JR,13,184,915,5,4.97,70.38
+2011,74,"Johnathan Franklin, UCLA",RB,JR,14,166,976,5,5.88,69.71
+2011,75,"Cody Fajardo, Nevada",QB,FR,10,128,694,11,5.42,69.4
+2011,76,"Joe Banyard, UTEP",RB,SR,12,127,832,6,6.55,69.33
+2011,77,"James Washington, North Carolina St.",RB,JR,13,226,897,7,3.97,69
+2011,78,"Jasmin Hopkins, Northern Ill.",RB,SR,14,187,956,15,5.11,68.29
+2011,79,"Ja'Terian Douglas, Tulsa",RB,SO,13,112,883,4,7.88,67.92
+2011,80,"Trey Watts, Tulsa",RB,SO,13,157,881,3,5.61,67.77
+2011,81,"Le'Veon Bell, Michigan St.",RB,SO,14,182,948,13,5.21,67.71
+2011,82,"Waymon James, TCU",RB,SO,13,121,875,6,7.23,67.31
+2011,83,"Taylor Martinez, Nebraska",QB,SO,13,188,874,9,4.65,67.23
+2011,84,"Michael Smith, Utah St.",RB,SR,13,114,870,9,7.63,66.92
+2011,85,"Houston, Indiana",,,12,151,802,8,5.31,66.83
+2011,86,"Edwards, Ball St.",,,12,178,786,11,4.42,65.5
+2011,87,"Rolandan Finch, Boston College",RB,SO,11,157,705,3,4.49,64.09
+2011,88,"Brandon Pendergrass, Wake Forest",RB,SR,13,188,823,9,4.38,63.31
+2011,89,"Charles Sims, Houston",RB,SO,13,110,821,9,7.46,63.15
+2011,90,"Dustin Garrison, West Virginia",RB,FR,12,136,742,6,5.46,61.83
+2011,91,"Alex Gillett, Eastern Mich.",QB,JR,12,169,736,3,4.36,61.33
+2011,92,"Tim Cornett, UNLV",RB,SO,11,119,671,7,5.64,61
+2011,93,"Dennis Johnson, Arkansas",RB,JR,11,106,670,3,6.32,60.91
+2011,94,"James Sims, Kansas",RB,SO,12,182,727,9,3.99,60.58
+2011,95,"Braxton Miller, Ohio St.",QB,FR,12,159,715,7,4.5,59.58
+2011,96,"Kevin Parks, Virginia",RB,FR,12,152,709,9,4.66,59.08
+2011,97,"Princeton McCarty, Idaho",RB,SR,12,149,705,3,4.73,58.75
+2011,98,"Alonzo Harris, La.-Lafayette",RB,FR,12,163,700,8,4.29,58.33
+2011,99,"David Sims, Georgia Tech",QB,SO,12,135,698,7,5.17,58.17
+2011,100,"Tauren Poole, Tennessee",RB,SR,12,187,693,5,3.71,57.75
+2010,1,"LaMichael James, Oregon",RB,SO,12,294,1731,21,5.89,144.25
+2010,2,"Jordan Todman, Connecticut",RB,JR,12,334,1695,14,5.07,141.25
+2010,3,"Bobby Rainey, Western Ky.",RB,JR,12,340,1649,15,4.85,137.42
+2010,4,"Denard Robinson, Michigan",QB,SO,13,256,1702,14,6.65,130.92
+2010,5,"Mikel Leshoure, Illinois",RB,JR,13,281,1697,17,6.04,130.54
+2010,6,"Lance Dunbar, North Texas",RB,JR,12,274,1553,13,5.67,129.42
+2010,7,"Vai Taua, Nevada",RB,SR,13,284,1610,19,5.67,123.85
+2010,8,"Daniel Thomas, Kansas St.",RB,SR,13,298,1585,19,5.32,121.92
+2010,9,"Kendall Hunter, Oklahoma St.",RB,SR,13,271,1548,16,5.71,119.08
+2010,10,"Ronnie Hillman, San Diego St.",RB,FR,13,262,1532,17,5.85,117.85
+2010,11,"Bilal Powell, Louisville",RB,SR,12,229,1405,11,6.14,117.08
+2010,12,"Rodney Stewart, Colorado",RB,JR,12,290,1318,10,4.54,109.83
+2010,13,"Chris Polk, Washington",RB,SO,13,260,1415,9,5.44,108.85
+2010,14,"Zach Line, SMU",RB,SO,14,244,1494,10,6.12,106.71
+2010,15,"Cam Newton, Auburn",QB,JR,14,264,1473,20,5.58,105.21
+2010,16,"Montel Harris, Boston College",RB,JR,12,269,1243,8,4.62,103.58
+2010,17,"Robbie Rouse, Fresno St.",RB,SO,11,205,1129,8,5.51,102.64
+2010,18,"Knile Davis, Arkansas",RB,SO,13,204,1322,13,6.48,101.69
+2010,19,"Anthony Allen, Georgia Tech",RB,SR,13,240,1316,7,5.48,101.23
+2010,20,"Chad Spann, Northern Ill.",RB,SR,14,258,1388,22,5.38,99.14
+2010,21,"Jacquizz Rodgers, Oregon St.",RB,JR,12,256,1184,14,4.63,98.67
+2010,22,"Lennon Creer, Louisiana Tech",RB,JR,12,212,1181,10,5.57,98.42
+2010,23,"Shane Vereen, California",RB,JR,12,231,1167,13,5.05,97.25
+2010,24,"Doug Martin, Boise St.",RB,JR,13,201,1260,12,6.27,96.92
+2010,25,"Delone Carter, Syracuse",RB,SR,13,231,1233,9,5.34,94.85
+2010,26,"Adam Robinson, Iowa",RB,SO,10,203,941,10,4.64,94.1
+2010,27,"Johnathan Franklin, UCLA",RB,SO,12,214,1127,8,5.27,93.92
+2010,28,"Jay Finley, Baylor",RB,SR,13,195,1218,12,6.25,93.69
+2010,29,"Isaiah Pead, Cincinnati",RB,JR,11,157,1029,6,6.55,93.55
+2010,30,"Edwin Baker, Michigan St.",RB,SO,13,207,1201,13,5.8,92.38
+2010,31,"Marcus Lattimore, South Carolina",RB,FR,13,249,1197,17,4.81,92.08
+2010,32,"John Clay, Wisconsin",RB,JR,11,187,1012,14,5.41,92
+2010,33,"Roy Helu Jr., Nebraska",RB,SR,14,188,1245,11,6.62,88.93
+2010,34,"Daneil Herron, Ohio St.",RB,JR,13,216,1155,16,5.35,88.85
+2010,35,"Dion Lewis, Pittsburgh",RB,SO,12,219,1061,13,4.84,88.42
+2010,36,"Stevan Ridley, LSU",RB,JR,13,249,1147,15,4.61,88.23
+2010,37,"James White, Wisconsin",RB,FR,12,156,1052,14,6.74,87.67
+2010,38,"Stepfan Taylor, Stanford",RB,SO,13,223,1137,15,5.1,87.46
+2010,39,"Cyrus Gray, Texas A&M",RB,JR,13,200,1133,12,5.67,87.15
+2010,40,"DeMarco Murray, Oklahoma",RB,SR,14,282,1214,15,4.3,86.71
+2010,41,"Colin Kaepernick, Nevada",QB,SR,14,173,1206,20,6.97,86.14
+2010,42,"Alex Green, Hawaii",RB,SR,14,146,1199,18,8.21,85.64
+2010,43,"Adonis Thomas, Toledo",RB,JR,13,175,1098,8,6.27,84.46
+2010,44,"Orleans Darkwa, Tulane",RB,FR,11,184,925,11,5.03,84.09
+2010,45,"Montee Ball, Wisconsin",RB,SO,12,163,996,18,6.11,83
+2010,46,"Ed Wesley, TCU",RB,SO,13,166,1078,11,6.49,82.92
+2010,47,"Brandon Bolden, Mississippi",RB,JR,12,163,976,14,5.99,81.33
+2010,48,"Vick Ballard, Mississippi St.",RB,JR,12,186,968,19,5.2,80.67
+2010,49,"Ricky Dobbs, Navy",QB,SR,12,266,967,14,3.64,80.58
+2010,50,"Dwayne Priest, Eastern Mich.",RB,SR,9,168,716,8,4.26,79.56
+2010,51,"Mark Ingram, Alabama",RB,JR,11,158,875,13,5.54,79.55
+2010,52,"Tauren Poole, Tennessee",RB,JR,13,204,1034,11,5.07,79.54
+2010,53,"Asher Clark, Air Force",RB,JR,13,182,1031,5,5.66,79.31
+2010,54,"Alexander Robinson, Iowa St.",RB,SR,12,202,946,9,4.68,78.83
+2010,55,"Michael Dyer, Auburn",RB,FR,14,182,1093,5,6.01,78.07
+2010,56,"Evan Royster, Penn St.",RB,SR,13,208,1014,6,4.88,78
+2010,57,"Jared Hassin, Army",RB,SO,13,191,1013,9,5.3,77.92
+2010,58,"Alfred Morris, Fla. Atlantic",RB,JR,12,227,928,7,4.09,77.33
+2010,59,"Ray Graham, Pittsburgh",RB,SO,12,148,922,8,6.23,76.83
+2010,60,"Damien Berry, Miami (FL)",RB,SR,12,190,899,5,4.73,74.92
+2010,61,"Taylor Martinez, Nebraska",QB,FR,13,162,965,12,5.96,74.23
+2010,62,"Sam McGuffie, Rice",RB,SO,12,197,883,6,4.48,73.58
+2010,63,"Alex Allen, Akron",RB,SR,12,186,877,8,4.72,73.08
+2010,64,"Bryce Beall, Houston",RB,JR,12,163,870,12,5.34,72.5
+2010,65,"Noel Devine, West Virginia",RB,SR,13,209,936,6,4.48,72
+2010,66,"Phillip Tanner, Middle Tenn.",RB,SR,13,160,928,13,5.8,71.38
+2010,67,"Pat Shed, UAB",RB,JR,12,157,847,3,5.39,70.58
+2010,68,"J.J. Di Luigi, BYU",RB,JR,13,178,917,8,5.15,70.54
+2010,69,"Marc Tyler, Southern California",RB,JR,13,171,913,9,5.34,70.23
+2010,70,"Kendrick Hardy, Southern Miss.",RB,FR,13,139,903,7,6.5,69.46
+2010,71,"Matt Brown, Temple",RB,SO,12,162,830,7,5.12,69.17
+2010,72,"Keith Payne, Virginia",RB,SR,11,160,749,14,4.68,68.09
+2010,73,"Rex Burkhead, Nebraska",RB,SO,14,172,951,7,5.53,67.93
+2010,74,"Washaun Ealey, Georgia",RB,SO,12,157,811,11,5.17,67.58
+2010,75,"James Sims, Kansas",RB,FR,11,168,742,9,4.42,67.45
+2010,76,"Nathan Scheelhaase, Illinois",QB,FR,13,185,868,5,4.69,66.77
+2010,77,"Alexander Teich, Navy",RB,JR,13,147,863,5,5.87,66.38
+2010,78,"Bernard Pierce, Temple",RB,SO,11,154,728,10,4.73,66.18
+2010,79,"Allen Bradford, Southern California",RB,SR,12,110,794,5,7.22,66.17
+2010,80,"Alvester Alexander, Wyoming",RB,SO,12,189,792,14,4.19,66
+2010,81,"Thomas Merriweather, Miami (OH)",RB,SR,14,176,921,12,5.23,65.79
+2010,82,"Cameron Marshall, Arizona St.",RB,SO,12,150,787,9,5.25,65.58
+2010,83,"Josh Harris, Wake Forest",RB,FR,11,126,720,7,5.71,65.45
+2010,84,"Jon Williams, East Carolina",RB,SR,13,154,847,10,5.5,65.15
+2010,85,"Derrvin Speight, Utah St.",RB,SR,12,189,779,8,4.12,64.92
+2010,86,"Darriet Perry, FIU",RB,JR,13,170,839,16,4.94,64.54
+2010,87,"Chandler Harnish, Northern Ill.",QB,JR,13,137,836,7,6.1,64.31
+2010,88,"Alex Gillett, Eastern Mich.",QB,SO,12,179,766,5,4.28,63.83
+2010,89,"Trent Richardson, Alabama",RB,SO,11,112,700,6,6.25,63.64
+2010,90,"Ronnie Weaver, UCF",RB,JR,14,186,890,11,4.78,63.57
+2010,91,"Baron Batch, Texas Tech",RB,SR,13,177,816,5,4.61,62.77
+2010,92,"Desmond Johnson, Southern Miss.",RB,SO,10,115,611,8,5.31,61.1
+2010,93,"Tim Jefferson, Air Force",QB,JR,13,154,794,15,5.16,61.08
+2010,94,"Darren Evans, Virginia Tech",RB,JR,14,151,854,11,5.66,61
+2010,94,"Moise Plancher, South Fla.",RB,SR,13,176,793,5,4.51,61
+2010,96,"Chris Thompson, Florida St.",RB,SO,14,134,845,6,6.31,60.36
+2010,97,"Willie Geter, Bowling Green",RB,SR,12,197,718,6,3.64,59.83
+2010,98,"Paris Cotton, Central Mich.",RB,JR,11,142,651,6,4.58,59.18
+2010,99,"Lamar Miller, Miami (FL)",RB,FR,11,108,646,6,5.98,58.73
+2010,100,"Jamie Harper, Clemson",RB,JR,13,197,760,7,3.86,58.46
+2009,1,"Ryan Mathews, Fresno St.",RB,JR,12,276,1808,19,6.55,150.67
+2009,2,"Toby Gerhart, Stanford",RB,SR,13,343,1871,28,5.45,143.92
+2009,3,"Dion Lewis, Pittsburgh",RB,FR,13,325,1799,17,5.54,138.38
+2009,4,"Donald Buckram, UTEP",RB,JR,12,259,1594,18,6.15,132.83
+2009,5,"Ryan Williams, Virginia Tech",RB,FR,13,293,1655,21,5.65,127.31
+2009,6,"Anthony Dixon, Mississippi St.",RB,SR,11,257,1391,12,5.41,126.45
+2009,7,"Curtis Steele, Memphis",RB,SR,10,198,1239,15,6.26,123.9
+2009,8,"Vai Taua, Nevada",RB,JR,11,172,1345,10,7.82,122.27
+2009,9,"LaMichael James, Oregon",RB,FR,13,230,1546,14,6.72,118.92
+2009,10,"Joe Webb, UAB",QB,SR,12,227,1427,11,6.29,118.92
+2009,11,"Mark Ingram, Alabama",RB,SO,14,271,1658,17,6.12,118.43
+2009,12,"John Clay, Wisconsin",RB,SO,13,287,1517,18,5.29,116.69
+2009,13,"Alfred Morris, Fla. Atlantic",RB,SO,12,263,1392,11,5.29,116
+2009,14,"Lance Dunbar, North Texas",RB,SO,12,200,1378,17,6.89,114.83
+2009,15,"Bernard Pierce, Temple",RB,FR,12,236,1361,16,5.77,113.42
+2009,16,"Darius Marshall, Marshall",RB,JR,10,227,1131,11,4.98,113.1
+2009,17,"Noel Devine, West Virginia",RB,JR,13,241,1465,13,6.08,112.69
+2009,18,"Montel Harris, Boston College",RB,SO,13,308,1457,14,4.73,112.08
+2009,19,"Jacquizz Rodgers, Oregon St.",RB,SO,13,273,1440,21,5.27,110.77
+2009,20,"Robert Turbin, Utah St.",RB,SO,12,207,1296,13,6.26,108
+2009,21,"Daniel Thomas, Kansas St.",RB,JR,12,247,1265,11,5.12,105.42
+2009,22,"Ben Tate, Auburn",RB,SR,13,263,1362,10,5.18,104.77
+2009,23,"Montario Hardesty, Tennessee",RB,SR,13,282,1345,13,4.77,103.46
+2009,24,"Jonathan Dwyer, Georgia Tech",RB,JR,14,235,1395,14,5.94,99.64
+2009,25,"Alexander Robinson, Iowa St.",RB,JR,12,232,1195,6,5.15,99.58
+2009,26,"Dominique Lindsay, East Carolina",RB,SR,12,239,1180,6,4.94,98.33
+2009,27,"Brandon West, Western Mich.",RB,SR,12,214,1164,10,5.44,97
+2009,28,"Daniel Porter, Louisiana Tech",RB,SR,12,211,1132,11,5.36,94.33
+2009,29,"Frank Goodin, La.-Monroe",RB,JR,12,219,1126,13,5.14,93.83
+2009,30,"Keith Toston, Oklahoma St.",RB,SR,13,227,1218,11,5.37,93.69
+2009,31,"Chris Polk, Washington",RB,FR,12,226,1113,5,4.92,92.75
+2009,32,"Brynn Harvey, UCF",RB,SO,12,261,1109,14,4.25,92.42
+2009,33,"Ricky Dobbs, Navy",QB,JR,13,315,1192,27,3.78,91.69
+2009,34,"Jordan Todman, Connecticut",RB,SO,13,235,1188,14,5.06,91.38
+2009,34,"Shawnbrey McNeal, SMU",RB,JR,13,236,1188,12,5.03,91.38
+2009,36,"Colin Kaepernick, Nevada",QB,JR,13,161,1183,16,7.35,91
+2009,37,"Harvey Unga, BYU",RB,JR,12,208,1087,11,5.23,90.58
+2009,38,"Dexter McCluster, Mississippi",WR,SR,13,181,1169,8,6.46,89.92
+2009,38,"Evan Royster, Penn St.",RB,JR,13,205,1169,6,5.7,89.92
+2009,40,"Dwight Dasher, Middle Tenn.",QB,JR,13,224,1154,13,5.15,88.77
+2009,41,"C.J. Spiller, Clemson",RB,SR,14,216,1212,12,5.61,86.57
+2009,42,"Luke Lippincott, Nevada",RB,SR,12,134,1034,9,7.72,86.17
+2009,43,"Delone Carter, Syracuse",RB,SR,12,236,1021,11,4.33,85.08
+2009,44,"Andre Anderson, Tulane",RB,SR,12,238,1016,8,4.27,84.67
+2009,45,"Damion Fletcher, Southern Miss.",RB,SR,12,219,1015,8,4.63,84.58
+2009,46,"Joe McKnight, Southern California",RB,JR,12,164,1014,8,6.18,84.5
+2009,47,"Andre Dixon, Connecticut",RB,SR,13,239,1093,14,4.57,84.08
+2009,48,"DaJuane Collins, Toledo",RB,SR,12,178,991,14,5.57,82.58
+2009,49,"Eddie Wide, Utah",RB,JR,13,203,1069,12,5.27,82.23
+2009,50,"Jeremy Avery, Boise St.",RB,JR,14,209,1150,6,5.5,82.14
+2009,51,"Roy Helu Jr., Nebraska",RB,JR,14,220,1147,10,5.21,81.93
+2009,52,"Chad Spann, Northern Ill.",RB,JR,13,179,1038,19,5.8,79.85
+2009,53,"Bobby Rainey, Western Ky.",RB,SO,12,144,939,6,6.52,78.25
+2009,54,"Seth Smith, New Mexico St.",RB,JR,13,246,1016,1,4.13,78.15
+2009,55,"Ralph Bolden, Purdue",RB,SO,12,200,935,9,4.68,77.92
+2009,56,"Leonard Mason, Colorado St.",RB,JR,10,156,766,2,4.91,76.6
+2009,57,"Adam Robinson, Iowa",RB,FR,11,181,834,5,4.61,75.82
+2009,58,"Derrick Locke, Kentucky",RB,JR,12,195,907,6,4.65,75.58
+2009,59,"DeMaundray Woolridge, Idaho",RB,SR,13,170,980,18,5.76,75.38
+2009,60,"Vince Murray, Navy",RB,JR,13,182,971,6,5.34,74.69
+2009,61,"Jared Tew, Air Force",RB,JR,13,238,970,9,4.08,74.62
+2009,62,"Joe Martinek, Rutgers",RB,SO,13,206,967,9,4.69,74.38
+2009,63,"Josh Nesbitt, Georgia Tech",QB,JR,14,279,1037,18,3.72,74.07
+2009,64,"Shane Vereen, California",RB,SO,13,183,952,12,5.2,73.23
+2009,65,"Rodney Stewart, Colorado",RB,SO,11,198,804,9,4.06,73.09
+2009,66,"MiQuale Lewis, Ball St.",RB,SR,12,181,871,5,4.81,72.58
+2009,67,"D.D. Kyles, Middle Tenn.",RB,SO,12,139,857,3,6.17,71.42
+2009,68,"Christine Michael, Texas A&M",RB,FR,12,166,844,10,5.08,70.33
+2009,69,"Baron Batch, Texas Tech",RB,JR,13,168,884,14,5.26,68
+2009,70,"Darius Willis, Indiana",RB,FR,9,123,607,6,4.93,67.44
+2009,71,"Mikel Leshoure, Illinois",RB,SO,11,108,734,5,6.8,66.73
+2009,72,"Asher Clark, Air Force",RB,SO,13,151,865,7,5.73,66.54
+2009,72,"Derrick Washington, Missouri",RB,JR,13,190,865,10,4.55,66.54
+2009,74,"Dimitri Nance, Arizona St.",RB,SR,12,188,795,6,4.23,66.25
+2009,75,"Warren Norman, Vanderbilt",RB,FR,12,145,783,3,5.4,65.25
+2009,76,"Tim Tebow, Florida",QB,SR,14,217,910,14,4.19,65
+2009,77,"Toney Baker, North Carolina St.",RB,SR,12,160,773,6,4.83,64.42
+2009,78,"Jermaine Thomas, Florida St.",RB,SO,13,163,832,9,5.1,64
+2009,79,"Isaiah Pead, Cincinnati",RB,SO,13,121,806,9,6.66,62
+2009,80,"Reggie Arnold, Arkansas St.",RB,SR,12,168,723,12,4.3,60.25
+2009,81,"Daneil Herron, Ohio St.",RB,SO,10,153,600,7,3.92,60
+2009,82,"Terrelle Pryor, Ohio St.",QB,SO,13,162,779,7,4.81,59.92
+2009,83,"Caleb King, Georgia",RB,SO,10,114,594,7,5.21,59.4
+2009,84,"B.J. Daniels, South Fla.",QB,FR,13,175,772,9,4.41,59.38
+2009,85,"John Mosure, Colorado St.",RB,JR,11,124,650,7,5.24,59.09
+2009,86,"Trent Steelman, Army",QB,FR,12,202,706,5,3.5,58.83
+2009,87,"DeMarco Murray, Oklahoma",RB,JR,12,171,705,8,4.12,58.75
+2009,88,"Meco Brown, Northern Ill.",RB,SO,11,148,645,4,4.36,58.64
+2009,89,"Cyrus Gray, Texas A&M",RB,SO,13,159,757,5,4.76,58.23
+2009,90,"Joseph Turner, TCU",RB,SR,13,147,754,11,5.13,58
+2009,91,"Graig Cooper, Miami (FL)",RB,JR,12,134,695,4,5.19,57.92
+2009,92,"Chris Brown, Oklahoma",RB,SR,13,182,749,7,4.12,57.62
+2009,93,"Dwayne Priest, Eastern Mich.",RB,JR,11,175,633,7,3.62,57.55
+2009,94,"Brandon Saine, Ohio St.",RB,JR,13,145,739,4,5.1,56.85
+2009,95,"Nic Grigsby, Arizona",RB,JR,10,79,567,5,7.18,56.7
+2009,95,"Shaun Draughn, North Carolina",RB,JR,10,124,567,1,4.57,56.7
+2009,97,"Patrick Mealy, Army",RB,JR,12,110,673,3,6.12,56.08
+2009,98,"Brandon Sullivan, San Diego St.",RB,JR,10,154,558,4,3.62,55.8
+2009,99,"Jeremiah Masoli, Oregon",QB,JR,12,121,668,13,5.52,55.67
+2009,100,"Ryan Houston, North Carolina",RB,JR,13,191,713,9,3.73,54.85
+2008,1,"Donald Brown, Connecticut",RB,JR,13,367,2083,18,5.68,160.23
+2008,2,"Shonn Greene, Iowa",RB,JR,13,307,1850,20,6.03,142.31
+2008,3,"Jahvid Best, California",RB,SO,12,194,1580,15,8.14,131.67
+2008,4,"Javon Ringer, Michigan St.",RB,SR,13,390,1637,22,4.2,125.92
+2008,5,"MiQuale Lewis, Ball St.",RB,JR,14,322,1736,22,5.39,124
+2008,6,"Chris Wells, Ohio St.",RB,JR,10,207,1197,8,5.78,119.7
+2008,7,"Kendall Hunter, Oklahoma St.",RB,SO,13,241,1555,16,6.45,119.62
+2008,8,"Vai Taua, Nevada",RB,SO,13,236,1521,15,6.44,117
+2008,9,"Tyrell Fenroy, La.-Lafayette",RB,SR,12,226,1375,19,6.08,114.58
+2008,10,"LeSean McCoy, Pittsburgh",RB,SO,13,308,1488,21,4.83,114.46
+2008,11,"Julian Edelman, Kent St.",QB,SR,12,215,1370,13,6.37,114.17
+2008,12,"Jacquizz Rodgers, Oregon St.",RB,FR,11,259,1253,11,4.84,113.91
+2008,13,"Gartrell Johnson III, Colorado St.",RB,SR,13,278,1476,12,5.31,113.54
+2008,14,"Collin Mooney, Army",RB,SR,12,231,1339,8,5.8,111.58
+2008,15,"James Starks, Buffalo",RB,JR,12,272,1333,16,4.9,111.08
+2008,16,"Dennis Kennedy, Akron",RB,SR,12,239,1321,17,5.53,110.08
+2008,17,"Damion Fletcher, Southern Miss.",RB,JR,12,219,1313,10,6,109.42
+2008,18,"Tarrion Adams, Tulsa",RB,SR,14,247,1523,14,6.17,108.79
+2008,19,"Devin Moore, Wyoming",RB,SR,12,249,1301,7,5.22,108.42
+2008,20,"Knowshon Moreno, Georgia",RB,SO,13,250,1400,16,5.6,107.69
+2008,21,"Jonathan Dwyer, Georgia Tech",RB,SO,13,200,1395,12,6.98,107.31
+2008,22,"Michael Smith, Arkansas",RB,JR,10,207,1072,8,5.18,107.2
+2008,23,"Rodney Ferguson, New Mexico",RB,SR,11,223,1105,13,4.96,100.45
+2008,24,"Noel Devine, West Virginia",RB,SO,13,206,1289,4,6.26,99.15
+2008,25,"Glen Coffee, Alabama",RB,JR,14,233,1383,10,5.94,98.79
+2008,26,"Curtis Brinkley, Syracuse",RB,SR,12,237,1164,7,4.91,97
+2008,27,"Bryce Beall, Houston",RB,FR,13,198,1247,13,6.3,95.92
+2008,28,"Evan Royster, Penn St.",RB,SO,13,191,1236,12,6.47,95.08
+2008,29,"Toby Gerhart, Stanford",RB,JR,12,210,1136,15,5.41,94.67
+2008,30,"Da'Rel Scott, Maryland",RB,SO,12,209,1133,8,5.42,94.42
+2008,31,"Kory Sheets, Purdue",RB,SR,12,234,1131,16,4.83,94.25
+2008,32,"Michael Desormeaux, La.-Lafayette",QB,SR,11,144,1035,5,7.19,94.09
+2008,33,"Curtis Steele, Memphis",RB,JR,13,218,1223,7,5.61,94.08
+2008,34,"Jeremiah Johnson, Oregon",RB,SR,13,168,1201,13,7.15,92.38
+2008,35,"Darius Marshall, Marshall",RB,SO,12,224,1099,5,4.91,91.58
+2008,36,"Darren Evans, Virginia Tech",RB,FR,14,287,1265,11,4.41,90.36
+2008,37,"Charles Scott, LSU",RB,JR,13,217,1174,18,5.41,90.31
+2008,38,"Daniel Porter, Louisiana Tech",RB,JR,13,222,1164,9,5.24,89.54
+2008,39,"Reggie Arnold, Arkansas St.",RB,JR,12,197,1074,7,5.45,89.5
+2008,40,"P.J. Hill, Wisconsin",RB,JR,13,226,1161,13,5.14,89.31
+2008,41,"Eugene Jarvis, Kent St.",RB,JR,9,165,801,9,4.85,89
+2008,42,"Nicolas Grigsby, Arizona",RB,SO,13,214,1153,13,5.39,88.69
+2008,43,"Vic Anderson, Louisville",RB,FR,12,183,1047,8,5.72,87.25
+2008,44,"Chris Brown, Oklahoma",RB,JR,14,217,1220,20,5.62,87.14
+2008,45,"Harvey Unga, BYU",RB,SO,13,240,1132,11,4.72,87.08
+2008,46,"Colin Kaepernick, Nevada",QB,SO,13,161,1130,17,7.02,86.92
+2008,47,"Brandon West, Western Mich.",RB,JR,12,204,1026,8,5.03,85.5
+2008,48,"Joe Webb, UAB",QB,JR,12,198,1021,11,5.16,85.08
+2008,49,"Morgan Williams, Toledo",RB,FR,12,169,1010,6,5.98,84.17
+2008,50,"Shun White, Navy",RB,SR,13,132,1092,8,8.27,84
+2008,51,"DuJuan Harris, Troy",RB,SO,13,210,1077,11,5.13,82.85
+2008,52,"Pat White, West Virginia",QB,SR,12,191,974,8,5.1,81.17
+2008,53,"Charles Pierre, Fla. Atlantic",RB,SR,13,161,1014,8,6.3,78
+2008,54,"Cam Montgomery, North Texas",RB,JR,12,170,928,9,5.46,77.33
+2008,55,"LeGarrette Blount, Oregon",RB,JR,13,137,1002,17,7.31,77.08
+2008,55,"DeMarco Murray, Oklahoma",RB,SO,13,179,1002,14,5.6,77.08
+2008,57,"Eric Kettani, Navy",RB,SR,13,190,982,4,5.17,75.54
+2008,58,"Derrick Washington, Missouri",RB,SO,14,177,1036,17,5.85,74
+2008,59,"Anthony Dixon, Mississippi St.",RB,JR,12,197,869,7,4.41,72.42
+2008,60,"Jay Finley, Baylor",RB,SO,12,149,865,7,5.81,72.08
+2008,61,"Frank Goodin, La.-Monroe",RB,SO,11,182,783,5,4.3,71.18
+2008,62,"Cedric Peerman, Virginia",RB,SR,11,153,774,7,5.06,70.36
+2008,63,"Robert Griffin, Baylor",QB,FR,12,173,843,13,4.87,70.25
+2008,64,"DaJuane Collins, Toledo",RB,JR,10,127,700,5,5.51,70
+2008,65,"Montel Harris, Boston College",RB,FR,13,179,900,5,5.03,69.23
+2008,66,"Rodney Stewart, Colorado",RB,FR,9,132,622,2,4.71,69.11
+2008,67,"John Clay, Wisconsin",RB,FR,13,155,884,9,5.7,68
+2008,68,"Lonyae Miller, Fresno St.",RB,JR,12,120,812,7,6.77,67.67
+2008,69,"Shaun Draughn, North Carolina",RB,SO,13,198,866,3,4.37,66.62
+2008,70,"Jake Sharp, Kansas",RB,JR,13,186,860,12,4.62,66.15
+2008,71,"Graig Cooper, Miami (Fla.)",RB,SO,13,171,841,4,4.92,64.69
+2008,72,"Alexander Robinson, Iowa St.",RB,SO,11,153,703,6,4.59,63.91
+2008,73,"Anthony Harding, Fresno St.",RB,JR,13,147,822,6,5.59,63.23
+2008,74,"Josh Nesbitt, Georgia Tech",QB,SO,11,172,693,7,4.03,63
+2008,75,"C.J. Ugokwe, Rice",RB,JR,13,167,809,2,4.84,62.23
+2008,76,"Roy Helu Jr., Nebraska",RB,SO,13,125,803,7,6.42,61.77
+2008,77,"Frank Summers, UNLV",RB,SR,12,183,740,8,4.04,61.67
+2008,78,"Tyrod Taylor, Virginia Tech",QB,SO,12,147,738,7,5.02,61.5
+2008,79,"Antone Smith, Florida St.",RB,SR,13,177,792,15,4.47,60.92
+2008,80,"Daniel Dufrene, Illinois",RB,JR,11,117,663,0,5.67,60.27
+2008,81,"Juice Williams, Illinois",QB,JR,12,175,719,5,4.11,59.92
+2008,82,"Joe McKnight, Southern California",RB,SO,11,89,659,2,7.4,59.91
+2008,83,"Jeremiah Masoli, Oregon",QB,SO,12,127,718,10,5.65,59.83
+2008,84,"Anthony Kimble, Stanford",RB,SR,12,120,717,6,5.98,59.75
+2008,85,"Phillip Tanner, Middle Tenn. St.",RB,JR,12,188,714,15,3.8,59.5
+2008,86,"Andre Brown, North Carolina St.",RB,SR,13,175,767,7,4.38,59
+2008,87,"Ian Johnson, Boise St.",RB,SR,13,150,766,13,5.11,58.92
+2008,88,"Baron Batch, Texas Tech",RB,SO,13,113,758,7,6.71,58.31
+2008,89,"Deonte Jackson, Idaho",RB,SO,12,161,696,3,4.32,58
+2008,90,"Derek Lawson, Arkansas St.",RB,FR,12,97,695,4,7.16,57.92
+2008,91,"James Davis, Clemson",RB,SR,13,171,751,11,4.39,57.77
+2008,92,"Yonus Davis, San Jose St.",RB,SR,10,120,558,3,4.65,55.8
+2008,93,"Ben Tate, Auburn",RB,JR,12,159,664,3,4.18,55.33
+2008,94,"Shannon Woods, Texas Tech",RB,SR,13,141,716,12,5.08,55.08
+2008,95,"Shane Vereen, California",RB,FR,13,142,715,4,5.04,55
+2008,95,"Percy Harvin, Florida",WR,JR,12,70,660,10,9.43,55
+2008,97,"Aaron Brown, TCU",RB,SR,10,99,547,3,5.53,54.7
+2008,97,"Thomas Merriweather, Miami (Ohio)",RB,SO,10,140,547,4,3.91,54.7
+2008,99,"Matt Asiata, Utah",RB,JR,13,146,707,12,4.84,54.38
+2008,100,"Stafon Johnson, Southern California",RB,JR,13,138,705,9,5.11,54.23

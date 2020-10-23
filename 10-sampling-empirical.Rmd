@@ -1,16 +1,280 @@
-# Sampling and Empirical Distributions
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Sampling
 
-An important part of data science consists of making conclusions based on the data in random samples. To make correct interpretations of their results, data scientists must possess first-hand knowledge of exactly what random samples are.
+Sampling is an important concept in data science.
+When a data scientist receives a data to analyze, the first question she asks is "how was this data generated?"
+The question she asks is about:
+* the original source of data (e.g., is it through an experiment, is it a combination of multiple data sources, etc.)
+* any processing applied to data (e.g., data conversion, filling in blanks, etc.)
+The "processing" part of the question often includes, "if the data collector chose to exclude some data rows or columns, why and how she did it?"
+The data selection question becomes important particularly when it is impossible to include every possible "subject" in the data.
+In this chapter, we explore methods for sampling.
 
-In this chapter we will take a more careful look at sampling, with special attention to the properties of large random samples.
 
-__Prerequisites__
+## Sample or Not Sample
+
+We will study how sampling can help produce the results without forcing you to examine the entire data.
 
 We will again make use of the tidyverse in this chapter, so let's load it in as usual.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
+
+Here is a data of the receivers in the National Football League in the 2017, 2018, and 2019 seasons.
+The data comes from [The Football Database](http://www.footballdb.com/index.html).
+
+If you are not familiar with (American) football, in each play of the game (excluding the kick-off), one team is offending and the other is defending.
+The ultimate goal of the offending team is to carry the ball beyond the goal line of the opponent team, which we call the "end zone".
+The offending team has four chances in its turn.
+If they cannot bring the ball beyond the goal line, an alternate option is to advance the ball position at least 10 yards forward from the starting position.
+If they cannot accomplish neither options, the defensive team will take over the ball and the role switches between the defensive and the offensive teams.
+There are two ways to move the ball forward.
+One is by running, where a player carries the ball and runs forward.
+When the player cannot move forward in the play, the last position of the ball becomes the next starting position.
+The other is by passing, where the quarterback player, who is responsible for initiating the play, throws a ball towards a player of the same team.
+If the player that the quarterback targets catches the ball, the player can continue the play by running forward with the ball.
+The idea in the running play is the runner knits through the regions that the defensive players cover and runs as far as possible.
+The idea in the passing play is the receiver runs to a place beyond the reach of the defensive team and the quarterback throws the ball so the receiver can catch it.
+
+The rule book of the National Football League is thick and contains so many rules.
+An important point here is that in each play there are multiple players who are eligible to receive the ball that the quarterback throws, but not everyone in the offensive team.
+In a rare event, the ball that the quarterback throws hits a helmet of some player, bounces back to the quarterback, the quarterback catches the ball, and runs with it.
+Anyhow, in one game of a football, multiple players may become targets of the same quartterback.
+Sometimes the target catches the ball and runs after catching, and sometimes they drop the ball with the passing play being unsuccessful.
+Important information about players who are eligible to receive balls, *receivers*, consists of the following:
+
+* how many times the quarterback targeted the receiver (Target);
+* after receiving the ball how many yards the receiver ran (Yards After Catch);
+* when the receiver caught the ball how many yards the ball advanced forward from the position that the play started (Receiving Yards); Note that the quarterback may have to run backwards before throwing the ball and so the distance can be greater than the advance distance of the ball towards the determination of the 10 yard requirement;
+* whether the receiver carried the ball beyond the goal line (Touchdown)
+* if not touch down, whether the receiver's catching resulted in the accomplishment of the 10-yard advance (First down)
+
+Let's start by loading the data into R.
+
+
+```{r}
+path <- "data/nfl_receiving0.csv"
+receivers0 <- read_csv(path)
+receivers0
+```
+The attributes of the data are:
+* The name of receiver (Player)
+* The year of data (Year)
+* The team of receiver (Team)
+* The number of games the receiver became a target (Gms)
+* The number of times the receiver caught the ball (Rec)
+* The total receiving yards (Yds)
+* The average yards per receiving (Avg)
+* The average yards per game (YPG)
+* The longest yards received where the attachment of "t" indicates "touchdown" (Lg)
+* The number of touchdowns (TD)
+* The number of first downs (FD)
+* The number of times the receiver became the target (Yac)
+* The total yards after catch (YAC)
+
+The data has a bit of a problem:
+* the same name may appear multiple times because the data is over three seasons
+* the longest yard information may have a "t" attached.
+
+For the former, we can solve the problem by creating a column to combine Player and Year.
+For the latter, we can use the following series of editing to create two new columns in which the two values in the longest yard are split into the yardage and the value indicating whether the longest yard is also a touchdown (1 for "yes" and 0 for "no").
+
+We will show how to do the process.
+An impatient reader may just do this to download the data after cleaning.
+
+```{r}
+path <- "data/nfl_receivers.csv"
+receivers_data <- read_csv(path)
+```
+
+The function below takes the longest yard string and returns a two element list whose first entry is the actual number and the second is the flag of "t".
+It uses `str_length` to obtain the number of characters in a string and `str_sub` to obtain substrings.
+Basically, it checks if the substring consisting only of the last character of `s` is equal to "t", and then if so, return the substring preceding the "t" and 1; otherwise, it returns s and 0.
+The function combines the two values as a list using `c` and converts both values to integers.
+To generate the integer from a string representing (e.g., going from "49" to 49) is possible using the `strtoi` function.
+
+```{r}
+split_lg <- function(s) {
+  if (str_length(s) == 0) {
+    return(c(0,0))
+  }
+  else {
+    l <- str_length(s)
+    suffix <- str_sub(s,l,l)
+    if (suffix != "t") {
+      return(c(strtoi(s),0))
+    }
+    else {
+      return(c(strtoi(str_sub(s,1,l-1)),1))
+    }
+  }
+}
+```
+
+
+With the function `split_lg`, we add three new columns to the data using the following code.
+The function `cbind` add a new column to an existing data.
+The first argument is the database to which to add the new column and the second argument is the new column.
+The last line of the code saves the result as a new data. 
+
+```{r}
+lgall <- receivers0$Lg
+length(lgall)
+lg_yd0 <-vector("integer",length(lgall))
+lg_td0 <-vector("integer",length(lgall))
+names <- receivers0$Player
+year <- receivers0$Year
+names_year <- 1:length(lgall)
+for (i in 1:length(lgall)) {
+  parts <- split_lg(lgall[i])
+  lg_yd0[i] <- parts[1]
+  lg_td0[i] <- parts[2]
+  names_year[i] <- paste(names[i], year[i])
+}
+receivers1 <- cbind(receivers0, lg_yd0)
+receivers2 <- cbind(receivers1, lg_td0)
+receivers_data <- cbind(receivers2, names_year)
+print(sum(lg_yd0))
+write_csv(receivers_data,'data/nfl_receivers.csv')
+```
+
+So, here we reload from the data set after cleaning.
+
+```{r}
+path <- "data/nfl_receivers.csv"
+receivers_data <- read_csv(path)
+```
+
+Let us say we will study the performance of the receivers with respect to their yardage (Yds).
+
+How many yards did the best receiver gain and how many receivers are there?
+Also, are there are receivers with 0 gains?
+
+```{r}
+col <- receivers_data$Yds
+max(col)
+length(col)
+min(col)
+```
+The largest value is 1725, there are about 1511 rows in the data set, and wow, there is a player with negative gain.
+How could the negative total be possible?
+The yardage is the distance from the point of throwing to the point where the ball ended and so it can be negative.
+
+What is the average of the total yardage value among the 1511 entries?
+Computing the average in question is simple:
+obtain the column for the attribute, sum the entries, and divide it by the number of rows.
+
+```{r}
+col <- receivers_data$Yds
+Yds_avg <- sum(col)/length(col)
+```
+
+So the average is around 252.7.
+
+Let us look at the histogram of the yardage values.
+We locate the position of the average, which we have calculated into `Yds_avg` in red.
+
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+bins <- seq(0,1750,20)
+ggplot(receivers_data, aes(x = Yds)) +
+  geom_histogram(aes(y = ..density..), color = "grey", breaks = bins) +
+  geom_point(aes(x = Yds_avg, y = 0), color = "red", size = 2)
+
+```
+
+It is hard to tell, just by looking at the histogram, that 252.72 is the average.
+
+Let us see how sampling qill takes us close to the ideal value.
+Let us we will sample 10% of the rows; that is, 151 rows.
+
+```{r}
+colSub <- sample(col,size=151,replace=FALSE)
+sum(colSub)/length(colSub)
+```
+
+How close do we get close to the true average if we are to repeat the 10% sampling many times?
+
+Let's do with 1000 repetitions.
+
+```{r}
+num_reps = 1000
+outcomes <- vector("double",num_reps)
+for (i in 1:num_reps) {
+  colSub <- sample(col,size=151,replace=FALSE)
+  outcomes[i] <- sum(colSub)/length(colSub)
+}
+outcome_df <- tibble(outcomes)
+bins <- seq(0,1750,20)
+ggplot(outcome_df, aes(x = outcomes), color = "grey") +
+  geom_histogram(binwidth=4) +
+  geom_point(aes(x = Yds_avg, y = 0), color = "red", size = 3)
+```
+
+Now this is 10000 repetitions.
+
+```{r}
+num_reps = 10000
+outcomes <- vector("double",num_reps)
+for (i in 1:num_reps) {
+  colSub <- sample(col,size=151,replace=FALSE)
+  outcomes[i] <- sum(colSub)/length(colSub)
+}
+outcome_df <- tibble(outcomes)
+bins <- seq(0,1750,20)
+ggplot(outcome_df, aes(x = outcomes), color = "grey") +
+  geom_histogram(binwidth=4) +
+  geom_point(aes(x = Yds_avg, y = 0), color = "red", size = 3)
+```
+
+How about we increase the percentage to 20%?
+
+```{r}
+num_reps = 10000
+outcomes <- vector("double",num_reps)
+for (i in 1:num_reps) {
+  colSub <- sample(col,size=302,replace=FALSE)
+  outcomes[i] <- sum(colSub)/length(colSub)
+}
+outcome_df <- tibble(outcomes)
+bins <- seq(0,1750,20)
+ggplot(outcome_df, aes(x = outcomes), color = "grey") +
+  geom_histogram(binwidth=4) +
+  geom_point(aes(x = Yds_avg, y = 0), color = "red", size = 3)
+```
+
+
+## Situations Demanding Sampling 
+
+Here are examples in which "selections" become important.
+* You want to conduct research on the height and weight on the entire population in U.S.
+* You want to conduct research on the buying and selling prices of the cars in a large online used car retailer in light of the demographics of the people who bought and sold the cars, but you want it very quick.
+* You need to analyze patient trends in a large hospital network, and the hospitals in the network are able to provide information for their inpatients and outpatients.
+
+The first one is an impossible problem because we cannot account the entire population in U.S.
+The second one is different in nature than the first because the retailer has the entire data set at hand, but the time is of essence, and so there is no time to examine all the cars.
+In the last case, the hospitals in the network are able to provide information for their inpatients and outpatients.
+However, if there are tens of hospitals with diverse sizes of patients on their records, does it make sense to combine all the data?
+If the most populous hospital has 250000 patients while the least one 5000, can we join the two or do have to include only a small fraction from the first so that the two extremes contribute the same number of patients?
+
+This is where the selection of data comes in to play.
+The selection can be systematic.
+For example, you may choose to select every 50th patient in the most populous hospital top reduce the number to 5000 to make the data size equal to the size of the smallest.
+We can apply this systematic reduction to the other hospitals to reduce the size equal to 5000 for all of them.
+Now every hospital will contribute the same number, 5000, of patients!
+
+But wait a second, what if the least populous is in Wyoming, the one with the least people in the U.S. and the most populous one is California, the most populous one in the U.S.
+Will selecting the same number of people from each hospital do justice?
+Shouldn't we select patients from the hospitals according to the states, or more precisely, the number of population they cover?
+There is no an obvious answer to the question.
+The data scientist in charge will have to decide on the adjustments to make.
+
+## Use of samples
 
 Let's start by drawing some samples. Our examples are based on the `mpg` data set.
 
@@ -112,6 +376,28 @@ The other, called a "simple random sample", is a sample drawn at random *without
 In this chapter, we will use simulation to study the behavior of large samples drawn at random with or without replacement.
 
 Drawing a random sample requires care and precision. It is not haphazard, even though that is a colloquial meaning of the word "random". If you stand at a street corner and take as your sample the first ten people who pass by, you might think you're sampling at random because you didn't choose who walked by. But it's not a random sample – it's a *sample of convenience*. You didn't know ahead of time the probability of each person entering the sample; perhaps you hadn't even specified exactly who was in the population.
+
+
+
+<!--
+
+In the previous chapter, we learned the concepts of randomness, iteration, and simulation.
+
+An important part of data science consists of making conclusions based on the data in random samples. To make correct interpretations of their results, data scientists must possess first-hand knowledge of exactly what random samples are.
+
+In this chapter we will take a more careful look at sampling, with special attention to the properties of large random samples.
+
+__Prerequisites__
+
+We will again make use of the tidyverse in this chapter, so let's load it in as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+
+
+
 
 ## Empirical Distributions
 
@@ -447,4 +733,4 @@ We know that by the Law of Averages, the empirical histogram of the statistic is
 This means that simulating random processes repeatedly is a way of approximating probability distributions *without figuring out the probabilities mathematically or generating all possible random samples*. Thus computer simulations become a powerful tool in data science. They can help data scientists understand the properties of random quantities that would be complicated to analyze in other ways.
 
 
-
+-->
