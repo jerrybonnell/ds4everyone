@@ -996,6 +996,213 @@ Seven is the most common value, with the frequencies falling off symmetrically o
 
 -->
 
+## The Birthday Paradox
+
+The *Birthday Paradox* states that if 23 people are in a room, the chances are 50:50 that there are two people among the 23 who have the same birthdays.
+There are 365 days in a year.
+How come is it possible for just 23 people to find two among them having the same birthdays?
+
+We answer the question first by analysis.
+
+Assume that we will consider only a non-leap year (that is, no February 29th) and each of the 365 birthdays are likely to occur in a person.
+Since each birthday is likely to occur as any other birthday, we can look at the question at hand by counting the number of possible birthday combinations.
+We have 23 people in the room.
+Each person gets to choose her birthday freely without considering the birthdays of other 22 people.
+The 23 people make their choices and then check whether the choices fall into one of the no-duplicate selections.
+
+With no restriction, the number of possible choices of birthdays for the 23 people is
+\[
+365^{23}
+\]
+These possibilities contain the cases where a birthday coincindence occurs.
+
+In comparison, the number of possibilities for selecting 23 birthdays so that no two are equal to each other requires a bit complicated analysis.
+We can view the counting problem using the following hypothetical process.
+The 23 people in the room will pick their birthdays in order so that there will be no duplicates.
+The first person has complete freedom in her choice.
+She chooses one from the 365 possibilities.
+
+The next person has almost complete freedom.
+She can pick any birthday but the one the first person has chosen.
+There are 364 possibilities.
+
+The third person has again almost complete freedom.
+She can pick any birthday but the ones the first two persons have chosen.
+Since the first two people picked different birthdays.
+There are 363 possibilities.
+
+We can generalize the action.
+The $k$-th person has $365 - k + 1$ choices.
+
+By combining all these for the 23 people, we have that the number of possibilities for chosing all-distinct birthdays is
+\[
+365 \cdot 364 \cdot 363 \cdot \cdots \cdot 353.
+\]
+Thus, the chances for the 23 people to make the selections so there are no duplicates are thus
+\[
+(365 \cdot 364 \cdot 363 \cdot \cdots \cdot 343) / 365^{23}.
+\]
+Moving terms, we get that the chances are
+\[
+\frac{365}{365} \cdot \frac{364}{365} \cdots \frac{343}{365}.
+\]
+The quantity is approximately 0.4927.
+The chances we find a duplicate are 1 minus this quantity, which is approximately 0.5073.
+Pretty interesting, isn't it?
+
+The second method, an alternative to analyzing mathematically, is to use simulation.
+We can mimic the process of selecting 23 birthdays independently from each other.
+We start by generating a vector having length 365 whose elements represent the birthdays.
+Naturally, we assign numbers 1 through 365 to the birthdays, create the following vector.
+
+```{r}
+base <- vector("integer", 365)
+for (i in 1:365) {
+  base[i] = i
+}
+base 
+```
+
+As you can see the 365 elements of the vector are 1 through 365.
+
+Next, using `sample` we draw 23 random values from the vector.
+
+```{r}
+chosen <- sample(base, size=23, replace=TRUE)
+chosen 
+```
+
+We then check whether there are any duplicates in it.
+One way to do the checking is to reorder the elements so the numbers appear in the non-decreasing order and then examine whether any two neighboring numbers are equal to each other.
+The code for doing the check is this.
+We can accomplish the task of reordering using the function `sort`.
+The code reorders `chosen`, stores the result of reordering in another vector `sorted`, and then for each `i` in the range [1,22], check whether the element at position `i` is equal to its next element. 
+
+
+```{r}
+sorted <- sort(chosen)
+for (i in 1:22) {
+  if (sorted[i] == sorted[i+1]) print("identical")
+} 
+```
+
+ We can encapsulate the idea as a pair of functions. The first one is to generate samples and the other is to perform the check.
+ The first function `generate_birthdays` takes the number of peopls as its argument `x`.
+Calling `generate_birthdays(23)` produces an array of 23 random birthdays.
+Note that we use the argument `x` in the execution of `sample`, where `x` appears in `size=x`. 
+
+```{r}
+generate_birthdays <- function(x) {
+  base <- vector("integer", 365)
+  for (i in 1:365) {
+    base[i] = i
+  }
+  chosen <- sample(base, size=x, replace=TRUE)
+  return(chosen)
+} 
+```
+
+The duplicate checking function receives an argument, which it expects to be a vector.
+It sorts the argument and stores it in `y`.
+It obtains `l` as the number of elements in `x` minus 1.
+Since `x` and `y` have identical lengths, `l` is also the number of elements in `y` minus 1.
+Then the program iterates over the sequence `1:l` using an item index `i` to compare the values at position `i` and `i+1`.
+Since we need to examine the position `i+1` for each value of `i`, the maximum value we want to assign to `i` is the length of the sequence minus 1, and that is the reason we subtract one when calculating the value for `l`.
+During the iteration, each time the program encounters a pair of identical values, it adds 1 to `num_duplicates`.
+The program initially stores 0 to `num_duplicates`, and so when the loop completes, the value of `num_duplicates` is equal to the number of times it encountered an identical pair.
+
+```{r}
+check_duplicate <- function(x) {
+  y <- sort(x)
+  l <- length(x) - 1
+  num_duplicates <- 0
+  for (i in 1:l) {
+    if (y[i] == y[i+1]) num_duplicates = num_duplicates + 1
+  }
+  return (num_duplicates)
+} 
+```
+
+The function returns the number of pairs.
+If there is a trio of people having the same birthdays and no other duplicate, the return value is 2.
+If there distinct pairs having the same birthdays, the return value is still 2.
+
+
+```{r}
+birthdays <- generate_birthdays(30)
+print(check_duplicate(birthdays))
+```
+
+If we want to compute the number of people with unique birthdays, we need a bit different calculation, which can be a bit more complex.
+For now, we will just need to know whether `num_duplicates` is 0 or not, and so we will not worry about it.
+
+Like before, we run simulations many times.
+We start by writing a code for generating the result of one experiment with a number of people as an argument. 
+
+```{r}
+one_birthday_trial <- function(x) {
+  birthdays <- generate_birthdays(x)
+  y <- sort(birthdays)
+  l <- length(birthdays) - 1
+  num_duplicates <- 0
+  for (i in 1:l) {
+    if (y[i] == y[i+1]) num_duplicates = num_duplicates + 1
+  }
+  return (num_duplicates)
+} 
+```
+
+```{r}
+one_birthday_trial(23)
+```
+
+We generate 10000 simulations and store the results in a vector.
+Since the value `one_birthday_trial` returns is a nonnegative integer, we create its simplified version, where we reduce all positive values to 1 and retain 0 as 0.
+
+```{r}
+many_trials <- function(x) {
+  # Number of repetitions
+  num_repetitions <- 100
+  results <- vector("integer",num_repetitions)
+  resultsSimple <- vector("integer",num_repetitions)
+
+  # simulate the experiment!
+  for (i in 1:num_repetitions) {
+    results[i] <- one_birthday_trial(x)
+    if (results[i] > 0 ) resultsSimple[i] <- 1
+    else resultsSimple[i] <- 0
+  }
+  return(sum(resultsSimple)/num_repetitions)
+
+}
+```
+
+
+The return statement of the program comutes the proportion of the trials that generated duplicates.
+Run a few times to see how the ratios the program prints are close to the ideal 0.5073.
+
+
+```{r}
+many_trials(23)
+```
+
+We run `many_trials(23)` a number of times and generate a histogram.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+num_reps <- 1000
+outcomes <- vector("double",num_reps)
+for (i in 1:num_reps) {
+  outcomes[i] <- many_trials(23)
+}
+outcome_df <- tibble(outcomes)
+ggplot(outcome_df, aes(x = outcomes)) + 
+  geom_bar() + 
+  coord_flip()
+```
+We see that the histogram looks symnmetric and centered around 0.51.
+
+<!--
+
 ## The Monty Hall Problem
 
 This [problem](https://en.wikipedia.org/wiki/Monty_Hall_problem) has flummoxed many people over the years, [mathematicians included](https://web.archive.org/web/20140413131827/http://www.decisionsciences.org/DecisionLine/Vol30/30_1/vazs30_1.pdf). Let's see if we can work it out by simulation.
@@ -1385,3 +1592,4 @@ If you have ever played games that rely heavily on "RNG" (*r*andom *n*umber *g*e
 
 Calculations like these can be used to find the chance that a particular individual is selected in a random sample. The exact calculation will depend on the sampling scheme. But what we have observed above can usually be generalized: increasing the size of the random sample increases the chance that an individual is selected.
 
+-->
