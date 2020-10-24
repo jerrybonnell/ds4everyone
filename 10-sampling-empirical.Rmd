@@ -275,6 +275,10 @@ ggplot(outcome_df, aes(x = outcomes), color = "grey") +
 ```
 
 
+```{r}
+sum(outcomes)/length(outcomes)
+```
+
 How does the histogram look like if we make systematic choices?
 There are many possibilities for mechanically selecting 151 positions.
 Suppose we will select "every Xth position starting from W".
@@ -358,6 +362,11 @@ ggplot(outcome_df, aes(x = outcomes), color = "grey") +
   geom_point(aes(x = Yds_avg, y = 0), color = "red", size = 3)
 ```
 
+
+```{r}
+sum(outcomes)/length(outcomes)
+```
+
 As you can see, the mechanical generations generate a histogram that is much narrower than the one we derive from random position selections.
 
 We may think of ourselves as lucky. If we use 1000 start points and 10 different gaps, the histogram looks much flatter.
@@ -386,8 +395,116 @@ ggplot(outcome_df, aes(x = outcomes), color = "grey") +
   geom_point(aes(x = Yds_avg, y = 0), color = "red", size = 3)
 ```
 
+```{r}
+sum(outcomes)/length(outcomes)
+```
 So, the use of mechanical index selections requires a careful treatment.
 Depending on how mechanically we select the index values, we may obtain different results.
+
+
+## Probabilities of Things Happening
+
+A probability is the likelihood of a thing happening.
+In our favorite topic of coin tossing, we have said previously that the the coin shows "Heads" as likely as it does "Tails".
+We have also said that the chances are 50-50 that the coin shows "Heads".
+The numbers 50 represent the probability in percentage that the coin shows "Heads" (or "Tails").
+A fair coin has no memory.
+When one turns "Heads" in a throws, it informs us nothing about what will happen in the next throw.
+Suppose a referee of football has thrown "Heads" three times in a row, what do you think will happen in the next throw.
+Many people think that the next throw must be "Tails" because "Tails" has not turned up in any of the past three throws.
+However, noting that the coin is fair, and has no memory, the next throw has equal probability of 50% for both "Heads" and "Tails".
+
+Now, suppose you, as an officiate member of NFL, have received a new coin (because a coin probably gets wear and tear, and of course, a new shiny coin looks more spiffy than an old, dull coin).
+How can you be sure that the coin is fair?
+Say you have thrown it three times and seen "Heads" three times in a row.
+Do you believe that it is a fair coin?
+
+In the program below, we simulate the process of throwing a fair coin a number of times.
+The value of `num_throws` represents the number of throws.
+To simulate the action of throwing a fair coin, we use `sample` and select from a two-element list [1,2] that we represent using a vector `counts`.
+We assume that 1 represents "Heads" and 2 "Tails", but these assignments are exchangeable.
+For each throw, we get 1 or 2 as a random sample.
+We then examine the results appearing in the list `sample` has generated and compute the number of times 1 appears and the number of times 2 appears, and we record the numbers in a two-element list `counts`.
+By dividing the quantities in `counts` by the number of throws, we get the probabilities of "Heads" and "Tails" of the fair coin.
+
+
+```{r}
+counts <- vector("double",2)
+choices <- 1:2
+num_throws <- 1000
+throws <- sample(choices,size=num_throws,replace=TRUE)
+for (i in 1:num_reps) {
+  counts[throws[i]] <- counts[throws[i]] + 1
+}
+counts[1] <- counts[1] / num_throws
+counts[2] <- counts[2] / num_throws
+counts
+```
+
+Let us turn the program into a function that takes the number of throws as its argument and returns the two-element probabilities.
+
+```{r}
+throw_est <- function(num_throws) {
+  counts <- vector("double",2)
+  choices <- 1:2
+  throws <- sample(choices,size=num_throws,replace=TRUE)
+  for (i in 1:num_reps) {
+    counts[throws[i]] <- counts[throws[i]] + 1
+  }
+  counts[1] <- counts[1] / num_throws
+  counts[2] <- counts[2] / num_throws
+  return(counts)
+}
+```
+
+Here we use 50 throws.
+
+```{r}
+coin <- c("Heads", "Tails")
+counts <- throw_est(50)
+outcome_df <- data.frame(throw=coin,prob=counts)
+# bins <- seq(0,1750,20)
+ggplot(outcome_df, aes(x = coin, y=counts), color = "grey") +
+  geom_bar(stat="identity",fill="steelblue", width=0.5) +
+  geom_text(aes(label=counts), vjust=-0.3, size=3.5)
+```
+
+Now with 100 throws.
+
+```{r}
+coin <- c("Heads", "Tails")
+counts <- throw_est(100)
+outcome_df <- data.frame(throw=coin,prob=counts)
+# bins <- seq(0,1750,20)
+ggplot(outcome_df, aes(x = coin, y=counts), color = "grey") +
+  geom_bar(stat="identity",fill="steelblue", width=0.5) +
+  geom_text(aes(label=counts), vjust=-0.3, size=3.5)
+```
+
+Here we use 1000 throws.
+
+```{r}
+coin <- c("Heads", "Tails")
+counts <- throw_est(1000)
+outcome_df <- data.frame(throw=coin,prob=counts)
+# bins <- seq(0,1750,20)
+ggplot(outcome_df, aes(x = coin, y=counts), color = "grey") +
+  geom_bar(stat="identity",fill="steelblue", width=0.5) +
+  geom_text(aes(label=counts), vjust=-0.3, size=3.5)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- 
 ## Use of samples
