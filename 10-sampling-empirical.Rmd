@@ -333,8 +333,8 @@ mechanical_selection(1000,10,1,27)
 
 Using the method `mechanical_selection`, let us see how the average yardage turns up in the same number of repetitions with 151 samples.
 In the following program, we create gap sequences of 100 elements each and start position sequences of 100 elements.
-The elemnents of the former are 14 * i, where i ranges from 1 to 100.
-The elemernts of the latter are 13 * i, where i ranges from 1 to 100.
+The elements of the former are 14 * i, where i ranges from 1 to 100.
+The elements of the latter are 13 * i, where i ranges from 1 to 100.
 Using all possible combinations of the elements produce 100 * 100 sequences with 1511 as `size` and 151 as `need`.
 Using two iterations, where the second occurs for each choice of the first element, we generate 10000 cases.
 
@@ -444,15 +444,15 @@ counts
 Let us turn the program into a function that takes the number of throws as its argument and returns the two-element probabilities.
 
 ```{r}
-throw_est <- function(num_throws) {
+throw_est <- function(x) {
   counts <- vector("double",2)
   choices <- 1:2
-  throws <- sample(choices,size=num_throws,replace=TRUE)
-  for (i in 1:num_reps) {
+  throws <- sample(choices,size=x,replace=TRUE)
+  for (i in 1:x) {
     counts[throws[i]] <- counts[throws[i]] + 1
   }
-  counts[1] <- counts[1] / num_throws
-  counts[2] <- counts[2] / num_throws
+  counts[1] <- counts[1] / x
+  counts[2] <- counts[2] / x
   return(counts)
 }
 ```
@@ -493,15 +493,138 @@ ggplot(outcome_df, aes(x = coin, y=counts), color = "grey") +
   geom_text(aes(label=counts), vjust=-0.3, size=3.5)
 ```
 
+As we did for the average yardage, let us observe when we execute the simulation of 1000 throws multiple times how the probability of 1 (="Heads") turns up.
+
+```{r}
+outcomes <- vector("double",1000)
+for (i in 1:num_reps) {
+  result <- throw_est(1000)
+  outcomes[i] <- result[1]
+}
+# outcomes
+outcome_df <- tibble(outcomes)
+bins <- seq(0.44,0.56,0.010)
+ggplot(outcome_df, aes(x = outcomes), color = "grey") +
+  geom_histogram(binwidth=0.001)
+```
+
+Even with 1000 repetitions, the shape is not smooth.
+
+_The Law of Average_
+
+The law of average is the term that refers to the understanding that for an event occurring with no relation to when in the past the event occurred, the ratio that we compute as
+\[
+\frac{\mathrm{the~number~of~times~the~event~occurred}}{\mathrm{the~number~of~times~the~event~could~have~occurred}}
+\]
+reaches the inherent ratio in which the event occurs as we make more observations.
+To put differently, if there is an experiment that
+* we can repeat as many time as we want,
+* the experiment has a number of possible outcomes, and
+* the outcomes of the previous events do not affect the outcome of any future event
+then, we can assume that
+* for each outcome, there is a non-negative constant quantity, which we call the *probability* of the outcome,
+* the sume of the probability of all the outcomes of the experiment is equal to 1, and
+* for each outcome $e$, if we are toi execute the experiment some $N$ times, count how many times $e$ occurs, and compute the ratio $e/N$, then the larger $N$ we use, the ratio $e/N$ gets closer to the probability of $e$ appears as the outcome.
 
 
 
 
+## Population and Statistics
+
+Recall that in our prior exploration of the receiver data, we saw that the average total yards is a little over 211 yards and that the distribution shows a drastic decline.
+A static that is popular along with average is *median*, which is the value at the middle position in the data after reordering of the values.
+Let's load the data and examine the median of the yardage value.
+
+But first, let's load the library.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+As before, we load the edited data into `receivers_data`.
+
+```{r}
+path <- "data/nfl_receivers.csv"
+receivers_data <- read_csv(path)
+```
+
+We can ask for the median of the yardage values, which appears in the attribute `Yds`.
+
+```{r}
+median(receivers_data$Yds)
+```
+
+So there is a big gap between the median and the average.
+A synonym for average is *mean*.
+The statistical literature prefers "mean" over "average".
+Our library `tidyverse` has the same reference.
+We can get the "mean" of the `Yds` values with `mean` in place of `median`.
+Let us look at the ratio of the mean to the average.
 
 
+```{r}
+mean(receivers_data$Yds)/median(receivers_data$Yds)
+```
+
+The ratio is close to 2; that is, the mean is almost as twice as much of the median.
+What does this mean?
+Noting that the gradually decline histogram of the yardage values, we guess that there are so many large values.
+
+As we mentioned earlier, a receiving yardage value can be negative, occurring when the receiving position is behind the position at the play started.
+So, the total yardage value may have a negative entry, especially when someone who is not regularly in a receiving position (such as a quarterback) received the ball in one game.
+
+Using `filter` we can find all the data with negative yardage.
 
 
+```{r}
+filter(receivers_data, Yds < 0)
+```
+There are 18 of them. You may notice that some of them are indeed quarterbacks, e.,g., Andy Dalton, Derek Carr, and Kirk Cousins.
 
+What is the minimum of the negative values?
+
+```{r}
+min(receivers_data$Yds)
+```
+
+Negative 11 it is.
+
+We have found that the median is 131 and the minimum is $-11$.
+The difference between the two is 142.
+Of the 1511 data values we have, the median sits right in the middle.
+There are $(1511-1)/2 = 755$ values below the median and the same number of values above the median.
+The value that is 142 away from the median on the opposite side of $-11$ is 273.
+To make the mean equal to the average, the data values above the median only have to be around 273.
+The deviation of the mean from the median indicates that the values above the median can be much higher than 273.
+Let up look at the top 100 (about 6.6%) of the yardage values.
+The `sort` function can be in the decreasing order.
+You have only to append `decreasing=TRUE` in the argument.
+
+```{r}
+y <- sort(receivers_data$Yds, decreasing=TRUE)
+y[1:100]
+```
+
+The highest is a breathtaking 1725 and the 100th one is 828.
+Here is a list of top 100 (i.e., the yardage value greater than or equal to 828) in the descending order of the yardage value.
+Note that Mike Thomas and Julio Jones appear in the top 10.
+
+```{r}
+filter(receivers_data, Yds >= 828) %>% arrange(desc(Yds))
+```
+There are cases, by the way, where two median exists.
+Such an event occurs exactly when the number of values is an even number.
+If there are 10 values, the 5th and the 6th values in the ascending order are the two medians.
+The one at the lower position in the order is the *odd median* and the other one, i.e., the one at the higher position in the order, is the *even median*.
+Som additional terminology is worth defining.
+The *population* is a group of objects from which we draw samples.
+In the case of the receivers data, the American football players who were targets in any play in the 2017, 2018, and 2019 seasons form the population.
+The *population size* is the number of objects in the population.
+1511 is the population size.
+The football players that we drew from the data set are *samples*.
+Each football player we included (implictly or explicitly) in our analysis is among the samples.
+The *maximum*, the *minimum*, and the *median* are *order statistics*, referring to their values from a list after reordering in ascending order.
+The *mean* (or *average*) is a statistic, but is not an order statistic.
 
 
 
