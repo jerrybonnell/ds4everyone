@@ -301,29 +301,24 @@ capitol <- function(x) {
 
 
 ```{r}
-print(capitol("Florida"))
-print(capitol("Massachusetts"))
-print(capitol("Georgia"))
-print(capitol("North Dakota"))
+capitol("Florida")
+capitol("Massachusetts")
+capitol("Georgia")
+capitol("North Dakota")
 ```
 
-## Betting with Iteration
+## Iteration
 
-Let us now use conditional execution to simulate a simple betting game on a coin. However, unlike the fair coin from the kick-off we saw in football, this coin is slightly *biased*. Heads has a 55% chance of happening while tails has a 45% chance. Here is the coin:
+Let us now use conditional execution to simulate a simple betting game on a coin. We will use the same fair coin from the kick-off we saw in the football example. 
 
-```{r}
-biased_coin <- c(0.55, 0.45)
-```
+However, feeling lucky, you wager that you can make some money off this coin by betting a few dollars on heads -- can we tell if your intuition is right? Let's find out! 
 
-
-Feeling lucky, you wager that you can make some money off this coin by betting on heads -- can we tell if your intuition is right? Let's find out! 
-
-We imagine a function that will receive a string argument representing the side the coin is showing, and returns the result of the bet. If the coin shows up `heads` you get a dollar. But, if it shows `tails` you lose a dollar.
+We imagine a function that will receive a string argument representing the side the coin is showing, and returns the result of the bet. If the coin shows up `heads` you get 2 dollars. But, if it shows `tails` you lose 1 dollar.
 
 ```{r}
 one_flip <- function(x) {
   if (x == "heads") {
-    return(1)
+    return(2)
   } else if (x == "tails") {
     return(-1)
   } 
@@ -341,33 +336,33 @@ Let us see how the function works.
 c(one_flip("heads"), one_flip("tails"))
 ```
 
-To play the game based on one flip of a coin, we can use `sample` again. This time, however, we pass the `biased_coin` vector as an argument specifying the probabilities of this (strange) coin.   
+To play the game based on one flip of a coin, we can use `sample` again.   
 
 ```{r}
 sides <- c("heads","tails")
-one_flip(sample(sides, prob = biased_coin, size = 1))
+one_flip(sample(sides, size = 1))
 ```
 
 We can avoid having to create a `sides` variable by including the vector directly as an argument. 
 
 ```{r}
-one_flip(sample(c("heads","tails"), prob = biased_coin, size = 1))
+one_flip(sample(c("heads","tails"), size = 1))
 ```
 
 Now let us expand this and develop a multi-round betting game.
 
-### A Betting Game Program
+### A Betting Game Simualtion
 
-Previously, we split the game into two actions: a function computing the gain/loss and a program simulating one-round of the game using the gain/loss function. We now combine the two into one.
+Previously, we split the game into two actions: a function `one_flip` computing the gain/loss and a `sample` call simulating one round of the game using the gain/loss function. We now combine these two into one.
 
 ```{r}
 betting_one_round <- function(x) {
   # Net gain on one bet
-  x <- sample(c("Head","Tail"), prob = biased_coin, size = 1) # flip a fair coin once and record the side
-  if (x == "Head") {
+  x <- sample(c("heads","tails"), size = 1) # flip a fair coin once and record the side
+  if (x == "heads") {
+    return(2)
+  } else if (x == "tails") {
     return(-1)
-  } else if (x == "Tail") {
-    return(1)
   } 
 }
 ```
@@ -378,24 +373,17 @@ Betting on one round is easy -- just call the function!
 betting_one_round()
 ```
 
-You can run the code several times to see (a) the value is sometimes 1 and sometimes -1 and (b) the value is never 0.
+Run the cell several times and observe how the value is sometimes 2 and sometimes -1. How often do we get to see 2 and how often do we get to see -1? Will your wager come out on top? 
 
-How often do we get to see 1 and how often do we get to see -1?
-Well, the program relies upon an equal possible selection between the two elements in the vector `c("Head","Tail"), and the selections result in 1 and -1, respectively.
-We thus anticipate to see 1 as often as we see -1.
-You can click the "Run" button a few times to and check, of the runs you have clicked, how many times you have seen 1.
-The number of times you have seen -1 is the total number of clicks you have made minus the number of 1's.
-You can then compare how big a difference the two numbers have between them.
+You could run this function multiple times and tally, of the runs you observed, how many times you won 2 dollars and how many times you lost a dollar. You could then compare the difference between the gains and losses. This is quite a tedious process and we still don't have a sense of how variable the results are. For that, we would need to run this process thousands or millions of times. Should we grab a good pencil and get tallying? No way! Let's use the power of R. 
 
-That would be kind of cumbersome.
+<!--`betting_one_round` relies upon an equal possible selection between the two elements in the vector `c("heads","tails"), and the selections result in 1 and -1, respectively. We thus anticipate to see 2 as often as we see -1. -->
 
-We can task R to take care of the cumbersome action.
-We can instruct a computer program to repeat some action a number of times with a specific instruction with/without some round-specific information, such as, "for round X, use this information".
-*Iteration* is the name we use to refer to repeating things with computer programs.
-In R and in many other programs, a keyword that leads a code for *iteration* is `for`.
-Also, *loop* is the word we use to refer to repeating a process.
-So, a code that repeats a process with `for` as the header is a *for-loop*.
-In R, the way to specify a for-loop is to say: "for each item appearing in the following sequence, starting from the first and towards its end, do this, as we illustrate in the next code.
+We can instruct R to take care of the repetitive work by repeating some action a number of times with  specific instruction such as, "for round X, use this information". *Iteration* is the name we use in programming to refer to things that repeat. In R and in many other languages, a keyword that leads a code in *iteration* is `for`. We also use the word *loop* to refer to a process that repeats. 
+
+So a code that repeats a process with `for` as the header is a `for`-loop.
+
+In R, the way to specify a `for`-loop is to say: "for each item appearing in the following sequence, starting from the first and towards its end, do this."
 
 ```{r}
 for (hand in c("rock", "paper", "scissors")) {
@@ -409,29 +397,25 @@ for (season in c("spring", "summer", "fall", "winter")) {
 }
 ```
 
-In the two programs, `hand` and `season` are the names we use to refer to the elements that the item iteration picks from the lists.
-In other words, the first for-loop picks an item from the three-element sequence and we use the name `hand` to access the item.
-The same deal is for the second for-loop.
+In the two programs, `hand` and `season` are the names we use to refer to the elements that the iteration picks from the lists. In other words, the first for-loop picks an item from the three-element sequence and we use the name `hand` to access the item. The same is true for the second `for`-loop.
 
 Our present interest is in writing a program that repeats the betting game many times.
 To repeat an action a number of times, we use a pair of numbers with a colon in between.
 The expression is `X:Y`, where `X` represents the start and `Y` the end.
 The expression represents the series of integers starting from `X` and ending with `Y`.
-Here are some examples.
+
 ```{r, error=TRUE}
 1:5
 30:20
-a = 18
-b = 7
+a <- 18
+b <-  7
 a:b
 b:a
 ```
 
-Wow!
-R is so smart that when the second number is smaller than the first number, decreases the number by 1, instead of increasing it by 1.
+Wow! R is so smart that when the second number is smaller than the first number, it decreases the number by 1, instead of increasing it by 1.
 
-Now we can use the sequence generation to write a for-loop.
-Here is a one that prints 1 through 5.
+Now we can use the sequence generation to write a for-loop. This one prints 1 through 5.
 
 ```{r}
 for (i in 1:5) {
@@ -439,27 +423,26 @@ for (i in 1:5) {
 }
 ```
 
-Using this idea, we can repeat the 
+We can apply this to the betting game. 
+
 ```{r}
 for (i in 1:10) {
   print(betting_one_round())
 }
 ```
 
-Note that the program `better_one_round()' is self-contained, meaning not requiring an argument, and so the code that R runs is identical among the ten iterations.
-However, `betting_one_round` has `sample` that we embedded, and that introduces randomness in the execution, and therefore the results we see in the ten lines are not uniform and can be different each time we run the for-loop.
+Note that the function `better_one_round' is self-contained, meaning not requiring an argument, and so the code that R runs is identical among the ten iterations. However, `betting_one_round` has a call to `sample` and that introduces randomness in the execution and, therefore, the results we see in the ten lines are not uniform and can be different each time we run the `for` loop.
 
 ### Fetching the Outcomes
 
-Having the program in the above a number of times, you may have wondered "the results of the ten runs disappear; is there a way to record them?"
-The answer is in the positive, and it is not too complicated.
-We create a series of empty boxes to store the results, where the series has the same length as the number of times we will run the betting, and then in the boxes, we will store the results one after another.
+You may have realized "the results of the ten runs disappear each time I run it; is there a way to record them?" The answer: yes! 
 
+We create an integer vector to store the results, where the vector has the same length as the number of times we issue a bet; each element in the vector stores the result of one bet.  
 
 ```{r}
-num_rounds <- 10
-outcomes <- vector("integer", num_rounds)  # create a vector with length num_flips
-for (i in 1:num_rounds) {
+rounds <- 10
+outcomes <- vector("integer", rounds)  # create a vector with length rounds
+for (i in 1:rounds) {
   outcomes[i] <- betting_one_round()
 }
 ```
@@ -468,19 +451,19 @@ for (i in 1:num_rounds) {
 outcomes
 ```
 
-This will do the job. The body of this `for` statement contains two actions: (1) run the betting function `betting_one)_round()`, and (2) store the result into `i`th slot of the `outcomes` vector. Both actions are executed for each item in the sequence `1:num_rounds`.
+This will do the job. The body of this `for` loop contains two actions: (1) run the betting function `betting_one_round()`, and (2) store the result into `i`th slot of the `outcomes` vector. Both actions are executed for each item in the sequence `1:rounds`.
 
-You may have noticed how cycling through the `outcomes` vector this way, individually assigning each element the result of one bet, can be cumbersome. If so, you would be in good company. The philosophy of R prefers to operate on vectors in whole, rather than in pieces as in the code we saw just above. In this way, we can eliminate the need for many common `for` statements. To demonstrate this, we introduce the idea of *maps* and *functionals*. 
+You may have noticed how stepping through the `outcomes` vector this way, individually assigning each element the result of one bet, can be cumbersome to write. If so, you would be in good company. The philosophy of R prefers to operate on vectors in whole, rather than in pieces as in the code we saw just above. In this way, we can eliminate the need for many common `for` loops. To demonstrate this, we introduce the idea of *maps* and *functionals*. 
 
 ### Maps and Functionals
 
-*Your midterm asks you to write code to capitalize the elements in a character vector.* 
+Let's consider a rather glum situation: *your midterm asks you to write R code to capitalize the elements in a character vector.* 
 
 ```{r}
 some_characters <- c("b", "a", "N", "a", "N", "A", "!")
 ```
 
-How can we do this with a computer? We know that the `toupper()` function can be used to capitalize a character (actually, it can do all of the work for us but let's not spoil the fun). We can try solving the problem using this function... 
+How can we do this with R? We know that the `toupper()` function can be used to capitalize a character (actually, it can do all of the work for us but let's not spoil the fun). We can try solving the problem using this function... 
 
 ```{r}
 capitalized <- vector("character", length(some_characters))
@@ -494,7 +477,7 @@ capitalized[7] <- toupper(some_characters[7])
 capitalized
 ```
 
-This would earn full marks. But what if the vector given was bigger? There wouldn't be any time left to work on the other problems! One way out of this jam is to observe the repetition in the code we have just written. We just learned that `for` statements are useful for performing the same action multiple times. In a ray of brilliance, the following revised code is produced.
+This would earn full marks. But what if the vector given was bigger? There wouldn't be any time left to work on the other problems! One way out of this jam is to observe the repetition in the code we have just written. We just learned that `for` loops are useful for performing the same action multiple times. In a ray of brilliance, the following revised code is produced.
 
 ```{r}
 my_upper_function <- function(x) {
@@ -507,7 +490,7 @@ my_upper_function <- function(x) {
 my_upper_function(some_characters)
 ``` 
 
-Much better! Moving on, you realize the next question asks you to convert the characters in the vector to *lowercase*. Another dilemma -- the function we wrote only works for capitalization! We need another for converting to lowercase. In a haste, you come up the following.  
+Much better! Moving on, you realize the next question asks you to convert the characters in the vector to *lowercase*. Another dilemma -- the function we wrote only works for capitalization! We need another for converting to lowercase. In a haste, you come up with the following.  
 
 ```{r}
 my_lower_function <- function(x) {
@@ -520,7 +503,7 @@ my_lower_function <- function(x) {
 my_lower_function(some_characters)
 ``` 
 
-Does this do the job? Yes. Full marks? Not a chance! We did not learn our lesson from last time: there is repetition in the code again! Besides name changes, a brand new function was written to make only one change: adjust the `toupper()` function call to `tolower()`. Moreover, there is ample room for introducing mistakes. If you were writing this on a computer and copy-and-pasting your capitalization code, it is all too easy to forget changing `toupper()` to `tolower()`, especially if we needed to call these functions more than once.       
+Does this do the job? Yes. Full marks? No way! We did not learn our lesson from last time: there is repetition in the code again! Besides name changes, a brand new function was written to make only one change: adjust the `toupper()` function call to `tolower()`. Moreover, there is ample room for introducing mistakes. If you were writing this on a computer and copy-and-pasting your capitalization code, it is all too easy to forget changing `toupper()` to `tolower()`, especially if we needed to call these functions more than once.       
 
 The better approach here is to leverage the power of R and make use of *functionals*. Instead of writing two separate functions, recycle one function and pass it an additional *functional* argument. That is, 
 
@@ -545,7 +528,17 @@ By passing in different functional arguments, we are effectively transforming th
 
 The idea of passing a function to another function is an extremely powerful idea. However, the careful reader would beg to differ: how can this be used to *eliminate* writing `for` statements?  
 
-To this end, we will make use of the [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf) package available in tidyverse, which provides many functions that can be used to replace common `for` statements. The goal of using `purrr` functions is to break up common list manipulation challenges into smaller pieces by solving first the problem for a single element in the vector. From this, we can build up solutions to more complex problems. 
+To this end, we will make use of the [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf) package available in tidyverse, which provides many functions that can be used to replace common `for` loops. 
+
+```{r, echo=FALSE, fig.align="center", out.width='20%'}
+knitr::include_graphics('images/purr_logo.png')
+```
+
+The goal of using `purrr` functions is to break up common list manipulation challenges into smaller pieces by solving first the problem for a single element in the vector. From this, we can build up solutions to more complex problems. Let's first load in the tidyverse package. 
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+```
 
 The main construct we will be using from `purrr` is the *map*. The `my_map_function()` we just wrote is one such example of a map: it applies a function (in this case, `toupper()` or `tolower()`) to each element of a vector or list. `purrr` offers many flavors of map, depending on what the output vector should look like: 
 
@@ -584,18 +577,22 @@ The next one will always return a vector of 5's, regardless of the input. Can yo
 map_dbl(1:6, function(x) 5)
 ```
 
-While map eliminates the need to write `for` statements in common situations, keep in mind that R internally must still perform a `for` loop, i.e., the code for map contains a `for` loop and it is not directly visible to those who use map. Therefore, the chief benefit of using constructs like map is not for its speed, but clarity: it is much easier to read and write (once you wrap your head around it :-).
+While map eliminates the need to write `for` loops in common situations, keep in mind that R internally must still perform a `for` loop, i.e., the code for map contains a `for` loop and it is not directly visible to those who use map. Therefore, the chief benefit of using constructs like map is not for its speed, but clarity: it is much easier to read and write (once you wrap your head around it :-).
 
-We now have all the pieces we need to take on the die roll simulation. 
+If you are still not convinced, we defer to a prominent data scientist and one of the leading contributors to the tidyverse for an explanation. 
+
+> Of course, someone has to write loops. It doesn’t have to be you. — Jenny Bryan
+
+We now have all the pieces we need to take on the betting simulation. 
 
 ### Example: Betting on 10 Coin Tosses (revisited)
 
 Let's recall the code we wrote earlier to perform the simulation.
 
 ```{r}
-num_rounds <- 10
-outcomes <- vector("integer", num_rounds)  # create a vector with length num_roundds
-for (i in 1:num_rounds) {
+rounds <- 10
+outcomes <- vector("integer", rounds)  # create a vector with length rounds
+for (i in 1:rounds) {
   outcomes[i] <- betting_one_round()
 }
 ```
@@ -603,8 +600,8 @@ for (i in 1:num_rounds) {
 Using what we have learned about map, we can rewrite this simulation to just two lines. 
 
 ```{r}
-num_rounds <- 10
-outcomes <- map_dbl(1:num_rounds, betting_one_round)
+rounds <- 10
+outcomes <- map_dbl(1:rounds, betting_one_round)
 ```
 
 ```{r}
@@ -619,19 +616,27 @@ We can use `sum()` to count the number of times money changed hands.
 sum(outcomes)
 ```
 
-### Example: Betting on 300 Tosses
+Looks like we made some money! 
 
-Iteration using maps is a powerful technique. For example, we can see the variation in the results of 300 bets by running exactly the same code for 300 bets instead of five.
+### Example: Betting on 1,000 Tosses
+
+Iteration using maps is a powerful technique. For example, we can see the variation in the results of 1,000 bets by running exactly the same code for 1,000 bets instead of ten.
 
 ```{r}
-num_rounds <- 300
-outcomes <- map_dbl(1:num_rounds, betting_one_round)
+rounds <- 1000
+outcomes <- map_dbl(1:rounds, betting_one_round)
 ```
 
-The vector `outcomes` contains the results of all 300 bets.
+The vector `outcomes` contains the results of all 1000 bets.
 
 ```{r}
 length(outcomes)
+```
+
+How much money did we make?
+
+```{r}
+sum(outcomes)
 ```
 
 To see how often the two different possible results appeared, we can create a tibble from `outcomes` and then use `ggplot2`.
@@ -643,67 +648,31 @@ ggplot(outcome_df, aes(x = outcomes)) +
   coord_flip()
 ```
 
-Not surprisingly, each of the two outcomes -1 and 1 appeared about about 150 of the 300 times, give or take. We will examine the "give or take" amounts more closely in later chapters.
+As we would expect, each of the two outcomes 2 and -1 appeared about 500 of the 1000 times, give or take. And, because we bet an extra dollar for every heads we get, we come out on top. Not bad!  
+
+We will examine the "give or take" amounts more closely in later chapters.
 
 ## Simulation
 
 Simulation, in data science, refers to the use of computer programs to imitate a physical process.
-Sometimes we call it "computer simulation" to articulate that the a computer is the do-er of the simulation.
-A simulation consists of multiple steps.
-The first step is to figure out which part of the physical process we want to imitate using computation and decide how we will represent the part numerically.
-The second step is to figure out how to generate values for the numerical representation from the first step using a computer program.
-If some numbers require updates during the imitation procedure, we will figure out how we will update them.
-Also, we often need to incorporate "chances" in the imitation procedure.
-Think of the famous the story of a king awarding a minister with doubling amount of grains.
-There are many versions of the story, but the gist is like this:
-<!-- Please add some formatting -->
-One day a king has decided to award a minister for his great work.
-The kind asks, "Great work, what do you want from me as a reward? You name it, I will make you wish come true."
-The minister says, "Your Majestry, what an honor! If you are so kind as to indulge me, may ask to receive grains of rice on a board chess. We will start with one grain on a space on the board, given one day. The next day, I would like two grains on the next space. The following day, I would like four grains on the third space. Each day, I would like twice as many grains as you have given me on the previous day. In this manner, for the next 64 days, you would be so generous to give me grains of rice. Would that be too imposing to ask?"
-The king says, "You ask so little. That would be so easy to do. Of course, this great King will grant you your request."
+Sometimes we call it "computer simulation" to articulate that the a computer is the do-er of the simulation. A simulation consists of three main steps.
 
-The question is how many grains of rice will this minister would receive at the end of the 64 day period?
+### Step 1: Determine what to simulate 
 
-We know the answer to the question.
-The daily amount doubles each day starting from 1.
-He would thus receive:
-\[
-1 + 2 + 4 + 8 + \cdots + 2^{63}
-\]
-This quantity is equal to $2^{64} - 1$.
-Why? Suppose he has one more grain in his pocket to add to the piles at the end of the 64th day.
-We have
-\[
-1 + 1 + 2 + 4 + 8 + \cdots + 2^{63} - 1
-\]
-as the same total amount.
-The first two occurrences of 1 are equal to 2. So we can simplify the sum as
-\[
-2 + 2 + 4 + 8 + \cdots + 2^{63} - 1
-\]
-We have got rid of the twos.
-By joining the first two 2's, we get
-\[
-4 + 4 + 8 + \cdots + 2^{63} - 1
-\]
-At the end of calculation, we get to
-\[
-2^{63} + 2^{63} - 1
-\]
-and this is equal to $2^{64}-1$, which is by the way an obscenely large number.
-We know the story as a fable that tells us we must think before promising something, and the assume that the story took place hundreds of years ago, where there were no computers.
-For the king to provide the grains he had promised to give to the minister, he would have ordered a clerk to do the calculation.
-If the clerk is super-human, her calculation would be perfect, and so the total amount she would provide exactly what we had anticipated.
-But, hey, she is human, and the humans are to err.
-In the process of writing down numbers, they may be various errors, such as skipping a digit or writing a wrong digit.
-If she does not notice an error, the minister would get a different error at the end of the 64 days.
-Suppose we want to mimic the process of her calculation using a computer, with the chance factor in mind.
-This is where "randomness" comes in to play.
+The first step is to figure out which part of the physical process we want to imitate using computation and decide how we will represent that part numerically.
 
-The third process of simulation is to run the simulation program and develop insights from the result, possibly using visualization.
+### Step 2: Figure out how to simulate one value
 
-Note that we have followed these steps in our 300 coin tosses experiment.
-What we did in the development of the code is:
+The second step is to figure out how to generate values for the numerical representation from the first step using a computer program. If some numbers require updates during the simulation procedure, we will figure out how we will update them. Also, we often need to incorporate randomness in the simulation. 
+
+### Step 3: Run the simulation and visualize!
+
+The fourth step is to run the simulation and develop insights from the result, often with visualization. During this step we also must decide the number of times to simulate the quantity from the second step. To get a sense of how variable a quantity is, we must run Step 2 many times. We saw that in the previous section with simulating bet wins/losses we ran the experiment 1,000 times. But we may need to run a simulation even more, say hundreds of thousands or millions of times.
+
+### Putting the steps together in R 
+
+Note that we have followed these same steps in the betting experiment from the previous section. We can write the steps more generally here:
+
 * Create a "repetitions sequence," that is, a sequence whose length is the number of repetitions you specified in Step 3. For n repetitions we will almost always use the sequence `1:n`.
 
 * Create an "experiment" function to simulate one value based on the code we developed.
@@ -714,42 +683,39 @@ second argument is the experiment function to simulate one value.
   * Store the resulting to a variable. We call this the "outcomes" vector.
   * A general format takes the form: `outcomes <- map_*(1:n, experiment_func)`
 
-That's it! Once you have carried out the steps above, your simulation is done. The outcomes vector contains all the simulated values.
+Done! Once you have carried out the steps above, your simulation is done. The outcomes vector contains all the simulated values.
 
 At this point you can use the outcomes vector as you would any other vector. You can visualize the distribution of the simulated values, count how many simulated values fall into a particular category, and so on.
 
+We now turn to some examples. 
+
 ### Difference Between the Number of Heads and the Number of Tails in 100 Coin Tosses
 
-Let us now return to the coin tosses.
-As we see powers of 10 as the easiest kind of numbers to deal with, let us back down from 300 to 100.
-If the coin is fair, we anticipate a half of the tosses we make is "Head".
-The program we have written receives as the number of repetitions, and returns a vector representing the results of the simulated coin tosses with an added interpretation of "Head" as 1 and "Tail" as -1.
-We can go back to the process of flopping a coin and develop an insight as to when we flip a coin 300 times, how the number of "Heads" is likely to look.
+Let us return to the coin tosses. As we see powers of 10 as the easiest kind of numbers to deal with, let us back down from 300 to 100. If the coin is fair, we anticipate a half of the tosses we make is "Head".
+The simulation we have written receives as the number of repetitions, and returns a vector representing the results of the simulated coin tosses with an added interpretation of "heads" as 1 and "tails" as -1.
+We can go back to the process of flipping a coin and develop an insight as to when we flip a coin 300 times, how the number of "heads" is likely to look.
 
 In this example we will simulate the number of heads in 300 tosses of a coin. The histogram of our results will give us some insight into how many heads are likely.
 
 Let's get started on the simulation, following the steps above.
 
-### Step 1: Determining What We Want to Simulate
+### Step 1: Determine what to simulate 
 
-We want to simulate the process of tossing 300 fair coins, where each coin toss generates "Head" or "Tail" as the outcome.
-There is only one number we are interested in the physical process - the number of "Heads".
+We want to simulate the process of tossing 300 fair coins, where each coin toss generates "heads" or "tails" as the outcome. There is only one number we are interested in the physical process - the number of "heads".
 
-### Step 2: Figuring our How to Make a Computer Program to Run the Simulation
+### Step 2: Figure out how to simulate one value
 
-Now we know that we want to know the number of "Heads" in 100 coin tosses, we have to figure out how to make one set of 100 tosses and count the number of heads. Let's start by creating a coin.
+Now we know that we want to know the number of "heads" in 100 coin tosses, we have to figure out how to make one set of 100 tosses and count the number of heads. Let's start by creating a coin.
 We eliminate the gain/loss calculation from the previous program in the ensuing simulation program.
 We start by stating the two possible outcomes of toss.
 What we define is a two-element vector, as before, and we call it `sides`.
 
 ```{r}
-sides <- c("Heads", "Tails")
-sides
+sides <- c("heads", "tails")
 ```
 
-We use `sample()` to sample from the two-element vector.
-Recall that we can specify the number of samples and if we want to replenish the array with the item that the sample has chosen.
-The code below shows how we sample from `sides` 8 times with "replenishment".
+We use `sample()` to sample from the two-element vector. Recall that we can specify the number of samples and if we want to replenish the vector with the item that the sample has chosen.
+The code below shows how we sample from `sides` 8 times with replacement.
 
 ```{r}
 tosses <- sample(sides, size = 8, replace = TRUE)
@@ -759,15 +725,14 @@ tosses
 We can count the number of heads by using `sum()` as before:
 
 ```{r}
-sum(tosses == "Heads")
+sum(tosses == "heads")
 ```
 
-Our goal is to simulate the number of heads in 100 tosses.
-We have only to replace the 8 with 100 and then apply `sum` with the argument checking whether the element is equal to "Heads".
+Our goal is to simulate the number of heads in 100 tosses. We have only to replace the 8 with 100.
 
 ```{r}
 outcomes <- sample(sides, size = 100, replace = TRUE)
-num_heads <- sum(outcomes == "Heads")
+num_heads <- sum(outcomes == "heads")
 num_heads
 ```
 
@@ -776,7 +741,7 @@ Play with the code a few times to see how close the number gets to the expected 
 ```{r}
 one_trial <- function(x) {
   outcomes <- sample(sides, size = 100, replace = TRUE)
-  num_heads <- sum(outcomes == "Heads")
+  num_heads <- sum(outcomes == "heads")
   return(num_heads)
 } 
 ```
@@ -787,13 +752,13 @@ You can simply call this function to generate an outcome of one experiment.
 one_trial(x)
 ```
 
-### Step 3: Running a Simulation
+### Step 3: Run and visualize!
+
+Here we face a critical question, "for our goal of developing an insight about coin tosses, how many times do we want to repeat it?" We can easily run the code 10,000 times, so let's choose 10,000 times. 
 
 We have programmed `one_trial` so that it executes 100 coin tosses and returns the number of "Heads".
 We can use a for-loop to repeat `one_trial` as many times we want.
-Here we face a critical question, "for our goal of developing an insight about coin tosses, how many times do we want to repeat it?"
-Since R is pretty fast at running the code for `one_trial`.
-We can easily run the code 10,000 times.
+
 To do that, we use the map.
 
 ```{r}
@@ -802,13 +767,10 @@ num_repetitions <- 10000
 
 # simulate the experiment!
 heads <- map_dbl(1:num_repetitions, one_trial)
-
-# That's it! The simulation is done.
-
 ```
 
 By executing `heads` after this produces all elements of `heads `.
-That will be a lot of lines on the scree, so you may not want to do it!
+That will be a lot of lines on the screen, so you may not want to do it!
 Instead, we can ask `heads` how many elements it has, using the `length` function we have seen before.
 
 ```{r}
@@ -823,8 +785,7 @@ heads[1]
 heads[2]
 ```
 
-Now using `tibble` we can collect the results as a table.
-Recall that `tibble` needs the index values and the data.
+Using `tibble` we can collect the results as a table. Recall that `tibble` needs the index values and the data.
 
 ```{r}
 results <- tibble(
@@ -839,7 +800,8 @@ results
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) + 
-  geom_histogram(aes(x = num_heads, y = ..density..), breaks = seq(30.5, 69.6, 1))
+  geom_histogram(aes(x = num_heads, y = ..density..), 
+                 color = "gray", fill = "darkcyan", breaks = seq(30.5, 69.6, 1))
 ```
 
 In this histogram, each bin has width 1 and we place it centered on the value.
@@ -851,98 +813,184 @@ If the coin is fair, for all number $d$, the event that we see $50-d$ "Heads" is
 The symmetry that we observe confirms the hypothesis.
 We also see that about 8% (i.e., 0.08 on the y-axis) of the simulation results produced 50.
 Furthermore, we see that very few times we see occurrences of numbers less than 35 or greater than 65.
-We thus conclude from the experiment that the range of thew number is likely to reside in the rnage [35,65].
+We thus conclude from the experiment that the range of thew number is likely to reside in the range [35,65].
 
-<!--
-### Moves in Monopoly
+### Example: The story of the doubling grains 
 
-Each move in the game Monopoly is determined by the total number of spots of two rolls of a die. If you play Monopoly, what should you expect to get when you roll the die two times?
+There is a famous the story of a king awarding a minister with doubling amount of grains. There are many versions of the story, but the gist is like this: one day a king has decided to award a minister for his great work.
 
-We can explore this by simulating the sum of two rolls of a die. We will run the simulation 10,000 times as we did in the previous example. Notice that is this paragraph we have completed Steps 1 and 3 of our simulation process.
+* The kind asks, "Great work, what do you want from me as a reward? You name it, I will make you wish come true."
+* The minister says, "Your Majestry, what an honor! If you are so kind as to indulge me, may I ask to receive grains of rice on a board of chess. We will start with one grain on a space on the board, given one day. The next day, I would like two grains on the next space. The following day, I would like four grains on the third space. Each day, I would like twice as many grains as you have given me on the previous day. In this manner, for the next 64 days, you would be so generous to give me grains of rice. Would that be too imposing to ask?"
+* The king says, "You ask so little. That would be so easy to do. Of course, this great King will grant you your request."
 
-Step 2 is the one in which we simulate one pair of rolls and add up the number of spots.
+The question is how many grains of rice will the minister receive at the end of the 64 day period?
+
+We know the answer to the question. The daily amount doubles each day starting from 1.
+He would thus receive:
+\[
+1 + 2 + 4 + 8 + 16  + \cdots = 2^0 + 2^1 + 2^2 + 2^3 + 2^4 + \cdots+ 2^{63}
+\]
+
+We can express this quantity more compactly as $2^{64} - 1$. Why? Suppose he has one more grain in his pocket to add to the piles at the end of the 64th day. We have
+\[
+1 + 1 + 2 + 4 + 8 + \cdots + 2^{63} - 1
+\]
+as the same total amount.
+The first two occurrences of 1 are equal to 2. So we can simplify the sum as
+\[
+2 + 2 + 4 + 8 + \cdots + 2^{63} - 1
+\]
+We have got rid of the twos.
+By joining the first two 2's, we get
+\[
+4 + 4 + 8 + \cdots + 2^{63} - 1
+\]
+At the end of calculation, we get 
+\[
+2^{63} + 2^{63} - 1 
+\]
+and this is equal to $2^{64}-1$, which is by the way an obscenely large number.
+
+We know the story as a fable that tells us we must think before promising something. This story took place hundreds of years ago, where there were no computers. For the king to provide the grains he had promised to give to the minister, he would have ordered a clerk to do the calculation.
+
+If the clerk is super-human, her calculation would be perfect, and so the total amount she would provide would be exactly what we had anticipated. But, since she is human, humans are prone to error. In the process of writing down numbers, there may be various errors, such as skipping a digit or writing a wrong digit.
+
+If she does not notice an error, the minister would get a different amount of grains at the end of the 64 days. Suppose we want to mimic the process of her calculation using a computer, with the chance factor in mind. This is where "randomness" comes in to play.
+
+To simplify the scenario, we will consider the number of grains the minister receives at the end of 10th day. We know that the number of grains should equal $2^{10} - 1$.
+
+### Step 1: Determine what to simulate 
+
+We are interested in simulating the number of grains the minister receives at the end of the 10th day. We hypothesize that the number of grains should cluster around $2^{10} - 1 = 1023$. 
+
+### Step 2: Figure out how to simulate one value
+
+We need to imagine the variability in the clerk's calculations for the number of grains a minister receives on a given day. If the clerk is perfect, we expect that number of grains to be $2^{\text{ day} - 1}$. For instance, on the third day the minister should receive 4 grains which is $2^{3 - 1} = 2^2 = 4$. 
 
 ```{r}
-pair_of_rolls_experiment <- function(x) {
-  dice <- 1:6
-  num_spots <- sum(sample(dice, size = 2, replace = TRUE))
-  return(num_spots)
+grains3 <- 2^(3 - 1)
+grains3 
+```
+
+However, the clerk is *not* perfect. How can we account for this in our simulation? We can use `sample`!
+
+We will assume that, for the most part, the clerk is correct and calculates the right number of grains. But, we will also say that the clerk may double count the number of grains or forget to count the day altogether with some probability. This yields three events: *correct*, *double count*, and *forget*. Say the probabilities for these events are $2/3$, $1/3$, and $1/3$, respectively. We can pass these probabilities in as an additional argument to `sample`. 
+
+```{r}
+some_error <- sample(c(-1, 0, 1), prob = c(1/3, 2/3, 1/3), size = 1) 
+some_error
+```
+
+If `some_error` is `0`, then there is no error. If `some_error` is `1`, the clerk double counted. Finally, if `some_error` is `-1`, she neglected to count the day. Therefore, the following calculation gives us the actual number of grains the minister received on day 3.
+
+```{r}
+grains3 + some_error * grains3
+```
+
+Now we can pull everything together into a function. 
+
+```{r}
+grains_on_day <- function(day) {
+  grains <- 2^(day - 1)
+  some_error <- sample(c(-1, 0, 1), prob = c(1/3, 2/3, 1/3), size = 1)  # clerk doing her best!
+  return(grains + some_error * grains)
+}
+```
+
+One trial of our simulation then is summing up the number of grains the minister received from day 1 to day 10. 
+
+```{r}
+one_trial <- function(x) {
+  grains_per_day <- map_dbl(1:10, grains_on_day)
+  return(sum(grains_per_day))
 } 
 ```
 
 ```{r}
-pair_of_rolls_experiment()
+one_trial()
 ```
 
-That simulates one value of the sum of two rolls. We are now all set to run the simulation according to the steps that are now familiar.
+Run the cell a few times and observe the variability in the number of grains.
+
+### Step 3: Run and visualize!
+
+We will use 100,000 repetitions of the simulation this time to get a good sense of the variability. Each element of the `grains` vector stores the resulting number of grains at the end of the 10th day in each simulation of the story. 
 
 ```{r}
-num_repetitions <- 10000
+# Number of repetitions
+num_repetitions <- 100000
 
-moves <- map_dbl(1:num_repetitions, pair_of_rolls_experiment)
+# simulate the experiment!
+grains <- map_dbl(1:num_repetitions, one_trial)
 ```
 
-Here is a histogram of the results.
+As before, we collect our results into a tibble. 
 
-```{r dpi=80, fig.align="center", message = FALSE}
-
+```{r}
 results <- tibble(
   repetition = 1:num_repetitions,
-  sum_of_two_rolls = moves
+  num_grains = grains
 )
-
-ggplot(results) + 
-  geom_histogram(aes(x = sum_of_two_rolls, y = ..density..), color = "gray",
-                 breaks = seq(1.5, 12.6, 1))
+results
 ```
 
-Seven is the most common value, with the frequencies falling off symmetrically on either side.
+Finally, we visualize our results.
 
--->
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(results) + 
+  geom_histogram(aes(x = num_grains, y = ..density..), 
+                 color = "gray", fill = "darkcyan", bins = 30) + 
+  geom_point(aes(x = 1023, y = 0), color = "salmon", size = 3)
+```
+
+We observe that the number of grains cluster around 1023, as expected (see the orange dot). Note how in some simulations of the story the minister ends up receiving little to no grains at the end of the 10th day! 
 
 ## The Birthday Paradox
 
-The *Birthday Paradox* states that if 23 people are in a room, the chances are 50:50 that there are two people among the 23 who have the same birthdays.
-There are 365 days in a year.
-How come is it possible for just 23 people to find two among them having the same birthdays?
+Happy birthday! Someone in your class has a birthday today! Or, should we say happy *birthdays*? 
+
+The *Birthday Paradox* states that if 23 students are in a class, the chances are 50/50 that there are two students among the 23 who have the same birthday. There are 365 days in a year. How is it possible that among just 23 students, we can find two of them that have the same birthday? 
+
+### Prerequisites
+
+As we will be making use of purrr functions in this section, we need to load in the tidyverse.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### A quick theoretical exploration 
 
 We answer the question first by analysis.
 
-Assume that we will consider only a non-leap year (that is, no February 29th) and each of the 365 birthdays are likely to occur in a person.
-Since each birthday is likely to occur as any other birthday, we can look at the question at hand by counting the number of possible birthday combinations.
-We have 23 people in the room.
-Each person gets to choose her birthday freely without considering the birthdays of other 22 people.
-The 23 people make their choices and then check whether the choices fall into one of the no-duplicate selections.
+Assume that we will consider only a non-leap year (no February 29th -- sorry leap year babies!) and each of the 365 birthdays are likely to occur. Since each birthday is likely to occur as any other birthday, we can look at the question at hand by counting the number of possible birthday combinations.
 
-With no restriction, the number of possible choices of birthdays for the 23 people is
+We have 23 students in the class. Each student gets to choose her birthday freely without considering the birthdays of the other 22 students. The 23 students make their choices and then check whether the choices fall into one of the no-duplicate selections.
+
+With no restriction, the number of possible choices of birthdays for the 23 students is
+
 \[
-365^{23}
+365 * 365 * 365 * \dots * 365 = 365^{23}
 \]
-These possibilities contain the cases where a birthday coincindence occurs.
 
-In comparison, the number of possibilities for selecting 23 birthdays so that no two are equal to each other requires a bit complicated analysis.
-We can view the counting problem using the following hypothetical process.
-The 23 people in the room will pick their birthdays in order so that there will be no duplicates.
-The first person has complete freedom in her choice.
-She chooses one from the 365 possibilities.
+These possibilities contain the cases where birthdays may be shared among the people.
 
-The next person has almost complete freedom.
-She can pick any birthday but the one the first person has chosen.
-There are 364 possibilities.
+In comparison, the number of possibilities for selecting 23 birthdays so that no two are equal to each other requires a bit complicated analysis. We can view the counting problem using the following hypothetical process.
 
-The third person has again almost complete freedom.
-She can pick any birthday but the ones the first two persons have chosen.
-Since the first two people picked different birthdays.
-There are 363 possibilities.
+The 23 students in the class will pick their birthdays in order so that there will be no duplicates.
 
-We can generalize the action.
-The $k$-th person has $365 - k + 1$ choices.
+* The first student has complete freedom in her choice. She chooses one from the 365 possibilities.
+* The next student has almost complete freedom. She can pick any birthday but the one the first student has chosen. There are now 364 possibilities.
+* The third student has again almost complete freedom. She can pick any birthday but the ones the first two students have chosen. Since the first two students picked different birthdays, there are 363 possibilities for the third student. 
 
-By combining all these for the 23 people, we have that the number of possibilities for chosing all-distinct birthdays is
+We can generalize the action. The $k$-th person has $365 - k + 1$ choices.
+
+By combining all of these for the 23 students, we have that the number of possibilities for choosing all-distinct birthdays is
+
 \[
 365 \cdot 364 \cdot 363 \cdot \cdots \cdot 353.
 \]
-Thus, the chances for the 23 people to make the selections so there are no duplicates are thus
+Thus, the chances for the 23 students to make the selections so there are no duplicates are thus
 \[
 (365 \cdot 364 \cdot 363 \cdot \cdots \cdot 343) / 365^{23}.
 \]
@@ -950,173 +998,103 @@ Moving terms, we get that the chances are
 \[
 \frac{365}{365} \cdot \frac{364}{365} \cdots \frac{343}{365}.
 \]
-The quantity is approximately 0.4927.
-The chances we find a duplicate are 1 minus this quantity, which is approximately 0.5073.
-Pretty interesting, isn't it?
 
-The second method, an alternative to analyzing mathematically, is to use simulation.
-We can mimic the process of selecting 23 birthdays independently from each other.
-We start by generating a vector having length 365 whose elements represent the birthdays.
-Naturally, we assign numbers 1 through 365 to the birthdays, create the following vector.
+The quantity is approximately $0.4927$. The chances we find a duplicate are 1 minus this quantity, which is approximately $0.5073$. Pretty interesting, isn't it?
+
+### Simulating the paradox
+
+The second method, an alternative to the formal mathematical analysis, is to use simulation to mimic the process of selecting 23 birthdays independently from each other. This simulation is slightly more difficult than the ones we have seen in the previous section. 
+
+### Step 1: Determine what to simulate 
+
+In this simulation, we are interested in obtaining the *chance* or probability that two students in the class have the same birthday among a group of 23 individuals. 
+
+### Step 2: Figure out how to simulate one value
+
+We start by using `sample` to draw 23 random birthdays. The vector represented by the sequence `1:365` contains the days in the year one can pick from.  
 
 ```{r}
-base <- vector("integer", 365)
-for (i in 1:365) {
-  base[i] = i
+chosen_birthdays <- sample(1:365, size=23, replace=TRUE)
+chosen_birthdays 
+```
+
+We now check how many duplicates there are in the class. 
+
+```{r}
+sum(duplicated(chosen_birthdays))
+```
+
+Let's pull these pieces together into a function we can use. The function returns `TRUE` if there are any duplicates in the class; `FALSE` otherwise. 
+
+```{r}
+any_duplicates_in_class <- function(x) {
+  chosen_bdays <- sample(1:365, size=23, replace=TRUE)
+  num_duplicates <- sum(duplicated(chosen_bdays))
+  if (num_duplicates > 0) {
+    return(1)
+  } else {
+    return(0)
+  }
 }
-base 
 ```
-
-As you can see the 365 elements of the vector are 1 through 365.
-
-Next, using `sample` we draw 23 random values from the vector.
 
 ```{r}
-chosen <- sample(base, size=23, replace=TRUE)
-chosen 
+any_duplicates_in_class()
 ```
 
-We then check whether there are any duplicates in it.
-One way to do the checking is to reorder the elements so the numbers appear in the non-decreasing order and then examine whether any two neighboring numbers are equal to each other.
-The code for doing the check is this.
-We can accomplish the task of reordering using the function `sort`.
-The code reorders `chosen`, stores the result of reordering in another vector `sorted`, and then for each `i` in the range [1,22], check whether the element at position `i` is equal to its next element. 
-
-
-```{r}
-sorted <- sort(chosen)
-for (i in 1:22) {
-  if (sorted[i] == sorted[i+1]) print("identical")
-} 
-```
-
- We can encapsulate the idea as a pair of functions. The first one is to generate samples and the other is to perform the check.
- The first function `generate_birthdays` takes the number of peopls as its argument `x`.
-Calling `generate_birthdays(23)` produces an array of 23 random birthdays.
-Note that we use the argument `x` in the execution of `sample`, where `x` appears in `size=x`. 
-
-```{r}
-generate_birthdays <- function(x) {
-  base <- vector("integer", 365)
-  for (i in 1:365) {
-    base[i] = i
-  }
-  chosen <- sample(base, size=x, replace=TRUE)
-  return(chosen)
-} 
-```
-
-The duplicate checking function receives an argument, which it expects to be a vector.
-It sorts the argument and stores it in `y`.
-It obtains `l` as the number of elements in `x` minus 1.
-Since `x` and `y` have identical lengths, `l` is also the number of elements in `y` minus 1.
-Then the program iterates over the sequence `1:l` using an item index `i` to compare the values at position `i` and `i+1`.
-Since we need to examine the position `i+1` for each value of `i`, the maximum value we want to assign to `i` is the length of the sequence minus 1, and that is the reason we subtract one when calculating the value for `l`.
-During the iteration, each time the program encounters a pair of identical values, it adds 1 to `num_duplicates`.
-The program initially stores 0 to `num_duplicates`, and so when the loop completes, the value of `num_duplicates` is equal to the number of times it encountered an identical pair.
-
-```{r}
-check_duplicate <- function(x) {
-  y <- sort(x)
-  l <- length(x) - 1
-  num_duplicates <- 0
-  for (i in 1:l) {
-    if (y[i] == y[i+1]) num_duplicates = num_duplicates + 1
-  }
-  return (num_duplicates)
-} 
-```
-
-The function returns the number of pairs.
-If there is a trio of people having the same birthdays and no other duplicate, the return value is 2.
-If there distinct pairs having the same birthdays, the return value is still 2.
-
-
-```{r}
-birthdays <- generate_birthdays(30)
-print(check_duplicate(birthdays))
-```
-
-If we want to compute the number of people with unique birthdays, we need a bit different calculation, which can be a bit more complex.
-For now, we will just need to know whether `num_duplicates` is 0 or not, and so we will not worry about it.
-The above calculation using iteration is a bit cumbersome.
-Fortunately, there is a way to obtain the number of unique values appearing in a vector.
-The method is `unique`.
-It receives a vector and returns the unique number of elements in it.
-We thus start by writing a code for generating the result of one experiment with a number of people as an argument. 
-
-<!--
-```{r}
-one_birthday_trial <- function(x) {
-  birthdays <- generate_birthdays(x)
-  y <- sort(birthdays)
-  l <- length(birthdays) - 1
-  num_duplicates <- 0
-  for (i in 1:l) {
-    if (y[i] == y[i+1]) num_duplicates = num_duplicates + 1
-  }
-  return (num_duplicates)
-} 
-```
--->
+We now imagine multiple classrooms that each have 23 students. We will survey each of the classes for any birthday duplicates in the class. Luckily, we can use `any_duplicates_in_class` to help us with the surveying work. Once the surveying is done, we will calculate the *proportion* of duplicates among all the classrooms we surveyed. Let's assume there are 100 classrooms in the school. 
 
 ```{r}
 one_birthday_trial <- function(x) {
-  birthdays <- generate_birthdays(x)
-  return(x - length(unique(birthdays)))
-} 
+  classrooms <- 100
+  num_duplicates <- map_dbl(1:classrooms, any_duplicates_in_class)
+  return(sum(num_duplicates) / classrooms)
+}
 ```
 
-The function `one_birthday_trial` generates a random birthday sequence of length `x` and then return `x` minus the length of the `unique` version of the birthday sequence.
+We can check how we did after one survey. 
 
 ```{r}
-one_birthday_trial(23)
+one_birthday_trial()
 ```
 
-We generate 10000 simulations and store the results in a vector.
+Run this cell a few times. Observe how this value is somewhat close to the theoretical 0.51. We now have one trial of our simulation.  
+
+### Step 3: Run and visualize!
+
+We generate 10,000 simulations and store the results in a vector.
 Since the value `one_birthday_trial` returns is a nonnegative integer, we create its simplified version, where we reduce all positive values to 1 and retain 0 as 0.
 
 ```{r}
-many_trials <- function(x) {
-  # Number of repetitions
-  num_repetitions <- 100
-  results <- vector("integer",num_repetitions)
-  resultsSimple <- vector("integer",num_repetitions)
+# Number of repetitions 
+num_repetitions <- 10000
 
-  # simulate the experiment!
-  for (i in 1:num_repetitions) {
-    results[i] <- one_birthday_trial(x)
-    if (results[i] > 0 ) resultsSimple[i] <- 1
-    else resultsSimple[i] <- 0
-  }
-  return(sum(resultsSimple)/num_repetitions)
+# simulate the experiment!
+bday_proportions <- map_dbl(1:num_repetitions, one_birthday_trial)
 
-}
+# and done!
 ```
 
-
-The return statement of the program comutes the proportion of the trials that generated duplicates.
-Run a few times to see how the ratios the program prints are close to the ideal 0.5073.
-
+As before, we collect our results into a tibble. 
 
 ```{r}
-many_trials(23)
+results <- tibble(
+  repetition = 1:num_repetitions,
+  proportions = bday_proportions
+)
+results
 ```
 
-We run `many_trials(23)` a number of times and generate a histogram.
+Finally, we visualize our results.
 
-```{r dpi=80,  fig.align="center", message = FALSE}
-num_reps <- 1000
-outcomes <- vector("double",num_reps)
-for (i in 1:num_reps) {
-  outcomes[i] <- many_trials(23)
-}
-outcome_df <- tibble(outcomes)
-ggplot(outcome_df, aes(x = outcomes)) + 
-  geom_bar() + 
-  coord_flip()
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(results) + 
+  geom_histogram(aes(x = proportions, y = ..density..), 
+                 color = "gray", fill = "darkcyan", breaks = seq(0.35, 0.65, 0.01)) + 
+  geom_point(aes(x = 0.51, y = 0), color = "salmon", size = 3)
 ```
-We see that the histogram looks symnmetric and centered around 0.51.
+
+We see that the histogram looks symmetric and centered around 0.51 (see the orange dot), as expected. Neat!
 
 <!--
 

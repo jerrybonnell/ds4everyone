@@ -2,7 +2,9 @@
 
 # Randomness 
 
-In the previous chapters we developed skills needed to make insightful descriptions of data. Data scientists also have to be able to understand randomness. For example, they have to be able to assign individuals to treatment and control groups at random, and then try to say whether any observed differences in the outcomes of the two groups are simply due to the random assignment or genuinely due to the treatment.
+content in comments
+
+<!--In the previous chapters we developed skills needed to make insightful descriptions of data. Data scientists also have to be able to understand randomness. For example, they have to be able to assign individuals to treatment and control groups at random, and then try to say whether any observed differences in the outcomes of the two groups are simply due to the random assignment or genuinely due to the treatment.
 
 In this chapter, we begin our analysis of randomness. To start off, we will use R to make choices at random. R contains many functions that involve random selection. One of these functions is called `sample()`. It picks one item at random from an array, and it is equally likely to pick any of the items. The function call is `sample(vector_name, size)`, where `vector_name` is the name of the vector from which to make the choice and `size` is the number of items to choose. 
 
@@ -1079,5 +1081,5 @@ filter(results, rolls == 50) %>% as.data.frame()
 
 If you have ever played games that rely heavily on "RNG" (*r*andom *n*umber *g*enerator), chances are you intuitively exploited this finding: just keep "rolling" until you find that rare item! 
 
-Calculations like these can be used to find the chance that a particular individual is selected in a random sample. The exact calculation will depend on the sampling scheme. But what we have observed above can usually be generalized: increasing the size of the random sample increases the chance that an individual is selected.
+Calculations like these can be used to find the chance that a particular individual is selected in a random sample. The exact calculation will depend on the sampling scheme. But what we have observed above can usually be generalized: increasing the size of the random sample increases the chance that an individual is selected. -->
 

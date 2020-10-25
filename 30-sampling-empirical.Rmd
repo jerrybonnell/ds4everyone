@@ -3,7 +3,12 @@ output:
   pdf_document: default
   html_document: default
 ---
+
 # Sampling and Empirical Distributions
+
+content in comments
+
+<!--
 
 An important part of data science consists of making conclusions based on the data in random samples. To make correct interpretations of their results, data scientists must possess first-hand knowledge of exactly what random samples are.
 
@@ -449,7 +454,9 @@ This is where empirical histograms come in.
 
 We know that by the Law of Averages, the empirical histogram of the statistic is likely to resemble the probability histogram of the statistic, if the sample size is large and if you repeat the random sampling process numerous times.
 
-This means that simulating random processes repeatedly is a way of approximating probability distributions *without figuring out the probabilities mathematically or generating all possible random samples*. Thus computer simulations become a powerful tool in data science. They can help data scientists understand the properties of random quantities that would be complicated to analyze in other ways.
+This means that simulating random processes repeatedly is a way of approximating probability distributions *without figuring out the probabilities mathematically or generating all possible random samples*. Thus computer simulations become a powerful tool in data science. They can help data scientists understand the properties of random quantities that would be complicated to analyze in other ways. --> 
+
+
 
 
 
