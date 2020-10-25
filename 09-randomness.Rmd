@@ -831,7 +831,10 @@ He would thus receive:
 1 + 2 + 4 + 8 + 16  + \cdots = 2^0 + 2^1 + 2^2 + 2^3 + 2^4 + \cdots+ 2^{63}
 \]
 
-We can express this quantity more compactly as $2^{64} - 1$. Why? Suppose he has one more grain in his pocket to add to the piles at the end of the 64th day. We have
+We can express this quantity more compactly as $2^{64} - 1$.
+
+<!--
+Why? Suppose he has one more grain in his pocket to add to the piles at the end of the 64th day. We have
 \[
 1 + 1 + 2 + 4 + 8 + \cdots + 2^{63} - 1
 \]
@@ -850,6 +853,7 @@ At the end of calculation, we get
 2^{63} + 2^{63} - 1 
 \]
 and this is equal to $2^{64}-1$, which is by the way an obscenely large number.
+-->
 
 We know the story as a fable that tells us we must think before promising something. This story took place hundreds of years ago, where there were no computers. For the king to provide the grains he had promised to give to the minister, he would have ordered a clerk to do the calculation.
 
