@@ -3,42 +3,454 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Sampling
 
-Sampling is an important concept in data science.
-When a data scientist receives a data to analyze, the first question she asks is "how was this data generated?"
-The question she asks is about:
-* the original source of data (e.g., is it through an experiment, is it a combination of multiple data sources, etc.)
-* any processing applied to data (e.g., data conversion, filling in blanks, etc.)
-The "processing" part of the question often includes, "if the data collector chose to exclude some data rows or columns, why and how she did it?"
-The data selection question becomes important particularly when it is impossible to include every possible "subject" in the data.
-In this chapter, we explore methods for sampling.
+# The Power of Sampling
+
+In the previous chapter we learned that using randomness we can make selections by chance.
+In this chapter, we will use sampling more aggressively and learn to exploit the power of sampling.
+Specifically, we will learn that (a) by drawing samples we are able to observe an unknown distribution and (b) by conducting experiments by sampling we can assess how unlikely or likely it is a phenomenon at hand.
+In both cases, the number of samples we draw plays a big role.
 
 
-## Situations Demanding Sampling 
+__Prerequisites__
 
-Here are examples in which "selections" become important.
-* You want to conduct research on the height and weight on the entire population in U.S.
-* You want to conduct research on the buying and selling prices of the cars in a large online used car retailer in light of the demographics of the people who bought and sold the cars, but you want it very quick.
-* You need to analyze patient trends in a large hospital network, and the hospitals in the network are able to provide information for their inpatients and outpatients.
+Before starting, let use load `tidyverse` as usual.
 
-The first one is an impossible problem because we cannot account the entire population in U.S.
-The second one is different in nature than the first because the retailer has the entire data set at hand, but the time is of essence, and so there is no time to examine all the cars.
-In the last case, the hospitals in the network are able to provide information for their inpatients and outpatients.
-However, if there are tens of hospitals with diverse sizes of patients on their records, does it make sense to combine all the data?
-If the most populous hospital has 250000 patients while the least one 5000, can we join the two or do have to include only a small fraction from the first so that the two extremes contribute the same number of patients?
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
 
-This is where the selection of data comes in to play.
-The selection can be systematic.
-For example, you may choose to select every 50th patient in the most populous hospital top reduce the number to 5000 to make the data size equal to the size of the smallest.
-We can apply this systematic reduction to the other hospitals to reduce the size equal to 5000 for all of them.
-Now every hospital will contribute the same number, 5000, of patients!
+Many data sets data scientists handle, including those data sets you have access as part of RStudio, are tables.
+We will familiarize ourselves with the use of sampling with table data.
+In this chapter specifically, we will use the `mpg` data set that comes with R.
+We will also use the `flight` data that we can download from the Bureau of Transportation Statistics.
 
-But wait a second, what if the least populous is in Wyoming, the one with the least people in the U.S. and the most populous one is California, the most populous one in the U.S.
-Will selecting the same number of people from each hospital do justice?
-Shouldn't we select patients from the hospitals according to the states, or more precisely, the number of population they cover?
-There is no an obvious answer to the question.
-The data scientist in charge will have to decide on the adjustments to make.
+__Sampling Rows of a Table__
+
+Let's load `mpg`.
+
+```{r}
+mpg
+```
+
+Each row of a data table represents an individual; in `mpg`, each individual is a car model. Sampling individuals can thus be achieved by sampling the rows of a table.
+
+The contents of a row are the values of different variables measured on the same individual. So the contents of the sampled rows form samples of values of each of the variables.
+
+__Deterministic Samples__
+
+Recall that on a table-like data set, we often anticipate the columns of the table (that is, the vertical slices) to represent the properties we can obtain from an individual object.
+A collection of the properties representing an individual is a *record* or a *data object*.
+The rows of a data set are the data records.
+The row X and column Y of the data set is the property Y of the data object X.
+
+By "sampling" we mean to select rows from the data.
+If we want to select distinct rows of the data, there is a convenient function `slice` for the action, which you may recall.
+The first argument of the function call specifies the source for sampling, and the other specifies the rows we draw with a list representation.
+
+```{r}
+mpg_sub <- slice(mpg, c(3, 25, 100))
+mpg_sub
+```
+
+As you see, the `slice` function call here generates a new data set with Rows 3, 25, and 100 of `mpg`.
+The function `mpg` does not care if the row numbers appearing in the argument are all different or if the row numbers appear in non-decreasing order.
+By repeating a pair `3` and `25` four times, you obtain a subset with four repeats of the consecutive appearance of Audi A4 and Chevrolet Corvette.
+
+
+```{r}
+mpg_sub <- slice(mpg, c(3, 25, 3, 25, 3, 25, 3, 25))
+mpg_sub
+```
+
+When you know which rows should appear a sample data set, you state them in your process to create the data set.
+We call the sampling process with a selection list of row *deterministic sample*.
+The determinism refers to the non-existence of chances (unless the list of rows comes from an external source and the process of generating the list uses randomness).
+
+An alternative to directly specifying the row numbers is specifying a condition on an attribute for a record to be in the sample data set.
+We have seen this before.
+The name of the function is `filter`.
+
+```{r}
+mpg_sub <- filter(mpg, manufacturer == "land rover")
+mpg_sub
+```
+
+There is room for ambiguity in filtering.
+The condition on the attribute of a record either puts in the subset or it does not. Exactly one of the two occurs.
+Like `slice`, `filter` selects the records deterministically.
+If we calculate by hand check for each row, whether it is part of the subset.
+The command `filter` produces exactly the same result as we do by hand.
+
+
+__Probabilistic Sampling__
+
+While the antonym of "deterministic" is "non-deterministic" and the concept plays an important role in computer science, data science does not use the word.
+The word only states that the process is not deterministic.
+It does not state how to draw non-determinism.
+Instead, data science uses a more specific form of non-determinism "randomness".
+We call the process of sampling using randomness *probabilistic sampling* or *random sampling*.
+The objects from which we can draw samples are the *population*.
+There are some types of populations.
+The determining factors of the types are their quantity and the we generate samples.
+Here are some (non-comprehensive) examples of populations and how we want to sample from the data.
+
+* *Accessible Data with Succinct Definition* We want to study the choice of major at a college. The registrar's office can generate a complete list of all the students currently attending the college. Using filtering, we can narrow down the population to a specific group (e.g., the full-time sophomore students). We can then sample from the group or we can choose to include all the students in the group in our study.
+* *Continuous Population Requiring Discretization* We want to study the quality of air based on how ``blue'' the skies are. There is no clear definition of population. The geographical location of measurement equipment, the area to cover in the sky, and the time of measurement can be factors in determine the samples. The determination these factors essentially *discretize* the continuous data. After determining all these determining factors succinctly, a technician can make a measurement.
+* *Data with Succinct Definition Beyond Reach* We want to study the relationship between the height and weight of the people living in the United States. The population appears to have a clear definition, but it is difficult to determine who gets in the population because the population is transient (due to babies coming to life, people moving out of the country, etc.). By specifying at which point of time the person must be living in the United States, the definition can be succinct. The problem is it is impossible to include everyone in the population. There are more than 300 million people, and we have no way of knowing who those people are.
+* *Non-existing Population Requiring Active Generation* We want to examine the fairness of a coin. Each time we throw the coin, we generate a record. Throwing the coin N times you get a population of N records, but you may want to use the entire population for the analysis.
+
+__Systematic or Random, Replace or not Replace, Uniform or Non-uniform__
+
+When we get down to the business of sampling, some critical decisions we must decide before starting to sample.
+
+* The first question is whether to sample systematically or not.
+* The second question is whether the same record can appear more than once in the sample data. In the previous chapter, 
+* The third is whether the records have equal chances of becoming a sample.
+
+
+__Systematic Sampling__
+
+In systematic samples, we will choose samples according to a systematic manner.
+For example, we can select all students whose university-issued ID number has an odd number in the second-to-last position from the population of all students a university.
+Also, we can select, from the entire population of the United States, all voters whose mailing address has the postal code ending in 1, whose street address has a digit 2, owns a car, and whose license plate has either the letter T or the numeral 6.
+
+Here is an example of making systematic sampling on the `mpg` data set using functions on R.
+Let's start by preparing a version of the data frame that includes the row index for better visual inspection.
+
+```{r}
+mpg_with_index <- mpg %>%
+  mutate(row_index = 1:nrow(mpg)) %>%
+  select(row_index, everything())
+mpg_with_index
+```
+
+We will now pick one of the first 10 rows at random, and then we will select every 10th row after that.
+
+```{r}
+# Choose a random start among rows 0 through 9; then take every 10th row.
+start <- sample(1:10, size = 1)
+slice(mpg_with_index, seq(start, nrow(mpg_with_index), by = 10))
+```
+
+Run the code a few times to see how the output varies.
+
+This is a combination of systematic sampling and random sampling.
+The starting point is random and there are 10 possibilities, and we pick one from these 10 possibilities with probability 10% (i.e., one in ten chances).
+The selection after determining the starting point is automatic; we will select every tenth element from the starting point.
+Therefore, there are just ten different sample data sets out of the original data set.
+Of course there are many other way of selecting one out of ten records from the data set.
+Any such combinations will never occur.
+
+Expanding this systematic selection, we can think of splitting the rows in consecutive 10 rows and selecting exactly one from each group.
+The systematic selection has more possibilities than the previous one, but still, there are combinations of the same number of records that it will never generates (e.g., the one contains the very first two records).
+
+
+__Replace or Not Replace__
+
+When you get to make random sampling, there are two major strategies.
+One strategy is to prohibit any record to appear more than once in the set.
+The other is to not impose the restriction.
+We call the first strategy *sampling without replacement* and the second *sampling with replacement*.
+Most of the sampling we conduct in this course is sampling with replacement.
+
+__Uniform or Non-Uniform__
+
+There are situations in which the population we access to is a mixture of a few groups, but the representation is not equal among the groups.
+For example, if we have a data set covering some students and while the university has a 50:50 mixture of male and female students, the data set has a 20:80 mixture of men and women.
+Assuming that both groups must have equal representation, we may want to sample four male students for every female student we sample.
+
+
+## Empirical Distributions
+
+One major use of sampling is to obtain an approximation for the true distribution.
+Think of a question like "how many percent of people in the Unite States are taller than six feet?"
+As discussed earlier, we first need to exert a considerable amount of effort in defining "the people in the United States" and then how to collect the height for all qualifying individuals.
+The latter action is, as we discussed before, impossible.
+We thus turn to sampling; that is, we sample people from the population and approximate the height information from the samples we collect.
+Since the question at hand is about the percentage and the attribute in question is a single quanty, we can build a histogram from the height information we collect.
+We hope that any height x percentage histogram we generate out of samples will be close to the one we would generate out of the entire population with the same bin set.
+Keep in nind that the human height carries inaccuracies because the way a person stands affects height measurement.
+We might say beyond a certain level of granularity, such as one tenth of an inch, it would be impossible to produce consistent measurements.
+According the [Guiness World Record](https://www.guinnessworldrecords.com/news/2019/2/a-history-of-record-breaking-giants-100-years-after-the-tallest-man-in-the-world-511577), the tallest person has ever lived with a irrefutable height measurement is Robert Wadlow (February 22, 1918 - July 15, 1940), whose record is stunning 8 feet and 11.1 inches (2.72 meters).
+Assuming none will beat him, we can assume that an active range of height is from 0 feet 0 inches to 9 feet 0 inches with the increment of 0.1 inches.
+With the active range and the granularity, there are $9 * 12 * 10 = 1080$ bins.
+We can thus imagine having a histogram with 1080 bins with the entire qualifying population and think of the histrograms we generate from sampling is an approximation of this 1080-bin histogram.
+We refer to the one with the entire population as the *true distribution* and the one we generate from samples *emprical distributions* (or *observed distributions*).
+With the view that the 1080 bins are unsplittable, we cannot increase the number of bins.
+Alternatively, assuming that the values can be further specific (e.g., by temporary freezing a person and then putting him/her on a height scale), the distributions are *continuous distributions*.
+
+
+
+In this section we will generate data and see what the empirical distribution looks like.
+We take as an example throwing an ideal die.
+There are six faces to a die.
+The outcome of throwing a die is the face that turns up.
+We naturally think of the six numbers in sequence but do not have to do so.
+You can go 1, 2, 3, and then 6, 5, 4 because the three numbers appear on the flip side of the first three in that order.
+Or, you can go like 2, 3, 1, 6, 5, and then 4.
+The six numbers are equal to each other.
+We call such a distribution a *discrete distribution*.
+The true distribution is the discrete distribution of a fair dice, where the probability of seeing a face is exactly 1/6.
+Does that mean that if you throw the die six times, you see each face exactly once?
+Not quite.
+If that is the case, after throwing the die five times, you must see five difference faces, then you can predict the face of the sixth one to be the one yet to appear.
+Also, you can apply the same logic to each consecutive five throws to predict the next one.
+The observation woud lead to an assertion that, after the first five throws, the remaining throws are deterministic, which contradicts the randomness we are expecting from the die.
+
+What can we conclude from this rather cumbersome discussion?
+We conclude that th ere is no guarantee that the proportions of faces you see after throwing a dice multiple times are not 1/6 even if the number of throws is a multiple of 6.
+We can even be bold enough to say that the proportions can be substantially different from the expected "1/6 for each face".
+
+The sampling we will conduct is different from sampling from the human population on three counts.
+First, the fair dice may not exist in the real world, and so we will use a computer program that represents a fair die.
+Second, the population exists only in our throwing of the die; that is, each time we throw the die, the throw and its outcome becomes a new member of the population.
+Third, because we can generate a sample any number of times, the population is inifinite in size.
+
+Now, let us get down to the business of generating samples by throwing a fair die.
+Let's load in the tidyverse as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+
+### Ideal Distribution
+
+Here is the ideal discrete distribution of the outcomes of throwing a fair die.
+
+```{r}
+die <- tibble(face = 1:6)
+die
+```
+
+Let us visualize the distribution using `ggplot`.
+Because there are six values for the face, we use six bars to generate a histogram.
+You can see that the height is equal for all bars, at the level of 1/6.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(die) + 
+  geom_histogram(aes(x = face, y =  ..density..), bins = 6, color = "gray")
+```
+
+### Empirical Distributions
+
+Now generate an empirical distribution using computer simulation.
+We used previously `sample` for generating samples from a list.
+Here will use `dplyr` method for sa,pling with data frames.
+The `dplyr` function we use is `slice_sample()`.
+It draws at random from the rows of a data frame, with an argument to sample with replacement.
+It also gives an an argument `n` for the sample size, and it returns a data frame consisting of the rows that were selected. 
+
+Here are the results of 10 rolls of a die.
+
+```{r}
+slice_sample(die, n = 10, replace = TRUE)
+```
+
+We can use `slice_sample` to generate different numbers of samples.
+So we can use a variable number of samples, let us define a function for the task of receiving the sample number and generating a distribution plot representing the samples.
+The argument `nn` is the sample number.
+We could have used a different name for it, e.g., as the plain `n`.
+Then we get something like `slice_sample(die, n = n, replace = TRUE)` in the second line.
+The two occurrences of `n` have different meanings.
+The left one is the name of the parameter the method `slice_sample` uses, and the right one is the argument that the method `empirical_hist_die` receives.
+R has no problem in distinguishing the two different meanings of `n`.
+Just to be safe, we will use `nn` instead` so as not to confuse ourselves.
+
+
+```{r}
+empirical_hist_die <- function(nn) {
+  die_sample <- slice_sample(die, n = nn, replace = TRUE)
+  ggplot(die_sample, aes(x = face, y = ..density..)) + 
+    geom_histogram(bins = 6, color = "gray")
+}
+```
+
+### Empirical Histograms
+
+Here is an empirical histogram of 10 rolls.
+It does not look very much like the probability histogram above.
+Run the cell a few times to see how it varies.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+empirical_hist_die(10)
+```
+
+There is a reason for it.
+We are talking about 10 throws with six possibilities for each.
+Even if try to distribute 10 independent possibilities among the 6 values, it is impossible to generate equal numbers among them.
+In the best case, 2 faces get 1 and 4 faces get 2.
+
+When we increase the sample size, we see that the distribution gets closer to the ideal, where each bar has 16.67% as its proportion.
+
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+empirical_hist_die(100)
+```
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+empirical_hist_die(1000)
+```
+
+
+The phenomenon we have observed - the empirical distribuition becomes closer to the true distribution as we increase the number of samples - is highly important in data science.
+We refer to it as the *law of average*.
+A critical requirement for the law of average to be applicable is that the samples come from the same action, irrelevant to other samples.
+We call the idea "independently and under identical conditions", sometimes "independently and identically distributed".
+
+## Sampling from a Population
+
+The law of averages also holds when the random sample is drawn from individuals in a large population.
+
+As an example, we will study a population of flight delay times. The data frame `flights` contains all 336,776 flights that departed from New York City in 2013. It is drawn from the [Bureau of Transportation Statistics](http://www.transtats.bts.gov/DatabaseInfo.asp?DB_ID=120&Link=0) in the United States. The help page `?flights` contains more documentation about the dataset.  
+
+### Prerequisites
+
+We will continue to make use of the tidyverse in this chapter. Moreover, we will load the nycflights13 package which has the `flights` table we will be using.  
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+There are 336,776 rows in `flights`, each corresponding to a flight. Note that some delay times are negative; those flights left early.
+
+```{r}
+flights
+```
+
+One flight departed 43 minutes early, and one was 1301 minutes late. The other delay times were almost all between -10 minutes and 200 minutes, as the histogram below shows.
+
+```{r}
+slice_min(flights, dep_delay)
+```
+
+```{r}
+slice_max(flights, dep_delay)
+```
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(flights, aes(x = dep_delay, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = seq(-50, 200, 10))
+```
+
+For the purposes of this section, it is enough to zoom in on the bulk of the data and ignore the 1.83% of flights that had delays of more than 150 minutes. This restriction is just for visual convenience; the table still retains all the data.
+
+```{r}
+nrow(filter(flights, dep_delay > 150)) / nrow(flights)
+```
+
+```{r warning=FALSE}
+delay_bins <- seq(-50, 150, 10)
+ggplot(flights, aes(x = dep_delay, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = delay_bins)
+```
+
+The height of the (-10, 0] bar is just under 6%, which means that just under 60% of the flights had delays between 0 and 10 minutes. That is confirmed by counting rows:
+
+```{r}
+nrow(filter(flights, dep_delay > -10 & dep_delay <= 0)) / nrow(flights)
+```
+
+### Empirical Distribution of the Sample
+
+Let us now think of the 336,776 flights as a population, and draw random samples from it with replacement. It is helpful to package our code into a function. The function `empirical_hist_delay()` takes the sample size as its argument and draws an empiricial histogram of the results.
+
+```{r}
+empirical_hist_delay <- function(n) {
+  flights_sample <- slice_sample(flights, n = n, replace = TRUE)
+  ggplot(flights_sample, aes(x = dep_delay, y = ..density..)) + 
+    geom_histogram(breaks = delay_bins, color = "gray")
+}
+```
+
+As we saw with the dice, as the sample size increases, the empirical histogram of the sample more closely resembles the histogram of the population. Compare these histograms to the population histogram above.
+
+```{r dpi=80,  fig.align="center", warning = FALSE, message = FALSE}
+empirical_hist_delay(10)
+```
+
+```{r dpi=80,  fig.align="center", warning = FALSE, message = FALSE}
+empirical_hist_delay(100)
+```
+
+The most consistently visible discrepancies are among the values that are rare in the population. In our example, those values are in the right hand tail of the distribution. But as the sample size increases, even those values begin to appear in the sample in roughly the correct proportions.
+
+```{r dpi=80,  fig.align="center", warning = FALSE, message = FALSE}
+empirical_hist_delay(1000)
+```
+
+### Convergence of the Empirical Histogram of the Sample
+
+What we have observed in this section can be summarized as follows:
+
+For a large random sample, the empirical histogram of the sample resembles the histogram of the population, with high probability.
+
+This justifies the use of large random samples in statistical inference. The idea is that since a large random sample is likely to resemble the population from which it is drawn, quantities computed from the values in the sample are likely to be close to the corresponding quantities in the population.
+
+
+## Empirical Distribution of a Statistic
+
+The Law of Averages implies that with high probability, the empirical distribution of a large random sample will resemble the distribution of the population from which the sample was drawn.
+
+The resemblance is visible in two histograms: the empirical histogram of a large random sample is likely to resemble the histogram of the population.
+
+### Prerequisites
+
+We will continue to make use of the tidyverse in this section. Moreover, we will load the nycflights13 package which has the `flights` table we will be using.  
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+As a reminder, here is the histogram of the delays of all the flights in `flights`, and an empirical histogram of the delays of a random sample of 1,000 of these flights.
+
+```{r warning=FALSE}
+delay_bins <- seq(-50, 150, 10)
+ggplot(flights, aes(x = dep_delay, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = delay_bins)
+```
+
+```{r warning=FALSE}
+sample_1000 <- slice_sample(flights, n = 1000, replace = TRUE)
+ggplot(sample_1000, aes(x = dep_delay, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = delay_bins)
+```
+
+The two histograms clearly resemble each other, though they are not identical.
+
+
+### Parameter
+
+Frequently, we are interested in numerical quantities associated with a population.
+
+* In a population of voters, what percent will vote for Candidate A?
+* In a population of Facebook users, what is the largest number of Facebook friends that the users have?
+* In a population of United flights, what is the median departure delay?
+
+Numerical quantities associated with a population are called *parameters*. For the population of flights in `flights`, we know the value of the parameter "median delay":
+
+```{r}
+median(flights$dep_delay, na.rm = TRUE)
+```
+
+Note the argument `na.rm` (read: "NaN remove") used in this function call. An interesting property of the `flights` dataset is that it has missing values, e.g., not all rows have a value in the `dep_delay` column. We toggle a flag `na.rm` so that R knows to drop these rows before computing the median.  
+
+The function `median()` returns the median (half-way point) of a column or vector. Among all the flights available, the median delay was -2 minute. This isn't surprising: more than 50% of flights in the population had early departures of 2 minutes or more:
+
+```{r}
+nrow(filter(flights, dep_delay <= -2)) / nrow(flights)
+```
+
+Neat!
+
+__Note.__ The percent isn't exactly 50 because of "ties," that is, flights that had early departures of exactly 2 minutes. There were 21,516 such flights. Ties are quite common in data sets, and we will not worry about them in this course.
+
+```{r}
+nrow(filter(flights, dep_delay == -2))
+```
 
 
 ## Sample or Not Sample
@@ -402,6 +814,7 @@ So, the use of mechanical index selections requires a careful treatment.
 Depending on how mechanically we select the index values, we may obtain different results.
 
 
+<!--
 ## Probabilities of Things Happening
 
 A probability is the likelihood of a thing happening.
@@ -527,9 +940,9 @@ then, we can assume that
 * for each outcome $e$, if we are toi execute the experiment some $N$ times, count how many times $e$ occurs, and compute the ratio $e/N$, then the larger $N$ we use, the ratio $e/N$ gets closer to the probability of $e$ appears as the outcome.
 
 
+-->
 
-
-## Population and Statistics
+## Order Statistics
 
 Recall that in our prior exploration of the receiver data, we saw that the average total yards is a little over 211 yards and that the distribution shows a drastic decline.
 A static that is popular along with average is *median*, which is the value at the middle position in the data after reordering of the values.
@@ -628,465 +1041,3 @@ The *mean* (or *average*) is a statistic, but is not an order statistic.
 
 
 
-
-<!-- 
-## Use of samples
-
-Let's start by drawing some samples. Our examples are based on the `mpg` data set.
-
-```{r}
-mpg
-```
-
-__Sampling Rows of a Table__
-
-Each row of a data table represents an individual; in `mpg`, each individual is a car model. Sampling individuals can thus be achieved by sampling the rows of a table.
-
-The contents of a row are the values of different variables measured on the same individual. So the contents of the sampled rows form samples of values of each of the variables.
-
-__Deterministic Samples__
-
-When you simply specify which elements of a set you want to choose, without any chances involved, you create a *deterministic sample*.
-
-You have done this many times, for example by using `slice()`:
-
-```{r}
-slice(mpg, c(3, 25, 100))
-```
-
-You have also used `filter()`:
-
-```{r}
-filter(mpg, manufacturer == "land rover")
-```
-
-While these are samples, they are not random samples. They don't involve chance.
-
-__Probability Samples__
-
-For describing random samples, some terminology will be helpful.
-
-A *population* is the set of all elements from whom a sample will be drawn.
-
-A *probability sample* is one for which it is possible to calculate, before the sample is drawn, the chance with which any subset of elements will enter the sample.
-
-In a probability sample, all elements need not have the same chance of being chosen.
-
-__A Random Sampling Scheme__
-
-For example, suppose you choose two people from a population that consists of three people A, B, and C, according to the following scheme:
-
-* Person A is chosen with probability 1.
-
-* One of Persons B or C is chosen according to the toss of a coin: if the coin lands heads, you choose B, and if it lands tails you choose C.
-
-This is a probability sample of size 2. Here are the chances of entry for all non-empty subsets:
-
-```
-A: 1 
-B: 1/2
-C: 1/2
-AB: 1/2
-AC: 1/2
-BC: 0
-ABC: 0
-```
-
-Person A has a higher chance of being selected than Persons B or C; indeed, Person A is certain to be selected. Since these differences are known and quantified, they can be taken into account when working with the sample.
-
-__A Systematic Sample__
-
-Imagine all the elements of the population listed in a sequence. One method of sampling starts by choosing a random position early in the list, and then evenly spaced positions after that. The sample consists of the elements in those positions. Such a sample is called a *systematic sample*.
-
-Here we will choose a systematic sample of the rows of `mpg`. Let's start by preparing a version of the data frame that includes the row index for better visual inspection.
-
-```{r}
-mpg_with_index <- mpg %>%
-  mutate(row_index = 1:nrow(mpg)) %>%
-  select(row_index, everything())
-mpg_with_index
-```
-
-We will now pick one of the first 10 rows at random, and then we will select every 10th row after that.
-
-```{r}
-# Choose a random start among rows 0 through 9; then take every 10th row.
-start <- sample(1:10, size = 1)
-slice(mpg_with_index, seq(start, nrow(mpg_with_index), by = 10))
-```
-
-Run the cell a few times to see how the output varies.
-
-This systematic sample is a probability sample. In this scheme, all rows have chance $1/10$  of being chosen. For example, Row 23 is chosen if and only if Row 3 is chosen, and the chance of that is $1/10$.
-
-But not all subsets have the same chance of being chosen. Because the selected rows are evenly spaced, most subsets of rows have no chance of being chosen. The only subsets that are possible are those that consist of rows all separated by multiples of 10. Any of those subsets is selected with chance 1/10. Other subsets, like the subset containing the first 11 rows of the table, are selected with chance 0.
-
-__Random Samples Drawn With or Without Replacement__
-
-In this course, we will mostly deal with the two most straightforward methods of sampling.
-
-The first is random sampling with replacement, which (as we have seen earlier) is the  behavior of `sample(replace = TRUE)` when it samples from an vector.
-
-The other, called a "simple random sample", is a sample drawn at random *without* replacement. Sampled individuals are not replaced in the population before the next individual is drawn. This is the kind of sampling that happens when you deal a hand from a deck of cards, for example.
-
-In this chapter, we will use simulation to study the behavior of large samples drawn at random with or without replacement.
-
-Drawing a random sample requires care and precision. It is not haphazard, even though that is a colloquial meaning of the word "random". If you stand at a street corner and take as your sample the first ten people who pass by, you might think you're sampling at random because you didn't choose who walked by. But it's not a random sample – it's a *sample of convenience*. You didn't know ahead of time the probability of each person entering the sample; perhaps you hadn't even specified exactly who was in the population.
-
-
-
-<!--
-
-In the previous chapter, we learned the concepts of randomness, iteration, and simulation.
-
-An important part of data science consists of making conclusions based on the data in random samples. To make correct interpretations of their results, data scientists must possess first-hand knowledge of exactly what random samples are.
-
-In this chapter we will take a more careful look at sampling, with special attention to the properties of large random samples.
-
-__Prerequisites__
-
-We will again make use of the tidyverse in this chapter, so let's load it in as usual.
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-```
-
-
-
-
-
-## Empirical Distributions
-
-In data science, the word "empirical" means "observed". Empirical distributions are distributions of observed data, such as data in random samples.
-
-In this section we will generate data and see what the empirical distribution looks like.
-
-### Prerequisites
-
-Let's load in the tidyverse as usual.
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-```
-
-Our setting is a simple experiment: rolling a die multiple times and keeping track of which face appears. The table `die` contains the numbers of spots on the faces of a die. All the numbers appear exactly once, as we are assuming that the die is fair.
-
-```{r}
-die <- tibble(face = 1:6)
-die
-```
-
-### A Probability Distribution
-
-The histogram below helps us visualize the fact that every face appears with probability 1/6. We say that the histogram shows the *distribution* of probabilities over all the possible faces. Since all the bars represent the same percent chance, the distribution is called *uniform on the integers 1 through 6*.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(die) + 
-  geom_histogram(aes(x = face, y =  ..density..), bins = 6, color = "gray")
-```
-
-Variables whose successive values are separated by the same fixed amount, such as the values on rolls of a die (successive values separated by 1), fall into a class of variables that are called *discrete*. The histogram above is called a *discrete* histogram. Its bins are specified by the vector `die_bins` and ensure that each bar is centered over the corresponding integer value.
-
-It is important to remember that the die can't show 1.3 spots, or 5.2 spots – it always shows an integer number of spots. But our visualization spreads the probability of each value over the area of a bar. While this might seem a bit arbitrary at this stage of the course, it will become important later when we overlay smooth curves over discrete histograms.
-
-Before going further, let's make sure that the numbers on the axes make sense. The probability of each face is 1/6, which is 16.67% when rounded to two decimal places. The width of each bin is 1 unit. So the height of each bar is 16.67% per unit. This agrees with the horizontal and vertical scales of the graph.
-
-### Empirical Distributions
-
-The distribution above consists of the theoretical probability of each face. It is not based on data. It can be studied and understood without any dice being rolled.
-
-*Empirical distributions*, on the other hand, are distributions of observed data. They can be visualized by *empirical histograms*.
-
-Let us get some data by simulating rolls of a die. This can be done by sampling at random with replacement from the integers 1 through 6. We have used `sample(replace = TRUE)` for such simulations before. But now we will introduce a `dplyr` method for doing this with data frames. 
-
-The `dplyr` function is called `slice_sample()`. It draws at random from the rows of a data frame, with an argument to sample with replacement. It also gives an an argument `n` for the sample size, and it returns a data frame consisting of the rows that were selected. 
-
-Here are the results of 10 rolls of a die.
-
-```{r}
-slice_sample(die, n = 10, replace = TRUE)
-```
-
-We can use the same method to simulate as many rolls as we like, and then draw empirical histograms of the results. Because we are going to do this repeatedly, we define a function empirical_hist_die that takes the sample size as its argument, rolls a die as many times as its argument, and then draws a histogram of the observed results.
-
-```{r}
-empirical_hist_die <- function(n) {
-  die_sample <- slice_sample(die, n = n, replace = TRUE)
-  ggplot(die_sample, aes(x = face, y = ..density..)) + 
-    geom_histogram(bins = 6, color = "gray")
-}
-```
-
-### Empirical Histograms
-
-Here is an empirical histogram of 10 rolls. It doesn't look very much like the probability histogram above. Run the cell a few times to see how it varies.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-empirical_hist_die(10)
-```
-
-When the sample size increases, the empirical histogram begins to look more like the histogram of theoretical probabilities.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-empirical_hist_die(100)
-```
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-empirical_hist_die(1000)
-```
-
-As we increase the number of rolls in the simulation, the area of each bar gets closer to 16.67%, which is the area of each bar in the probability histogram.
-
-### The Law of Averages 
-
-What we have observed above is an instance of a general rule.
-
-If a chance experiment is repeated independently and under identical conditions, then, in the long run, the proportion of times that an event occurs gets closer and closer to the theoretical probability of the event.
-
-For example, in the long run, the proportion of times the face with four spots appears gets closer and closer to 1/6.
-
-Here "independently and under identical conditions" means that every repetition is performed in the same way regardless of the results of all the other repetitions.
-
-
-## Sampling from a Population
-
-The law of averages also holds when the random sample is drawn from individuals in a large population.
-
-As an example, we will study a population of flight delay times. The data frame `flights` contains all 336,776 flights that departed from New York City in 2013. It is drawn from the [Bureau of Transportation Statistics](http://www.transtats.bts.gov/DatabaseInfo.asp?DB_ID=120&Link=0) in the United States. The help page `?flights` contains more documentation about the dataset.  
-
-### Prerequisites
-
-We will continue to make use of the tidyverse in this chapter. Moreover, we will load the nycflights13 package which has the `flights` table we will be using.  
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-library(nycflights13)
-```
-
-There are 336,776 rows in `flights`, each corresponding to a flight. Note that some delay times are negative; those flights left early.
-
-```{r}
-flights
-```
-
-One flight departed 43 minutes early, and one was 1301 minutes late. The other delay times were almost all between -10 minutes and 200 minutes, as the histogram below shows.
-
-```{r}
-slice_min(flights, dep_delay)
-```
-
-```{r}
-slice_max(flights, dep_delay)
-```
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(flights, aes(x = dep_delay, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(-50, 200, 10))
-```
-
-For the purposes of this section, it is enough to zoom in on the bulk of the data and ignore the 1.83% of flights that had delays of more than 150 minutes. This restriction is just for visual convenience; the table still retains all the data.
-
-```{r}
-nrow(filter(flights, dep_delay > 150)) / nrow(flights)
-```
-
-```{r warning=FALSE}
-delay_bins <- seq(-50, 150, 10)
-ggplot(flights, aes(x = dep_delay, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = delay_bins)
-```
-
-The height of the (-10, 0] bar is just under 6%, which means that just under 60% of the flights had delays between 0 and 10 minutes. That is confirmed by counting rows:
-
-```{r}
-nrow(filter(flights, dep_delay > -10 & dep_delay <= 0)) / nrow(flights)
-```
-
-### Empirical Distribution of the Sample
-
-Let us now think of the 336,776 flights as a population, and draw random samples from it with replacement. It is helpful to package our code into a function. The function `empirical_hist_delay()` takes the sample size as its argument and draws an empiricial histogram of the results.
-
-```{r}
-empirical_hist_delay <- function(n) {
-  flights_sample <- slice_sample(flights, n = n, replace = TRUE)
-  ggplot(flights_sample, aes(x = dep_delay, y = ..density..)) + 
-    geom_histogram(breaks = delay_bins, color = "gray")
-}
-```
-
-As we saw with the dice, as the sample size increases, the empirical histogram of the sample more closely resembles the histogram of the population. Compare these histograms to the population histogram above.
-
-```{r dpi=80,  fig.align="center", warning = FALSE, message = FALSE}
-empirical_hist_delay(10)
-```
-
-```{r dpi=80,  fig.align="center", warning = FALSE, message = FALSE}
-empirical_hist_delay(100)
-```
-
-The most consistently visible discrepancies are among the values that are rare in the population. In our example, those values are in the right hand tail of the distribution. But as the sample size increases, even those values begin to appear in the sample in roughly the correct proportions.
-
-```{r dpi=80,  fig.align="center", warning = FALSE, message = FALSE}
-empirical_hist_delay(1000)
-```
-
-### Convergence of the Empirical Histogram of the Sample
-
-What we have observed in this section can be summarized as follows:
-
-For a large random sample, the empirical histogram of the sample resembles the histogram of the population, with high probability.
-
-This justifies the use of large random samples in statistical inference. The idea is that since a large random sample is likely to resemble the population from which it is drawn, quantities computed from the values in the sample are likely to be close to the corresponding quantities in the population.
-
-
-## Empirical Distribution of a Statistic
-
-The Law of Averages implies that with high probability, the empirical distribution of a large random sample will resemble the distribution of the population from which the sample was drawn.
-
-The resemblance is visible in two histograms: the empirical histogram of a large random sample is likely to resemble the histogram of the population.
-
-### Prerequisites
-
-We will continue to make use of the tidyverse in this section. Moreover, we will load the nycflights13 package which has the `flights` table we will be using.  
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-library(nycflights13)
-```
-
-As a reminder, here is the histogram of the delays of all the flights in `flights`, and an empirical histogram of the delays of a random sample of 1,000 of these flights.
-
-```{r warning=FALSE}
-delay_bins <- seq(-50, 150, 10)
-ggplot(flights, aes(x = dep_delay, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = delay_bins)
-```
-
-```{r warning=FALSE}
-sample_1000 <- slice_sample(flights, n = 1000, replace = TRUE)
-ggplot(sample_1000, aes(x = dep_delay, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = delay_bins)
-```
-
-The two histograms clearly resemble each other, though they are not identical.
-
-
-### Parameter
-
-Frequently, we are interested in numerical quantities associated with a population.
-
-* In a population of voters, what percent will vote for Candidate A?
-* In a population of Facebook users, what is the largest number of Facebook friends that the users have?
-* In a population of United flights, what is the median departure delay?
-
-Numerical quantities associated with a population are called *parameters*. For the population of flights in `flights`, we know the value of the parameter "median delay":
-
-```{r}
-median(flights$dep_delay, na.rm = TRUE)
-```
-
-Note the argument `na.rm` (read: "NaN remove") used in this function call. An interesting property of the `flights` dataset is that it has missing values, e.g., not all rows have a value in the `dep_delay` column. We toggle a flag `na.rm` so that R knows to drop these rows before computing the median.  
-
-The function `median()` returns the median (half-way point) of a column or vector. Among all the flights available, the median delay was -2 minute. This isn't surprising: more than 50% of flights in the population had early departures of 2 minutes or more:
-
-```{r}
-nrow(filter(flights, dep_delay <= -2)) / nrow(flights)
-```
-
-Neat!
-
-__Note.__ The percent isn't exactly 50 because of "ties," that is, flights that had early departures of exactly 2 minutes. There were 21,516 such flights. Ties are quite common in data sets, and we will not worry about them in this course.
-
-```{r}
-nrow(filter(flights, dep_delay == -2))
-```
-
-### Statistic
-
-In many situations, we will be interested in figuring out the value of an unknown parameter. For this, we will rely on data from a large random sample drawn from the population.
-
-A statistic (note the singular!) is any number computed using the data in a sample. The sample median, therefore, is a statistic.
-
-Remember that `sample_1000` contains a random sample of 1000 flights from united. The observed value of the sample median is:
-
-```{r}
-median(sample_1000$dep_delay, na.rm = TRUE)
-```
-
-Our sample – one set of 1,000 flights – gave us one observed value of the statistic. This raises an important problem of inference:
-
-__The statistic could have been different.__ A fundamental consideration in using any statistic based on a random sample is that *the sample could have come out differently*, and therefore the statistic could have come out differently too.
-
-```{r}
-a_new_sample <- slice_sample(flights, n = 1000, replace = TRUE)
-median(a_new_sample$dep_delay, na.rm = TRUE)
-```
-
-Run the cell above a few times to see how the answer varies. Often it is equal to 2, the same value as the population parameter. But sometimes it is different.
-
-__Just how different could the statistic have been?__ One way to answer this is to simulate the statistic many times and note the values. A histogram of those values will tell us about the distribution of the statistic.
-
-Let's recall the main steps in a simulation.
-
-### Simulating a Statistic 
-
-We will simulate the sample median using the steps we set up in an earlier chapter when we started studying simulation. You can replace the sample size of 1,000 by any other sample size, and the sample median by any other statistic.
-
-__Step 1: Decide which statistic to simulate.__ We have already decided that: we are going to simulate the median of a random sample of size 1,000 drawn from the population of flight delays.
-
-__Step 2: Write the code to generate one value of the statistic.__ Draw a random sample of size 1000 and compute the median of the sample. We did this in the code cell above. Here it is again, encapsulated in a function.
-
-```{r}
-random_sample_median <- function(x) {
-  a_new_sample <- slice_sample(flights, n = 1000, replace = TRUE)
-  return(median(a_new_sample$dep_delay, na.rm = TRUE))
-}
-```
-
-__Step 3: Decide how many simulated values to generate.__ Let's do 5,000 repetitions.
-
-__Step 4: Write the code to generate an array of simulated values.__ As in all simulations, we start by creating a vector with length 5,000 where all the simulated values will be stored. The map will call the `random_sample_median()` function for each of its elements and store the calculated median in the corresponding element of the vector. Upon completion, the vector will contain all the simulated values, and we call this vector `medians`. 
-
-The simulation takes a noticeable amount of time to run. That is because it is performing 5,000 repetitions of the process of drawing a sample of size 1,000 and computing its median. That's a lot of sampling and repeating!
-
-```{r}
-num_repetitions <- 5000
-medians <- map_dbl(1:num_repetitions, random_sample_median)
-```
-
-The simulation is done. All 5,000 simulated sample medians have been collected in the array medians. Now it's time to visualize the results.
-
-### Visualization
-
-Here are the simulated random sample medians displayed in the data frame `simulated_medians`.
-
-```{r}
-simulated_medians <- tibble(sample_median = medians)
-simulated_medians
-```
-
-We can also visualize the simulated data using a histogram. The histogram is called an *empirical histogram of the statistic*. It displays the *empirical distribution* of the statistic. Remember that *empirical* means *observed*.
-
-```{r}
-ggplot(simulated_medians) + 
-  geom_histogram(aes(x = sample_median, y = ..density..), color = "gray", bins = 3)
-```
-
-You can see that the sample median is very likely to be about -2, which was the value of the population median. Since samples of 1,000 flight departure delays are likely to resemble the population of delays, it is not surprising that the median delays of those samples should be close to the median delay in the population.
-
-This is an example of how a statistic can provide a good estimate of a parameter.
-
-### The Power of Simulation
-
-If we could generate all possible random samples of size 1,000, we would know all possible values of the statistic (the sample median), as well as the probabilities of all those values. We could visualize all the values and probabilities in the probability histogram of the statistic.
-
-But in many situations including this one, the number of all possible samples is large enough to exceed the capacity of the computer, and purely mathematical calculations of the probabilities can be intractably difficult.
-
-This is where empirical histograms come in.
-
-We know that by the Law of Averages, the empirical histogram of the statistic is likely to resemble the probability histogram of the statistic, if the sample size is large and if you repeat the random sampling process numerous times.
-
-This means that simulating random processes repeatedly is a way of approximating probability distributions *without figuring out the probabilities mathematically or generating all possible random samples*. Thus computer simulations become a powerful tool in data science. They can help data scientists understand the properties of random quantities that would be complicated to analyze in other ways.
-
-
--->
