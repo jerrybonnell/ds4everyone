@@ -5,9 +5,8 @@ output:
 ---
 # Hypothesis Testing
 
-In the previous chapters, we learned the use of simulation to examine how events that we expect to occur at random behave up to our expectation.
-To accomplish our examination task, we developed the expected behavior, e.g., a fair coin shows "Heads" as equally likely as it does "Tails".
-It is often the case that a data scientist receives some data and must make some assertion about the data.
+In the previous chapters, we learned the concepts of randomness and sampling.
+Quite often, a data scientist receives some data and must make some assertion about the data.
 There are typically two situations:
 
 * She has one data set and a model that the data should have followed. She needs to decide if it is likely that the data set indeed follows the model?
@@ -20,7 +19,7 @@ Here are examples of the two situations.
 
 For both situations, an important consideration for you to make is in terms of what you compare the differences.
 
-## Empirical Distributions
+## Buildiung an Empirical Distribution
 
 Suppose 10000 throws of a die generate the following counts for the faces 1 through 6:
 \[
@@ -30,23 +29,25 @@ By taking the ratio of each number to 10000, we get the ratios for the six faces
 \[
 0.1779 0.1578 0.1783 0.1491 0.1884 0.1485
 \]
-The six values comprise the empirical distribution of the face of the die.
+The six values comprise the empirical distribution representing the behavior of the die.
 We notice that the values are not very close to the ideal 0.1667 (= 1/6).
-Let us look at how must different these six quantities are from the ideal.
-We get
+Let us look at how different these six quantities are from the ideal.
+By subtracting 0.1667 from each, we obtain 
 \[
 0.0112 -0.089 0.0115 -0.0176 0.0217 -0.0182
 \]
-The above differences (that is, the numbers without the negative sign wherever applicable) are
+We then obtain the absolute difference values from them by removing any negative sign
 \[
 0.0112 0.089 0.0115 0.0176 0.0217 0.0182
 \]
-If we introduce more digits after the decimal point, the total difference is 0.0892.
+The sum of the absolute differences is 0.0891.
 Is the difference big or small?
 It is hard to tell without knowing the differences we get by chance.
-Let us conduct some simulation to get the sense of how large or small the difference.
+Let us conduct some simulation to obtain an empirical distribution of the absolute difference of a fair dice.
+As mentioned earlier, the proportion that each face turns up is not constant, even for a fair die.
+So by simulating throws of a fair dice, we must expect to see a range of absolute differences.
 
-As usual, we start with `tidyverse`.
+As usual, we start by loading `tidyverse`.
 
 
 ```{r}
@@ -60,7 +61,7 @@ The second is the number of times we throw the die according to the empirical di
 The first program `die_sampler` is one for simulating just one throw. It produces a number from 1 through 6.
 If we run the `die_sampler` a number of times, we get a series of numbers from 1 through 6.
 We want to count for each of the six numbers, how many times it appears in the sequence.
-By dividing the counts by the total numbrer of throws, we get an empirical distribution.
+By dividing the counts by the total number of throws, we get an empirical distribution.
 
 
 ```{r}
@@ -89,15 +90,41 @@ dist_from_die_sampler <- function(x,c) {
 }
 ```
 
-Let us see how this works with the ideal die distribution and 1000 throws.
+Let us see how this works with a fair die distribution and 1000 throws.
+Run the code a few times to see the values it generates.
+The values sometimes very high and sometimes very low.
+Even though the program uses a fair die for simulation, the actual shares of the number of times the faces turn up are not very close to the idea.
 
 ```{r}
 # twisted_die_chances <- c(0.18, 0.15, 0.18, 0.15, 0.19, 0.15)
 true_die_chances <- vector("double",6)
 for (i in 1:6) { true_die_chances[i] <- 1/6 }
 counts <- dist_from_die_sampler(true_die_chances,1000)
+true_die_chances
 counts
 ```
+
+The situation is much different when we use 10000 throws.
+
+```{r}
+# twisted_die_chances <- c(0.18, 0.15, 0.18, 0.15, 0.19, 0.15)
+true_die_chances <- vector("double",6)
+for (i in 1:6) { true_die_chances[i] <- 1/6 }
+counts <- dist_from_die_sampler(true_die_chances,10000)
+true_die_chances
+counts
+```
+Let us visualize the distribution.
+
+```{r}
+counts_df <- tibble(face = 1:6, frequency=counts)
+counts_df
+ggplot(data=counts_df, aes(x=face, y=frequency), color="gray") +
+  geom_bar(stat="identity", fill="steelblue")+
+  theme_minimal()
+```
+
+
 
 ```{r}
 observed_die_chances <- c(0.1779, 0.1578, 0.1783, 0.1491, 0.1884, 0.1485)
@@ -120,7 +147,7 @@ max(diffs)
 min(diffs)
 ```
 ```{r}
-observed_point <- 0.0892
+observed_point <- 0.0891
 diffs_df <- tibble(diffs)
 bins <- seq(0,0.2500,0.005)
 ggplot(diffs_df, aes(x = diffs), color = "grey") +
@@ -140,13 +167,13 @@ over_count <- over_count / length(diffs)
 over_count
 ```
 
-The value we get is 0.071.
+The value we get is 0.065. <!-- how do we adjust according to the outcome? -->
 We interpret the value as stating.
 We estimate the empirical distribution or a fair die with 1000 throws and compute the absolute distance of the empirical distribution from the ideal.
-Then the chances that the difference achieves 0.071 that we observed are no more than 7.1%.
-We can thus conclude that the chances that the die at hand is a fair one are no more than 7.1%.
+Then the chances that the difference achieves 0.065 that we observed are no more than 6.5%.
+We can thus conclude that the chances that the die at hand is a fair one are no more than 6.5%.
 
-The value we have calculated, 0.071, through simulation is a p-value.
+The value we have calculated, 0.065, through simulation is a p-value.
 To compute a p-value, we first establish some model that is possibly describing a quantifiable phenomenon (e.g., the absolute distance from the ideal distribution).
 We then run some simulation, if mathematical analysis appears too complicated or too cumbersome, to obtain a histogram of the quantifiable phenomenon under the model.
 We then compare the observation and examine where in the histogram the observation stands.
@@ -156,11 +183,11 @@ Conversely, the farther the two portions are in size, the lower the likelihood o
 We usually take the smaller of the two portions and call the size of the smaller portion the *p-value*.
 
 Also, when we use a p-value and simulations, we have in mind two possible interpretations.
-We call them the *Null Hypothesis* and the *Alternate Hypothesis*.
+We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
 The Null Hypothesis is the hypothesis we use in creating the model for simulation.
 The Alternative Hypothesis is its counter part - the opposite of the Null Hypothesis.
 In the experiment we have just conducted, the Null Hypothesis is that the die we have is a fair die and the Alternate Hypothesis is that the die we have is not a fair one.
-Using simulations we learn that the Null Hypothesis has a p-value of 7.1% (or 0.071) using the absolute distance between distributions as the distance measure.
+Using simulations we learn that the Null Hypothesis has a p-value of 6.5% (or 0.065) using the absolute distance between distributions as the distance measure.
 
 
 
@@ -182,6 +209,134 @@ sum_diff_throws
 
 
 
+## Entering Harvard
+
+### Studetns for Fair Admissions
+
+Harvard University is one of the most, if not the most prestigious, universities in the United States.
+A recent lawsuit by [Students for Fair Admissions (SFFA)](https://studentsforfairadmissions.org/) led by Edward Blum against Harvard University alleges that Harvard has used soft racial quota to keep the numbers of Asian-Americans low.
+Put differently, the allegation is that from the pool of Harvard-admissible American applicants, Harvard uses a discriminatory score on the Asian race and uses the score to choose dis-proportionally smaller numbers of Asian-Americans.
+Lawsuit is currently is in a Federal Appeals Court.
+[Harvard University](https://college.harvard.edu/admissions/admissions-statistics) publishes some statistics on the class of 2024.
+According to the data, the proportions of the class for Whites, Blacks, Hispanics, Asians, and Others (International and Native Americans) are respectively 46.1%, 14.7%, 12.7%, 24.4%, and 2.1%.
+We do not have the data of the students admissible to enter Harvard.
+We so refer to the demographics of the students enrolled in a four-year college.
+According to [Chronicle of Higher Education](http://www.chronicle.com) 2020-2021 Almanac, the racial demographics of full-time students in 4-year private non-profit institutions (Harvard is one) in Fall 2018 are: 63.6% White, 11.5% Black, 12.3% Hispanic, 8.1% Asian, and 4.5% Other.
+
+
+```{r}
+data_table <- tribble(~Race, ~Harvard, ~Almanac,
+                      "White", 46.1, 63.6, 
+                      "Black", 14.7, 11.5,
+                      "Hispanic", 12.7, 12.3,
+                      "Asian", 24.4, 8.1,
+                      "Other", 2.1, 4.5)
+data_table$Race
+data_table$Harvard
+data_table$Almanac
+sum(data_table$Harvard)
+sum(data_table$Almanac)
+```
+The distributions may look quite different from each other.
+Specifically, 
+Of course, the demographics from the Almanac includes students who did not apply to Harvard, those who might not have got into Harvard, those applied and did not get in, and international students.
+Also, the Almanac data covers all full-time students in 2018 but no students who entered colleges in 2020.
+With these differences notwithstanding, for our learning purpose, let us conduct an experiment to see how the demographics from Harvard looks different from the demographics from the Almanac in terms of empirical distribution.
+
+As we will be handling proprtion values, let us scale down the numbers in the table by dividing each element by 100.
+We call them `harvard` and `almanac`.
+We define a function that computes the distance of a five-element discrete distribution to `harvard' as `harvard_diff`.
+
+
+```{r}
+harvard <- data_table$Harvard/100
+almanac <- data_table$Almanac/100
+demo_diff <- function(x) {
+  return(
+    abs(x[1] - almanac[1]) +
+    abs(x[2] - almanac[2]) +
+    abs(x[3] - almanac[3]) +
+    abs(x[4] - almanac[4]) +
+    abs(x[5] - almanac[5]))
+}
+harvard_diff <- demo_diff(harvard)
+harvard_diff
+who <- demo_diff(c(0.71861042 ,0.00918114, 0.05483871, 0.07593052, 0.14143921))
+who
+```
+
+The Harvard Class of 2024 has size 2015.
+Think of the process of sampling 2015 people from those who "were attending" at a for-year non-profit college in Fall 2018 and then examining their racial distribution.
+We cannot reach out to the individuals, but we know the distribution of the entire population from which we want to sample.
+Using the knowledge, we can substitute the process of sampling individuals with generation of random numbers.
+We first split the range from 0 to 1 into five portions according to the values in the Almanac; that is, 0 through 0.636, 0.636 through 0.751, 0.751 through 0.874, 0.874 through 0.955, and 0.955 to 1.0.
+We then agree on a strategy for assigning a value from 1 to 5 to an arbitrary number between 0 and 1 as: finding the interval corresponding to the real number, and assign the index to the index.
+The indexes correspond to the races in the table: White, Black, Hispanic, Asian, and Other. 
+
+The function `rmultinom` is one for generating a distribution with discrete categories from a probability distribution.
+The call `rmultinom(n=100, size=2015, prob = almanac)` generate 500 distribution vectors, where each vector is the result of sampling 2015 people according the proportion `almanac`.
+Each column of the output of the call is a five-element vector whose sum is equal to 2015.
+So, for each column of the 100 columns, we scale its five entries by dividing by 2015 and then compute the distance from the Harvard distribution using the `demo_diff` function.
+With `almanac`, we can generate a distance and calculate its distance to `harvard`.
+
+
+
+```{r}
+sample_vector <- rmultinom(n=500, size=2015, prob = almanac)
+demo_diff_series <- vector("double",500)
+for (i in 1:500) {
+  demo_diff_series[i] <- demo_diff(sample_vector[,i] / 2015)
+}
+demo_diff_series[1:10]
+```
+
+Now we plot the result.
+
+```{r}
+demo_diff_df <- tibble(demo_diff_series)
+bins <- seq(0.0, 0.5, 0.02)
+ggplot(demo_diff_df, aes(x = demo_diff_series), color = "gray") +
+  geom_histogram(binwidth=0.002) +
+  geom_point(aes(x = harvard_diff, y = 0), color = "red", size = 2)
+```
+The red dot shows the distance value of the Harvard value from the Almanac value.
+What we see is that the proportion of the races at Harvard is not like the national proportion at all.
+This is something we have anticipated because the base population can be different.
+
+
+### Asian Versus Others
+
+The prior experiment looked at the proportion of all races.
+What if we simplify the question to Asian versus Non-Asian.
+```{r}
+data_table <- tribble(~Race, ~Harvard, ~Almanac,
+                      "Asian", 24.4, 8.1,
+                      "Other", 75.6, 91.9)
+data_table
+```
+The proportion of Asian in the private non-profit 4-year colleges is just 8.1% while the race occupies 24.4% of the Harvard freshman class.
+
+
+```{r}
+sample_vector <- rmultinom(n=500, size=2015, prob = c(0.081,0.919))
+demo_diff_simple <- vector("double",500)
+for (i in 1:500) {
+  demo_diff_simple[i] <- sample_vector[1,i] / 2015
+}
+demo_diff_simple[1:10]
+```
+
+Now we plot the result.
+
+```{r}
+demo_diff_simple_df <- tibble(demo_diff_simple)
+bins <- seq(0.0, 0.5, 0.02)
+ggplot(demo_diff_simple_df, aes(x = demo_diff_simple), color = "gray") +
+  geom_histogram(binwidth=0.002) +
+  geom_point(aes(x = 0.244, y=0), color = "green", size = 2)
+```
+The result is the same. The Harvard proportion is not like the national value at all.
+We can confidently say that Havard enrolls much more Asian students than the national average. 
 
 
 <!--
