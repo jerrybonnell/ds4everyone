@@ -3,7 +3,7 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Hypothesis Testing
+# Hypothesis Testing and p-Value
 
 In the previous chapters, we learned the concepts of randomness and sampling.
 Quite often, a data scientist receives some data and must make some assertion about the data.
@@ -40,8 +40,14 @@ We then obtain the absolute difference values from them by removing any negative
 \[
 0.0112 0.089 0.0115 0.0176 0.0217 0.0182
 \]
-The sum of the absolute differences is 0.0891.
-Is the difference big or small?
+The sum of the absolute differences is 0.0891, and its one half is 0.04455.
+In statistics, one half the absolute difference has the name *total variation distance*.
+The total variation distance serves as the measure for the difference between two distributions.
+
+Now we have the technical term referring to the difference, we can state the question as follows:
+
+> Is the total variation distance 0.04455 big or small?
+
 It is hard to tell without knowing the differences we get by chance.
 Let us conduct some simulation to obtain an empirical distribution of the absolute difference of a fair dice.
 As mentioned earlier, the proportion that each face turns up is not constant, even for a fair die.
@@ -90,6 +96,18 @@ dist_from_die_sampler <- function(x,c) {
 }
 ```
 
+We can do the complicated procedure using `rmultinom`.
+`rmultinom` executes sampling from a discrete probability distribution and returns a table.
+The argument `size` is the sample size, the argument `n` is the number of repetitons, and the argument `prob` is the underlying distribution.
+
+```{r}
+dist_from_die_sampler <- function(x,c) {
+  sample_vector <- rmultinom(n = 1, size = c, prob = x)
+  return(sample_vector[,1]/c)
+}
+```
+
+
 Let us see how this works with a fair die distribution and 1000 throws.
 Run the code a few times to see the values it generates.
 The values sometimes very high and sometimes very low.
@@ -103,6 +121,9 @@ counts <- dist_from_die_sampler(true_die_chances,1000)
 true_die_chances
 counts
 ```
+
+
+
 
 The situation is much different when we use 10000 throws.
 
@@ -133,11 +154,12 @@ for (i in 1:6) { true_die_chances[i] <- 1/6 }
 diffs <- vector("double",1000)
 for (j in 1:1000) {
   counts <- dist_from_die_sampler(true_die_chances,1000)
-  a <- 0
-  for (i in 1:6) {
-    a <- a + abs(counts[i] - true_die_chances[i])
-  }
-  diffs[j] <- a
+#  a <- 0
+#  for (i in 1:6) {
+#    a <- a + abs(counts[i] - true_die_chances[i])
+#  }
+#  diffs[j] <- a
+  diffs[j] <- sum(abs(counts - true_die_chances)) / 2
 }
 diffs[1:100]
 ```
@@ -147,7 +169,7 @@ max(diffs)
 min(diffs)
 ```
 ```{r}
-observed_point <- 0.0891
+observed_point <- 0.04455
 diffs_df <- tibble(diffs)
 bins <- seq(0,0.2500,0.005)
 ggplot(diffs_df, aes(x = diffs), color = "grey") +
@@ -155,7 +177,7 @@ ggplot(diffs_df, aes(x = diffs), color = "grey") +
 ```
 
 
-Let us look at the proportion of the elements in the list `diffs` that are at least the observed diff value 0.0892, whose value we have stored in `observed_point`.
+Let us look at the proportion of the elements in the list `diffs` that are at least the observed diff value 0.04455, whose value we have stored in `observed_point`.
 We simply count the elements matching the requirement and then divide the count by the length of the list.
 
 ```{r}
@@ -167,27 +189,27 @@ over_count <- over_count / length(diffs)
 over_count
 ```
 
-The value we get is 0.065. <!-- how do we adjust according to the outcome? -->
+The value we get is 0.054. <!-- how do we adjust according to the outcome? -->
 We interpret the value as stating.
 We estimate the empirical distribution or a fair die with 1000 throws and compute the absolute distance of the empirical distribution from the ideal.
-Then the chances that the difference achieves 0.065 that we observed are no more than 6.5%.
-We can thus conclude that the chances that the die at hand is a fair one are no more than 6.5%.
+Then the chances that the difference achieves 0.054 that we observed are no more than 5.4%.
+We can thus conclude that the chances that the die at hand is a fair one are no more than 5.4%.
 
-The value we have calculated, 0.065, through simulation is a p-value.
+The value we have calculated, 0.054, through simulation is what we call *p-value*.
 To compute a p-value, we first establish some model that is possibly describing a quantifiable phenomenon (e.g., the absolute distance from the ideal distribution).
 We then run some simulation, if mathematical analysis appears too complicated or too cumbersome, to obtain a histogram of the quantifiable phenomenon under the model.
 We then compare the observation and examine where in the histogram the observation stands.
 Specifically, we estimate how far the observation is from the central portion of the histogram by splitting the histogram at the point of observation; that is, the portion less than or equal to the observation and the portion greater than or equal to the observation (where we can include the equality on either side).
 The closer the two portions are in size, the higher the likelihood of the observation.
 Conversely, the farther the two portions are in size, the lower the likelihood of the observation.
-We usually take the smaller of the two portions and call the size of the smaller portion the *p-value*.
+We usually take the smaller of the two portions and call the size of the smaller portion the p-value.
 
 Also, when we use a p-value and simulations, we have in mind two possible interpretations.
 We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
 The Null Hypothesis is the hypothesis we use in creating the model for simulation.
 The Alternative Hypothesis is its counter part - the opposite of the Null Hypothesis.
 In the experiment we have just conducted, the Null Hypothesis is that the die we have is a fair die and the Alternate Hypothesis is that the die we have is not a fair one.
-Using simulations we learn that the Null Hypothesis has a p-value of 6.5% (or 0.065) using the absolute distance between distributions as the distance measure.
+Using simulations we learn that the Null Hypothesis has a p-value of 5.4% (or 0.054) using the absolute distance between distributions as the distance measure.
 
 
 
@@ -252,12 +274,7 @@ We define a function that computes the distance of a five-element discrete distr
 harvard <- data_table$Harvard/100
 almanac <- data_table$Almanac/100
 demo_diff <- function(x) {
-  return(
-    abs(x[1] - almanac[1]) +
-    abs(x[2] - almanac[2]) +
-    abs(x[3] - almanac[3]) +
-    abs(x[4] - almanac[4]) +
-    abs(x[5] - almanac[5]))
+  return(sum(abs(x - almanac))/2)
 }
 harvard_diff <- demo_diff(harvard)
 harvard_diff
@@ -337,6 +354,173 @@ ggplot(demo_diff_simple_df, aes(x = demo_diff_simple), color = "gray") +
 ```
 The result is the same. The Harvard proportion is not like the national value at all.
 We can confidently say that Havard enrolls much more Asian students than the national average. 
+
+## Significance Level
+
+Previously we studied the way to compare two distributions using simulation.
+We used the racial demographics at the Harvard University as our subject and compared it to the national data at 4-year non-profit private colleges.
+Let us now use the same Almanac by the Chronicle of Higher Education and compare the private and public 4-year non-profit institutions for their student demographics.
+
+As usual, we use `tidyverse`.
+
+```{r}
+library(tidyverse)
+```
+
+Here is the demographics data.
+
+```{r}
+data_table <- tribble(~Race, ~Public, ~Private,
+                      "American Indian", 0.008, 0.006,
+                      "Asian", 0.060, 0.052,
+                      "Black", 0.125, 0.163, 
+                      "Hispanic", 0.211, 0.119,
+                      "Native Hawaiian and Other Pacific Islander", 0.003, 0.003,
+                      "White", 0.557, 0.627,
+                      "2 or More Races", 0.036, 0.030)
+data_table$Race
+sum(data_table$Public)
+sum(data_table$Private)
+```
+
+Let us add a new column that shows the race-wise ratio of the faculty data to the student data.
+
+```{r}
+df <- data_table %>% add_column(Public_Private_Ratio = data_table$Public / data_table$Private)
+head(df)
+```
+Like before, let us look at the Asian population, which is 6.0% in public institutions and 5.2% in private ones.
+
+Suppose you are in a section of a computer science class with 100 students, and in that section, 10 students (i.e., 10%) are Asian.
+Is this an unlikely event if we apply the national average to all schools?
+To answer the question, we generate an empirical distribution.
+
+We will stay away from the knowledge of 10 students out of 100 for now to see what we can determine from the national data.
+We can even make up our mind for how many Asian students in how large a class is significantly large.
+
+We will sample 100 students according to the proportion at hand and then measure the proportion of Asian.
+We repeat it 500 times to generate 500 student proportions using `rmultinom`.
+Let us check the public school proportions first.
+
+```{r}
+public_table <- rmultinom(n = 500, size = 100, prob = df$Public) / 100
+```
+
+Here are the first 5 results.
+
+```{r}
+public_table[,1:5]
+```
+
+
+The Asian population appears in the second row.
+Let us extract is as `asian_row`.
+```{r}
+asian_row <- public_table[2,]
+asian_row[1:10]
+```
+
+
+Let us visualize the asian_row list.
+
+```{r}
+demo_df <- tibble(asian_row)
+bins <- seq(0.0, 0.2, 0.01)
+ggplot(demo_df, aes(x = asian_row), color = "gray") +
+  geom_histogram(binwidth=0.01, fill = "steelblue")
+```
+
+We sort it in increasing order of its elements.
+Let us look at the first ten and the last ten of the sorted list.
+
+```{r}
+sorted <- sort(asian_row)
+sorted[1:10]
+sorted[491:500]
+```
+
+What is the value at the 90% from the bottom?
+How about 95%?
+
+```{r}
+sorted[length(sorted)*0.9]
+sorted[length(sorted)*0.95]
+```
+This means that in our simulations 90% of the time, the proportion is at most 0.09 (i.e., 9%).
+Thus, if the proportion of the Asians is greater than 9%, we can say  the class is unusually high in Asian.
+As for 95%, the value is the 95% point is the same as the threshold, and so we say that having 10% of Asian ztudents is not at the 95% level of unusualness.
+
+We say that the threshold point 0.09 is the 90% *significant level* and the threshold point 0.10 is the 94% significant level.
+What a significant level says that an empirical distribution suggests that if an observed value stays below (or above, depending on whether you are looking for too small a value or too large a value), the discovery you make is not significant.
+
+Let us do this now for private institutions.
+```{r}
+private_table <- rmultinom(n = 500, size = 100, prob = df$Private) / 100
+```
+
+Here are the first 5 results.
+
+```{r}
+private_table[,1:5]
+```
+```{r}
+asian_row2 <- private_table[2,]
+asian_row2[1:10]
+```
+
+```{r}
+demo_df2 <- tibble(asian_row2)
+bins <- seq(0.0, 0.2, 0.01)
+ggplot(demo_df2, aes(x = asian_row2), color = "gray") +
+  geom_histogram(binwidth=0.01, fill = "steelblue")
+```
+
+The 90% point of the sorted list is 0.08.
+
+```{r}
+sorted2 <- sort(asian_row2)
+sorted2[451]
+sorted2[476]
+```
+
+Now in the case of private institutions, the observed ratio 10% is higher than the 95% threshold point.
+
+What we can say now is this.
+
+* We set a Null Hypothesis that in the computer science section, the student population reflects the national demographics.
+* We all set an Alternative Hypothesis that in that section, the population does not reflect the demographics.
+
+With the simulation with 500 rounds of selecting random 100 students, seeing 10% of Asians in the section is beyond the 95% significance level.
+The p-value of 10% in the experiment is 0.02 as we see below.
+
+```{r}
+p_value <- sum(asian_row2 > 0.10) / 500
+p_value
+```
+
+### Siginificance Levels with Both Ends
+
+The above analysis is applicable to situations in which we must examine how smaller than unual an obverbation is.
+
+```{r}
+sorted2 <- sort(asian_row2)
+sorted2[50]
+sorted2[25]
+```
+The value is 0.02 at the bottom 10% as well as at the bottom 5%, so if there is just 1% of Asian in the section, which is exactly 1 student, you can say it is significant (with the significance level of 5%).
+The p-value of having a value less than 0.02 is 0.04.
+
+```{r}
+p_value2 <- sum(asian_row2 < 0.02) / 500
+p_value2
+```
+
+We can join the two analysis results at bottom 5% and top 5% together to say that with 90% significance the proporition is between 2 and 9.
+```{r}
+print(c(sorted2[25],sorted2[476]))
+```
+
+
 
 
 <!--
