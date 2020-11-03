@@ -225,10 +225,197 @@ Michael Crabtree has two entries in 2007 and in 2006, where his yards per catch 
 
 
 ## Bootstrapping and Confidence Interval
+
+
+Sometimes a data scientist receives a collection of samples from the underlying population to which she has no access.
+If she had access to the underlying population, she might attempt to generate an array of samples, from which she would generate a distribution of the statistic of interest.
+Since that is impossible, is there a way for to deal with the sample collection at hand to generate a range of values for the statistic?
+Yes, we call that *resampling* or *bootstrapping*.
+In resampling (or bootstrapping) you treat the data set at hand as the true population and generate samples from them.
+But there is a catch.
+Each sample data set you generate should be equal in size to the original you have.
+In stead of sampling without replacement, you use sample with replacement.
+Since the sample data sets have the same size as the original, with the use of replacement, you get duplicates and omissions; that is, there are items appearing multiple times in and there are items missing.
+Because of the use of randomness, the discrepancy varies.
+
+
 ### Resampling
+
+Recall the birthday paradox we studied earlier.
+There, we noticed that if 23 people are in a room, the chances are fifty-fifty that there are two people having the same birthdays among the 23.
+The resampling idea resembles a situation in which there are 365 people instead of 23.
+There are already very good chances of having two people the same birthdays with just 23 people.
+If there are 365 people, you can divide the 365 people into about 16 groups of 23, each having fifth-fifty chances of two people with identical birthdays, and there are possibilities that there are cross-group matches of birthdays.
+Since there are 365 birthdays, duplication eliminates birthdays from the list of birthdays appearing.
+Let us formalize the discussion a little.
+Suppose we have a sample at hand with $N$ elements, which we will treat as the population.
+We will sample $N$ elements from the $N$-element set with replacement.
+The ratio between the number of ways to select the $N$ elements in an arbitrary order without replacement and the number with replacement is
+\[
+\frac{N}{N}\cdot \frac{N-1}{N} \cdot \cdots \cdot \frac{1}{N}
+\]
+This quantity is approximately $\sqrt{2\pi N}/e^{N}$ for any large enough $N$.
+The value $e$ is what we call *Euler's constant* and is about 2.718, and so for a large enough $B$, the ratio is quite small.
+Thus, the analysis guarantees that the samples we generate practically will not look like the original.
+
+### Getting ready
+
+Let us start with loading the `tidyverse` package and loading the NCAA data.
+
+```{r}
+library(tidyverse)
+```
+```{r}
+path0 <- "data/ncaa-reivers-2005-2011.csv"
+ncaa0 <- read_csv(path0)
+ncaa <- ncaa0 %>%
+  mutate(player_year = str_c(Player, " ", Year))
+spec(ncaa)
+```
+
+Let us create a subset of the data mechanically.
+We will select Year 2006.
+There are 1004 receivers appearing in the subset.
+
+```{r}
+ncaa1 <- filter(ncaa, Year == 2006)
+nrow(ncaa1)
+yards <- ncaa1$YdsPerCatch
+```
+
+Assume this is the population we have at hand.
+The method for generating a subset of an equal size with replacement can be the following.
+
+```{r}
+resample <- function(x) {
+  sample(x, size = length(x), replace = TRUE)
+}
+```
+
+Using `resample`, we can generate a series of bootstrapped data set and generate the distribution of the averages of the data.
+
+```{r}
+averages <- vector("double", 500)
+for (i in 1:500) {
+  averages[i] <- sum(resample(yards))/length(yards)
+}
+averages <- sort(averages)
+```
+
+Let us also define again the function that returns the percentile.
+
+```{r}
+percentile <- function(x, y) {
+  return(x[y * length(x) / 100])
+}
+```
+
+Here are the minimum, maximum, and the quartiles of the averages.
+
+```{r}
+averages[1]
+percentile(averages, 25)
+percentile(averages, 50)
+percentile(averages, 75)
+percentile(averages, 100)
+
+
+```
+
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+df <- tibble(averages)
+ggplot(df, aes(x = averages, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = seq(11, 13, 0.05))
+```
+
+The 90% range of the averages is
+```{r}
+the_range <- c(percentile(averages,5),percentile(averages,95))
+```
+
+In other words, this is the range that covers 90% of the yards per catch values of the receivers.
+
+Now we can check how many of the receivers in the true population falls in this region.
+
+```{r}
+ncaa2 <- filter(ncaa, YdsPerCatch >= the_range[1], YdsPerCatch <= the_range[2])
+nrow(ncaa2) / nrow(ncaa)
+overall_mean <- mean(ncaa$YdsPerCatch)
+```
+
+Let us see the distribution of the averages of the 2006 data in contrast with the mean of the means (in green) and the overall mean (in red).
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+df <- tibble(averages)
+mean_of_means <- percentile(averages,50)
+ggplot(df, aes(x = averages, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = seq(11, 13, 0.05)) +
+  geom_point(aes(x = overall_mean, y = 0), color = "red", size = 3) +
+  geom_point(aes(x = mean_of_means, y = 0), color = "green", size = 3)
+```
+
+
+
+### Doing the thing again
+
+The subset selection that we used `Year == 2006` was very artificial because there may have been some annual bias on the data in 2006.
+The gap between the red and the green dot is an indication of such a bias.
+So, let us try again.
+This time, we select 1000 data points, about the same number as the 2006 data, by random sampling.
+
+```{r}
+yards2 <- sample(ncaa$YdsPerCatch, size = 1000, replace = TRUE)
+mean(yards2)
+```
+
+We then perform the series of definitions and operations as we did before.
+We use different names for some data: `yards` to for the 1000 subset of the yardage column and `averages2` for the means we generate from bootstrapping.
+
+```{r}
+resample <- function(x) {
+  sample(x, size = length(x), replace = TRUE)
+}
+averages2 <- vector("double", 500)
+for (i in 1:500) {
+  averages2[i] <- sum(resample(yards2))/length(yards2)
+}
+averages2 <- sort(averages2)
+```
+
+
+Now we project the data.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+percentile <- function(x, y) {
+  return(x[y * length(x) / 100])
+}
+df2 <- tibble(averages2)
+mean_of_means <- percentile(averages2,50)
+overall_mean <- mean(yards2)
+ggplot(df, aes(x = averages2, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = seq(11, 13, 0.05)) +
+  geom_point(aes(x = overall_mean, y = 0), color = "red", size = 4) +
+  geom_point(aes(x = mean_of_means, y = 0), color = "green", size = 2)
+```
+
+To see more clearly the two dots, we use size 4 for the red dot and use size 2 for the green dot.
+The order we plot the two is red first, and so the small dot in green will surely appear on top of the red dot without completely covering the red.
+We see that the two dots overlap with each other.
+Our conclusion from the second experiment is that the true overall average must be sitting in the interval between the 5 percentile and 95 percentile with 90% confidence.
+See yourself by examining the values.
+
+```{r}
+c(percentile(averages2,5),percentile(averages2,95))
+overall_mean
+```
+
 ### Confidence Intervals
 
-
+We call the interval we used to encompass the mean of the means a *confidence interval*.
+We attach the size of the coverage of the interval as an attributed of the interval, e.g., 90% confidence interval, 95% confidence interval, etc.
+A confidence interval means that by way of resampling (or some other method) we are "confident" that the true value must be sitting in the interval.
+So, the 
 
 
 <!--
