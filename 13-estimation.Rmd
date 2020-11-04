@@ -339,7 +339,7 @@ In other words, this is the range that covers 90% of the yards per catch values 
 Now we can check how many of the receivers in the true population falls in this region.
 
 ```{r}
-ncaa2 <- filter(ncaa, YdsPerCatch >= the_range[1], YdsPerCatch <= the_range[2])
+ncaa2 <- filter(ncaa, YdsPerCatch >= the_range[1] & YdsPerCatch <= the_range[2])
 nrow(ncaa2) / nrow(ncaa)
 overall_mean <- mean(ncaa$YdsPerCatch)
 ```
@@ -419,6 +419,56 @@ So, the
 
 
 <!--
+```{r}
+nfl <- read_csv("data/nfl_receiving0.csv")
+ncaa <- read_csv("data/ncaa-reivers-2005-2011.csv")
+```
+
+```{r}
+yards_nfl <- nfl$Yds
+yards_ncaa <- ncaa$Yards
+```
+
+```{r}
+t_test <- function(x,y,c) {
+  x1 <- sample(x, size = c, replace = TRUE)
+  x2 <- sample(y, size = c, replace = TRUE)
+  m1 <- mean(x1)
+  m2 <- mean(x2)
+  x1d <- x1 - m1
+  x2d <- x2 - m2
+  s1 <- x1d * x1d
+  s2 <- x2d * x2d
+  sd1 <- sqrt(sum(s1) / (c-1))
+  sd2 <- sqrt(sum(s2) / (c-1))
+  z <- (m1 - m2)/sqrt((sum(s1) + sum(s2))/(c*(c-1)))
+  return(z)
+}
+```
+
+```{r}
+a <- t_test(yards_nfl,yards_ncaa,200)
+a
+```
+
+```{r}
+mean_nfl <- mean(yards_nfl)
+mean_ncaa <- mean(yards_ncaa)
+mean_nfl
+mean_ncaa
+max_nfl <- max(yards_nfl)
+max_ncaa <- max(yards_ncaa)
+max_nfl
+max_ncaa
+sd_nfl <- sd(yards_nfl)
+sd_ncaa <- sd(yards_ncaa)
+sd_nfl
+sd_ncaa
+z <- (mean_nfl - mean_ncaa)/sqrt(sd_nfl*sd_nfl/length(yards_nfl) + sd_ncaa*sd_ncaa/length(yards_ncaa))
+z
+```
+
+
 In the previous chapter we began to develop ways of inferential thinking. In particular, we learned how to use data to decide between two hypotheses about the world. But often, instead of comparing hypotheses, we just want to know how big something is.
 
 For example, in an earlier chapter we investigated how many warplanes the enemy might have. In a similar vein, in an election year, we might want to know what percent of voters favor a particular candidate. To assess the current economy, we might be interested in the median annual income of households in the United States.

@@ -1,5 +1,159 @@
-# Comparing Two Samples
+## A/B Test
 
+In the previous section, we study the use of hypothesis testing.
+Here in this section, we learn a simple method to compare two distributions using a method we call *A/B Test*.
+The idea behind A/B testing is this as follows.
+
+* We have two sets of numerical data A and B, which respectively have the mean values $a$ and $b$, with difference $d = a - b$. We will swap A and B if necessary so that $a > b$.
+* We want to know, assuming that the two data sets have the same origin, how large (or small) chances are that the difference of $d$ emerges when we redivide the join of A and B into two groups, only retaining the sizes of A and B.
+* For each such random split, we compute the difference in the mean values.
+* By repeating such random splits many times, we can obtain distributions of the means.
+
+So let us begin by loading `tidyverse`.
+
+```{r}
+library(tidyverse)
+```
+
+In making random splits, we define a function that generates, given a number `c`, a random sequence of integers between 1 and `c`.
+
+```{r}
+rand_perm <- function(c) {
+  y <- 1:c
+  for (i in c:2) {
+    ll <- sample(1:c, size=1, replace=TRUE)
+    j <- ll[1]  
+    a <- y[j]
+    y[j] <- y[i]
+    y[i] <- a
+  }
+  return(y)
+}
+print(rand_perm(11))
+```
+
+The function `mean_diff_single` is one that receives two lists, `x` and `y`, merges the two input one, and then splits it into two lists having the same sizes as `x` and `y`, respectively.
+The function then computes the mean for each of the two new lists and returns the difference betwwen the two means.
+
+In random splitting, the function uses the `rand_perm` function.
+
+```{r}
+mean_diff_single <- function(x,y) {
+  l1 = length(x)
+  l2 = length(y)
+  l0 = l1 + l2
+  z <- append(x,y)
+  ch <- rand_perm(l0)
+  #print(z)
+  #print(ch)
+  z1 <- vector("double", l1)
+  for (i in 1:l1) {
+    z1[i] <- z[ch[i]]
+  }
+  z2 <- vector("double", l2)
+  for (i in 1:l2) {
+    z2[i] <- z[ch[l1 + i]]
+  }
+  #print(z1)
+  #print(z2)
+  m1 <- mean(z1)
+  m2 <- mean(z2)
+  #print(m1)
+  #print(m2)
+  return(m1 - m2)
+}
+mean_diff_single(c(1,2,3),c(4,-5,6))
+```
+
+We now define a function that receives two lists and a count `c`, executes the random split `c` times and returns the list of `c` mean differences.
+```{r}
+mean_diff_multi <- function(x,y,c) {
+  results <- vector("double",c)
+  for (i in 1:c) {
+    results[i] <- mean_diff_single(x,y)
+  }
+  return(results)
+}
+r <- mean_diff_multi(c(1,2,3,4,5),c(6,8,10,12,24),5)
+print(r)
+```
+
+```{r}
+receivers <- read_csv("data/nfl_receivers.csv")
+spec(receivers)
+receivers2017 <- filter(receivers, Year == 2017)
+receivers2019 <- filter(receivers, Year == 2019)
+yards17 <- receivers2017$Yds
+yards19 <- receivers2019$Yds
+
+```
+
+
+```{r}
+diff0 <- mean(yards17) - mean(yards19)
+diff_data <- mean_diff_multi(yards17,yards19,1000)
+```
+
+```{r}
+length(yards17)
+length(yards19)
+diff_data[1:10]
+diff0
+max(diff_data)
+min(diff_data)
+mean(diff_data)
+```
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+df <- tibble(diff_data)
+mean_of_means <- mean(diff_data)
+ggplot(df, aes(x = diff_data, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = seq(-45, 75, 4)) +
+  geom_point(aes(x = diff0, y = 0), color = "red", size = 3)
+```
+
+<!--
+```{r}
+split_data <- function(x,y) {
+  l <- length(x)
+  l1 <- floor(l/2)
+  l2 <- l - l1
+  ch <- rand_perm(l)
+  x1 <- vector("integer", l1)
+  for (i in 1:l1) {
+    x1[i] <- x[ch[i]]
+  }
+  x2 <- vector("integer", l2)
+  for (i in 1:l2) {
+    x2[i] <- x[ch[l1 + i]]
+  }
+  l <- length(y)
+  l1 <- floor(l/2)
+  l2 <- l - l1
+  ch <- rand_perm(l)
+  y1 <- vector("integer", l1)
+  for (i in 1:l1) {
+    y1[i] <- y[ch[i]]
+  }
+  y2 <- vector("integer", l2)
+  for (i in 1:l2) {
+    y2[i] <- y[ch[l1 + i]]
+  }
+  z1 <- c(x1,y1)
+  z2 <- c(x2,y2)
+  #print(z1)
+  #print(z2)
+  diff <- mean(z1) - mean(z2)
+  return(diff)
+}
+split_data(c(1,2,3),c(-4,-5,-6,-7))
+```
+-->
+
+
+
+
+<!--
 We have seen several examples of assessing whether a single sample looks like random draws from a specified chance model.
 
 * Did the Alameda County jury panels look like a random sample from the population of eligible jurors?
@@ -291,3 +445,7 @@ TBA
 ## Causality
 
 TBA
+
+-->
+
+
