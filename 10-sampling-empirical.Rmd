@@ -399,9 +399,7 @@ Since large-scale sampling produces an empirical distribution close to the true 
 
 ### Prerequisites
 
-We will continue to make use of the tidyverse in this section.
-Our running examples in this section will be flights data from `nycflights13` and National Football League (NFL) data on football players.
-First, let's load in these datasets.  
+We will continue to make use of the tidyverse in this section. Our running examples in this section will be flights data from `nycflights13` and National Football League (NFL) data on football players. First, let's load in these datasets.  
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
@@ -415,8 +413,7 @@ receivers0 <- read_csv(path)
 
 ### The variability of statistics
 
-One thing we need to keep in mind is that the empirical distribution can look quite different between runs.
-Recall the histogram of departure delays in `flights`. 
+One thing we need to keep in mind is that the empirical distribution can look quite different between runs. Recall the histogram of departure delays in `flights`. 
 
 ```{r warning=FALSE}
 delay_bins <- seq(-50, 150, 10)
@@ -482,8 +479,7 @@ Before getting down to the business of estimating the median distribution, let u
 
 __Step 1: Select the Statistic to Estimate.__ Two questions are at hand. What statistic do we want to estimate? How many samples do we use in each estimate?
 
-__Step 2: Write the Code for Estimation.__ We need to write the code for sampling and then computing an estimate from the samples.
-Typically we encapsulate such steps in a function that we can use as a functional in a `purrr` map. 
+__Step 2: Write the Code for Estimation.__ We need to write the code for sampling and then computing an estimate from the samples. Typically we encapsulate such steps in a function that we can use as a functional in a `purrr` map. 
 
 __Step 3: Generate Estimations and Examine.__ A question at hand is how many times do we repeat the experiment? We may not have an answer to the question.
 We will write the code for repeating experiments, collecting the results in a vector whose length is equal to the number of repetitions, and then generating a visualization of the results we have collected in the vector.
@@ -603,13 +599,13 @@ receivers2019 <- filter(receivers, Year == 2019)
 The percentage of longest yards is the fraction of `TRUE`'s in the `is_lg_td` column. Recall that Boolean variables are really just `1`'s and `0`'s. Thus, we can sum the number of `TRUE`'s and divide by the total number of players. This is equivalent to computing the mean for the `is_lg_td` column.  
 
 ```{r}
-percent_td <- receivers %>%
+percent_td <- receivers2019 %>%
   pull(is_lg_td) %>%
   mean()
 percent_td
 ```
 
-So about 19.7% of the longest yardages of players ended in a touchdown. How good would our statistic be? 
+So about 18.5% of the longest yardages of players ended in a touchdown. How good would our statistic be? 
 
 ### Step 1: Select the Statistic to Estimate
 
@@ -620,7 +616,7 @@ We will draw random samples of size 1,000 from the population of players and sim
 We already know how to generate a random sample of 1,000 players.  
 
 ```{r}
-sampled <- receivers %>%
+sampled <- receivers2019 %>%
   slice_sample(n = 1000, replace = TRUE)
 ```
 
@@ -636,7 +632,7 @@ As before, let's wrap this up into a function we can use in our map.
 
 ```{r}
 one_sample_percentage <- function(x) {
-  sample_percent <- receivers %>%
+  sample_percent <- receivers2019 %>%
     slice_sample(n = 1000, replace = TRUE) %>%
     pull(is_lg_td) %>%
     mean()
@@ -658,171 +654,150 @@ We can now visualize the empirical distribution of the statistic using a histogr
 ```{r}
 ggplot(tibble(percentages)) + 
   geom_histogram(aes(x = percentages, y = ..density..), 
-                 fill = "darkcyan", color = "gray", bins = 15) + 
+                 fill = "darkcyan", color = "gray", bins = 20) + 
   geom_point(aes(x = percent_td, y = 0), color = "salmon", size = 3)
 ```
 
-Observe how the sample percentages cluster around the value 0.197, which is the value of the population percentage given by `percent_td` (see the light orange dot). 
+Observe how the sample percentages cluster around the value 0.185, which is the value of the population percentage given by `percent_td` (see the light orange dot). 
 
 Once again, we see that the statistic provides a good estimate of a parameter. 
 
+## Sampling Strategies
 
-<!--## Sample or Not Sample
+The story goes that we can derive meaningful conclusions about a population using empirical distributions. Such distributions are formed by the application of some sampling strategy. The  one we have used so far has been drawing random samples with (or without) replacement. We refer to such a scheme as *simple random sampling*. However, simple random sampling is not the only way to generate an empirical distribution. We briefly discussed another method at the start of this chapter: *systematic sampling*. In this section, we examine systematic sampling in greater detail and its suitability for statistical analysis.   
 
-We will study how sampling can help produce the results without forcing you to examine the entire data.
 
-We will again make use of the tidyverse in this chapter, so let's load it in as usual.
+### Prerequisites
+
+We will continue to make use of the tidyverse in this section. Our example in this section will be data about New York City flight delays in 2013 from the package `nycflights13`, which we have worked with before. Let's load both of these packages. 
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(nycflights13)
 ```
 
-Here is a data of the receivers in the National Football League in the 2017, 2018, and 2019 seasons.
-The data comes from [The Football Database](http://www.footballdb.com/index.html).
-
-If you are not familiar with (American) football, in each play of the game (excluding the kick-off), one team is offending and the other is defending.
-The ultimate goal of the offending team is to carry the ball beyond the goal line of the opponent team, which we call the "end zone".
-The offending team has four chances in its turn.
-If they cannot bring the ball beyond the goal line, an alternate option is to advance the ball position at least 10 yards forward from the starting position.
-If they cannot accomplish neither options, the defensive team will take over the ball and the role switches between the defensive and the offensive teams.
-There are two ways to move the ball forward.
-One is by running, where a player carries the ball and runs forward.
-When the player cannot move forward in the play, the last position of the ball becomes the next starting position.
-The other is by passing, where the quarterback player, who is responsible for initiating the play, throws a ball towards a player of the same team.
-If the player that the quarterback targets catches the ball, the player can continue the play by running forward with the ball.
-The idea in the running play is the runner knits through the regions that the defensive players cover and runs as far as possible.
-The idea in the passing play is the receiver runs to a place beyond the reach of the defensive team and the quarterback throws the ball so the receiver can catch it.
-
-The rule book of the National Football League is thick and contains so many rules.
-An important point here is that in each play there are multiple players who are eligible to receive the ball that the quarterback throws, but not everyone in the offensive team.
-In a rare event, the ball that the quarterback throws hits a helmet of some player, bounces back to the quarterback, the quarterback catches the ball, and runs with it.
-Anyhow, in one game of a football, multiple players may become targets of the same quartterback.
-Sometimes the target catches the ball and runs after catching, and sometimes they drop the ball with the passing play being unsuccessful.
-Important information about players who are eligible to receive balls, *receivers*, consists of the following:
-
-* how many times the quarterback targeted the receiver (Target);
-* after receiving the ball how many yards the receiver ran (Yards After Catch);
-* when the receiver caught the ball how many yards the ball advanced forward from the position that the play started (Receiving Yards); Note that the quarterback may have to run backwards before throwing the ball and so the distance can be greater than the advance distance of the ball towards the determination of the 10 yard requirement;
-* whether the receiver carried the ball beyond the goal line (Touchdown)
-* if not touch down, whether the receiver's catching resulted in the accomplishment of the 10-yard advance (First down)
-
-Let's start by loading the data into R.
-
+Recall that the median flight delay in the true distribution of flights is $-2$. 
 
 ```{r}
-path <- "data/nfl_receiving0.csv"
-receivers0 <- read_csv(path)
-receivers0
-```
-The attributes of the data are:
-* The name of receiver (Player)
-* The year of data (Year)
-* The team of receiver (Team)
-* The number of games the receiver became a target (Gms)
-* The number of times the receiver caught the ball (Rec)
-* The total receiving yards (Yds)
-* The average yards per receiving (Avg)
-* The average yards per game (YPG)
-* The longest yards received where the attachment of "t" indicates "touchdown" (Lg)
-* The number of touchdowns (TD)
-* The number of first downs (FD)
-* The number of times the receiver became the target (Yac)
-* The total yards after catch (YAC)
-
-The data has a bit of a problem:
-* the same name may appear multiple times because the data is over three seasons
-* the longest yard information may have a "t" attached.
-
-For the former, we can solve the problem by creating a column to combine Player and Year.
-For the latter, we can use the following series of editing to create two new columns in which the two values in the longest yard are split into the yardage and the value indicating whether the longest yard is also a touchdown (1 for "yes" and 0 for "no").
-
-We will show how to do the process.
-An impatient reader may just do this to download the data after cleaning.
-
-```{r}
-path <- "data/nfl_receivers.csv"
-receivers_data <- read_csv(path)
+median_delay <- flights %>%
+  pull(dep_delay) %>%
+  median(na.rm = TRUE)
+median_delay
 ```
 
-The function below takes the longest yard string and returns a two element list whose first entry is the actual number and the second is the flag of "t".
-It uses `str_length` to obtain the number of characters in a string and `str_sub` to obtain substrings.
-Basically, it checks if the substring consisting only of the last character of `s` is equal to "t", and then if so, return the substring preceding the "t" and 1; otherwise, it returns s and 0.
-The function combines the two values as a list using `c` and converts both values to integers.
-To generate the integer from a string representing (e.g., going from "49" to 49) is possible using the `strtoi` function.
 
+### Systematic selection
+
+In systematic selection, we pick some random pivot (say, the 4th row), and then select every $i$-th row after that. This method of sampling is quite popular because of its sheer simplicity. For example, if we wanted to sample a student population at a university, we could select all students based on the digits in their university-issued ID number, e.g., selecting all students who have an odd number in the second-to-last position of their ID. 
+
+<!-- HIDDEN (for generating mystery flights)
 ```{r}
-split_lg <- function(s) {
-  if (str_length(s) == 0) {
-    return(c(0,0))
-  }
-  else {
-    l <- str_length(s)
-    suffix <- str_sub(s,l,l)
-    if (suffix != "t") {
-      return(c(strtoi(s),0))
-    }
-    else {
-      return(c(strtoi(str_sub(s,1,l-1)),1))
-    }
-  }
+early_delays <- sample(filter(flights, dep_delay < 0)$dep_delay)
+
+my_func <- function(ID, dep_delay) {
+  return(if_else(ID %% 2 == 0, 
+                 early_delays[ID],
+                 dep_delay))
 }
+
+flights_new <- flights %>% 
+  mutate(ID = row_number(),
+         dep_delay = pmap(list(ID, dep_delay), my_func)
+         ) %>%
+  unnest()
+flights_new
+write_csv(flights_new, "data/mystery_flights.csv")
 ```
+--> 
 
-
-With the function `split_lg`, we add three new columns to the data using the following code.
-The function `cbind` add a new column to an existing data.
-The first argument is the database to which to add the new column and the second argument is the new column.
-The last line of the code saves the result as a new data. 
+We can explore this sampling strategy using the `flights` tibble. We will select a random row in the tibble as the pivot, and then select every 100th row after that (recall that the dataset is quite large, with ~330K rows!). 
 
 ```{r}
-lgall <- receivers0$Lg
-length(lgall)
-lg_yd0 <-vector("integer",length(lgall))
-lg_td0 <-vector("integer",length(lgall))
-names <- receivers0$Player
-year <- receivers0$Year
-names_year <- 1:length(lgall)
-for (i in 1:length(lgall)) {
-  parts <- split_lg(lgall[i])
-  lg_yd0[i] <- parts[1]
-  lg_td0[i] <- parts[2]
-  names_year[i] <- paste(names[i], year[i])
-}
-receivers1 <- cbind(receivers0, lg_yd0)
-receivers2 <- cbind(receivers1, lg_td0)
-receivers_data <- cbind(receivers2, names_year)
-print(sum(lg_yd0))
-write_csv(receivers_data,'data/nfl_receivers.csv')
+start <- sample(1:nrow(flights), size = 1)  # pick a random row, any one! 
+start
 ```
 
-So, here we reload from the data set after cleaning.
+Does the generated distribution mirror what we know about the true distribution? 
 
 ```{r}
-path <- "data/nfl_receivers.csv"
-receivers_data <- read_csv(path)
+selected_rows <- seq(start, nrow(flights), 100)  # select every 100th row after start
+
+slice(flights, selected_rows) %>% 
+  ggplot(aes(x = dep_delay, y = ..density..)) + 
+  geom_histogram(fill = "darkcyan", color = "gray", breaks = seq(-50, 150, 10)) +
+  ggtitle(str_c("starting row = ", start))
 ```
 
-Let us say we will study the performance of the receivers with respect to their yardage (Yds).
+Looks good! The empirical distribution still looks a whole lot like the true distribution of flight delays. However, the number of samples that appear in the tail varies greatly across runs -- why might that be? Run the cell a few times and observe the effect of the selected `start` variable on the resulting distribution. 
 
-How many yards did the best receiver gain and how many receivers are there?
-Also, are there are receivers with 0 gains?
+From our initial exploration, it looks like systematic sampling is a good bet. Any statistics we compute using this sampling strategy is likely to provide a good estimate of the population parameter in question. 
+
+Now suppose that we reorganized the `flights` data a bit into a tibble called `mystery_flights`.
+
+```{r message = FALSE, error = FALSE}
+mystery_flights <- read_csv("data/mystery_flights.csv") %>% select(ID, everything())
+mystery_flights 
+```
+
+Notice anything problematic? Don't worry if you can't spot it; the problem doesn't jump at first glance. Let's keep with our sampling scheme, but with one key modification. We will assert that the randomly generated `start` is 2. 
 
 ```{r}
-col <- receivers_data$Yds
-max(col)
-length(col)
-min(col)
+start <- 2
 ```
-The largest value is 1725, there are about 1511 rows in the data set, and wow, there is a player with negative gain.
-How could the negative total be possible?
-The yardage is the distance from the point of throwing to the point where the ball ended and so it can be negative.
 
+We can now perform the same systematic selection as before. 
+
+```{r message = FALSE, warning = FALSE}
+selected_rows <- seq(start, nrow(mystery_flights), 100)  # select every 100th row after start
+
+slice(mystery_flights, selected_rows) %>% 
+  ggplot(aes(x = dep_delay, y = ..density..)) + 
+  geom_histogram(fill = "darkcyan", color = "gray", breaks = seq(-50, 150, 10)) +
+  ggtitle(str_c("starting row = ", start))
+```
+
+All of the sampled flights have early departures! What happened? 
+
+Let's break down the steps we took. The first row selected is at index 2, as told by `start`, and each row after increases by increments of 100. If we write out some of these indices, we would select rows: 
+
+```{r}
+tibble(row_index = seq(2, nrow(mystery_flights), 100))
+```
+
+There are several patterns that can be gleaned from this listing, but we will direct your attention to one in particular: these row numbers are all even! If we pick out some of these rows from `mystery_flights`, we find something revealing. 
+
+```{r}
+slice(mystery_flights, c(2, 102, 202, 302, 402))
+```
+
+Compare this with the rows just before these. 
+
+```{r}
+slice(mystery_flights, c(1, 101, 201, 301, 401))
+```
+
+It turns out that the flights with even row numbers all have early departures. By fixing `start` to be an even value, our systematic sampling scheme was fooled into always choosing flights that are ahead of schedule. Under such circumstances, we conclude that our random sample is necessarily *biased*. 
+
+### Beware: the presence of patterns 
+
+The `mystery_flights` tibble is a contrived example that required careful reorganization of the rows to create a setup where *every* flight with an even row index among the approximately 330K flights present in the dataset had an early departure. While it is quite unlikely that a real-world dataset would contain such an anomaly, the example points to valuable lessons that can occur in practice. 
+
+Real-world datasets are rife with patterns. Manufacturing errors due to a particular malfunctioning machine that assemble every $n$-th product; software engineering teams where every tenth member is designated the product manager; university-issued ID's where ID numbers ending in 0 are reserved for faculty members. Any systematic sampling scheme is much more prone to selecting samples that follow (unexpected) patterns than a simple random scheme would be. Not unlike like the story with `mystery_flights`, a biased sample can result and lead to misleading (and likely erroneous) findings. Even more, some may be willing to exploit such patterns for the sole possibility of increasing the significance of their results -- we would hardly call them data scientists!  
+
+Thus, regardless whether simple random or systematic sampling is used, sampling strategies demand prudence on the part of the data scientist.  
+
+
+
+
+
+
+<!--
 What is the average of the total yardage value among the 1511 entries?
 Computing the average in question is simple:
 obtain the column for the attribute, sum the entries, and divide it by the number of rows.
 
 ```{r}
-col <- receivers_data$Yds
+col <- receivers$Yds
 Yds_avg <- sum(col)/length(col)
 ```
 
@@ -834,7 +809,7 @@ We locate the position of the average, which we have calculated into `Yds_avg` i
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 bins <- seq(0,1750,20)
-ggplot(receivers_data, aes(x = Yds)) +
+ggplot(receivers, aes(x = Yds)) +
   geom_histogram(aes(y = ..density..), color = "grey", breaks = bins) +
   geom_point(aes(x = Yds_avg, y = 0), color = "red", size = 2)
 
@@ -1027,7 +1002,7 @@ sum(outcomes)/length(outcomes)
 So, the use of mechanical index selections requires a careful treatment.
 Depending on how mechanically we select the index values, we may obtain different results.
 
-
+--> 
 <!--
 ## Probabilities of Things Happening
 
