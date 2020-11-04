@@ -9,7 +9,10 @@ The idea behind A/B testing is this as follows.
 * For each such random split, we compute the difference in the mean values.
 * By repeating such random splits many times, we can obtain distributions of the means.
 
-So let us begin by loading `tidyverse`.
+### Some Preparation
+
+
+Let us begin by loading `tidyverse`.
 
 ```{r}
 library(tidyverse)
@@ -69,14 +72,16 @@ We now define a function that receives two lists and a count `c`, executes the r
 ```{r}
 mean_diff_multi <- function(x,y,c) {
   results <- vector("double",c)
-  for (i in 1:c) {
-    results[i] <- mean_diff_single(x,y)
+  for (j in 1:c) {
+    results[j] <- mean_diff_single(x,y)
   }
   return(results)
 }
 r <- mean_diff_multi(c(1,2,3,4,5),c(6,8,10,12,24),5)
 print(r)
 ```
+
+### Comparing NCAA Receivers from Different Years
 
 ```{r}
 receivers <- read_csv("data/nfl_receivers.csv")
@@ -108,9 +113,77 @@ mean(diff_data)
 df <- tibble(diff_data)
 mean_of_means <- mean(diff_data)
 ggplot(df, aes(x = diff_data, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(-45, 75, 4)) +
+  geom_histogram(col="grey", breaks = seq(-45, 75, 10)) +
   geom_point(aes(x = diff0, y = 0), color = "red", size = 3)
 ```
+
+Where does the mean different sit in the distribution of the differences?
+We can calculate by obtaining a sub-list of `diff_data` with "less than `diff0`" as a filter and then computing the ratio of the length of the sub-list to the length of th original.
+
+```{r}
+#diff_data < diff0
+length(diff_data[diff_data < diff0]) / length(diff_data)
+
+```
+
+The result is 0.289.
+This means that the position of the mean difference is at 28.9% of the distribution of means.
+We can safely accept the Null Hypothesis (the question we are asking - are the two data sets of the same origin).
+
+### Comparing NFL and NCAA
+
+Here is a data set of NCAA receivers.
+
+
+
+```{r}
+path0 <- "data/ncaa-reivers-2005-2011.csv"
+ncaa0 <- read_csv(path0)
+```
+
+The data set has a large number of rows (7323).
+The yardage information appears in `Yards`.
+
+
+```{r}
+spec(ncaa0)
+nrow(ncaa0)
+c(max(ncaa0$Year),min(ncaa0$Year))
+```
+
+Let us the NCAA data for 2011 and NFL 2019 and 2018 (which is the equivalent to Year not equal to 2017).
+```{r}
+ncaaYards <- filter(ncaa0, Year==2011)$Yards
+nflYards <- filter(receivers, Year!=2017)$Yds
+length(ncaaYards)
+length(nflYards)
+```
+
+The two lists about the same lengths.
+As before, let us compute the difference between the means of the two lists and then plot the data.
+
+```{r}
+diff1 <- mean(nflYards) - mean(ncaaYards)
+diff1_data <- mean_diff_multi(nflYards,ncaaYards,1000)
+min(diff1_data)
+diff1
+```
+
+While the difference of the means is -53.9, the mean difference by sampling produced the minimum of -44.88.
+This means that the probability that we observe the difference at hand is 0.
+
+```{r}
+df <- tibble(diff1_data)
+mean_of_means <- mean(diff1_data)
+ggplot(df, aes(x = diff1_data, y = ..density..)) + 
+  geom_histogram(col="grey", breaks = seq(-100, 100, 10)) +
+  geom_point(aes(x = diff1, y = 0), color = "red", size = 3)
+```
+```
+
+
+
+
 
 <!--
 ```{r}
