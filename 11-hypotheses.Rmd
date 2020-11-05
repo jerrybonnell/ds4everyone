@@ -3,233 +3,185 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Hypothesis Testing and p-Value
 
-In the previous chapters, we learned the concepts of randomness and sampling.
-Quite often, a data scientist receives some data and must make some assertion about the data.
-There are typically two situations:
+# Hypothesis Testing
 
-* She has one data set and a model that the data should have followed. She needs to decide if it is likely that the data set indeed follows the model?
-* She has two data sets. She needs to decide if it is possible to explain the two data sets using a single model.
+In the previous chapters, we learned about randomness and sampling. Quite often, a data scientist receives some data and must make some assertion about it. There are typically two kinds of situations:
+
+* She has one dataset and a model that the data should have followed. She needs to decide if it is likely that the dataset indeed follows the model?
+* She has two datasets. She needs to decide if it is possible to explain the two datasets using a single model.
 
 Here are examples of the two situations.
 
-* A company making dice is testing a fairness of a die. Using some machine, the company throw the die 100000 times. They recorded the face that had turned up. Can you tell, by examining the record of the 100000 throws, how likely it is that the die is fair?
-* You are evaluating the performance data of the receivers in the NFL receivers. Are the receivers in 2019 better than those in 2017?
+* A company making dice is testing the fairness of a die. Using some machine, the company throws the die 100,000 times. They record the face that turns up. By examining the record of the 100,000 throws, can you tell how likely it is that the die is fair?
+* You are evaluating the performance data of National Football League (NFL) players. Are the receivers in 2019 better than those in 2017?
 
 For both situations, an important consideration for you to make is in terms of what you compare the differences.
 
-## Buildiung an Empirical Distribution
+## Evaluating a Model
 
-Suppose 10000 throws of a die generate the following counts for the faces 1 through 6:
-\[
-1779 1578 1783 1491 1884 1485
-\]
-By taking the ratio of each number to 10000, we get the ratios for the six faces
-\[
-0.1779 0.1578 0.1783 0.1491 0.1884 0.1485
-\]
-The six values comprise the empirical distribution representing the behavior of the die.
-We notice that the values are not very close to the ideal 0.1667 (= 1/6).
-Let us look at how different these six quantities are from the ideal.
-By subtracting 0.1667 from each, we obtain 
-\[
-0.0112 -0.089 0.0115 -0.0176 0.0217 -0.0182
-\]
-We then obtain the absolute difference values from them by removing any negative sign
-\[
-0.0112 0.089 0.0115 0.0176 0.0217 0.0182
-\]
-The sum of the absolute differences is 0.0891, and its one half is 0.04455.
-In statistics, one half the absolute difference has the name *total variation distance*.
-The total variation distance serves as the measure for the difference between two distributions.
-
-Now we have the technical term referring to the difference, we can state the question as follows:
-
-> Is the total variation distance 0.04455 big or small?
-
-It is hard to tell without knowing the differences we get by chance.
-Let us conduct some simulation to obtain an empirical distribution of the absolute difference of a fair dice.
-As mentioned earlier, the proportion that each face turns up is not constant, even for a fair die.
-So by simulating throws of a fair dice, we must expect to see a range of absolute differences.
-
-As usual, we start by loading `tidyverse`.
-
+Suppose 10,000 throws of a die generate the following counts for the faces 1 through 6:
 
 ```{r}
+face_counts <- c(1620, 1618, 1633, 1658, 1802, 1669)
+face_counts
+```
+
+By dividing each number by 10,000, we get the *proportion* of the occurrence of each face.
+
+```{r}
+empirical <- face_counts / 10000
+empirical
+```
+
+The six values comprise the empirical distribution representing the behavior of the die. We notice that the values are not very close to the ideal 0.1667 (= 1/6). How far away is that from what we know about the true distribution?
+
+We know that the probability of each face is $1/6$. By subtracting $1/6$ from each and obtaining the absolute difference values from them by removing any negative sign we have: 
+
+```{r}
+abs(empirical - 1/6)
+```
+
+We then compute the sum and take one half of this value. We will call this the *observed value*. 
+
+```{r}
+observed_tvd <- sum(abs(empirical - 1/6)) * 1/2
+observed_tvd
+```
+
+In statistics, this value has a special name: the *total variation distance* (or, for short, TVD).  The total variation distance serves as the measure for the difference between two distributions, namely, the difference between a true and empirical distribution. 
+
+Now that we have the technical term referring to the difference, we can state the question as follows:
+
+> Is the total variation distance 0.0446 big or small?
+
+It is hard to tell without knowing the differences we get by chance.
+
+Let us conduct some simulation to obtain an empirical distribution of the absolute difference of a fair dice. As mentioned earlier, the proportion that each face turns up is not constant, even for a fair die. So by simulating throws of a fair dice, we must expect to see a range of absolute differences.
+
+### Prerequisites
+
+Before starting, let's load the `tidyverse` as usual.
+
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-Let's start with a program for throwing a die many times according to its empirical distribution.
-The program `dist_from_die_sampler` takes two arguments.
-The first argument is a six-element representing an empirical distribution of a die showing six faces.
-The second is the number of times we throw the die according to the empirical distribution.
-The first program `die_sampler` is one for simulating just one throw. It produces a number from 1 through 6.
-If we run the `die_sampler` a number of times, we get a series of numbers from 1 through 6.
-We want to count for each of the six numbers, how many times it appears in the sequence.
-By dividing the counts by the total number of throws, we get an empirical distribution.
 
+### The `rmultinom` function
+
+We saw before that we can generate an empirical distribution by putting in place some sampling strategy. Perhaps the most straightforward is simple random sampling with replacement. This will be the approach we continue to make use of here, as well as throughout the rest of the course.  
+
+We also learned about two different ways to sample with replacement. `sample` samples items from a *vector*, which we used when simulating the number of expected heads in 100 coin tosses or the expected amount of grains a minister receives after some number of days. `slice_sample` functions identically, but instead samples from rows of a *data frame* or tibble. To generate the empirical distribution for this experiment, we could just use `sample` again. But there is a quicker way, using a function called `rmultinom`, which is tailored for sampling at random from categorical distributions. We introduce it here and will use it several times this chapter.
+
+Here is how we can use it to generate an empirical distribution of 100 tosses of a fair coin.
 
 ```{r}
-# take an empirical probability distribution and simulate one throw 
-die_sampler <- function(x) {
-  y <- runif(1,min=0,max=1)
-  z <- y[1]
-  for (i in 1:length(x)) {
-    z <- z - x[i]
-    if (z < 0) {
-      return(i)
-    }
-  }
-  return(0)
+fair_coin <- c(1/2, 1/2)
+sample_vector <- rmultinom(n = 1, size = 100, prob = fair_coin)
+sample_vector
+```
+
+For an empirical distribution, we are more interested in the *proportion* of resulting heads and tails. Thus, we should divide by the number of tosses. Note how the probability of heads and tails is about equal. 
+
+```{r}
+sample_vector / 100
+```
+
+So we can just as easily simulate proportions instead of counts.
+
+The classic interpretation of `rmultinom` is that you have some marbles to put into boxes of size `size`, each with some probability `prob`; the length of `prob` determines the number of boxes. The result shows the number of marbles that end up in each box. Thus, the function takes the following arguments:
+
+* `size`, the total number of marbles that are put into the boxes. 
+* `prob`, the distribution of the categories in the population, as a vector of proportions that add up to 1.
+* `n`, the number of samples to draw from this distribution. We will typically leave this at 1 to make things easier to work with later on.  
+
+It returns a vector containing the number of marbles in each category in a random sample of the given size taken from the population. Because this distribution is so special, statisticians have given it a name: the *multinomial distribution*. 
+
+Let us see how we can use it to assess the model for 10,000 throws of dice. 
+
+### A model for 10,000 die throws 
+
+Generating an empirical distribution for the dice throw is an extension of the coin toss we saw just earlier. As before, note how the probability of each face is about equal. 
+
+```{r}
+fair_die_probs <- rep(1/6, 6)
+sample_vector <- rmultinom(n = 1, size = 10000, prob = fair_die_probs) / 10000
+sample_vector
+```
+
+We can compute the total variation distance (TVD) of this sample. 
+
+```{r}
+sum(abs(sample_vector - fair_die_probs)) / 2
+```
+
+Let's wrap this up into a function we can call. 
+
+```{r}
+one_simulated_tvd <- function(x) {
+  fair_die_probs <- rep(1/6, 6)
+  sample_vector <- rmultinom(n = 1, size = 10000, prob = fair_die_probs) / 10000
+  return(sum(abs(sample_vector - fair_die_probs)) / 2)
 }
-dist_from_die_sampler <- function(x,c) {
-  die_counts = vector("double",length(x))
-  for (i in 1:c) {
-    p <- die_sampler(x)
-    die_counts[p] <- die_counts[p]+ 1
-  }
-  for (i in 1:length(x)) {
-    die_counts[i] = die_counts[i] / c
-  }
-  return(die_counts)
-}
 ```
 
-We can do the complicated procedure using `rmultinom`.
-`rmultinom` executes sampling from a discrete probability distribution and returns a table.
-The argument `size` is the sample size, the argument `n` is the number of repetitons, and the argument `prob` is the underlying distribution.
+Next, we create a vector `sample_tvds` containing 10,000 simulated TVD values. As before, we will use `map_dbl()` to do the work. 
 
 ```{r}
-dist_from_die_sampler <- function(x,c) {
-  sample_vector <- rmultinom(n = 1, size = c, prob = x)
-  return(sample_vector[,1]/c)
-}
-```
-
-
-Let us see how this works with a fair die distribution and 1000 throws.
-Run the code a few times to see the values it generates.
-The values sometimes very high and sometimes very low.
-Even though the program uses a fair die for simulation, the actual shares of the number of times the faces turn up are not very close to the idea.
-
-```{r}
-# twisted_die_chances <- c(0.18, 0.15, 0.18, 0.15, 0.19, 0.15)
-true_die_chances <- vector("double",6)
-for (i in 1:6) { true_die_chances[i] <- 1/6 }
-counts <- dist_from_die_sampler(true_die_chances,1000)
-true_die_chances
-counts
-```
-
-
-
-
-The situation is much different when we use 10000 throws.
-
-```{r}
-# twisted_die_chances <- c(0.18, 0.15, 0.18, 0.15, 0.19, 0.15)
-true_die_chances <- vector("double",6)
-for (i in 1:6) { true_die_chances[i] <- 1/6 }
-counts <- dist_from_die_sampler(true_die_chances,10000)
-true_die_chances
-counts
-```
-Let us visualize the distribution.
-
-```{r}
-counts_df <- tibble(face = 1:6, frequency=counts)
-counts_df
-ggplot(data=counts_df, aes(x=face, y=frequency), color="gray") +
-  geom_bar(stat="identity", fill="steelblue")+
-  theme_minimal()
-```
-
-
-
-```{r}
-observed_die_chances <- c(0.1779, 0.1578, 0.1783, 0.1491, 0.1884, 0.1485)
-true_die_chances <- vector("double",6)
-for (i in 1:6) { true_die_chances[i] <- 1/6 }
-diffs <- vector("double",1000)
-for (j in 1:1000) {
-  counts <- dist_from_die_sampler(true_die_chances,1000)
-#  a <- 0
-#  for (i in 1:6) {
-#    a <- a + abs(counts[i] - true_die_chances[i])
-#  }
-#  diffs[j] <- a
-  diffs[j] <- sum(abs(counts - true_die_chances)) / 2
-}
-diffs[1:100]
+num_repetitions <- 10000
+sample_tvds <- map_dbl(1:num_repetitions, one_simulated_tvd)
 ```
 
 ```{r}
-max(diffs)
-min(diffs)
+max(sample_tvds)
 ```
+
+### The Prediction
+
+To interpret the results of our simulation, we start by visualizing the results using an empirical histogram.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(tibble(sample_tvds)) +
+  geom_histogram(aes(x = sample_tvds, y = ..density..), fill = "darkcyan", color = 'gray')
+```
+
+Where does the observed value fall in this histogram? We can plot it easily. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(tibble(sample_tvds)) +
+  geom_histogram(aes(x = sample_tvds, y = ..density..), fill = "darkcyan", color = 'gray') +
+  geom_point(aes(x = observed_tvd, y = 0), size = 3, color = "salmon")
+```
+
+
+Let us look at the proportion of the elements in the list `sample_tvds` that are at least the observed TVD value 0.01376, whose value we have stored in `observed_tvd`. We simply count the elements matching the requirement and then divide the count by the length of the vector.
+
 ```{r}
-observed_point <- 0.04455
-diffs_df <- tibble(diffs)
-bins <- seq(0,0.2500,0.005)
-ggplot(diffs_df, aes(x = diffs), color = "grey") +
-  geom_histogram(aes(y=..density..), color = "blue", breaks = bins) + geom_point(aes(x = observed_point, y = 0), color = "red", size = 3)
+sum(sample_tvds >= observed_tvd) / length(sample_tvds)
 ```
 
 
-Let us look at the proportion of the elements in the list `diffs` that are at least the observed diff value 0.04455, whose value we have stored in `observed_point`.
-We simply count the elements matching the requirement and then divide the count by the length of the list.
+The value we get is 0.0659, or about 6.6%. <!-- how do we adjust according to the outcome? -->
+We interpret the value as stating the *chance* the difference achieves 0.0659 is no more than 6.6%. We can thus conclude that the chances that the die at hand is a fair one is no more than 6.6%. This value, computed through simulation, is what we call a *p-value*.
 
-```{r}
-over_count <- 0
-for (i in 1:length(diffs)) {
-  if (diffs[i] >= observed_point) over_count <- over_count + 1
-}
-over_count <- over_count / length(diffs)
-over_count
-```
+To compute a p-value, we take the following steps:
 
-The value we get is 0.054. <!-- how do we adjust according to the outcome? -->
-We interpret the value as stating.
-We estimate the empirical distribution or a fair die with 1000 throws and compute the absolute distance of the empirical distribution from the ideal.
-Then the chances that the difference achieves 0.054 that we observed are no more than 5.4%.
-We can thus conclude that the chances that the die at hand is a fair one are no more than 5.4%.
+1. Establish some model that is possibly describing a quantifiable phenomenon (e.g., the absolute distance from the ideal distribution).
+2. Run a simulation to obtain a histogram of the quantifiable phenomenon under the model.
+3. Compare the observation and examine where in the histogram the observation stands.
 
-The value we have calculated, 0.054, through simulation is what we call *p-value*.
-To compute a p-value, we first establish some model that is possibly describing a quantifiable phenomenon (e.g., the absolute distance from the ideal distribution).
-We then run some simulation, if mathematical analysis appears too complicated or too cumbersome, to obtain a histogram of the quantifiable phenomenon under the model.
-We then compare the observation and examine where in the histogram the observation stands.
-Specifically, we estimate how far the observation is from the central portion of the histogram by splitting the histogram at the point of observation; that is, the portion less than or equal to the observation and the portion greater than or equal to the observation (where we can include the equality on either side).
-The closer the two portions are in size, the higher the likelihood of the observation.
-Conversely, the farther the two portions are in size, the lower the likelihood of the observation.
-We usually take the smaller of the two portions and call the size of the smaller portion the p-value.
+More specifically, we estimate how far the observation is from the central portion of the histogram by splitting the histogram at the point of observation; that is, the portion less than or equal to the observation and the portion greater than or equal to the observation (where we can include the equality on either side). 
 
-Also, when we use a p-value and simulations, we have in mind two possible interpretations.
+The closer the two portions are in size, the higher the likelihood of the observation. Conversely, the farther the two portions are in size, the lower the likelihood of the observation. __We usually take the smaller of the two portions and call the size of the smaller portion the p-value.__
+
+Also, when we compute a p-value, we have in mind two possible interpretations.
 We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
-The Null Hypothesis is the hypothesis we use in creating the model for simulation.
-The Alternative Hypothesis is its counter part - the opposite of the Null Hypothesis.
-In the experiment we have just conducted, the Null Hypothesis is that the die we have is a fair die and the Alternate Hypothesis is that the die we have is not a fair one.
-Using simulations we learn that the Null Hypothesis has a p-value of 5.4% (or 0.054) using the absolute distance between distributions as the distance measure.
 
+* __Null Hypothesis (NH):__ The hypothesis we use to create the model for simulation. For example, we assume that the die we have is a fair die. 
+* __Alternative Hypothesis (AH):__ The opposite, or counterpart, of the Null Hypothesis. For example, the AH states that the die we have is not fair.  
 
-
-
-
-
-```{r}
-test_throws <- c(0.1779, 0.1578, 0.1783, 0.1491, 0.1884, 0.1485)
-ideal_throws <- c(1,1,1,1,1,1)
-ideal_throws <- ideal_throws / 6
-ideal_throws
-diff_throws <- test_throws - ideal_throws
-for (i in 1:6) { diff_throws[i] <- abs(diff_throws[i]) }
-diff_throws
-sum_diff_throws <- sum(diff_throws)
-sum_diff_throws
-```
-
-
-
+Using simulations we learn that the Null Hypothesis has a p-value of 6.6% (or 0.0659) using the absolute distance between distributions as the distance measure.
 
 ## Entering Harvard
 
