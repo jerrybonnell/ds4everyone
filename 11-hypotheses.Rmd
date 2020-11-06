@@ -171,9 +171,17 @@ To compute a p-value, we take the following steps:
 2. Run a simulation to obtain a histogram of the quantifiable phenomenon under the model.
 3. Compare the observation and examine where in the histogram the observation stands.
 
-More specifically, we estimate how far the observation is from the central portion of the histogram by splitting the histogram at the point of observation; that is, the portion less than or equal to the observation and the portion greater than or equal to the observation (where we can include the equality on either side). 
+More specifically, we estimate how far the observation is from the central portion of the histogram by splitting the histogram at the point of observation. As shown in the following figure, the portion less than or equal to the observation (in dark cyan) and the portion greater than or equal to the observation (in orange). Note that we can include the equality, when the sampled value equals the observed value, on either side. 
 
-The closer the two portions are in size, the higher the likelihood of the observation. Conversely, the farther the two portions are in size, the lower the likelihood of the observation. __We usually take the smaller of the two portions and call the size of the smaller portion the p-value.__
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+colors <- c(rep("darkcyan",17), rep("salmon",13))
+
+ggplot(tibble(sample_tvds)) +
+  geom_histogram(aes(x = sample_tvds, y = ..density..), fill = colors, color = 'gray') +
+  geom_point(aes(x = observed_tvd, y = 0), size = 3, color = "red")
+```
+
+The closer these two portions are in size, i.e. the number of cyan and orange bars, the higher the likelihood of the observation. Conversely, the farther the two portions are in size, the lower the likelihood of the observation. We usually take the smaller of the two portions and designate the smaller portion a special name: __the p-value__.
 
 Also, when we compute a p-value, we have in mind two possible interpretations.
 We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
@@ -185,7 +193,7 @@ Using simulations we learn that the Null Hypothesis has a p-value of 6.6% (or 0.
 
 ## Entering Harvard
 
-### Studetns for Fair Admissions
+### Students for Fair Admissions
 
 Harvard University is one of the most, if not the most prestigious, universities in the United States.
 A recent lawsuit by [Students for Fair Admissions (SFFA)](https://studentsforfairadmissions.org/) led by Edward Blum against Harvard University alleges that Harvard has used soft racial quota to keep the numbers of Asian-Americans low.
