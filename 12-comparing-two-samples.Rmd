@@ -137,7 +137,7 @@ Here is a data set of NCAA receivers.
 
 
 ```{r}
-path0 <- "data/ncaa-reivers-2005-2011.csv"
+path0 <- "data/ncaa-receivers-2005-2011.csv"
 ncaa0 <- read_csv(path0)
 ```
 

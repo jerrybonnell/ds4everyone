@@ -24,7 +24,7 @@ This time, we will use an NCAA receiver data set covering the years 2005 - 2011,
 
 
 ```{r}
-path0 <- "data/ncaa-reivers-2005-2011.csv"
+path0 <- "data/ncaa-receivers-2005-2011.csv"
 ncaa0 <- read_csv(path0)
 ```
 Here is the list of attributes of the data. 
@@ -266,7 +266,7 @@ Let us start with loading the `tidyverse` package and loading the NCAA data.
 library(tidyverse)
 ```
 ```{r}
-path0 <- "data/ncaa-reivers-2005-2011.csv"
+path0 <- "data/ncaa-receivers-2005-2011.csv"
 ncaa0 <- read_csv(path0)
 ncaa <- ncaa0 %>%
   mutate(player_year = str_c(Player, " ", Year))
@@ -421,7 +421,7 @@ So, the
 <!--
 ```{r}
 nfl <- read_csv("data/nfl_receiving0.csv")
-ncaa <- read_csv("data/ncaa-reivers-2005-2011.csv")
+ncaa <- read_csv("data/ncaa-receivers-2005-2011.csv")
 ```
 
 ```{r}
