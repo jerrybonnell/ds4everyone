@@ -191,1149 +191,625 @@ We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
 
 Using simulations we learn that the Null Hypothesis has a p-value of 6.6% (or 0.0659) using the absolute distance between distributions as the distance measure.
 
-## Entering Harvard
+## Case Study: Entering Harvard
+
+Harvard University is one of the most, if not the most, prestigious universities in the United States. A recent lawsuit by [Students for Fair Admissions (SFFA)](https://studentsforfairadmissions.org/) led by Edward Blum against Harvard University alleges that Harvard has used soft racial quota to keep the numbers of Asian-Americans low.
+Put differently, the allegation claims that, from the pool of Harvard-admissible American applicants, Harvard uses a racial discriminatory score that allows the college to choose disproportionately less Asian-Americans. As of this writing, the lawsuit is currently in a Federal Appeals Court.
+
+This section examines the "Harvard model" to assess, at a basic level, the claim put forward by the lawsuit.  
+
+### Prerequisites
+
+Before starting, let's load the `tidyverse` as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
 
 ### Students for Fair Admissions
 
-Harvard University is one of the most, if not the most prestigious, universities in the United States.
-A recent lawsuit by [Students for Fair Admissions (SFFA)](https://studentsforfairadmissions.org/) led by Edward Blum against Harvard University alleges that Harvard has used soft racial quota to keep the numbers of Asian-Americans low.
-Put differently, the allegation is that from the pool of Harvard-admissible American applicants, Harvard uses a discriminatory score on the Asian race and uses the score to choose dis-proportionally smaller numbers of Asian-Americans.
-Lawsuit is currently is in a Federal Appeals Court.
-[Harvard University](https://college.harvard.edu/admissions/admissions-statistics) publishes some statistics on the class of 2024.
+Harvard University publishes [some statistics](https://college.harvard.edu/admissions/admissions-statistics) on the class of 2024.
 According to the data, the proportions of the class for Whites, Blacks, Hispanics, Asians, and Others (International and Native Americans) are respectively 46.1%, 14.7%, 12.7%, 24.4%, and 2.1%.
-We do not have the data of the students admissible to enter Harvard.
-We so refer to the demographics of the students enrolled in a four-year college.
-According to [Chronicle of Higher Education](http://www.chronicle.com) 2020-2021 Almanac, the racial demographics of full-time students in 4-year private non-profit institutions (Harvard is one) in Fall 2018 are: 63.6% White, 11.5% Black, 12.3% Hispanic, 8.1% Asian, and 4.5% Other.
 
+We do not have the data of the students admissible to enter Harvard so, in lieu of this, we refer to student demographics enrolled in a four-year college.
+According to [Chronicle of Higher Education](http://www.chronicle.com) 2020-2021 Almanac, the racial demographics of full-time students in 4-year private non-profit institutions -- Harvard is one of them -- in Fall 2018 are: 63.6% White, 11.5% Black, 12.3% Hispanic, 8.1% Asian, and 4.5% Other.
+
+Let's compile this information into a tibble.
 
 ```{r}
-data_table <- tribble(~Race, ~Harvard, ~Almanac,
-                      "White", 46.1, 63.6, 
-                      "Black", 14.7, 11.5,
-                      "Hispanic", 12.7, 12.3,
-                      "Asian", 24.4, 8.1,
-                      "Other", 2.1, 4.5)
-data_table$Race
-data_table$Harvard
-data_table$Almanac
-sum(data_table$Harvard)
-sum(data_table$Almanac)
+class_props <- tribble(~Race, ~Harvard, ~Almanac,
+                             "White", 46.1, 63.6, 
+                             "Black", 14.7, 11.5,
+                             "Hispanic", 12.7, 12.3,
+                             "Asian", 24.4, 8.1,
+                             "Other", 2.1, 4.5)
+class_props
 ```
-The distributions may look quite different from each other.
-Specifically, 
-Of course, the demographics from the Almanac includes students who did not apply to Harvard, those who might not have got into Harvard, those applied and did not get in, and international students.
-Also, the Almanac data covers all full-time students in 2018 but no students who entered colleges in 2020.
-With these differences notwithstanding, for our learning purpose, let us conduct an experiment to see how the demographics from Harvard looks different from the demographics from the Almanac in terms of empirical distribution.
+The distributions may look quite different from each other. Of course, the demographics from the Almanac includes students who did not apply to Harvard, those who might not have got into Harvard, those applied and did not get in, and international students. Moreover, the Almanac data covers all full-time students in 2018 but not students who entered college in 2020.
 
-As we will be handling proprtion values, let us scale down the numbers in the table by dividing each element by 100.
-We call them `harvard` and `almanac`.
-We define a function that computes the distance of a five-element discrete distribution to `harvard' as `harvard_diff`.
+Notwithstanding these differences, let us conduct an experiment to see how the demographics from Harvard look different from those given by the Almanac in terms of an empirical distribution.
 
+As we will be handling proportions, let us scale the numbers down (by dividing each element by 100) so that they are expressed as percentages.
 
 ```{r}
-harvard <- data_table$Harvard/100
-almanac <- data_table$Almanac/100
-demo_diff <- function(x) {
-  return(sum(abs(x - almanac))/2)
+class_props <- class_props %>% 
+  mutate(Harvard = Harvard / 100,
+         Almanac = Almanac / 100)
+class_props
+```
+
+We will also write a function that computes the total variation distance (TVD) between two vectors.  
+
+```{r}
+compute_tvd <- function(x, y) {
+  return(sum(abs(x - y)) / 2)
 }
-harvard_diff <- demo_diff(harvard)
+```
+
+In this study, our observed value is the TVD between the distribution of students in the Harvard class and the Almanac. 
+
+```{r}
+harvard_diff <- compute_tvd(pull(class_props, Harvard), pull(class_props, Almanac))
 harvard_diff
-who <- demo_diff(c(0.71861042 ,0.00918114, 0.05483871, 0.07593052, 0.14143921))
-who
 ```
 
-The Harvard Class of 2024 has size 2015.
-Think of the process of sampling 2015 people from those who "were attending" at a for-year non-profit college in Fall 2018 and then examining their racial distribution.
-We cannot reach out to the individuals, but we know the distribution of the entire population from which we want to sample.
-Using the knowledge, we can substitute the process of sampling individuals with generation of random numbers.
-We first split the range from 0 to 1 into five portions according to the values in the Almanac; that is, 0 through 0.636, 0.636 through 0.751, 0.751 through 0.874, 0.874 through 0.955, and 0.955 to 1.0.
-We then agree on a strategy for assigning a value from 1 to 5 to an arbitrary number between 0 and 1 as: finding the interval corresponding to the real number, and assign the index to the index.
-The indexes correspond to the races in the table: White, Black, Hispanic, Asian, and Other. 
+The Harvard class of 2024 has 2015 students. We can think of the process of sampling 2015 people to fill the "Harvard class" from those who "were attending" a four-year non-profit college in Fall 2018 and then examining their racial distribution. Of course, we cannot reach out to those individuals specifically; but we know the distribution of the entire population from which we want to sample. Therefore, we can simulate a great number of times what this "Harvard class" and compare it with what we know about the true Harvard class distribution, available in `harvard_diff`. 
 
-The function `rmultinom` is one for generating a distribution with discrete categories from a probability distribution.
-The call `rmultinom(n=100, size=2015, prob = almanac)` generate 500 distribution vectors, where each vector is the result of sampling 2015 people according the proportion `almanac`.
-Each column of the output of the call is a five-element vector whose sum is equal to 2015.
-So, for each column of the 100 columns, we scale its five entries by dividing by 2015 and then compute the distance from the Harvard distribution using the `demo_diff` function.
-With `almanac`, we can generate a distance and calculate its distance to `harvard`.
+Our sampling plan can be framed as a "boxes and marbles" problem, as we saw in the previous section. There are five "boxes" to choose from, where each corresponds to a race: White, Black, Hispanic, Asian, and Other. The goal is to place marbles (which correspond to students) in each of the boxes, where the probability of ending up in any of the boxes is given by the Almanac. 
 
-
+This is an excellent fit for the `rmultinom` function. For example, here is one simulation of the proportion of races found in a "Harvard class." 
 
 ```{r}
-sample_vector <- rmultinom(n=500, size=2015, prob = almanac)
-demo_diff_series <- vector("double",500)
-for (i in 1:500) {
-  demo_diff_series[i] <- demo_diff(sample_vector[,i] / 2015)
-}
-demo_diff_series[1:10]
-```
-
-Now we plot the result.
-
-```{r}
-demo_diff_df <- tibble(demo_diff_series)
-bins <- seq(0.0, 0.5, 0.02)
-ggplot(demo_diff_df, aes(x = demo_diff_series), color = "gray") +
-  geom_histogram(binwidth=0.002) +
-  geom_point(aes(x = harvard_diff, y = 0), color = "red", size = 2)
-```
-The red dot shows the distance value of the Harvard value from the Almanac value.
-What we see is that the proportion of the races at Harvard is not like the national proportion at all.
-This is something we have anticipated because the base population can be different.
-
-
-### Asian Versus Others
-
-The prior experiment looked at the proportion of all races.
-What if we simplify the question to Asian versus Non-Asian.
-```{r}
-data_table <- tribble(~Race, ~Harvard, ~Almanac,
-                      "Asian", 24.4, 8.1,
-                      "Other", 75.6, 91.9)
-data_table
-```
-The proportion of Asian in the private non-profit 4-year colleges is just 8.1% while the race occupies 24.4% of the Harvard freshman class.
-
-
-```{r}
-sample_vector <- rmultinom(n=500, size=2015, prob = c(0.081,0.919))
-demo_diff_simple <- vector("double",500)
-for (i in 1:500) {
-  demo_diff_simple[i] <- sample_vector[1,i] / 2015
-}
-demo_diff_simple[1:10]
-```
-
-Now we plot the result.
-
-```{r}
-demo_diff_simple_df <- tibble(demo_diff_simple)
-bins <- seq(0.0, 0.5, 0.02)
-ggplot(demo_diff_simple_df, aes(x = demo_diff_simple), color = "gray") +
-  geom_histogram(binwidth=0.002) +
-  geom_point(aes(x = 0.244, y=0), color = "green", size = 2)
-```
-The result is the same. The Harvard proportion is not like the national value at all.
-We can confidently say that Havard enrolls much more Asian students than the national average. 
-
-## Significance Level
-
-Previously we studied the way to compare two distributions using simulation.
-We used the racial demographics at the Harvard University as our subject and compared it to the national data at 4-year non-profit private colleges.
-Let us now use the same Almanac by the Chronicle of Higher Education and compare the private and public 4-year non-profit institutions for their student demographics.
-
-As usual, we use `tidyverse`.
-
-```{r}
-library(tidyverse)
-```
-
-Here is the demographics data.
-
-```{r}
-data_table <- tribble(~Race, ~Public, ~Private,
-                      "American Indian", 0.008, 0.006,
-                      "Asian", 0.060, 0.052,
-                      "Black", 0.125, 0.163, 
-                      "Hispanic", 0.211, 0.119,
-                      "Native Hawaiian and Other Pacific Islander", 0.003, 0.003,
-                      "White", 0.557, 0.627,
-                      "2 or More Races", 0.036, 0.030)
-data_table$Race
-sum(data_table$Public)
-sum(data_table$Private)
-```
-
-Let us add a new column that shows the race-wise ratio of the faculty data to the student data.
-
-```{r}
-df <- data_table %>% add_column(Public_Private_Ratio = data_table$Public / data_table$Private)
-head(df)
-```
-Like before, let us look at the Asian population, which is 6.0% in public institutions and 5.2% in private ones.
-
-Suppose you are in a section of a computer science class with 100 students, and in that section, 10 students (i.e., 10%) are Asian.
-Is this an unlikely event if we apply the national average to all schools?
-To answer the question, we generate an empirical distribution.
-
-We will stay away from the knowledge of 10 students out of 100 for now to see what we can determine from the national data.
-We can even make up our mind for how many Asian students in how large a class is significantly large.
-
-We will sample 100 students according to the proportion at hand and then measure the proportion of Asian.
-We repeat it 500 times to generate 500 student proportions using `rmultinom`.
-Let us check the public school proportions first.
-
-```{r}
-public_table <- rmultinom(n = 500, size = 100, prob = df$Public) / 100
-```
-
-Here are the first 5 results.
-
-```{r}
-public_table[,1:5]
-```
-
-
-The Asian population appears in the second row.
-Let us extract is as `asian_row`.
-```{r}
-asian_row <- public_table[2,]
-asian_row[1:10]
-```
-
-
-Let us visualize the asian_row list.
-
-```{r}
-demo_df <- tibble(asian_row)
-bins <- seq(0.0, 0.2, 0.01)
-ggplot(demo_df, aes(x = asian_row), color = "gray") +
-  geom_histogram(binwidth=0.01, fill = "steelblue")
-```
-
-We sort it in increasing order of its elements.
-Let us look at the first ten and the last ten of the sorted list.
-
-```{r}
-sorted <- sort(asian_row)
-sorted[1:10]
-sorted[491:500]
-```
-
-What is the value at the 90% from the bottom?
-How about 95%?
-
-```{r}
-sorted[length(sorted)*0.9]
-sorted[length(sorted)*0.95]
-```
-This means that in our simulations 90% of the time, the proportion is at most 0.09 (i.e., 9%).
-Thus, if the proportion of the Asians is greater than 9%, we can say  the class is unusually high in Asian.
-As for 95%, the value is the 95% point is the same as the threshold, and so we say that having 10% of Asian ztudents is not at the 95% level of unusualness.
-
-We say that the threshold point 0.09 is the 90% *significant level* and the threshold point 0.10 is the 94% significant level.
-What a significant level says that an empirical distribution suggests that if an observed value stays below (or above, depending on whether you are looking for too small a value or too large a value), the discovery you make is not significant.
-
-Let us do this now for private institutions.
-```{r}
-private_table <- rmultinom(n = 500, size = 100, prob = df$Private) / 100
-```
-
-Here are the first 5 results.
-
-```{r}
-private_table[,1:5]
-```
-```{r}
-asian_row2 <- private_table[2,]
-asian_row2[1:10]
-```
-
-```{r}
-demo_df2 <- tibble(asian_row2)
-bins <- seq(0.0, 0.2, 0.01)
-ggplot(demo_df2, aes(x = asian_row2), color = "gray") +
-  geom_histogram(binwidth=0.01, fill = "steelblue")
-```
-
-The 90% point of the sorted list is 0.08.
-
-```{r}
-sorted2 <- sort(asian_row2)
-sorted2[451]
-sorted2[476]
-```
-
-Now in the case of private institutions, the observed ratio 10% is higher than the 95% threshold point.
-
-What we can say now is this.
-
-* We set a Null Hypothesis that in the computer science section, the student population reflects the national demographics.
-* We all set an Alternative Hypothesis that in that section, the population does not reflect the demographics.
-
-With the simulation with 500 rounds of selecting random 100 students, seeing 10% of Asians in the section is beyond the 95% significance level.
-The p-value of 10% in the experiment is 0.02 as we see below.
-
-```{r}
-p_value <- sum(asian_row2 > 0.10) / 500
-p_value
-```
-
-### Siginificance Levels with Both Ends
-
-The above analysis is applicable to situations in which we must examine how smaller than unual an obverbation is.
-
-```{r}
-sorted2 <- sort(asian_row2)
-sorted2[50]
-sorted2[25]
-```
-The value is 0.02 at the bottom 10% as well as at the bottom 5%, so if there is just 1% of Asian in the section, which is exactly 1 student, you can say it is significant (with the significance level of 5%).
-The p-value of having a value less than 0.02 is 0.04.
-
-```{r}
-p_value2 <- sum(asian_row2 < 0.02) / 500
-p_value2
-```
-
-We can join the two analysis results at bottom 5% and top 5% together to say that with 90% significance the proporition is between 2 and 9.
-```{r}
-print(c(sorted2[25],sorted2[476]))
-```
-
-
-
-
-<!--
-Data scientists are often faced with yes-no questions about the world. You have seen some examples of such questions in this course:
-
-* Is chocolate good for you?
-* Did water from the Broad Street pump cause cholera?
-* Have the demographics in California changed over the past decade?
-
-Whether we answer questions like these depends on the data we have. Census data about California can settle questions about demographics with hardly any uncertainty about the answer. We know that Broad Street pump water was contaminated by waste from cholera victims, so we can make a pretty good guess about whether it caused cholera.
-
-Whether chocolate or any other treatment is good for you will almost certainly have to be decided by medical experts, but an initial step consists of using data science to analyze data from studies and randomized experiments.
-
-In this chapter, we will try to answer such yes-no questions, basing our conclusions on random samples and empirical distributions.
-
-## Assessing Models
-
-In data science, a "model" is a set of assumptions about data. Often, models include assumptions about chance processes used to generate data.
-
-Sometimes, data scientists have to decide whether or not their models are good. In this section we will discuss two examples of making such decisions. In later sections we will use the methods developed here as the building blocks of a general framework for testing hypotheses.
-
-### Prerequisites
-
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-```
-
-### U.S. Supreme Court, 1965: Swain vs. Alabama
-
-In the early 1960's, in Talladega County in Alabama, a black man called Robert Swain was convicted of raping a white woman and was sentenced to death. He appealed his sentence, citing among other factors the all-white jury. At the time, only men aged 21 or older were allowed to serve on juries in Talladega County. In the county, 26% of the eligible jurors were black, but there were only 8 black men among the 100 selected for the jury panel in Swain's trial. No black man was selected for the trial jury.
-
-In 1965, the Supreme Court of the United States denied Swain's appeal. In its ruling, the Court wrote "... the overall percentage disparity has been small and reflects no studied attempt to include or exclude a specified number of Negroes."
-
-Jury panels are supposed to be selected at random from the eligible population. Because 26% of the eligible population was black, 8 black men on a panel of 100 might seem low.
-
-### A Model
-
-But one view of the data – a model, in other words – is that the panel was selected at random and ended up with a small number of black men just due to chance. This model is consistent with what the Supreme Court wrote in its ruling.
-
-The model specifies the details of a chance process. It says the data are like a random sample from a population in which 26% of the people are black. We are in a good position to assess this model, because:
-
-* We can simulate data based on the model. That is, we can simulate drawing at random from a population of whom 26% are black.
-* Our simulation will show what a panel *would* look like *if* it were selected at random.
-* We can then compare the results of the simulation with the composition of Robert Swain's panel.
-* If the results of our simulation are not consistent with the composition of Swain's panel, that will be evidence against the model of random selection.
-
-Let's go through the process in detail.
-
-### The Statistic
-
-First, we have to choose a statistic to simulate. The statistic has to be able to help us decide between the model and alternative views about the data. The model says the panel was drawn at random. The alternative viewpoint, suggested by Robert Swain's appeal, is that the panel was not drawn at random because it contained too few black men. A natural statistic, then, is the number of black men in our simulated sample of 100 men representing the panel. Small values of the statistic will favor the alternative viewpoint.
-
-### Predicting the Statistic Under the Model
-
-If the model were true, how big would the statistic typically be? To answer that, we have to start by working out the details of the simulation.
-
-#### Generating One Value of the Statistic
-
-First let's figure out how to simulate one value of the statistic. For this, we have to sample 100 times at random from the population of eligible jurors and count the number of black men we get.
-
-One way is to set up a data frame representing the eligible population and use `sample()` as we did in the previous chapter. But there is also a quicker way, using a function called `rmultinom()`, which is tailored for sampling at random from categorical distributions. We will use it several times in this chapter.
-
-The classic interpretation of `rmultinom()` is that you have some marbles to put into boxes of size `size`, each with some probability `prob`; the length of `prob` determines the number of boxes. The result shows the number of marbles that end up in each box. Thus, the function takes the following arguments:
-
-* `size`, the total number of marbles that are put into the boxes. 
-* `prob`, the distribution of the categories in the population, as a vector of proportions that add up to 1.
-* `n`, the number of samples to draw from this distribution. We will typically leave this at 1 to make things easier to work with later on.  
-
-It returns a vector containing the number of marbles in each category in a random sample of the given size taken from the population. Because this distribution is so special, statisticians have given it a name: the *multinomial distribution*.
-
-To see how to use this, remember that according to our model, the panel is selected at random from a population of men among whom 26% were black and 74% were not. Thus the distribution of the two categories can be represented as the vector `c(0.26, 0.74)`, which we have assigned to the name `eligible_population`. Now let's sample 100 times from this distribution to create *one* sample vector of counts. This vector tells us the counts in each of the two categories we get in our sample.
-
-```{r}
-eligible_population <- c(0.26, 0.74)
-sample_vector <- rmultinom(n = 1, size = 100, prob = eligible_population)
+sample_vector <- rmultinom(n=1, size=2015, prob = pull(class_props, Almanac)) / 2015
 sample_vector
 ```
 
-That was easy! The number of black men in the random sample is at index 1 of the sample vector.
-
-It can be easier to understand the *proportion* of the two categories we get in our sample, rather than raw counts. Proportions are useful because they tell us about the distribution of the categories present in our sample vector. For this interpretation, we divide `sample_vector` by the 100 total number of men in the sample. 
+How far is our simulated class from the Almanac? We can compute the TVD to find out. 
 
 ```{r}
-sample_vector / 100
+compute_tvd(sample_vector, pull(class_props, Almanac))
 ```
 
-So we can just as easily simulate proportions instead of counts, and access the proportion of black men only.
+We wrap our work into a function.  
 
 ```{r}
-(rmultinom(n = 1, size = 100, prob = eligible_population) / 100)[1]
-```
-
-Run the cell a few times to see how the output varies.
-
-#### Running the Simulation
-
-To get a sense of the variability without running the cell over and over, let's generate 10,000 simulated values of the count.
-
-The code follows the same steps that we have used in every simulation. First, we define a function to simulate one value of the count, using the code we wrote above.
-
-```{r}
-one_simulated_count <- function(x) {
-  eligible_population <- c(0.26, 0.74)
-  sample_vector <- rmultinom(n = 1, size = 100, prob = eligible_population)
-  return(sample_vector[1])
+one_simulated_class <- function(x, props) {
+  sample_vector <- rmultinom(n=1, size=2015, prob = pull(props, Almanac)) / 2015
+  return(compute_tvd(sample_vector, pull(props, Almanac)))
 }
 ```
 
-Next, we create a vector `counts` containing 10,000 simulated counts. As before, we will use `map_dbl()` to do the work. 
+Let us simulate what 10,000 classes could look like. This will be contained in a vector called `sample_class_tvds`. Also, as before, we will use `map_dbl()` to do the work. 
 
 ```{r}
 num_repetitions <- 10000
-counts <- map_dbl(1:num_repetitions, one_simulated_count)
+sample_class_tvds <- map_dbl(1:num_repetitions, one_simulated_class, props = class_props)
 ```
 
-### The Prediction
-
-To interpret the results of our simulation, we start as usual by visualizing the results by an empirical histogram.
+We can now visualize the result. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(tibble(counts)) +
-  geom_histogram(aes(x = counts, y = ..density..), binwidth = 1, color = 'gray')
+ggplot(tibble(sample_class_tvds)) +
+  geom_histogram(aes(x = sample_class_tvds, y = ..density..), 
+                 bins = 30, fill = "darkcyan", color = 'gray')
 ```
 
-The histogram tells us what the model of random selection predicts about our statistic, the count of black men in the sample.
-
-To generate each simulated count, we drew 100 times at random from a population in which 26% were black. This gave us a sample vector containing counts, in which the count of black men in the sample corresponds to the first index; this is our simulated count.    
-
-So, as you would expect, most of the simulated counts are around 26. They are not exactly 26: there is some variation. The counts range from about 10 to about 45.
-
-### Comparing the Prediction and the Data
-
-Though the simulated counts are quite varied, very few of them came out to be eight or less. The value eight is far out in the left hand tail of the histogram. It's the red dot on the horizontal axis of the histogram.
+Where does the true Harvard class lie on this histogram? We can plot a point geom to find out. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(tibble(counts)) +
-  geom_histogram(aes(x = counts, y = ..density..), binwidth = 1, color = 'gray') +
-  geom_point(aes(x=8, y=0), size = 3, color="red")
+ggplot(tibble(sample_class_tvds)) +
+  geom_histogram(aes(x = sample_class_tvds, y = ..density..), 
+                 bins = 70, fill = "darkcyan", color = 'gray') +
+  geom_point(aes(x = harvard_diff, y = 0), size = 3, color = "salmon")
 ```
 
-The simulation shows that if we select a panel of 100 jurors at random from the eligible population, we are very unlikely to get counts of black men as low as the eight that were in Swain's jury panel. This is evidence that the model of random selection of the jurors in the panel is not consistent with the data from the panel.
+The orange dot shows the distance value of the Harvard value from the Almanac value. What we see is that the proportion of the races at Harvard is nothing like the national proportion.
 
-When the data and a model are inconsistent, the model is hard to justify. After all, the data are real. The model is just a set of assumptions. When assumptions are at odds with reality, we have to question those assumptions.
 
-While it is *possible* that a panel like Robert Swain's could have been generated by chance, our simulation demonstrates that it is very unlikely. Thus our assessment is that the model of random draws is not supported by the evidence. Swain's jury panel does not look like the result of random sampling from the population of eligible jurors.
+### Asian Students Versus Others
 
-This method of assessing models is very general. Here is an example in which we use it to assess a model in a completely different setting.
-
-### Mendel's Pea Flowers 
-
-[Gregor Mendel](https://en.wikipedia.org/wiki/Gregor_Mendel) (1822-1884) was an Austrian monk who is widely recognized as the founder of the modern field of genetics. Mendel performed careful and large-scale experiments on plants to come up with fundamental laws of genetics.
-
-Many of his experiments were on varieties of pea plants. He formulated sets of assumptions about each variety; these were his models. He then tested the validity of his models by growing the plants and gathering data.
-
-Let's analyze the data from one such experiment to see if Mendel's model was good.
-
-In a particular variety, each plant has either purple flowers or white. The color in each plant is unaffected by the colors in other plants. Mendel hypothesized that the plants should bear purple or white flowers at random, in the ratio 3:1.
-
-### Mendel's Model
-
-For every plant, there is a 75% chance that it will have purple flowers, and a 25% chance that the flowers will be white, regardless of the colors in all the other plants.
-
-#### Approach to Assessment
-
-To go about assessing Mendel's model, we can simulate plants under the assumptions of the model and see what it predicts. Then we will be able to compare the predictions with the data that Mendel recorded.
-
-### The Statistic 
-
-Our goal is to see whether or not Mendel's model is good. We need to simulate a statistic that will help us make this decision.
-
-If the model is good, the percent of purple-flowering plants in the sample should be close to 75%. If the model is not good, the percent purple-flowering will be away from 75%. It may be higher, or lower; the direction doesn't matter.
-
-The key for us is the *distance* between 75% and the percent of purple-flowering plants in the sample. Big distances are evidence that the model isn't good.
-
-Our statistic, therefore, is the __distance between the sample percent and 75%__:
-
-\[ | \text{sample percent of purple-flowering plants} - 75 | \]
-
-### Predicting the Statistic Under the Model
-
-To see how big the distance would be if Mendel's model were true, we can use sample_proportions to simulate the distance under the assumptions of the model.
-
-First, we have to figure out how many times to sample. To do this, remember that we are going to compare our simulation with Mendel's plants. So we should simulate the same number of plants that he had.
-
-Mendel grew a lot of plants. There were 929 plants of the variety corresponding to this model. So we have to sample 929 times.
-
-#### Generating One Value of the Statistic
-
-The steps in the calculation:
-
-* Sample 929 times at random from the distribution specified by the model and find the number of observations in the purple-flowering category.
-* Divide the number of flowers by 929 to get a percent.
-* Subtract 0.75 and take the absolute value of the difference.
-
-That's the statistic: the distance between the sample percent and 75.
-
-We will start by defining a function that takes a proportion and returns the absolute difference between the corresponding percent and 75.
+The prior experiment looked at the proportion of all races. However, the claim given by the lawsuit is specifically about Harvard-admissible students who are Asian. We can now address this by refining our model to include only Asian students and non-Asian students. 
 
 ```{r}
-distance_from_75 <- function(p) {
-  return(abs(100*p - 75))
-}
+class_props_asian <- tribble(~Race, ~Harvard, ~Almanac,
+                             "Asian", 24.4, 8.1,
+                             "Other", 75.6, 91.9)
+class_props_asian
 ```
 
-To simulate one value of the distance between the sample percent of purple-flowering plants and 75%, under the assumptions of Mendel's model, we have to first simulate the proportion of purple-flowering plants among 929 plants under the assumption of the model, and then calculate the discrepancy from 75%.
+As before, we transform the data to be in terms of proportions.
 
 ```{r}
-model_proportions <- c(0.75, 0.25)
+class_props_asian <- class_props_asian %>% 
+  mutate(Harvard = Harvard / 100,
+         Almanac = Almanac / 100)
+class_props_asian
 ```
+
+The proportion of Asian in private non-profit 4-year colleges is just 8.1% while the race occupies 24.4% of the Harvard freshman class. Let's recompute our observed TVD value. 
 
 ```{r}
-sample_vector <- rmultinom(n = 1, size = 929, prob = model_proportions) / 929
-distance_from_75(sample_vector[1])
+harvard_diff <- compute_tvd(pull(class_props_asian, Harvard), pull(class_props_asian, Almanac))
+harvard_diff
 ```
 
-That's one simulated value of the distance between the sample percent of purple-flowering plants and 75% as predicted by Mendel's model. Note how the sample vector here is a *proportion* of the categories, not a count.
-
-#### Running the Simulation
-
-To get a sense of how variable the distance could be, we have to simulate it many more times.
-
-We will generate 10,000 values of the distance. As before, we will first use the code we developed above to define a function that returns one simulated value Mendel's hypothesis.
-
-```{r}
-one_simulated_distance <- function(x) {
-  sample_vector <- rmultinom(n = 1, size = 929, prob = model_proportions) / 929
-  return(distance_from_75(sample_vector[1]))
-}
-```
-
-Next, we will use a `map_dbl()` to create 10,000 such simulated distances.
+Re-running the simulation is easy. Note that instead of passing `class_props` as an argument to the function `one_simulated_class`, we pass the new tibble `class_props_asian`.
 
 ```{r}
 num_repetitions <- 10000
-counts <- map_dbl(1:num_repetitions, one_simulated_distance)
+sample_class_tvds <- map_dbl(1:num_repetitions, one_simulated_class, props = class_props_asian)
 ```
 
-### The Prediction
 
-The empirical histogram of the simulated values shows the distribution of the distance as predicted by Mendel's model.
+We again visualize the result. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(tibble(counts)) +
-  geom_histogram(aes(x = counts, y = ..density..), color = 'gray', 
-                 breaks = seq(0,5))
+ggplot(tibble(sample_class_tvds)) +
+  geom_histogram(aes(x = sample_class_tvds, y = ..density..), 
+                 binwidth=0.002, fill = "darkcyan", color = 'gray')
 ```
 
-Look on the horizontal axis to see the typical values of the distance, as predicted by the model. They are rather small. For example, a high proportion of the distances are in the range 0 to 1, meaning that for a high proportion of the samples, the percent of purple-flowering plants is within 1% of 75%, that is, the sample percent is in the range 74% to 76%.
-
-### Comparing the Prediction and the Data
-
-To assess the model, we have to compare this prediction with the data. Mendel recorded the number of purple and white flowering plants. Among the 929 plants that he grew, 705 were purple flowering. That's just about 75.89%.
-
-```{r}
-705 / 929
-```
-
-So the observed value of our statistic – the distance between Mendel's sample percent and 75 – is about 0.89:
-
-```{r}
-observed_statistic <- distance_from_75(705/929)
-observed_statistic
-```
-
-Just by eye, locate roughly where 0.89 is on the horizontal axis of the histogram. You will see that it is clearly in the heart of the distribution predicted by Mendel's model.
-
-The cell below redraws the histogram with the observed value plotted on the horizontal axis.
+Where does the observed value fall in this histogram? 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(tibble(counts)) +
-  geom_histogram(aes(x = counts, y = ..density..), color = 'gray', 
-                 breaks = seq(0, 5)) +
-  geom_point(aes(x=observed_statistic, y=0), size = 3, color="red")
+ggplot(tibble(sample_class_tvds)) +
+  geom_histogram(aes(x = sample_class_tvds, y = ..density..), 
+                 binwidth=0.002, fill = "darkcyan", color = 'gray') +
+  geom_point(aes(x = harvard_diff, y = 0), size = 3, color = "salmon")
 ```
 
-The observed statistic is like a typical distance predicted by the model. By this measure, the data are consistent with the histogram that we generated under the assumptions of Mendel's model. This is evidence in favor of the model.
+We find that the result is the same; the Harvard proportion of Asian students is not at all like the national value. We can state, with great confidence, that Harvard enrolls much more Asian students than the national average. However, the reader should be cautioned not to accept these results as direct evidence against the suit's case. As noted at the outset of this section, we do not know the proportion of Harvard-admissible students and must instead rely on a national Almanac for reference. The base population of students can be very much different which is, in fact, something we anticipated.
 
-## Multiple Categories
 
-We have developed a way of assessing models about chance processes that generate data in two categories. The method extends to models involving data in multiple categories. The process of assessment is the same as before, the only difference being that we have to come up with a new statistic to simulate.
+## Significance Level
 
-Let's do this in an example that addresses the same kind of question that was raised in the case of Robert Swain's jury panel. This time, the data are more recent.
+So far we have evaluated models by comparing some observation to a prediction made by a model. For instance, we compared:
+
+* Racial demographics at Harvard University with the national Almanac at four-year non-profit private colleges. 
+* 10,000 throws of an unknown six-sided die at hand with a fair six-sided die. 
+
+Sometimes the observed statistic, e.g. the sample total variation distance (TVD), ended up close to the predictions; sometimes it ended up very far away. But how do we define what "close" or "far" is? And at what point does an observed statistic transition from being "close" to "far"? 
+
+This section examines the *significance* of an observed statistic. To set up the discussion, we introduce another example still on the topic of academics: midterm scores in a computer science course at the University of Miami. 
 
 ### Prerequisites
 
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
+Before starting, let's load the `tidyverse` as usual.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-### Jury Selection in Alameda County 
+```{r message = FALSE, warning = FALSE, echo = FALSE}
+set.seed(1)
+```
 
-In 2010, the American Civil Liberties Union (ACLU) of Northern California presented a [report](https://www.aclunc.org/sites/default/files/racial_and_ethnic_disparities_in_alameda_county_jury_pools.pdf) on jury selection in Alameda County, California. The report concluded that certain ethnic groups are underrepresented among jury panelists in Alameda County, and suggested some reforms of the process by which eligible jurors are assigned to panels. In this section, we will perform our own analysis of the data and examine some questions that arise as a result.
 
-Some details about jury panels and juries will be helpful in interpreting the results of our analysis.
+### A midterm grumble? 
 
-### Jury Panels
+CSC220 is an introductory Computer Science course at the University of Miami. One offering of the course had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads the section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following a exam?
 
-A jury panel is a group of people chosen to be prospective jurors; the final trial jury is selected from among them. Jury panels can consist of a few dozen people or several thousand, depending on the trial. By law, a jury panel is supposed to be representative of the community in which the trial is taking place. Section 197 of California's Code of Civil Procedure says, "All persons selected for jury service shall be selected at random, from a source or sources inclusive of a representative cross section of the population of the area served by the court."
+If we were to fill that lab section with randomly selected students from the class, it is possible that their average midterm grade will look a lot like the score the grumbling students are unhappy about. It turns out that what we have stated here is a chance model that we can simulate. 
 
-The final jury is selected from the panel by deliberate inclusion or exclusion. The law allows potential jurors to be excused for medical reasons; lawyers on both sides may strike a certain number of potential jurors from the list in what are called "peremptory challenges"; the trial judge might make a selection based on questionnaires filled out by the panel; and so on. But the initial panel is supposed to resemble a random sample of the population of eligible jurors.
+Let's have a look at the data from each (anonymized) student in the course. The following tibble `csc220` contains midterm and final scores, and the lab section the student is enrolled in. 
 
-### Composition of Panels in Alameda County
+```{r message = FALSE, warning = FALSE}
+csc220 <- read_csv("data/csc220.csv")
+csc220
+```
 
-The focus of the study by the ACLU of Northern California was the ethnic composition of jury panels in Alameda County. The ACLU compiled data on the ethnic composition of the jury panels in 11 felony trials in Alameda County in the years 2009 and 2010. In those panels, the total number of people who reported for jury service was 1,453. The ACLU gathered demographic data on all of these prosepctive jurors, and compared those data with the composition of all eligible jurors in the county.
+We can use the dplyr verb `group_by` to examine the mean midterm grade as well as the number of students in each section. 
 
-The data are tabulated below in a data frame called `jury`. For each ethnicity, the first value is the proportion of all eligible juror candidates of that ethnicity. The second value is the proportion of people of that ethnicity among those who appeared for the process of selection into the jury.
+```{r message = FALSE}
+lab_stats <- csc220 %>%
+  group_by(section) %>%
+  summarize(midterm_avg = mean(midterm),
+            count = n())
+lab_stats
+```
+
+Indeed, it seems that the section H students fared the worst, albeit by a small margin, among the three sections. Our statistic then is the mean grade of students in the lab section. Thus, our observed statistic is the mean grade from section H, which is about 68.56.  
 
 ```{r}
-jury <- tribble(~ethnicity, ~eligible, ~panels, 
-                 "Asian",     0.15,     0.26, 
-                 "Black",     0.18,     0.08,
-                 "Latino",    0.12,     0.08,
-                 "White",     0.54,     0.54,
-                 "Other",     0.01,     0.04
-                )
-jury
+observed_statistic <- 68.56
 ```
 
-Some ethnicities are overrepresented and some are underrepresented on the jury panels in the study. A bar chart is helpful for visualizing the differences.
+We can also formally state our null and alternative hypothesis. 
 
-```{r dpi=80, fig.align="center", message = FALSE}
-plot_df <- tibble(ethnicity = rep(jury$ethnicity, 2),
-                    percent = c(jury$eligible, jury$panels),
-                    grouping = c(rep("Eligible", 5), rep("Panels", 5)))
+__Null Hypothesis:__ The mean midterm grades of students in lab section H looks like the mean grades of a "section H" that is generated by randomly sampling the same number of students from the class.  
 
-jury_plot <- ggplot(plot_df) + 
-  geom_bar(aes(x = ethnicity, y = percent, fill = grouping), position="dodge", 
-           stat = "identity") +
-  coord_flip()
-jury_plot
-```
+__Alternative Hypothesis:__ The section H midterm grades are too low. 
 
-### Comparison with Panels Selected at Random
-
-What if we select a random sample vector of 1,453 people from the population of eligible jurors? Will the distribution of their ethnicities look like the distribution of the panels above?
-
-We can answer these questions by using `rmultinom()` and mutating the `jury` data frame with a column of the proportions in our sample.
-
-__Technical note.__ Random samples of prospective jurors would be selected without replacement. However, when the size of a sample is small relative to the size of the population, sampling without replacement resembles sampling with replacement; the proportions in the population don't change much between draws. The population of eligible jurors in Alameda County is over a million, and compared to that, a sample size of about 1500 is quite small. We will therefore sample with replacement.
-
-In the cell below, we form a sample vector containing proportions by sampling at random 1453 times from the distribution of eligible jurors. We display the distribution of the sample vector along with the distributions of the eligible jurors and the panel in the data.
+To form a random sample, we will need to sample *without* replacement 9 students from the course to fill up the theoretical "lab section H".  
 
 ```{r}
-eligible_population <- jury$eligible
-sample_vector <- rmultinom(n = 1, size = 1453, prob = eligible_population) / 1453
-panels_and_sample <- jury %>%
-  mutate(sample_vector = sample_vector)
-panels_and_sample
-```
-
-The distribution of the sample vector is quite close to the distribution of the eligible population, unlike the distribution of the panels.
-
-As always, it helps to visualize.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-plot_df <- tibble(ethnicity = rep(panels_and_sample$ethnicity, 3),
-                  percent = c(panels_and_sample$eligible, 
-                              panels_and_sample$panels, 
-                              panels_and_sample$sample_vector),
-                  grouping = c(rep("Eligible", 5), rep("Panels", 5), 
-                               rep("Sample vector", 5)))
-
-jury_wth_random_plot <- ggplot(plot_df) + 
-  geom_bar(aes(x = ethnicity, y = percent, fill = grouping), position="dodge", 
-           stat = "identity") +
-  coord_flip()
-jury_wth_random_plot
-```
-
-The bar chart shows that the distribution of the sample vector resembles the eligible population but the distribution of the panels does not.
-
-To assess whether this observation is particular to one random sample or more general, we can simulate multiple panels under the model of random selection and see what the simulations predict. But we won't be able to look at thousands of bar charts like the one above. We need a statistic that will help us assess whether or not the model or random selection is supported by the data.
-
-### A New Statistic: The Distance between Two Distributions 
-
-We know how to measure how different two numbers are – if the numbers are $x$ and $y$, the distance between them is $|x - y|$. Now we have to quantify the distance between two distributions. For example, we have to measure the distance between the cyan and salmon pink distributions below.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-jury_plot
-```
-
-For this we will compute a quantity called the *total variation distance* between two distributions. The calculation is as an extension of the calculation of the distance between two numbers.
-
-To compute the total variation distance, we first take the difference between the two proportions in each category.
-
-```{r}
-jury_with_diffs <- jury %>%
-  mutate(difference = panels - eligible)
-jury_with_diffs
-```
-
-Take a look at the column `difference` and notice that the sum of its entries is 0: the positive entries add up to 0.14, exactly canceling the total of the negative entries which is -0.14.
-
-This is numerical evidence of the fact that in the bar chart, the red bars exceed the cyan bars by exactly as much as the cyan bars exceed the red. The proportions in each of the two columns `Panels` and `Eligible` add up to 1, and so the give-and-take between their entries must add up to 0.
-
-To avoid the cancellation, we drop the negative signs and then add all the entries. But this gives us two times the total of the positive entries (equivalently, two times the total of the negative entries, with the sign removed). So we divide the sum by 2.
-
-```{r}
-jury_with_diffs <- jury_with_diffs %>%
-  mutate(abs_difference = abs(difference))
-jury_with_diffs
-```
-
-```{r}
-sum(jury_with_diffs$abs_difference) / 2 
-```
-
-This quantity 0.14 is the *total variation distance* (TVD) between the distribution of ethnicities in the eligible juror population and the distribution in the panels.
-
-We could have obtained the same result by just adding the positive differences. But our method of including all the absolute differences eliminates the need to keep track of which differences are positive and which are not.
-
-### Simulating One Value of the Statistic
-
-We will use the total variation distance between distributions as the statistic to simulate. It will help us decide whether the model of random selection is good, because large values of the distance will be evidence against the model.
-
-Keep in mind that __the observed value of our statistic is 0.14__, calculated above.
-
-Since we are going to be computing total variation distance repeatedly, we will write a function to compute it.
-
-The function `total_variation_distance()` returns the TVD between distributions in two vectors.
-
-```{r}
-total_variation_distance <- function(distribution_1, distribution_2) {
-  return(sum(abs(distribution_1 - distribution_2)) / 2)
-}
-```
-
-This function will help us calculate our statistic in each repetition of the simulation. But first, let's check that it gives the right answer when we use it to compute the distance between the salmon pink (eligible) and cyan (panels) distributions above.
-
-```{r}
-total_variation_distance(jury$panels, jury$eligible)
-```
-
-This agrees with the value that we computed directly without using the function.
-
-In the cell below we use the function to compute the TVD between the distributions of the eligible jurors and one sample vector of proportions. This is the code for simulating one value of our statistic. Recall that `eligible_population` is the vector containing the distribution of the eligible jurors.
-
-```{r}
-sample_vector <- rmultinom(n = 1, size = 1453, prob = eligible_population) / 1453
-total_variation_distance(sample_vector, eligible_population)
-```
-
-Notice that the distance is quite a bit smaller than 0.14, the distance between the distribution of the panels and the eligible jurors.
-
-We are now ready to run a simulation to assess the model of random selection.
-
-### Predicting the Statistic Under the Model of Random Selection
-
-The total variation distance between the distributions of the random sample and the eligible jurors is the statistic that we are using to measure the distance between the two distributions. By repeating the process of sampling, we can see how much the statistic varies across different random samples.
-
-The code below simulates the statistic based on a large number of replications of the random sampling process, following our usual sequence of steps for simulation. We first define a function that returns one simulated value of the total variation distance under the hypothesis of random selection. Then we use our function in a `map` to create a vector `tvds` consisting of 5,000 such distances.
-
-```{r}
-# Simulate one simulated value of 
-# the total variation distance between
-# the distribution of a sample vector
-# and the distribution of the eligible population
-
-one_simulated_tvd <- function(x) {
-  sample_vector <- rmultinom(n = 1, size = 1453, prob = eligible_population) / 1453
-  return(total_variation_distance(sample_vector, eligible_population))
-}
-```
-
-```{r}
-num_repetitions <- 5000
-tvds <- map_dbl(1:num_repetitions, one_simulated_tvd)
-```
-
-The empirical histogram of the simulated distances shows that drawing 1453 jurors at random from the pool of eligible candidates results in a distribution that rarely deviates from the eligible jurors' race distribution by more than about 0.05.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(tibble(tvds), aes(x = tvds, y = ..density..)) + 
-  geom_histogram(breaks=seq(0, 0.2, 0.005), color = "gray")
-```
-
-### Assessing the Model of Random Selection
-
-The panels in the study, however, were not quite so similar to the eligible population. The total variation distance between the panels and the population was 0.14, which is far out in the tail of the histogram above. It does not look at all like a typical distance between a random sample and the eligible population.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(tibble(tvds), aes(x = tvds, y = ..density..)) + 
-  geom_histogram(breaks=seq(0, 0.2, 0.005), color = "gray") + 
-  geom_point(aes(x = 0.14, y = 0), size = 3, color = "red")
-```
-
-The data in the panels is not consistent with the predicted values of the statistic based on the model of random selection. So our analysis supports the ACLU's calculation that the panels were not representative of the distribution provided for the eligible jurors.
-
-### Some Possible Explanations for the Differences
-
-As with most such analyses, however, our analysis does not say *why* the distributions are different or what the difference might imply.
-
-The ACLU report discusses several possible reasons for the discrepancies. For example, some minority groups were underrepresented on the records of voter registration and of the Department of Motor Vehicles, the two main sources from which jurors are selected. At the time of the study, the county did not have an effective process for following up on prospective jurors who had been called but had failed to appear. The ACLU listed several other reasons as well. Whatever the reasons, it seems clear that the composition of the jury panels was different from what we would have expected in a random sample from the distribution in the `eligible` column.
-
-### Questions about the Data 
-
-We have developed a powerful technique that helps decide whether one distribution looks like a random sample from another. But data science is about more than techniques. In particular, data science always involves a thoughtful examination of how the data were gathered.
-
-__Eligible Jurors.__ First, it is important to remember that not everyone is eligible to serve on a jury. On its [website](http://www.alameda.courts.ca.gov/pages.aspx/jury-duty-overview), the Superior Court of Alameda County says, "You may be called to serve if you are 18 years old, a U.S. citizen and a resident of the county or district where summoned. You must be able to understand English, and be physically and mentally capable of serving. In addition, you must not have served as any kind of juror in the past 12 months, nor have been convicted of a felony."
-
-The Census doesn't maintain records of the populations in all these categories. Thus the ACLU had to obtain the demographics of eligible jurors in some other way. Here is their own description of the process they followed and some flaws that it might contain.
-
-"For the purpose of determining the demographics of Alameda County’s jury eligible population, we used a declaration that was prepared for the Alameda County trial of People v. Stuart Alexander in 2002. In the declaration, Professor Weeks, a demographer at San Diego State University, estimated the jury eligible population for Alameda County, using the 2000 Census data. To arrive at this estimate, Professor Weeks took into account the number of people who are not eligible for jury services because they do not speak English, are not citizens, are under 18, or have a felony conviction. Thus, his estimate should be an accurate assessment of who is actually eligible for jury service in Alameda County, much more so than simply reviewing the Census report of the race and ethnicity of all people living in Alameda County. It should be noted, however, that the Census data on which Professor Weeks relied is now ten years old and the demographics of the county may have changed by two or three percent in some categories."
-
-Thus the distribution of ethnicities of eligible jurors used in the analysis is itself an estimate and might be somewhat out of date.
-
-__Panels.__ In addition, panels aren't selected from the entire eligible population. The Superior Court of Alameda County says, "The objective of the court is to provide an accurate cross-section of the county's population. The names of jurors are selected at random from everyone who is a registered voter and/or has a driver's license or identification card issued by the Department of Motor Vehicles."
-
-All of this raises complex questions about how to accurately estimate the ethnic composition of eligible jurors in Alameda County.
-
-It is not clear exactly how the 1453 panelists were classified into the different ethnic categories (the ACLU report says that "attorneys ... cooperated in collecting jury pool data"). There are serious social, cultural, and political factors that affect who gets classified or self-classifies into each ethnic category. We also don't know whether the definitions of those categories in the panels are the same as those used by Professor Weeks who in turn used Census categories in his estimation process. Thus there are also questions about the correspondence between the two distributions being compared.
-
-Thus, while we have a clear conclusion about the data in our table – the panels do not look like a random sample from the distribution provided for eligible jurors – questions about the nature of the data prevent us from concluding anything broader.
-
-
-## Decisions and Uncertainty
-
-We have seen several examples of assessing models that involve chance, by comparing observed data to the predictions made by the models. In all of our examples, there has been no doubt about whether the data were consistent with the model's predictions. The data were either very far away from the predictions, or very close to them.
-
-But outcomes are not always so clear cut. How far is "far"? Exactly what does "close" mean? While these questions don't have universal answers, there are guidelines and conventions that you can follow. In this section we will describe some of them.
-
-But first let us develop a general framework of decision making, into which all our examples will fit.
-
-What we have developed while assessing models are some of the fundamental concepts of statistical tests of hypotheses. Using statistical tests as a way of making decisions is standard in many fields and has a standard terminology. Here is the sequence of the steps in most statistical tests, along with some terminology and examples. You will see that they are consistent with the sequence of steps we have used for assessing models.
-
-### Prerequisites
-
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-library(readtext)
-```
-
-### Step 1: The Hypotheses 
-
-All statistical tests attempt to choose between two views of the world. Specifically, the choice is between two views about how the data were generated. These two views are called *hypotheses*.
-
-__The null hypothesis.__ This is a clearly defined model about chances. It says that the data were generated at random under clearly specified assumptions about the randomness. The word "null" reinforces the idea that if the data look different from what the null hypothesis predicts, the difference is due to *nothing* but chance.
-
-From a practical perspective, __the null hypothesis is a hypothesis under which you can simulate data.__
-
-In the example about Mendel's model for the colors of pea plants, the null hypothesis is that the assumptions of his model are good: each plant has a 75% chance of having purple flowers, independent of all other plants.
-
-Under this hypothesis, we were able to simulate random samples, by using
-`rmultinom(n = 1, size = 929, prob = c(0.75, 0.25))`. We used a sample size of 929 because that's the number of plants Mendel grew.
-
-__The alternative hypothesis.__ This says that some reason other than chance made the data differ from the predictions of the model in the null hypothesis.
-
-In the example about Mendel's plants, the alternative hypothesis is simply that his model isn't good.
-
-### Step 2: The Test Statistic 
-
-In order to decide between the two hypothesis, we must choose a statistic that we can use to make the decision. This is called the __test statistic__.
-
-In the example of Mendel's plants, our statistic was the absolute difference between the sample percent and 75% which was predicted by his model.
-
-\[ | \text{sample percent of purple-flowering plants} - 75 | \]
-
-To see how to make the choice in general, look at the alternative hypothesis. What values of the statistic will make you think that the alternative hypothesis is a better choice than the null?
-
-* If the answer is "big values," you might have a good choice of statistic.
-* So also if the answer is "small values."
-* But if the answer is "both big values and small values," we recommend that you look again at your statistic and see if taking an absolute value can change the answer to just "big values".
-
-In the case of the pea plants, a sample percent of around 75% will be consistent with the model, but percents much bigger or much less than 75 will make you think that the model isn't good. This indicates that the statistic should be the *distance* between the sample percent and 75, that is, the absolute value of the difference between them. Big values of the distance will make you lean towards the alternative.
-
-The __observed value of the test statistic__ is the value of the statistic you get from the data in the study, not a simulated value. Among Mendel's 929 plants, 705 had purple flowers. The observed value of the test statistic was therefore
-
-```{r}
-abs ( 100 * (705 / 929) - 75)
-```
-
-### Step 3: The Distribution of the Test Statistic, Under the Null Hypothesis
-
-The main computational aspect of a test of hypotheses is figuring out *what the values of the test statistic might be if the null hypothesis were true*.
-
-The test statistic is simulated based on the assumptions of the model in the null hypothesis. That model involves chance, so the statistic comes out differently when you simulate it multiple times.
-
-By simulating the statistic repeatedly, we get a good sense of its possible values and which ones are more likely than others. In other words, we get a good approximation to the probability distribution of the statistic, as predicted by the model in the null hypothesis.
-
-As with all distributions, it is very useful to visualize this distribution by a histogram. We have done so in all our examples.
-
-### Step 4. The Conclusion of the Test
-
-The choice between the null and alternative hypotheses depends on the comparison between what you computed in Steps 2 and 3: the observed value of the test statistic and its distribution as predicted by the null hypothesis.
-
-If the two are consistent with each other, then the observed test statistic is in line with what the null hypothesis predicts. In other words, the test does not point towards the alternative hypothesis; the null hypothesis is better supported by the data. This was the case with the assessment of Mendel's model.
-
-But if the two are not consistent with each other, as is the case in our example about Alameda County jury panels, then the data do not support the null hypothesis. That is why we concluded that the jury panels were not selected at random. Something other than chance affected their composition.
-
-If the data do not support the null hypothesis, we say that the test rejects the null hypothesis.
-
-### The Meaning of "Consistent"
-
-In the example about Alameda County juries, it was apparent that our observed test statistic was far from what was predicted by the null hypothesis. In the example about pea flowers, it is just as clear that the observed statistic is consistent with the distribution that the null predicts. So in both of the examples, it is clear which hypothesis to choose.
-
-But sometimes the decision is not so clear. Whether the observed test statistic is consistent with its predicted distribution under the null hypothesis is a matter of judgment. We recommend that you provide your judgment along with the value of the test statistic and a graph of its predicted distribution under the null. That will allow your reader to make his or her own judgment about whether the two are consistent.
-
-Here is an example where the decision requires judgment.
-
-### The GSI's Defense
-
-A Berkeley Statistics class of about 350 students was divided into 12 discussion sections led by Graduate Student Instructors (GSIs). After the midterm, students in Section 3 noticed that their scores were on average lower than the rest of the class.
-
-In such situations, students tend to grumble about the section's GSI. Surely, they feel, there must have been something wrong with the GSI's teaching. Or else why would their section have done worse than others?
-
-The GSI, typically more experienced about statistical variation, often has a different perspective: if you simply draw a section of students at random from the whole class, their average score could resemble the score that the students are unhappy about, just by chance.
-
-The GSI's position is a clearly stated chance model. We can simulate data under this model. Let's test it out.
-
-__Null Hypothesis.__ The average score of the students in Section 3 is like the average score of the same number of students picked at random from the class.
-
-__Alternative Hypothesis.__ No, it's too low.
-
-A natural statistic here is the average of the scores. Low values of the average will make us lean towards the alternative.
-
-Let's take a look at the data.
-
-The data frame `scores` contains the section number and midterm score for each student in the class. The midterm scores were integers in the range 0 through 25; 0 means that the student didn't take the test.
-
-__***JB: need to discuss an appropriate example for the UM-based course. possibly using previous CSC120 or CSC220 grades?***__
-
-```{r}
-url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/scores_by_section.csv"
-scores <- read_csv(url)
-scores
-```
-
-To find the average score in each section, we will use the `group_by()` verb from dplyr, followed by a summary of the mean of mideterm scores in each section. 
-
-```{r}
-section_averages <- scores %>%
-  group_by(Section) %>%
-  summarize(midterm_avg = mean(Midterm))
-section_averages
-```
-
-The average score of Section 3 is 13.667, which does look low compared to the other section averages. But is it lower than the average of a section of the same size selected at random from the class?
-
-To answer this, we can select a section at random from the class and find its average. To select a section at random to we need to know how big Section 3 is. We can do this once again using `group_by()`, except this time followed by a `count()`.
-
-```{r}
-scores %>%
-  group_by(Section) %>%
-  count()
-```
-
-Section 3 had 27 students.
-
-Now we can figure out how to create one simulated value of our test statistic, the random sample average.
-
-First we have to select 27 scores at random without replacement. Since the data are already in a data frame, we will use the `slice_sample()` function.
-
-```{r}
-scores_only <- select(scores, Midterm)
-```
-
-```{r}
-random_sample <- slice_sample(scores_only, n = 27, replace = FALSE)
+random_sample <- csc220 %>%
+  select(midterm) %>%
+  slice_sample(n = 9, replace = FALSE)
 random_sample
 ```
 
-The average of these 27 randomly selected scores is
+We can look at the mean midterm score for this randomly sampled section. 
 
 ```{r}
-mean(random_sample$Midterm)
+mean(pull(random_sample, midterm))
 ```
 
-That's the average of 27 randomly selected scores. The cell below collects the code necessary for generating this random average.
-
-Now we can simulate the random sample average by repeating the calculation multiple times.
+Now that we know how to simulate one value, we can wrap this into a function. 
 
 ```{r}
-random_sample_average <- function(x) {
-  random_sample <- slice_sample(scores_only, n = 27, replace = FALSE)
-  return(mean(random_sample$Midterm))
+one_simulated_mean <- function(x) {
+  random_sample <- csc220 %>%
+    select(midterm) %>%
+    slice_sample(n = 9, replace = FALSE)
+  return(mean(pull(random_sample, midterm)))
 }
 ```
+
+We will simulate the "section H lab" 10,000 times. Let us run the simulation! 
 
 ```{r}
 num_repetitions <- 10000
-sample_averages <- map_dbl(1:num_repetitions, random_sample_average)
+sample_means <- map_dbl(1:num_repetitions, one_simulated_mean)
 ```
 
-Here is the histogram of the simulated averages. It shows the distribution of what the Section 3 average might have been, if Section 3 had been selected at random from the class.
-
-The observed Section 3 average score of 13.667 is shown as a red dot on the horizontal axis.
-
-```{r}
-observed_statistic <- 13.667
-```
-
-```{r}
-ggplot(tibble(sample_averages)) +
-  geom_histogram(aes(x = sample_averages, y = ..density..), 
-                 bins = 20, color = "gray") +
-  geom_point(aes(x = observed_statistic, y = 0), color = "red", size = 3)
-```
-
-As we said earlier, small values of the test statistic will make us lean towards the alternative hypothesis, that the average score in the section is too low for it to look like a random sample from the class.
-
-Is the observed statistic of 13.667 "too low" in relation to this distribution? In other words, is the red far enough out into the left hand tail of the histogram for you to think that it is "too far"?
-
-It's up to you to decide! Use your judgment. Go ahead – it's OK to do so.
-
-### Conventional Cut-offs and the P-value
-
-If you don't want to make your own judgment, there are conventions that you can follow. These conventions tell us how far out into the tails is considered "too far".
-
-The conventions are based on the area in the tail, starting at the observed statistic (the red dot) and looking in the direction that makes us lean toward the alternative (the left side, in this example). If the area of the tail is small, the observed statistic is far away from the values most commonly predicted by the null hypothesis.
-
-Remember that in a histogram, area represents percent. To find the area in the tail, we have to find the percent of sample averages that were less than or equal to the average score of Section 3, where the red dot is. The vector `sample_averages` contains the averages for all 10,000 repetitions of the random sampling, and observed_statistic is 13.667, the average score of Section 3.
-
-```{r}
-sum(sample_averages <= observed_statistic) / num_repetitions
-```
-
-About 5.7% of the simulated random sample averages were 13.667 or below. If we had drawn the students of Section 3 at random from the whole class, the chance that their average would be 13.667 or lower is about 5.7%.
-
-This chance has an impressive name. It is called the *observed significance level* of the test. That's a mouthful, and so it is commonly called the *P-value* of the test.
-
-__Definition:__ The P-value of a test is the chance, based on the model in the null hypothesis, that the test statistic will be equal to the observed value in the sample or even further in the direction that supports the alternative.
-
-If a P-value is small, that means the tail beyond the observed statistic is small and so the observed statistic is far away from what the null predicts. This implies that the data support the alternative hypothesis better than they support the null.
-
-How small is "small"? According to the conventions:
-
-* If the P-value is less than 5%, it is considered small and the result is called "statistically significant."
-
-* If the P-value is even smaller – less than 1% – the result is called "highly statistically significant."
-
-By this convention, our P-value of 5.7% is not considered small. So we have to conclude that the GSI's defense holds good – the average score of Section 3 is like those generated by random chance. Formally, the result of the test is not statistically significant.
-
-When you make a conclusion in this way, we recommend that you don't just say whether or not the result is statistically significant. Along with your conclusion, provide the observed statistic and the P-value as well, so that readers can use their own judgment.
-
-### Historical Note on the Conventions
-
-The determination of statistical significance, as defined above, has become standard in statistical analyses in all fields of application. When a convention is so universally followed, it is interesting to examine how it arose.
-
-The method of statistical testing – choosing between hypotheses based on data in random samples – was developed by Sir Ronald Fisher in the early 20th century. Sir Ronald might have set the convention for statistical significance somewhat unwittingly, in the following statement in his 1925 book *Statistical Methods for Research Workers*. About the 5% level, he wrote, "It is convenient to take this point as a limit in judging whether a deviation is to be considered significant or not."
-
-What was "convenient" for Sir Ronald became a cutoff that has acquired the status of a universal constant. No matter that Sir Ronald himself made the point that the value was his personal choice from among many: in an article in 1926, he wrote, "If one in twenty does not seem high enough odds, we may, if we prefer it draw the line at one in fifty (the 2 percent point), or one in a hundred (the 1 percent point). Personally, the author prefers to set a low standard of significance at the 5 percent point ..."
-
-Fisher knew that "low" is a matter of judgment and has no unique definition. We suggest that you follow his excellent example. Provide your data, make your judgment, and explain why you made it.
-
-Whether you use a conventional cutoff or your own judgment, it is important to keep the following points in mind.
-
-* Always provide the observed value of the test statistic and the P-value, so that readers can decide whether or not they think the P-value is small.
-* Don't look to defy convention only when the conventionally derived result is not to your liking.
-* Even if a test concludes that the data don't support the chance model in the null hypothesis, it typically doesn't explain why the model doesn't work.
-
-
-## Error Probabilities
-
-In the process by which we decide which of two hypotheses is better supported by our data, the final step involves a judgment about the consistency of the data and the null hypothesis. While this step results in a good decision a vast majority of the time, it can sometimes lead us astray. The reason is chance variation. For example, even when the null hypothesis is true, chance variation might cause the sample to look quite different from what the null hypothesis predicts.
-
-### Wrong Conclusions
-
-If you are testing a null hypothesis against the alternative that the null hypothesis isn't true, then there are four ways of classifying reality and the result of the test.
-
-|     | Null is True | Alternative is True |
-|----:|:-----------------------:|:------------------------:|
-|**Test Favors the Null**| Correct result | Error |
-|**Test Favors the Alternative**| Error | Correct result |
-
-In two out of the four cells of this table, the test result is wrong. One type of error occurs if the test favors the alternative hypothesis when in fact the null hypothesis is true. The other type of error occurs if the test favors the null hypothesis when in fact the alternative hypothesis is true.
-
-Since the null hypothesis is a completely specified chance model, we can estimate the chance of the first type of error. The answer turns out to be essentially the cutoff that we use for the P-value. Let's see how.
-
-### The Chance of an Error
-
-Suppose you want to test whether a coin is fair or not. Then the hypotheses are:
-
-__Null:__ The coin is fair. That is, the results are like draws made at random with replacement from *Heads, Tails*.
-
-__Alternative:__ The coin is not fair.
-
-Suppose you are going to test this hypothesis based on 2000 tosses of the coin. You would expect a fair coin to land heads 1000 times out of 2000, so a reasonable test statistic to use is
-
-\[\text{test statistic = } ∣ \text{number of heads} − 1000 ∣ \]
-
-Small values of this statistic favor the null hypothesis, and large values favor the alternative.
-
-We have simulated this statistic under the null hypothesis many times, and drawn its empirical distribution.
+As before, we visualize the resulting distribution of grades.  
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-
-fair_coin <- c(0, 1)
-
-one_simulated_statistic <- function(x) {
-  num_heads <- sum(sample(fair_coin, size = 2000, replace = TRUE))
-  return(abs(num_heads - 1000))
-}
-
-num_repetitions <- 50000
-statistics <- map_dbl(1:num_repetitions, one_simulated_statistic)
-
-ggplot(tibble(statistics)) + 
-  geom_histogram(aes(x = statistics, y = ..density..), 
-                 breaks = seq(0, 100, 5) - 0.01,
-                 color = "gray") +
-  geom_vline(xintercept = 45, size = 1, color = "purple")
+ggplot(tibble(sample_means)) +
+  geom_histogram(aes(x = sample_means, y = ..density..), 
+                 bins = 15, fill = "darkcyan", color = 'gray')
 ```
 
-The area to the right of 45 (where the purple line is) is about 5%. We can confirm this with a quick numerical test. 
+It seems that the grades cluster around 72. Where does the actual section H section lie? Recall that this value is available in the variable `observed_statistic`. We overlay a point geom to our above plot.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(tibble(sample_means)) +
+  geom_histogram(aes(x = sample_means, y = ..density..), 
+                 bins = 15, fill = "darkcyan", color = 'gray') + 
+  geom_point(aes(x = observed_statistic, y = 0), size = 3, color = "salmon")
+```
+
+It seems that the observed statistic is "close" to the center of randomly sampled scores. 
+
+### Choosing a significance level
+
+Let's sort the sample means generated. We will examine in particular the value at 10% and 5% from the bottom. We will first turn to the value at 10%. 
 
 ```{r}
-sum(statistics >= 45) / length(statistics)
+sorted_samples <- sort(sample_means)
+sorted_samples[length(sorted_samples)*0.1]
 ```
 
-Large values of the test statistic favor the alternative. So if the test statistic comes out to be 45 or more, the test will conclude that the coin is unfair.
+We will plot this value on our empirical histogram, as well as the area to the left of it. 
 
-However, as the figure shows, a fair coin can produce test statistics with values 45 or more. In fact it does so with chance about 5%.
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+colors <- c(rep("salmon",6), rep("darkcyan",9))
 
-So *if the coin is fair* and our test uses a 5% cutoff for deciding whether it is fair or not, then there is about a 5% chance that the test will wrongly conclude that the coin is unfair.
+ggplot(tibble(sample_means)) +
+  geom_histogram(aes(x = sample_means, y = ..density..), bins = 15,
+                 fill = colors, color = 'gray') +
+  geom_point(aes(x = sorted_samples[length(sorted_samples)*0.1], y = 0), size = 3, color = "red")
+```
 
-### The Cutoff for the P-value is an Error Probability 
+This means that in our simulation the mean midterm score is as low as about 63 90% of the time. Put differently, the chance of a midterm score *lower* than 63 occurring is 10%. 
 
-The example above is a special case of a general fact:
+The situation is not much different if we look at the value 5% from the bottom, which we find to be about 61. We redraw the situation in on our empirical histogram. 
 
-> If you use a $p$% cutoff for the P-value, and the null hypothesis happens to be true, then there is about a $p$% chance that your test will conclude that the alternative is true.
+```{r}
+sorted_samples[length(sorted_samples)*0.05]
+```
 
-The 1% cutoff is therefore more conservative than 5%. There is less chance of concluding "alternative" if the null happens to be true. For this reason, randomized controlled trials of medical treatments usually use 1% as the cutoff for deciding between the following two hypotheses:
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+colors <- c(rep("salmon",5), rep("darkcyan",10))
 
-__Null Hypothesis.__ The treatment has no effect; observed differences between the outcomes of the treatment and control groups of patients are due to randomization.
+ggplot(tibble(sample_means)) +
+  geom_histogram(aes(x = sample_means, y = ..density..), bins = 15,
+                 fill = colors, color = 'gray') +
+  geom_point(aes(x = sorted_samples[length(sorted_samples)*0.05], y = 0), size = 3, color = "red")
+```
 
-__Alternative Hypothesis.__ The treatment has an effect.
+This time, the chance of a mean midterm score at least as low as about 61 occurring is 5%.   
 
-The idea is to control the chance of concluding the treatment does something if in fact it does nothing. This reduces the risk of giving patients a useless treatment.
+We say that the threshold point 63 is the 90% *significance level* and the threshold point 61 is at the 95% significance level. If we prefer an even higher level of significance, we could also look at the 99% significance level or even the 99.9% level; these are commonly referred to in the area of physics which rely on high significance to prove something axiomatic. It is important to note that these cut-off points are conventional only and do not have a strong theoretical backing. They were first established by the statistician Ronald Fisher in his seminal work [*Statistical Methods for Research Workers*](https://en.wikipedia.org/wiki/Statistical_Methods_for_Research_Workers). 
 
-Still, even if you set the cutoff to be as low as 1%, and the treatment does nothing, there is about a 1% chance of concluding that the treatment does something. This is due to chance variation. There is a small chance that data from random samples end up leading you astray.
+Regardless of the cut-off point, a significance level states that if an observed statistic remains above it the discovery is not significant. The same holds true for the flip-side, i.e., if we are looking for too large a value.   
 
-### Data Snooping and P-Hacking
+### The verdict: is the TA guilty? 
 
-The discussion above implies that if each of 100 different research groups runs a separate randomized controlled experiment about the effect of a treatment that in fact has no effect, and each experiment uses a 1% cutoff for the P-value, then by chance variation, one of the experiments is expected to wrongly conclude that the treatment does have an effect.
+We can set a modest significance level at 95% for the CSC220 case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level if so. 
 
-Unfortunately, that could be the one that gets published. This is why it is important that experiments be *replicated*. That is, other researchers ought to be able to carry out the experiment and see if they get similar results.
+We overlay the observed statistic on the empirical histogram. As before, the orange bars show the 95% significance region.
 
-It is not uncommon for researchers to test multiple hypotheses using the same data. For example, in a randomized controlled trial about the effect of a drug, researchers might test whether the drug has an effect on various different diseases.
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+colors <- c(rep("salmon",6), rep("darkcyan",9))
 
-Now suppose the drug has no effect on anything. Just by chance variation, a small percent of the tests might conclude that it does have an effect. So, when you read a study that uses tests of hypotheses and concludes that a treatment has an effect, always ask how many different effects were tested before the researchers found the one that was reported.
+ggplot(tibble(sample_means)) +
+  geom_histogram(aes(x = sample_means, y = ..density..), bins = 15,
+                 fill = colors, color = 'gray') +
+  geom_point(aes(x = observed_statistic, y = 0), size = 3, color = "red")
+```
 
-If the researchers ran multiple different tests before finding one that gave a "highly statistically significant" result, use the result with caution. The study could be marred by *data snooping*, which essentially means torturing the data into making a false confession. This is sometimes also called *p-hacking*.
+We see that the point does not fall within this region. We can check numerically how much area is to the left of the observed statistic. 
 
-In such a situation, one way to validate the reported result is by replicating the experiment and testing for that particular effect alone. If it comes out significant again, that will validate the original conclusion.
+```{r}
+sum(sample_means <= observed_statistic) / num_repetitions
+```
 
-### Technical Note: The Other Kind of Error
+Therefore, we conclude that the resulting low grades are likely not due to the TA's teaching. It may be wise to check in with the TA to get his take on the story.   
 
-There is, of course, another kind of error: concluding that the treatment does nothing when in fact it does something. Discussions of that error are outside the scope of this course. Just be aware that life isn't easy: if you set up your test to reduce one of the two errors, you almost always increase the other one.
 
--->
+## Permutation Testing
+
+In the previous section, we study the use of hypothesis testing. In this section we learn a simple method to compare two distributions using a method we call *permutation testing*. This allows us to decide if the two distributions come from the same underlying distribution.
+
+<!--
+* We have two sets of numerical data A and B, which respectively have the mean values $a$ and $b$, with difference $d = a - b$.
+* We want to know, assuming that the two datasets have the same origin, how large (or small) chances are that the difference of $d$ emerges when we redivide the join of A and B into two groups, only retaining the sizes of A and B.
+* For each such random split, we compute the difference in the mean values.
+* By repeating such random splits many times, we can obtain distributions of the means.
+--> 
+
+### Prerequisites
+
+Let us begin by loading the `tidyverse`.
+
+```{r message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### The effect of a tutoring program 
+
+The tibble `finals` contains final exam grades in a Computer Science course for 105  students. They are divided into two groups, based on two different offerings of the course labeled `A` and `B`. The more recent offering `B` featured a tutoring program for students to receive help on assignments and exams. The course instructor is interested in finding out if the tutoring program boosted overall performance in the class, measured by a final exam. This could help the instructor and department decide if the program should continue or even be expanded. The dataset is collected over two semesters from the same Computer Science course taught at the University of Miami.
+
+Let's first load the dataset. 
+
+```{r message = FALSE, echo = FALSE}
+finals <- read_csv("data/final_exams.csv")
+finals
+```
+
+We can examine the number of enrolled students in each of the two offerings. 
+
+```{r}
+finals %>%
+  group_by(class) %>%
+  count()
+```
+
+It appears they are about equal. Let's now turn to a distribution of the students in the offering that featured the tutoring program (class `B`) compared to those in the offering without the program (class `A`). To generate an overlaid histogram, we use the positional adjustment argument `identity` and set an `alpha` so that the bars are drawn with slight transparency. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(finals) + 
+  geom_histogram(aes(x = grade, y = ..density.., fill = class),
+                 bins = 10, color = "gray",
+                 alpha = 0.7, position = "identity")
+```
+
+By observation alone, it seems that the final scores of students in the offering where the tutoring program was available (`B`) is slightly to the right of the distribution corresponding to scores when the program did not exist (`B`). Could this be chalked up to chance?
+
+As we have done throughout this chapter, we can address this question by means of a hypothesis test. We will state a null and alternative hypothesis that arise from the problem. 
+
+__Null hypothesis:__ In the population, the distribution of final exam scores where the  tutoring program was available is the same as those when the service did not exist. The difference seen in the sample is because of chance. 
+
+__Alternative hypothesis:__ In the population, the distribution of final exam scores when the tutoring program was available are, on average, *higher* than the scores when the program was not.  
+
+According to the alternative hypothesis, the average final score in offering `B` should be higher than the average final score in offering `A`. Therefore, a natural test statistic we can use is the difference in the mean between the two groups. That is,
+
+\[
+\text{test statistic} = \mu_B - \mu_A
+\]
+
+where $\mu$ denotes the mean of the group. 
+
+First, we form two vectors `finalsA` and `finalsB` that contain final scores with respect to the course offering. 
+
+```{r}
+finalsA <- finals %>%
+  filter(class == 'A') %>% pull(grade)
+finalsB <- finals %>%
+  filter(class == 'B') %>% pull(grade)
+```
+
+The observed value of the statistic can be computed as the following. 
+
+```{r}
+observed_statistic <- mean(finalsB) - mean(finalsA)
+observed_statistic
+```
+
+We can write a function that computes the statistic for us. We call it `mean_diff`. 
+
+```{r}
+mean_diff <- function(a, b) {
+  return(mean(a) - mean(b))
+}
+```
+
+Observe how it returns the same value for the observed statistic. 
+
+```{r}
+mean_diff(finalsB, finalsA)
+```
+
+To predict the statistic under the null hypothesis, we defer to an idea called the *permutation test*. 
+
+### The Permutation Test 
+
+Suppose that we are given the following vector of integers. 
+
+```{r}
+1:10
+```
+
+We can interpret these numbers as indices that refer to an element inside a vector. We imagine that the first half of indices belong to a group `A`, and the second half group `B`. 
+
+Under the assumption of the null hypothesis, there should be no difference between the two distributions `A` and `B` with respect to the underlying population. For example, whether a final exam score belongs to the course offering `A` or `B` should have no effect on the mean final score. If so, there should be no consequences if we place both groups into a pot, shuffle them around, and compute the mean difference from the result. The resulting value we get from this process is one simulated value of the test statistic under the null hypothesis. 
+
+The first bit of machinery we need is a function that shuffles a sequence of integers. We actually already know one: `sample`. 
+
+```{r}
+shuffled <- sample(1:10)
+shuffled
+```
+
+In this example, `sample` receives a vector of numbers 1 through 10 and returns the result after shuffling them. We might also call the result a *permutation* of the original sequence -- hence, its namesake. 
+
+If we again interpret the resulting vector as indices, we take the first half to be the indices of the shuffled group A and the second half the shuffled group B. 
+
+```{r}
+shuffled[1:5]  # shuffled group A
+shuffled[6:10] # shuffled group B
+```
+
+The remaining work then is to compute the difference in means between the shuffled groups. 
+
+The function `one_mean_difference` puts everything together. It receives two vectors, `a` and `b`, puts them together in a pot, and deals out two shuffled vectors with the same size as `a` and `b`, respectively. The function returns the value of the simulated statistic by calling the functional `compute_statistic`. For this example, we use `mean_diff`. 
+
+```{r}
+one_difference <- function(a, b, compute_statistic) {
+  pot <- c(a, b)
+  sample_indices <- sample(1 : length(pot))
+  shuffled_a <- pot[sample_indices[1 : length(a)]]
+  shuffled_b <- pot[sample_indices[(length(a) + 1) : length(pot)]]
+  return(compute_statistic(shuffled_a, shuffled_b))
+}
+```
+
+We are now ready to perform a permutation test for the tutoring program example. We would like to simulate the test statistic under the null hypothesis multiple times and collect the values into a vector. As before, we can use `replicate`. We will simulate 10,000 values. 
+
+```{r}
+differences <- replicate(n = 10000, one_difference(finalsA, finalsB, mean_diff))
+```
+
+### Conclusion of the Test
+
+Let's visualize the results. 
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(tibble(differences)) + 
+  geom_histogram(aes(x = differences, y = ..density..), 
+                 col="grey", fill = "darkcyan", bins = 20) +
+  geom_point(aes(x = observed_statistic, y = 0), color = "salmon", size = 3)
+```
+
+First observe how the distribution is centered around 0. Under the assumption of the null hypothesis, there is no difference between the final exam averages in the two course offerings and, therefore, the difference clusters around 0. 
+
+Also observe that the observed test statistic is also somewhat close to the center. To get a better sense of how close, we should compute the P-value. 
+
+```{r}
+sum(differences >= observed_statistic) / 10000
+```
+
+This means that the chance of obtaining a mean difference at least as large as $4.92$ is around 15%. By standards of the conventional cut-off points we have discussed, this would not bring enough convincing evidence to refute the null hypothesis. 
+
+An important remark must be made: this does *not* mean we take the null hypothesis to be true, bearing the implication that the tutoring program is ineffective. Indeed, the permutation test only evaluated one criteria -- that is, difference in final exam scores -- as a measure for improvement. There are other criteria we did not consider, like class participation, which may have benefited from the program. It would be up to the judgment of the department on how to use these results in deciding the merit of the tutoring program. 
+
+### Another Permutation Test: NFL and NCAA players 
+
+We end this section with one more example of a permutation test: comparing the yardage of NFL and NCAA players. We load in both datasets and select out the column containing year and yardage information. We also add a new column to each tibble containing which league (NFL or NCAA) the yardage pertains to, so we can refer to it later. 
+
+```{r message = FALSE}
+ncaa_with_yards <- read_csv("data/ncaa-receivers-2005-2011.csv") %>%
+  select(Yards, Year) %>%
+  mutate(league = "NCAA")
+nfl_with_yards <- read_csv("data/nfl_receivers.csv") %>% 
+  select(Yds, Year) %>%
+  rename(Yards = Yds) %>%
+  mutate(league = "NFL")
+```
+
+Let us use NCAA data for 2011 and NFL data from 2019 and 2018. 
+
+```{r}
+ncaa_with_yards <- ncaa_with_yards %>%
+  filter(Year == 2011)
+nfl_with_yards <- nfl_with_yards %>%
+  filter(Year == 2019 | Year == 2018)
+```
+
+It will be easier if we merge these two tibbles together. 
+
+```{r}
+all_yards <- bind_rows(ncaa_with_yards, nfl_with_yards)
+```
+
+We can glance at how much yardage information we have in each league. 
+
+```{r}
+all_yards %>%
+  group_by(league) %>%
+  count()
+```
+
+We observe that they are roughly the same. Before proceeding any further, we should visualize the yardage with an overlaid histogram. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(all_yards) + 
+  geom_histogram(aes(x = Yards, y = ..density.., fill = league),
+                 bins = 30, color = "gray",
+                 alpha = 0.7, position = "identity")
+```
+
+We state our hypothesis tests. 
+
+__Null hypothesis:__ In the population, the distribution of yardage information in the NFL is, on average, the same as in the NCAA. 
+
+__Alternative hypothesis:__ In the population, the distribution of yardage information in the NFL is, on average, different from the NCAA. 
+
+Note that the alternative hypothesis, unlike the tutoring program example, does not care whether the yardage information in the NFL is *higher* or *less* than that of the NCAA. It only states that some *difference* exists.  
+
+We can apply the same test statistic before but we take the absolute value of the difference to account for this change. 
+
+\[
+\text{test statistic} = | \mu_B - \mu_A | 
+\]
+
+Note how it does not matter which group ends up as A and likewise for B. Let's write a function to compute this statistic; it is a slight variation of the `mean_diff` we saw before. 
+
+```{r}
+mean_abs_diff <- function(a, b) {
+  return(abs(mean(a) - mean(b)))
+}
+```
+
+### The Test 
+
+We form two vectors `ncaa_yardage` and `nfl_yardage` that contain the yardage information with respect to the league. 
+
+```{r}
+ncaa_yardage <- ncaa_with_yards %>% pull(Yards)
+nfl_yardage <- nfl_with_yards %>% pull(Yards)
+```
+
+The observed value of the statistic can be computed as the following. 
+
+```{r}
+observed_statistic <- mean_abs_diff(ncaa_yardage, nfl_yardage)
+observed_statistic
+```
+
+We are now ready to perform the permutation test. As before, let us simulate the test statistic under the null hypothesis 10,000 times. 
+
+```{r}
+differences <- replicate(n = 10000, one_difference(ncaa_yardage, nfl_yardage, mean_abs_diff))
+```
+
+### Conclusion of the Test
+
+We are ready to visualize the results. 
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(tibble(differences)) + 
+  geom_histogram(aes(x = differences, y = ..density..), 
+                 col="grey", fill = "darkcyan", bins = 15) +
+  geom_point(aes(x = observed_statistic, y = 0), color = "salmon", size = 3)
+```
+
+The observed statistic is quite far away from the distribution of simulated test statistics. Let's do a quick numerical check. 
+
+```{r}
+sum(differences >= observed_statistic) / 10000
+```
+
+The chance of obtaining a mean absolute difference of $53.9$ is practically 0. We can safely reject the null hypothesis at a significance level over 99.9%. This confirms that the yardage information between NCAA and NFL players are likely, on average, to be different. 
