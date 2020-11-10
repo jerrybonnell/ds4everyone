@@ -327,8 +327,22 @@ The process is by calling the function `library(...)` where the part `...` repre
 
 Here are the two steps you follow to use a package whose name is `PACKAGE_NAME`.
 
+<<<<<<< HEAD
 To install, you enter `install.packages(PACKAGE_NAME)` and to use it, you enter
 `library(PACKAGE_NAME)`.
+=======
+To install, you enter
+
+```
+install.packages(PACKAGE_NAME)
+```
+
+and to use it, you enter
+
+```
+library(PACKAGE_NAME)
+```
+>>>>>>> ca3dd7a967fe361684623f7bc78b2a60c14d9a0c
 
 The package we will most frequently use in this course is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science.
 Once you have installed in, calling the package into your computation is as we stated earlier.
@@ -355,9 +369,6 @@ If a package has already undergone `library` in the current "session", the envir
 install.packages("tidyverse")
 library(tidyverse)
 ```
-
-
-
 
 
 ## Introduction to Tables {#introtables}
