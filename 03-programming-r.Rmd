@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # (PART) Programming fundamentals {-} 
 
 # Programming in R
@@ -64,6 +69,7 @@ We will introduce the types as they become necessary.
 Let us begin with the simple ones: numerals and arithmetic expressions.
 
 __Numerical Literals__
+
 *Numerical literals* are expressions of numbers with exact specifications of their values.
 There is no ambiguity in the expressions.
 Examples of numerical literals include `415`, `-3.56`, and `1956.5436781`
@@ -321,15 +327,8 @@ The process is by calling the function `library(...)` where the part `...` repre
 
 Here are the two steps you follow to use a package whose name is `PACKAGE_NAME`.
 
-To install, you enter
-```{r}
-install.packages(PACKAGE_NAME)
-```
-
-and to use it, you enter
-```{r}
-library(PACKAGE_NAME)
-```
+To install, you enter `install.packages(PACKAGE_NAME)` and to use it, you enter
+`library(PACKAGE_NAME)`.
 
 The package we will most frequently use in this course is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science.
 Once you have installed in, calling the package into your computation is as we stated earlier.
@@ -406,11 +405,11 @@ We can inquire about the data using `?`.
 The `?` sign inquires the R environment what it knows about the object whose name appears after the question mark.
 
 
-
-
 We operate on tables through functions. The call looks like 
 
 `function(table_name, arguments)`
+
+That is, the first argument of the argument series is the data frame you want to operate on.
 
 For example, if you want to see just the first two rows of a table, you can use the function `head()`.
 
@@ -418,11 +417,13 @@ For example, if you want to see just the first two rows of a table, you can use 
 head(trees, n=2)
 ```
 
-You can replace 2 by any number of rows. If you ask for more than 31, you will only get 31, because `trees` only has 31 rows.
+You can replace 2 by any number of rows. If you ask for more than 31, say `n=100`, you will only get 31, because `trees` only has 31 rows.
 
 __Choosing Sets of Columns__ 
 
-The method `select()` creates a new table consisting of only the specified columns.
+The method `select()` creates a new table consisting of data rows of your choice.
+If you place, the label of a column, the table you create consists only of the column.
+Below, we create a table consiting only of the `Height` column.
 
 ```{r, eval=FALSE, warning=FALSE, results='hide'}
 select(trees, Height)
@@ -449,7 +450,11 @@ knitr::kable(
   head(trees), booktabs = TRUE)
 ```
 
-You can select more than one column, by passing in a function call `c()` containing the column labels separated by commas. We will learn more about `c()` in later sections. 
+You can select more than one column, by providing a list of columns.
+The `c(...)` below allows you to create a list (of anything).
+In our specific case here, the elements of the list are two column labels `Height` and `Volume`.
+The syntax about using the `c` function is to have the elements list with a comma in between inside the parentheses.
+We will learn more about `c()` in later sections. 
 
 ```{r, eval=FALSE}
 select(trees, c(Height, Volume))
@@ -460,7 +465,8 @@ knitr::kable(
   head(select(trees, c(Height, Volume))), booktabs = TRUE)
 ```
 
-You can also *drop* columns you don't want. The table above can be created by dropping the *Girth* column. Note the use of the `-` operator. 
+You can also *drop* columns you do not want (in other words, "deselect"), using the `~` sign, which appears at the upper left corner on your keyboard.
+We can create the table by dropping the *Girth* column.
 
 ```{r, eval=FALSE}
 select(trees, -Girth)
@@ -471,7 +477,8 @@ knitr::kable(
   head(select(trees, -Girth)), booktabs = TRUE)
 ```
 
-You can name this new table and look at it again by just typing its name.
+You can name this new table using an assignment.
+You can then look at it again without reproducing it.
 
 ```{r, eval=FALSE}
 no_girth <- select(trees, -Girth)
@@ -484,11 +491,14 @@ knitr::kable(
   head(no_girth), booktabs = TRUE)
 ```
 
-`select()` can be used to create smaller tables while leaving the original table unchanged. In order to explore your data, you can create any number of smaller tables by using choosing or dropping columns. It will do no harm to your original data table.
+An important feature of `select` is the original data set remains the same.
+It essentially shows a new database through a selection process.
+By directing its action with an assignment, you can preserve the result of selection.
 
-__Sorting Rows__
+__Rearranging Rows of Data Table__
 
-The `arrange()` method creates a new table by arranging the rows of the original table in ascending order of the values in the specified column. Here the `trees` table has been sorted in ascending order of the heights of the trees.
+The `arrange()` method creates a new table by arranging the rows of the original table in ascending order of the values in a column that an argument specifies.
+Let us sort the `trees` in ascending order of the heights of the trees.
 
 ```{r, eval=FALSE}
 arrange(trees, Height)
@@ -512,10 +522,13 @@ knitr::kable(
 
 By default, `arrange()` sorts in increasing order of the values in the specified column. To sort in decreasing order, use the function `desc()` on the label of the column to be sorted. 
 
-Like `select()`, the `arrange()` function leaves the original table unchanged.
+Like `select()`, the `arrange()` function leaves the original table intact.
 
 __Selecting Rows that Satisfy a Condition__
 
+The `select()` function allows you to select columns.
+How about selecting rows?
+We can use the function `filter()`.
 The `filter()` function creates a new table consisting only of the rows that satisfy a given condition. In this section we will work with a very simple condition, which is that the value in a specified column must be equal to a value that we also specify.
 
 The code in the cell below creates a table consisting only of the rows corresponding to trees with heights greater than `80 ft`.
@@ -529,9 +542,11 @@ knitr::kable(
   filter(trees, Height > 80), booktabs = TRUE)
 ```
 
-The second argument, a condition, gives the label of the column and a range of values we are looking for in that column (i.e., all heights *greater* than 80). The `filter()` function can also be used when the condition that the rows must satisfy is more complicated.
+The second argument, which we call a *condition*, gives the label of the column and a range of values we are looking for in that column (i.e., all heights *greater* than 80). The `filter()` function can also be used when the condition that the rows must satisfy is more complicated.
+We will look into conditions later in this book.
 
-We may be interested in finding trees with an exact height, say `83 ft`. 
+Suppose we want to find all the trees whose height is exactly 83 feet.
+The way to specify "exactly equal to" is to put two equal signs with no gap.
 
 ```{r, eval=FALSE}
 filter(trees, Height == 83)
@@ -553,14 +568,16 @@ knitr::kable(
   filter(trees, Height == 93), booktabs = TRUE)
 ```
 
-The `filter()` correctly finds no rows because there are no trees that are `93 ft` tall in the table. If you happened to type this mistakenly, when you really meant `83 ft`, the result may be surprising. Take care to provide the value exactly. 
+The `filter()` finds no rows, which is correct because there are no trees that are `93 ft` tall in the table.
+What does this tell you?
+If you happened to type this mistakenly, when you really meant `83 ft`, the result may astound you.
+You have to be careful with the values you type.
 
 Like all the other table methods in this section, `filter()` leaves the original table unchanged.
 
 __Example: Fuel economy data for popular car models__
 
-The table `mpg` contains a subset of fuel economy data that the US Environmental Protection Agency makes [available online](http://fueleconomy.gov) on 38 popular models of car. Among the attributes
-in `mpg` are:
+The table `mpg` contains a subset of fuel economy data that the US Environmental Protection Agency makes [available online](http://fueleconomy.gov) on 38 popular models of car. Among the attributes in `mpg` are:
 
 * `displ`, a car’s engine size, in litres.
 
@@ -574,24 +591,30 @@ The first row contains information about a 1999 Audi a4.
 mpg
 ```
 
-We can create a new table called `jeeps` consisting of just the data for Jeep cars. 
+We can create a new table called `jeeps` consisting of just the data for Jeep cars.
 
 ```{r}
 jeeps <- filter(mpg, manufacturer == "jeep")
 jeeps
 ```
 
-The `mpg` table is sorted in alphabetical order of the manufacturer. To see which cars have the best fuel efficiency on the highway, it will be useful to sort the data by `hwy`. Remember that by default, the sorting is in increasing order.  
+The double quotation marks surrounding `jeep` are to specify that the character sequence is not the name of an object or the name of a column.
+We call data specifying exact character sequences *string li\terals*.
+
+The rows of the `mpg` table appear in alphabetical order of the manufacturer.
+To see which cars have the best fuel efficiency on the highway, it will be useful to sort the data by `hwy`.
+Remember that by default, the sorting is in increasing order.  
 
 ```{r}
 arrange(mpg, hwy)
 ```
 
-These figures are somewhat difficult to compare; in fact, this gives us cars with the *worst* fuel efficiency! To identify those most-efficient cars, we can sort in descending order of `hwy` and look at the top few rows. 
+These figures are somewhat difficult to compare; in fact, this gives us cars with the *worst* fuel efficiency! To identify those most-efficient cars, we can sort in descending order of `hwy` and look at the top few rows.
+The expression we use is `desc(hwy)`.
 
 ```{r}
 arrange(mpg, desc(hwy))
 ```
 
-The arranged table reveals that the most fuel efficient cars on the highway are manufactured by Volkswagen. Visualizing data this way can be a helpful aid in decision-making (and saving money :-)  
+The table with the rearrangement reveals that the most fuel efficient cars on the highway are Volkswagens. Visualizing data this way can be a helpful aid in decision-making (and saving money :-)  
 
