@@ -2,34 +2,104 @@
 
 # Programming in R
 
-Programming can dramatically improve our ability to collect and analyze information about the world, which in turn can lead to discoveries through the kind of careful reasoning demonstrated in the previous section. In data science, the purpose of writing a program is to instruct a computer to carry out the steps of an analysis. Computers cannot study the world on their own. People must describe precisely what steps the computer should take in order to collect and analyze data, and those steps are expressed through programs.
+The work of a data scietist consists of many aspects:
+* working with domain scientists to determine what questions need addressing
+* assembling a group of data into a data set for analysis
+* examining the data set to remove any unusable part
+* analyzing the data for addressing the questions
+* sharing the result with the domain scientists
+Some of these steps are quite mechanical and cumbersome, may repeat the same calculation over and over again.
+Some mistakes can lead to wrong conclusions, and you do not want to screw your data science job through simple mistakes.
+To err is human.
+You had better use some method that helps you minimize the chances of error.
+That's where computer programs come to rescue.
+
+## Computers
+
+A computer program is a sequence of characters with which to tell a computer how to perform its task.
+The history of computers is kind of long.
+Early in the 1800s, Charles Babbage invented a machine for calculation, calling it the ["Difference Engine"](https://www.computerhistory.org/babbage/engines/).
+Ada Lovelace, a daughter of English poet Lord Byron, collaborated with Babbage to develop ideas about what the engine could compute beyond addition and multiplication.
+Several attempts to build such mechanical systems to perform calculation had emerged until in the first half of the 1900s during which a series of innovations resulted in the invention of "computers".
+The new inventions used electricity as the source of energy, vacuum tubes for regulating electrical currents, separation between the brain that is responsible for computation and the storage for holding the final and intermediate results of computation, and punch cards for defining the calculation steps to follow.
+
+
+### Programming languages and Scripting Languages
+
+In the early days of modern computing, programmers had to provide instructions to computers using languages specific to the computers.
+However, as new computers emerged and the number of computers in use grew, there arose the need of languages that programmers can use in describing the instructions.
+That is the birth of modern, machine-independent programming languages.
+Allowing the use of machine-independent languages in writing programmings requires the creation of a layer that sits between programmers who code with universal languages and the computers who will execute the program but do not understand what the languages the programmers use.
+Early on, there was only one layer separating between the programmers and the computers.
+Nowadays there are multiple layers separating between them.
+What these layers do is outside the coverage of the course, we will skip it entirely.
+The key point is that a programmer can use a specific language to write what she intends to do with programmer.
+
+Many types of programming languages exist.
+One type is the *scripting language*.
+In a scripting language, a programmer "enters" an environment specific to the language and then executes her program "line by line".
+A *line* of a program is a sequence of characters which is syntactically complete according the syntax of the language.
+In a scripting language programming, a programmer completes writing of a line by pressing the *return key* (and the like), and then the environment immediately parses the line the programmer has entered regarding the syntax of the language and performs any action the line expresses.
+
+### Programming Language R
+
+We will use the programming language [R](https://www.r-project.org/) in this course.
+There are four major reasons for us to choose R as our language.
+* R is quite popular. There are many data scientists out there who enjoy conducting science using R.
+* There are so many R codes for the public use. You can adapt such programs to your own needs. Reciprocally, you can share your R codes with others. Some of the popular codes have become libraries, groups of R codes that you can use for specific purposes. You can download such libraries for your own use with a simple line of code.
+* R comes with dozens of data sets that you play with.
+* There exists an easy-to-install R programming environment [RStudio](https://rstudio.com/products/rstudio/download/), where not only can you write codes but also can create notebooks in which R codes and texts alternate.
+
+
+
 
 ## Expressions
 
-Programming languages are much simpler than human languages. Nonetheless, there are some rules of grammar to learn in any language, and that is where we will begin. In this text, we will use the [R](https://www.r-project.org/) programming language. Learning the grammar rules is essential, and the same rules used in the most basic programs are also central to more sophisticated programs.
+In R, executable "lines" must conform to the syntax of the language.
+If a programmer enters a syntactically incorrect line, the environment usually issues an "error message" with some information about why the line failed.
+Entering an incorrect line has not effect on the computing task the programming task she wants to carry out, which means there is nothing to be afraid of about making mistakes!
+A line of an R code consists of what we call *expressions*.
+Several types of expressions exist, serving as building blocks.
+We will introduce the types as they become necessary.
+Let us begin with the simple ones: numerals and arithmetic expressions.
 
-Programs are made up of *expressions*, which describe to the computer how to combine pieces of data. For example, a multiplication expression consists of a `*` symbol between two numerical expressions. Expressions, such as `3 * 4`, are *evaluated* by the computer. The value (the result of *evaluation*) of the last expression in each cell, `12` in this case, is displayed below the cell.
+__Numerical Literals__
+*Numerical literals* are expressions of numbers with exact specifications of their values.
+There is no ambiguity in the expressions.
+Examples of numerical literals include `415`, `-3.56`, and `1956.5436781`
+An important numerical literal type uses `e` to specify shifting of the decimal point.
+An example of this type is `5.07e-2`.
+The expression means "5.07 times 10 to the power of negative 2" and the value is equal to "0.0507".
+Similarly, `86.5e4` means "86.5 times 10 to the power of 4" and thus equals to `865000`.
+A slight detail that you may want to keep in mind that each value carries a fixed number of digits that it can correctly represent, and so you cannot be too specific about the value.
+For example, you can type `1.5454786e-10` to specify a value, but when an R environment reads the expression, it turns the value into something a bit off, e.g., `1.545479e-10`.
+
+__Arithmetic Expressions__
+
+You can construct mathematical expressions combining numerical literals and mathematical operations `+`, `-`, `*`, and `/` as we use in mathematics.
+Also, `^` represents exponentiation.
+The same order of operations applied when processing an expression with multiple types of operations in it.
+You can use parentheses, `(` and `)`, to changes the order.
+We often use other types of parentheses in writing mathematical expressions in English.
+However, the other types of parentheses have different meanings in R and so you cannot use them in writing mathematical expressions.
+
+When you type an arithmetic expression in an R environment and press the return key, the environment attempts to evaluate the expression.
+For example, entering `3.4 * (1.7 + 2.3)` produces `13.6` as the result and `2^5` produces `32`.
+Instead of `^` to mean exponentiation, you can use `**`.
+There should not be a space between the two `*`.
+
+Another important operation is `%`, which is the *remainder*.
 
 ```{r}
-3 * 4
+3.4 * (1.7 + 2.3)
+2^5
+2 ** 5
 ```
 
-The grammar rules of a programming language are rigid. In R, the `*` symbol cannot appear twice in a row. The computer will not try to interpret an expression that differs from its prescribed expression structures. Instead, it will show an error. The *syntax* of a language is its set of grammar rules, and the error here indicates that an expression structure doesn't match any of the rules of the language.
-
-```{r, error=TRUE}
-3 * * 4
-```
-
-Small changes to an expression can change its meaning entirely. Below, the space between the `*`'s has been removed. Because `**` appears between two numerical expressions, the expression is a well-formed *exponentiation* expression (the first number raised to the power of the second: 3 times 3 times 3 times 3). The symbols `*` and `**` are called *operators*, and the values they combine are called *operands*.
-
-```{r}
-3 ** 4
-```
-
-__Common Operators.__ Data science often involves combining numerical values, and the set of operators in a programming language are designed to so that expressions can be used to express any sort of arithmetic. In R, the following operators are essential.
+Below is the summary of the mathematical operations.
 
 ```{r, echo=FALSE}
-operators <- data.frame(Expression.Type=c("Addition", "Subtraction","Multiplication", "Division", "Remainder", "Exponentiation"), Operator=c("+", "-", "*", "/", "%", "**"), Example=c("2 + 3", "2 - 3", "2 * 3", "7 / 3", "7 % 3", "2 ** 0.5"), Value=c("5", "-1", "6", "2.66667", "1", "1.41421"))
+operators <- data.frame(Expression.Type=c("Addition", "Subtraction","Multiplication", "Division", "Remainder", "Exponentiation", "Exponentiation"), Operator=c("+", "-", "*", "/", "%", "**", "^"), Example=c("2 + 3", "2 - 3", "2 * 3", "7 / 3", "7 % 3", "2 ** 0.5", "2 ^ 0.5"), Value=c("5", "-1", "6", "2.66667", "1", "1.41421", "1.41421"))
 knitr::kable(operators, col.names = gsub("[.]", " ", names(operators)))
 # knitr::kable(
 #   head(mtcars[, 1:8], 10), booktabs = TRUE,
@@ -37,207 +107,274 @@ knitr::kable(operators, col.names = gsub("[.]", " ", names(operators)))
 
 ```
 
-R expressions obey the same familiar rules of precedence as in algebra: multiplication and division occur before addition and subtraction. Parentheses can be used to group together smaller expressions within a larger expression.
+Here is an example that shows the difference of having parentheses in the expression.
+The first one produces `10.00043` while the second `20000014`.
+
 
 ```{r}
-1 + 2 * 3 * 4 * 5 / 6 ** 3 + 7 + 8 - 9 + 10
+1 + 2 * 3 * 4 * 5 / 6 ** 7 + 8 - 9 + 10
 ```
 
 ```{r}
-1 + 2 * (3 * 4 * 5 / 6) ** 3 + 7 + 8 - 9 + 14
+1 + 2 * (3 * 4 * 5 / 6) ** 7 + 8 - 9 + 14
 ```
 
-This chapter introduces many types of expressions. Learning to program involves trying out everything you learn in combination, investigating the behavior of the computer. What happens if you divide by zero? What happens if you divide twice in a row? You don't always need to ask an expert (or the Internet); many of these details can be discovered by trying them out yourself.
 
-## Names 
+__Giving Names to Results__
+When you enter a mathematical expression like the one we presented in the above, R responds by printing the value resulting from its evaluation of the expression, but you cannot recall the value.
+You can *assign* a name to the value R produces and keep it for future use.
+The are three ways to designate the name and the expression in an assignment
 
-Names are given to values in R using an assignment statement. In an assignment, a name is followed by `<-`, which is followed by any expression. The value of the expression to the right of `<-` is *assigned* to the name. Once a name has a value assigned to it, the value will be substituted for that name in future expressions.
+`NAME <- EXPRESSION`
+
+`EXPRESSION -> NAME`
+
+`NAME = EXPRESSION`
+
+Here `NAME` and `EXPRESSION` respectively refer to the name and the expression you are using in the assignment.
+We call an expression with assigning action an *assignment*.
+For example, `a <- 3.4 + 4.2` means assigning the name `a` to the value of `3.4 + 4.2`.
+Once you have executed it, the assignment will persist until you make another assignment to `a` or you terminate the R environment program you are running.
+We call a named entity with a value an `object`.
+
+You can type `a` to look up the value it is representing at present.
+
+```{r, error=TRUE}
+a <- 3.4 + 4.2
+a
+a <- 5 * 15
+a
+barnie
+```
+
+The `[1]` has much to do with the internal workings of R and is very technical, and so we ignore it for a while.
+You see that the value the environment produces changes from `7.6` to `75` when you reassign a value to `a` the second time.
+The message `Error: object `barnie` not found` states that in the present session, you have not assigned any value to the name `barnie`.
+
+To define a name you can use the letters from the alphabet, both uppercase and lowercase, numerals, and the underscore `_`.
+A name cannot contain space or start with a numeral.
+
+
+__Recalling the Value of an Object by Its Name__
+You can write an expression contains an object name.
+When an R environment evaluates an expression, if it encounters a name, it tries to see whether an object by the name exists and if so, substitutes all of its occurrences in the expression with the present value of the object by the name.
+Otherwise, the environment produces an error message.
+
+```{r, error=TRUE}
+a / 5
+a <- barnie * 3
+```
+
+
+__Function Calls__
+
+Another type of expressions is the function call.
+A function is a code object that takes a certain number of objects/values for its execution.
+The expression to call a function for its action is `NAME(ARGS)`, where `NAME` is the name of the function object and `ARGS` is the series of object that the function uses in its calculation.
+The `ARGS` part appears as a list of objects a comma in between.
+The objects are order dependent.
+The function has the concept of the first object, the second object, and so on.
+We call them *arguments*.
+
+R comes with some functions that we are familiar with: `round`, `floor`, `ceiling`, and `abs` for the rounding, rounding down, rounding up, and absolute value functions, respectively.
 
 ```{r}
-a <- 10
-b <- 20
-a + b
+a <- -10.5
+round(a)
+floor(a)
+ceiling(a)
+abs(a)
 ```
 
-A previously assigned name can be used in the expression to the right of *<-*.
+Functions that you may have seen in mathematics courses are readily available in R. They are `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `log`, and `log10`, which are the sine, cosine, tangent, inverse sine, inverse cosine, inverse tangent, natural logarithm, and logarithm base 10, respectively.
+The unit of the argument is radian for the first three (i.e., 360 degrees are equal to $\pi$ radians).
 
 ```{r}
-quarter <- 1/4
-half <- 2 * quarter
-half
+sin(1)
+cos(1)
+tan(1)
+asin(-1)
+acos(-1)
+atan(1)
+log(10)
+log10(10)
 ```
 
-However, only the current value of an expression is assigned to a name. If that value changes later, names that were defined in terms of that value will not change automatically.
+There are mathematical functions that can take more than argument.
+The `max` and `min` functions are those that return the maximum and the minimum of the argument list, respectively.
+These functions accept any number of arguments.
 
 ```{r}
-quarter <- 4
-half
+max(4, 5, 3)
+min(1, 2, 3, 4, 5, 6)
 ```
 
-Names must start with a letter, but can contain both letters and numbers. A name cannot contain a space; instead, it is common to use an underscore character _ to replace each space. Names are only as useful as you make them; it's up to the programmer to choose names that are easy to interpret. Typically, more meaningful names can be invented than a and b. For example, to describe the sales tax on a $5 purchase in Miami, FL, the following names clarify the meaning of the various quantities involved.
+
+### Example: Pay Your Debt
+
+You may have heard from your friends and family members preaching you the importance of paying the debt.
+You can use R to do a hypothetical calculation of how quickly your debt would accumulate if you do not pay it.
+Suppose you load 1,000 dollars from an agency with the monthly interest rate of 1%, which means that after each month, not only do you still owe the money you owed one month ago but also you owe one percent of the money you owed.
+For example, after the first month of the mortgage in question, you not only owe the 1,000 dollars you loaned but also its 1 percent, 10 dollars.
+Altogether, at the end of the first month, you owe the total of 1,010 dollars.
+If you fail to repay, the same series of actions will happen after another month, increasing your total debt to 1,010.10 dollars.
+If you fail to repay, the same series of actions will happen.
+
+Let us see how this process balloons your if you DO NOT pay for one year.
 
 ```{r}
-purchase_price <- 5
-state_tax_rate <- 0.060
-county_tax_rate <- 0.01
-city_tax_rate <- 0
-sales_tax_rate <- state_tax_rate + county_tax_rate + city_tax_rate
-sales_tax <- purchase_price * sales_tax_rate
-sales_tax
+1000 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01
 ```
 
-### Example: Growth Rates
+The loan accumulate a little over 126 dollars as its interest.
 
-The relationship between two measurements of the same quantity taken at different times is often expressed as a *growth rate*. For example, the United States federal government [employed](http://www.bls.gov/opub/mlr/2013/article/industry-employment-and-output-projections-to-2022-1.htm) 2,766,000 people in 2002 and 2,814,000 people in 2012. To compute a growth rate, we must first decide which value to treat as the `initial` amount. For values over time, the earlier value is a natural choice. Then, we divide the difference between the `changed` and `initial` amount by the `initial` amount.
+The amount does not appear to be much.
+However, if the "principal amount* is large, the effect is substantial.
+For example, if you loan 200 thousand dollars,
+```{r}
+200000 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01
+```
+
+You owe 25,365 dollars as interest.
+
+The expression we used had 12 repetitions of 1.01.
+Using the exponentiation, we can simplify it.
 
 ```{r}
-initial = 2766000
-changed = 2814000
-(changed - initial) / initial
+200000 * 1.01 ^ 12
+200000 * 1.01 ** 12
 ```
 
-It is also typical to subtract one from the ratio of the two measurements, which yields the same value.
+Usually when you borrow money from a bank or a mortgage company, you set up a plan for repaying so that you pay the same amount throughout your mortgage.
+In other words, you pay a fixed amount at every anniversary (usually every month since the start).
+The bank or the mortgage company subtracts you payment from the amount of money you owe, and one month later will apply the interest rate to the money you now owe.
+The amount you pay monthly must be so that you owe no more or no less when you make the last payment.
+There is a formula that gives the monthly payment.
+$$
+\mathrm{monthly} = 
+\frac{\mathrm{principal} * \mathrm{rate}^{\mathrm{months}} * (\mathrm{rate} - 1)}{\mathrm{rate}^{\mathrm{months}}-1}
+$$
+Here $\mathrm{principal}$ is the money you borrow, $\math{rate}$ is the monthly rate as the ratio, and $\mathrm{months}$ is the duration of the loan in terms of the number of months. 
+
+Let us make R do the computation for us.
+Use objects `principal`, `rate`, `months`, and `monthly` to represent the four pieces of information appearing in the equation and `total` to represent the total payment, which is simply `monthly * months`.
 
 ```{r}
-(changed/initial) - 1
+principal <- 1000
+rate <- 1.01
+months <- 12
+monthly <- principal * rate ^ months * (rate - 1) / (rate ^ months - 1)
+total <- monthly * months
 ```
 
-This value is the growth rate over 10 years. A useful property of growth rates is that they don't change even if the values are expressed in different units. So, for example, we can express the same relationship between thousands of people in 2002 and 2012.
+What the values of `monthly` and `total`?
+R will tell you immediately.
 
 ```{r}
-initial <- 2766
-changed <- 2814
-(changed/initial) - 1
+monthly
+total
 ```
 
-In 10 years, the number of employees of the US Federal Government has increased by only 1.74%. In that time, the total expenditures of the US Federal Government increased from \$2.37 trillion to \$3.38 trillion in 2012.
+We talked about the possibility of not paying for one year.
+Let us use an object `balloon` to represent the amount.
 
 ```{r}
-initial <- 2.37
-changed <- 3.38
-(changed/initial) - 1
+balloon <- principal * rate ^ months
+balloon
 ```
 
-A 42.6% increase in the federal budget is much larger than the 1.74% increase in federal employees. In fact, the number of federal employees has grown much more slowly than the population of the United States, which increased 9.21% in the same time period from 287.6 million people in 2002 to 314.1 million in 2012.
+Assuming that in the case of not paying for one year, you pay all the debt, what is the difference between the two options, and what is the proportion of the difference to the principal?
+Let us use objects `diff` and `diff_percent` to represent the quantities.
 
 ```{r}
-initial <- 287.6
-changed <- 314.1
-(changed/initial) - 1
+diff <- balloon - total
+diff_percent <- diff / principal * 100
+diff
+diff_percent
 ```
 
-A growth rate can be negative, representing a decrease in some value. For example, the number of manufacturing jobs in the US decreased from 15.3 million in 2002 to 11.9 million in 2012, a -22.2% growth rate.
+So it is a little over 6% that you will have to pay more.
+In other words, we obtain the conclusion:
 
+* Assuming the rate is 1% per month and the loan is for 12 months, if you chose to pay out after 12 months paying none until then, you would have to pay slightly more than 6% of the principal than you would pay with the standard monthly payment program.   
+
+6% does not sound like a significant amount if the principal is small, but what iuf the principal is 20,000 dollars?
+The difference is 1,2000 dollars.
+You have the daily savings of 3 dollars and 28 cents.
+You get an extra cup of coffee at a coffee shop!
+
+
+## R Libraries
+
+The designers of R had statistical computing in mind.
+Because of the motivation, many mathematical functions are available as we have seen in the above.
+There are also, as mentioned earlier, groups of codes that you can use hwen necessary.
+We call those programs *packages*.
+[The list of R packages](https://cran.r-project.org/web/packages/available_packages_by_name.html) is quite long.
+Using an R package is in two stages.
+In the first stage, you download the package into your computer where the R environment can see.
+When you download an R environment and install it, its sets up the place for it hold the packages, so there is no need for your to worry about remembering where they are.
+The process is by calling the function `install_packages(...)` where the part `...` represents its argument, which is the name of the package.
+The packages you have installed are readily use-able in your computation.
+When you use one, you have tell the R environment you are using that package.
+The process is by calling the function `library(...)` where the part `...` represents its argument, which is the name of the package.
+
+Here are the two steps you follow to use a package whose name is `PACKAGE_NAME`.
+
+To install, you enter
 ```{r}
-initial <- 15.3
-changed <- 11.9
-(changed/initial) - 1
+install.packages(PACKAGE_NAME)
 ```
 
-An annual growth rate is a growth rate of some quantity over a single year. An annual growth rate of 0.035, accumulated each year for 10 years, gives a much larger ten-year growth rate of 0.41 (or 41%).
-
+and to use it, you enter
 ```{r}
-1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 * 1.035 - 1
+library(PACKAGE_NAME)
 ```
 
-This same computation can be expressed using names and exponents.
-
-```{r}
-annual_growth_rate <- 0.035
-ten_year_growth_rate <- (1 + annual_growth_rate) ** 10 - 1
-ten_year_growth_rate
-```
-
-Likewise, a ten-year growth rate can be used to compute an equivalent annual growth rate. Below, `t` is the number of years that have passed between measurements. The following computes the annual growth rate of federal expenditures over the last 10 years.
-
-```{r}
-initial <- 2.37
-changed <- 3.38
-t <- 10
-(changed/initial) ** (1/t) - 1
-```
-
-The total growth over 10 years is equivalent to a 3.6% increase each year.
-
-In summary, a growth rate `g` is used to describe the relative size of an initial amount and a changed amount after some amount of time `t`. To compute $changed$, apply the growth rate `g` repeatedly, `t` times using exponentiation.
-
-`initial * (1 + g) ** t`
-
-To compute `g`, raise the total growth to the power of `1/t` and subtract one.
-
-`(changed/initial) ** (1/t) - 1`
-
-
-## Call Expressions
-
-*Call expressions* invoke functions, which are named operations. The name of the function appears first, followed by expressions in parentheses.
-
-```{r}
-abs(-12)
-```
-
-```{r}
-round(5 - 1.3)
-```
-
-```{r}
-max(2, 2 + 3, 4)
-```
-
-In this last example, the `max` function is *called* on three *arguments*: 2, 5, and 4. The value of each expression within parentheses is passed to the function, and the function *returns* the final value of the full call expression. The `max` function can take any number of arguments and returns the maximum.
-
-Because the R language was written for use in statistical computing, many mathematical
-functions are available by default, such as `abs` and `round`. Other functions that are built into the R language, e.g., for loading in text from a URL or plotting visualizations, are stored in a collection of functions called a *package*. These can be imported by running the function call `library()`, such as `readtext` or `ggplot2`. These were used earlier to conduct the character analysis in Section \@ref(literary). Another useful package that this text will use is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for 
-doing data science. This can be imported in just one line. 
+The package we will most frequently use in this course is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science.
+Once you have installed in, calling the package into your computation is as we stated earlier.
 
 ```{r, warning=FALSE}
 library(tidyverse)
 ```
 
-This line will also indicate which functions from `tidyverse` conflict with functions in base R (or from other loaded packages). An error message may appear the first time this code is run, indicating "there is no package called `tidyverse`". The solution is to first install it, then run `library()` once again. 
+A package is a collection of objects.
+Each object has its name.
+Sometimes two packages contain objects having the same names.
+If such objects appear, the R environment warns you about the duplicate names, and chooses to use the most recent name assignment ignoring the earlier ones.
+Also, if you attempt to load a package with the `library` function and if the package needs installation, the R environment gives you a warning.
+Once you have installed the package, the warning will go away.
+package called `tidyverse`". The solution is to first install it, then run `library()` once again. 
+
+You can also install packages as many times you want.
+R environments are smart.
+If the package in the system is identical to the most current version of the package available on the R web site, the environment skips the installation process.
+A similar is true for the `library` function.
+If a package has already undergone `library` in the current "session", the environment ignores the duplicate `library` function calls.
 
 ```{r, eval=FALSE}
 install.packages("tidyverse")
 library(tidyverse)
 ```
 
-Operators and call expressions can be used together in an expression. The *percent difference* between two values is used to compare values for which neither one is obviously `initial` or `changed.` For example, in 2014 Florida farms produced 2.72 billion eggs while Iowa farms produced 16.25 billion eggs (http://quickstats.nass.usda.gov/). The percent difference is 100 times the absolute value of the difference between the values, divided by their average. In this case, the difference is larger than the average, and so the percent difference is greater than 100.
 
-```{r}
-florida = 2.72
-iowa = 16.25
-100*abs(florida-iowa)/((florida+iowa)/2)
-```
 
-Learning how different functions behave is an important part of learning a programming language. R Studio can assist in remembering the names and effects of different functions. When editing a code cell, press the *tab* key after typing the beginning of a name to bring up a list of ways to complete that name. For example, press *tab* after `log` to see all of the functions available that begin with `log`. Typing will narrow down the list of options. To learn more about a function, place a `?` before its name. For example, typing `?log` will bring up a description of the `log` function in the "Help" window.
 
-```{r, eval=FALSE}
-?log
-```
-
-The documentation indicates that `log` can be called with an argument providing a base. That is, `log` can be called with either one or two arguments.
-
-```{r}
-log(16, 2)
-```
-
-```{r}
-log(16)/log(2)
-```
-
-The list of [R's built-in functions](https://cran.r-project.org/doc/contrib/Baggott-refcard-v2.pdf) is quite long and includes many functions that will not be covered during the course. This is a list of the [packages in the core tidyverse](https://www.tidyverse.org/packages/#core-tidyverse). Explore these and the large collection of functions that are offered by each. This text will introduce the most important parts in context, rather than expecting the reader to memorize or understand these lists. 
 
 ## Introduction to Tables {#introtables}
 
-We can now apply R to analyze data. We will work with data stored in structures called data frames.
+We can now apply R to analyze data.
+In R, we often use a type of structure looking like a table for data processing.
+We call the structure of the data "data frames".
 
-Tables are a fundamental way of representing data sets. A table can be viewed in two ways:
+Tables are a fundamental way of representing data sets.
+We can view data horizontally and vertically.
+* Each vertical slice of the table (or column) represents a type of properties of the items appearing in the data set. We call these properties are *attributes* or *variables*.
+Each attribute has a name, which we call the column *label*.
+* Each horizontal slice sequence (or row) describes a set of attributes representing on item of data, which we call *observations* or *individuals*.
 
-* a sequence of named columns that each describe a single attribute of all entries in a 
-  data set, or
-* a sequence of rows that each contain all information about a single individual in a data set.
-  
-We will study tables in great detail in the next several chapters. For now, we will just introduce a few methods without going into technical details.
+We will use data frames with `tidyverse` in the following sections.
+Let us start with a few basics.
 
 First, let's load in the `tidyverse` package. 
 
@@ -245,7 +382,9 @@ First, let's load in the `tidyverse` package.
 library(tidyverse)
 ```
 
-The table `trees` has been imported for us; let's take a look at it.
+The package comes with a number of data sets.
+The table `trees` is one of them.
+We can confirm its existence by typing the expression `trees`.
 
 ```{r, eval=FALSE}
 trees
@@ -256,15 +395,18 @@ knitr::kable(
   head(trees), booktabs = TRUE, caption="A table showing the first 10 rows of trees data")
 ```
 
-This table provides measurements in felled black cherry trees. It has 31 rows. Each row corresponds to one tree. The trees are the *individuals* or *observations*.    
-
-Each tree has 3 *attributes*: girth, height, and volume. These are also called *variables*. Each column contains the data on one of these attributes, and so all the entries of any single column are of the same kind. Each column has a label. We will refer to columns by their labels.
-
-Much like how we can learn about a function using `?`, we can do the same for a table. 
-
+The table `trees` provides measurements in felled black cherry trees. It has 31 rows. Each row corresponds to one tree.
+Each tree has 3 *attributes*: girth, height, and volume.
+We can inquire about the data using `?`.
+=
 ```{r, eval=FALSE}
 ?trees
 ```
+
+The `?` sign inquires the R environment what it knows about the object whose name appears after the question mark.
+
+
+
 
 We operate on tables through functions. The call looks like 
 
