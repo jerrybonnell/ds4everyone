@@ -322,12 +322,14 @@ The process is by calling the function `library(...)` where the part `...` repre
 Here are the two steps you follow to use a package whose name is `PACKAGE_NAME`.
 
 To install, you enter
-```{r}
+
+```
 install.packages(PACKAGE_NAME)
 ```
 
 and to use it, you enter
-```{r}
+
+```
 library(PACKAGE_NAME)
 ```
 
@@ -356,9 +358,6 @@ If a package has already undergone `library` in the current "session", the envir
 install.packages("tidyverse")
 library(tidyverse)
 ```
-
-
-
 
 
 ## Introduction to Tables {#introtables}
@@ -404,8 +403,6 @@ We can inquire about the data using `?`.
 ```
 
 The `?` sign inquires the R environment what it knows about the object whose name appears after the question mark.
-
-
 
 
 We operate on tables through functions. The call looks like 
