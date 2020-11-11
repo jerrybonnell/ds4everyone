@@ -326,30 +326,10 @@ When you use one, you have tell the R environment you are using that package.
 The process is by calling the function `library(...)` where the part `...` represents its argument, which is the name of the package.
 
 Here are the two steps you follow to use a package whose name is `PACKAGE_NAME`.
-
-<<<<<<< HEAD
 To install, you enter `install.packages(PACKAGE_NAME)` and to use it, you enter
 `library(PACKAGE_NAME)`.
-=======
-To install, you enter
 
-```
-install.packages(PACKAGE_NAME)
-```
 
-and to use it, you enter
-
-```
-library(PACKAGE_NAME)
-```
->>>>>>> ca3dd7a967fe361684623f7bc78b2a60c14d9a0c
-
-The package we will most frequently use in this course is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science.
-Once you have installed in, calling the package into your computation is as we stated earlier.
-
-```{r, warning=FALSE}
-library(tidyverse)
-```
 
 A package is a collection of objects.
 Each object has its name.
@@ -365,10 +345,17 @@ If the package in the system is identical to the most current version of the pac
 A similar is true for the `library` function.
 If a package has already undergone `library` in the current "session", the environment ignores the duplicate `library` function calls.
 
+
+The package we will most frequently use in this course is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science.
+Once you have installed in, calling the package into your computation is as we stated earlier.
+
+
 ```{r, eval=FALSE}
 install.packages("tidyverse")
 library(tidyverse)
 ```
+
+
 
 
 ## Introduction to Tables {#introtables}
@@ -627,5 +614,16 @@ The expression we use is `desc(hwy)`.
 arrange(mpg, desc(hwy))
 ```
 
-The table with the rearrangement reveals that the most fuel efficient cars on the highway are Volkswagens. Visualizing data this way can be a helpful aid in decision-making (and saving money :-)  
+The table with the rearrangement reveals that the most fuel efficient cars on the highway are Volkswagens. By examining visualization of data, you can quickly obtain insights on the data.
+
+### What Is tidyverse?
+
+As we mentioned earlier, tidyverse is a collection packages, each having to do with data visualization and processing.
+The packages in the suite include:
+* ggplot2 for visualization (e.g., creating graphs)
+* dplyr for data manipulation (e.g., filtering, reordering, etc.)
+* readr for reading data from data files
+* stringr for manipulating string attributes
+* forcat for handling attributes with categories
+We can be ignorant about from which package the functions of tidyverse are from.
 
