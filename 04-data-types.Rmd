@@ -5,7 +5,9 @@ output:
 ---
 # Data Types and Vectors
 
-In this chapter we learn the principal data types of R and an important data structure "vector".
+In this chapter we learn four fundamental data types of R and an important data structure "vector".
+We also spend a bit of time studying the package `stringr`, which is part of `tidyverse`.
+
 
 ## Principal Data Types in R
 
@@ -603,7 +605,307 @@ c(79, a, 17)
 
 ## String Manipulations with `stringr`
 
+As we mentioned earlier, `tidyverse` is a collection of packages.
+One of the packages `tidyverse` contains is `stringr`, which offers a variety of methods for manipulating strings.
+Like numbers, a string is a vector of strings with just one string.
+So, applying a function to a string is the same as applying a function to a string vector.
+Depending on the roles, we can classify the functions in `stringr` roughly into the following categories:
+* Finding and locating matches of a pattern in each string in a string vector
+* Extracting subtrings and subvectors from a string vector matching a pattern
+* Inquiring about the lengths and padding/trimming the strings
+* Mutating the strings appearing in a string vector
+* Changing the structure of a vector
+* Sorting
+* Character set conversion and viewing
 
+### Regular expression
+
+The pattern matching functions of `stringr` accept *regular expressions*.
+A regular expression is a string that specifies a collection of strings in a possibly compact manner. Here are some examples of regular expressions and how one of the `stringr` functions `str_detect` uses it find patterns in string vector `c("May 17, 2019", "Certified mail", "FL 33333", "Oppa Locka", "to Mr. Haan", "arrived")`.
+The function `str_detect` receives two arguments. The first is a string (or a string vector) and the second is the pattern. The function returns for each element in the vector, whether the pattern appears.
+Let us first define a string vector with the five elements.
+
+```{r}
+s <- c("May 17, 2019", "Certified mail", "FL 33333", "Oppa Locka", "to Mr. Haan", "arrived")
+s
+```
+
+Now you see a bracket with a number other than 1.
+The `[5]` states that "to Mr. Haan" is the fifth element of the vector.
+
+Let us load `tidyverse` to being.
+
+```{r}
+library(tidyverse)
+```
+
+The pattern strings appearing in the following have the following meaning
+
+| pattern           | meaning                                                 |
+|-------------------|---------------------------------------------------------|
+|`"a"`              | any appearance of "a"                                   |
+|`"a[iy]"`          | any "a" then one of "i" or "y"                          |
+|`"a$"`             | "a" at the end of string                                |
+|`"^a"`             | "a" at the start of string                              |
+|`"^a.*d$"`         | "a" at the start, any string, and then a "d" at the end |
+|`"ppa"`            | "ppa"                                                   |
+|`"3{4}"`           | "3" repeated four times in sequence                     |
+|`"[aeiou].[aeiou]"`| one from "aeiou", some character, and one from "aeiou"  |
+
+
+```{r}
+s
+str_detect(s, "a")
+str_detect(s, "a[iy]")
+str_detect(s, "a$")
+str_detect(s, "^a")
+str_detect(s, "^a.*d$")
+str_detect(s, "ppa")
+str_detect(s, "3{4}")
+str_detect(s, "[aeiou].[aeiou]")
+```
+
+So, the syntax is:
+* use the square brackets to specify a list of characters
+* use the curly brackets to specify the number of repetitions
+* use the period to specify any character
+* use the caret "^" and the dollar sign to specify the start and the end of string, respectively
+* use * to specify any number of repetitions, including 0 repetitions.
+
+
+In the square brackets you can specify a range using a dash and the caret to mean "not".
+By putting a pair of numbers inside a pair of curly brackets, you can specify a permissible range of the number of repetitions.
+
+The patterns below mean the following:
+
+| pattern         | meaning                                        |
+|-----------------|------------------------------------------------|
+| `"[a-z]"`       | "a" through "z" at least one                   |
+| `"[A-Z]{2,5}"`  | "A" through "Z" between 2 and 5 times          |
+| `"[^a-zA-Z]"`   | a non-alphabet                                 |
+| `"[0-9]"`       | a numeral                                      |
+
+
+```{r}
+s
+str_detect(s, "[a-z]")
+str_detect(s, "[A-Z]{2,5}")
+str_detect(s, "[^a-zA-Z]")
+str_detect(s, "[0-9]")
+```
+
+There are some other details about regular expressions and matching, but we will not present them here.
+We will present any additional detail wherever we use it.
+
+### `stringr` Functions
+
+__Finding and locating matches__
+
+There are functions in this category.
+* `str_detect(STRING, PATTERN)`: As we have seen previously, the function returns a vector of Boolean representing whether the elements of `STRING` matching `PATTERN`.
+* `str_which(STRING, PATTERN)`: The function works like `str_detect` but instead of Boolean vector, returns the indexes at which the pattern appears; in other words, at which indexes, the value of `str_detect(STRING, PATTERN)` is true.
+* `str_count(STRING, PATTERN)`: The function returns for each element of `STRING`, at how many different positions the pattern aligns.
+* `str_locate(STRING, PATTERN)`: The function finds for each element of `STRING`, the first (or the closest to the start of string) match of the pattern and provides the start and end character positions of the first match as a pair of integers (that is, a length-2 vector of integers). If there are no matches for an element of `STRING`, the function returns a pair of `NA`.
+
+Let us recall `s`.
+```{r}
+s
+```
+
+Here is the result of finding "[0-9]" in the strings.
+
+```{r}
+str_which(s, "[0-9]")
+```
+
+Here is finding one of "aeiou" and any alphabet and counting the occurrences. Note that in "to Mr. Haan" there are two places that match the pattern `"[aeiou][A-Za-z]"`, that is "aa" and "an".
+The pattern counting goes by repeating the action of finding the first match and then asserting the characters leading to the end of the match unusable for finding matches. With the feature, after finding the first, "aa", the prefix "to Mr. Haa" is no longer available, and so "an" does not qualify as a match.
+
+```{r}
+str_count(s, "[aeiou][A-Za-z]")
+```
+
+So, if we find three numerals in sequence with no gap, the elements 1 and 3 have exactly one match each, though there are multiple possibilities for aligning the pattern.
+
+```{r}
+str_count(s, "[0-9]{3}")
+```
+
+Here is the result of locating the pattern of any alphabet then a sequence of letters from "aeiou" at least one in sequence.
+
+```{r}
+str_locate(s, "[A-Za-z][aeiou]+")
+```
+
+What does the comma appearing in the six rows represent?
+The comma represents that the  output of the function is actually is a data table and the series appearing after the comma is a row of the table whose row index is the number appearing before the comma.
+In the case of our experiment at hand, `[4,] 3 4` means that row 4 of the table has 3 and 4 as elements.
+To access the row at a specific position, we use the row index and then a comma, and to access the column at a specific position, we use a comma and then the column index.
+
+```{r}
+x <- str_locate(s, "[A-Za-z][aeiou]+")
+x
+x[,1]
+x[,2]
+x[1,]
+x[2,]
+```
+
+
+There is an extension of `str_locate_all' which finds all the matches constructs a two-dimensional table for each element.
+What function returns is thus a three-dimensional table.
+
+```{r}
+str_locate_all(s, "[A-Za-z][aeiou]+")
+```
+
+
+__Extracting subtrings and subvectors__
+
+Here are the functions in this category.
+* `str_sub(STRING, START, END)`: Creates a new vector consisting of the substrings of the elements of `STRING` with `START` and `END` as the staring and ending positions, respectively.
+* `str_subset(STRING, pattern)`: Creates a new vector keeping only those elements in `s` matching the pattern.
+* `str_extract(STRING, pattern)`: The same as `str_subset` concerning what to find, but the function returns a table not a one-dimensional vector.
+See the examples below to examine the differences among `str_subset`, `str_extract`, and `str_match`.
+
+```{r}
+str_sub(s, 4, 7)
+str_subset(s, "[a-zA-Z][^a-zA-Z]+[a-zA-Z]")
+str_extract(s, "[a-zA-Z][^a-zA-Z]+[a-zA-Z]")
+str_match(s, "[a-zA-Z][^a-zA-Z]+[a-zA-Z]")
+```
+
+Both `str_extract` and `str_match` have their version for "apply to all matches", like `str_locate_all`.
+Their names are `str_extract_all` and `str_match_all`.
+
+
+__Inquiring about the lengths and padding/trimming the strings__
+
+The following functions belong to this category.
+* `str_length(STRING)`: Returns the length of each element.
+* `str_pad(STRING, WIDTH, side=OPTION, pad=X)`:Appends the string `X` to both or either side of each element of `STRING` as many times as necessary so as to inflate the length of element to at least `WIDTH`. The `OPTION` is one of `"left"`, `"right"`, and `"both"` to indicate where the padding should occur. They respectively represent "the left side only", "the right side only", and "both sides so as to center the original". If the original has length greater than or equal to `WIDTH` no padding occurs. In the case of "both", if the number of necessary padding is an odd number to make the length equal to `WIDTH`, the right side receives one more than the left side. The padding sTring `X` must be a single character. You may omit the specification part `pad=` in `pad=X`.
+* `str_trunc(STRING, WIDTH, side=OPTION, ellipsis=E)`: This is in some sense at the opposite of `str_pad`. The function shrinks each string to length `WIDTH` with the single-character string `E` for replacement. The `side=` specification states where the replacement occurs and should be one of `"left"`, `"right"`, and `"center"`. You may omit the `ellipsis=` prefix.
+* `str_trim(STRING, side=OPTION)`: Trims the white space at the end. The option value is one of `"left"`, `"right"`, and `"both"`, which correspond to "the left side only", "the right side only", and "both sides".
+
+```{r}
+str_length(s)
+str_pad(s, 11, side="both", pad=".")
+str_pad(s, 10, side="left", ".")
+str_trunc(s, 3, side="right", ellipsis="_")
+str_trunc(s, 5, side="center", "#")
+str_trim("   abc    ", side="right")
+str_trim("   abc    ", side="both")
+```
+
+__Mutating__
+
+The first three functions execute substitutions to parts of each string.
+
+* `str_sub() <- VALUE`: Here the `str_sub()` part follows the syntax of the method we earlier discussed - the substrings with specific range of indexes inside strings. After this action, each substring will become `VALUE`.
+
+```{r}
+s <- c("May 17, 2019", "Certified mail", "FL 33333", "Oppa Locka", "to Mr. Haan", "arrived")
+```
+
+Since the `str_sub() <- VALUE` modifies the original, let us copy `s` to `scopy` and then execute the action on the copy, not the original.
+In that manner, we can preserve the original.
+Note the use of 0 and 0 in the second instance, the position range of 0 through 0 corresponds to the part before the start of the string.
+
+```{r}
+scopy <- s
+str_sub(scopy, 1, 3) <- "I am "
+scopy
+scopy <- s
+str_sub(scopy, 0, 0) <- "I am "
+scopy
+s
+```
+
+* `str_replace(STRING, PATTERN, REPLACEMENT)`: Replaces the first occurrence of `PATTERN` with `REPLACEMENT`.
+* `str_replace_all(STRING, PATTERN, REPLACEMENT)`: Replaces all occurrences of `PATTERN` with `REPLACEMENT`. Like `str_locate_all` the function finds a set of non-overlapping occurrences and then replaces all the occurrences it has identified.
+
+Both functions return the vector resulting from their action.
+The original remains intact.
+
+```{r}
+t <- s
+str_replace(t, "a", "oo")
+t <- s
+str_replace_all(s, "a", "oo")
+t <- s
+str_replace_all(s,"[0-9][0-9]", "##")
+```
+
+There are three more string mutation functions.
+* `str_to_lower(STRING)`: This converts each uppercase letter to its corresponding lowercase letter.
+* `str_to_upper(STRING)`: This converts each lowercase letter to its corresponding uppercase letter.
+* `str_to_title(STRING)`: This converts each string to a title-like format.
+
+Each fo the three methods returns a new vector.
+
+```{r}
+t <- s
+str_to_lower(s)
+t <- s
+str_to_upper(s)
+t <- s
+str_to_title(s)
+```
+
+__Changing the structure__
+
+We only show three methods in this category.
+
+* `str_dup(STRING, TIMES)`: Create from a vector `STRING`, a new vector where each element appears consecutively, without a gap, `TIMES` times.
+* `str_split_fixed(STRING, PATTERN, TIMES)`: Create a new table with one more dimension from `STRING` where each element expands to a vector of `TIMES` elements by splitting at occurrences of `PATTERN`. If there are less than `TIMES` occurrences of the pattern, the function appends `""` to make the length exactly `TIMES`.
+* `str_c(STRING)`: Collpoase the elements column-wise into a single dimensional vector.
+* `str_c(STRING, collapse=X)`: Concatenate the elements column-wise with `X` in between and then concatenate the elements row-wise with `X` in between, thereby generating a single-element vector.
+
+Below are examples.
+Note that the action of `str_split_dfisxed` generates a two-dimensional vector from `s`.
+
+```{r}
+t <- s
+str_dup(t, 3)
+```
+
+```{r}
+t <- str_split_fixed(s, "[0-9 ]", 2)
+t
+```
+
+```{r}
+t <- str_split_fixed(s, "[0-9 ]", 2)
+str_c(t)
+t <- str_split_fixed(s, "[0-9 ]", 2)
+str_c(t, collapse=":")
+
+```
+
+__Sorting__
+
+There are two functions.
+* `str_sort(STRING,decreasing=X,na_last=Y,numeric=Z)`: Sorts the elements as the string. The arguments after the first one are optional. `X`, `Y`, and `Z` are Boolean. With `decreasing=TRUE` the ordering is reverse. The `na_last=FALSE`, all `NA` move to the start. With `numeric=TRUE`, the function treats numerical sequences as numbers; otherwise, it treats them as character sequences.
+* `str_order(...)`: The same arguments as `str_sort`, but instead of actually sorting, returns the sequence of indexes such that ordering the elements according to the index list produces the same result as `str_sort`.
+
+```{r}
+t <- str_split_fixed(s, "[0-9 ]", 2)
+u <- str_c(t)
+str_sort(u)
+u <- str_c(t)
+str_sort(u, decreasing=TRUE)
+u <- str_c(t)
+str_order(u, decreasing=TRUE)
+```
+
+```{r}
+str_sort(t, decrease=TRUE)
+```
+
+
+__Character set conversion and viewing__
+
+We cdo not talk about these functions here.
 
 <!--
 ## Numbers 
