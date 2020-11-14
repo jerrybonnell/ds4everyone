@@ -1,0 +1,254 @@
+# Data Types
+
+Every value has a type, and the built-in type function returns the type of the result of any expression.
+
+One type we have encountered already is a built-in function. R indicates that the type is a `builtin`.
+
+```{r}
+typeof(abs)
+```
+
+This chapter will explore many useful types of data.
+
+## Numbers 
+
+Computers are designed to perform numerical calculations, but there are some important details about working with numbers that every programmer working with quantitative data should know. R (and most other programming languages) distinguishes between two different types of numbers:
+
+* Integers are called `integer` values in the R language. They can only represent whole numbers (negative, zero, or positive) that don't have a fractional component.
+* Real numbers are called `double` values (or *floating point values*) in the R language. They can represent whole or fractional numbers but have some limitations.
+
+`double` values are evident from the way they are displayed: they always have a decimal point. 
+
+```{r}
+# Some double values
+1.2
+```
+
+```{r}
+3.0
+```
+
+```{r}
+1.5 + 2.2
+```
+
+We can confirm these are doubles using the `typeof` function.
+
+```{r}
+typeof(3.0)
+```
+
+However, for numbers without a decimal point, i.e. integers, R will still treat them as `double`. 
+
+```{r}
+3  # here is a value that looks like an integer
+typeof(3) # ..but is actually a double!
+```
+
+Hence, to create an integer, we must specify this explicitly by placing an `L` directly after the number. Here are some examples.
+
+```{r}
+# Some integer values
+2L
+```
+
+```{r}
+1L + 3L
+```
+
+```{r}
+-123456789L
+```
+
+We can confirm these are integers using the `typeof` function.
+
+```{r}
+typeof(-123456789L)
+```
+
+Check out what happens when we try placing an `L` after a decimal value! 
+
+```{r}
+3.2L
+```
+
+When a `double` value is combined with an `integer` value using some arithmetic operator, then the result is always a `double` value. In most cases, two integers combine to form another integer, but any number (`integer` or `double`) divided by another will be a `double` value. Very large or very small `double` values are displayed using scientific notation.
+
+```{r}
+1.5 + 2L
+```
+
+```{r}
+3L / 1L
+```
+
+```{r}
+-12345678900000000000
+```
+
+We can use `typeof` to check these quantities. 
+
+```{r}
+typeof(1.5 + 2L)
+typeof(3 / 1)
+```
+
+The `typeof` an expression is the type of its final value. So, the `typeof` function will never indicate that the type of an expression is a name, because names are always evaluated to their assigned values.
+
+```{r}
+x <- 3L
+typeof(x) # The type of x is a integer, not a name
+typeof(x + 2.5)
+```
+
+### More About Doubles
+
+Double values are very flexible, but they do have limits. 
+
+1. A `double` can represent extremely large and extremely small numbers. There are limits, but you will rarely encounter them.
+2. A `double` only represents 15 or 16 significant digits for any number; the remaining precision is lost. This limited precision is enough for the vast majority of applications.
+3. After combining `double` values with arithmetic, the last few digits may be incorrect. Small rounding errors are often confusing when first encountered.
+
+The first limit can be observed in two ways. If the result of a computation is a very large number, then it is represented as infinite. If the result is a very small number, then it is represented as zero.
+
+```{r}
+2e306 * 10
+2e306 * 100
+2e-322 / 10
+2e-322 / 100
+```
+
+The second limit can be observed by an expression that involves numbers with more than 15 significant digits. These extra digits are discarded before any arithmetic is carried out.
+
+```{r}
+0.6666666666666666 - 0.6666666666666666123456789
+```
+
+The third limit can be observed when taking the difference between two expressions that should be equivalent. For example, the expression `2 ** 0.5` computes the square root of 2, but squaring this value does not exactly recover 2.
+
+```{r}
+2 ** 0.5
+(2 ** 0.5) * (2 ** 0.5)
+(2 ** 0.5) * (2 ** 0.5) - 2
+```
+
+The final result above is `0.0000000000000004440892098500626`, a number that is very close to zero. The correct answer to this arithmetic expression is 0, but a small error in the final significant digit appears very different in scientific notation. This behavior appears in almost all programming languages because it is the result of the standard way that arithmetic is carried out on computers. 
+
+Although `double` values are not always exact, they are certainly reliable and work the same way across all different kinds of computers and programming languages. 
+
+## Strings
+
+Much of the world's data is text, and a piece of text represented in a computer is called a *string*. A string can represent a word, a sentence, or even the contents of every book in a library. Since text can include numbers (like this: 5) or truth values (True), a string can also describe those things.
+
+### Prerequisites
+
+The `tidyverse` has some helpful functions from the `stringr` package for working with strings. Let's first load in the tidyverse.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+### Working with Strings
+
+In much the same way we can add together two numbers, we can add together two *strings*. The `str_c` function can accomplish this for us, which is an abbreviation for **str**ing **c**combine.   
+
+```{r}
+str_c("data", "science!")
+```
+
+`str_c` combined the two strings together without regard for their contents. It doesn't add a space because these are different words; that's up to the programmer (you) to specify.
+
+```{r}
+str_c("data", " ",  "science!")
+```
+
+Single and double quotes can both be used to create strings: `'hi'` and `"hi"` are identical expressions. Double quotes are often preferred because they allow you to include apostrophes inside of strings.
+
+```{r}
+"This won't work with a single-quoted string!"
+```
+
+Why not? Try it out.
+
+We can also construct strings with `str_c` that have embedded values.
+
+```{r}
+str_c("That's ", 1 + 1, ' ', TRUE)
+```
+
+### String Functions
+
+From an existing string, related strings can be constructed using string functions, which are functions that operate on strings. These methods are called by placing a dot after the string, then calling the function.
+
+For example, `str_to_upper` generates an uppercased version of a string.
+
+```{r}
+str_to_upper("loud")
+```
+
+Perhaps the most important function is `str_replace` (and its variant `str_replace_all`), which replaces instances of a substring within the string. Both functions take three arguments, the string, text to be replaced, and its replacement. The following replaces *all* occurrences of `hi` with `ma` in the string `hitchhiker`.
+
+```{r}
+str_replace_all("hitchhiker", "hi", "ma")
+```
+
+String functions can also be invoked using variable names, as long as those names are bound to strings. So, for instance, the following two-step process generates the word "degrade" starting from "train" by first creating "ingrain" and then applying a second replacement.
+
+```{r}
+s <- "train"
+t <- str_replace_all(s, "t", "ing")
+u <- str_replace_all(t, "in", "de")
+u
+```
+
+Note that the line `t <- str_replace_all(s, 't', 'ing')` doesn't change the string `s`, which is still "train". 
+
+```{r}
+s
+```
+
+
+## Comparisons 
+
+Boolean values most often arise from comparison operators. R includes a variety of operators that compare values. For example, `3` is larger than `1 + 1`.
+
+```{r}
+3 > 1 + 1
+```
+
+The value `TRUE` indicates that the comparison is valid; R has confirmed this simple fact about the relationship between `3` and `1 + 1`. The full set of common comparison operators are listed below.
+
+| Comparison         | Operator | True example | False Example |
+|--------------------|----------|--------------|---------------|
+| Less than          | <        | 2 < 3        | 2 < 2         |
+| Greater than       | >        | 3>2          | 3>3           |
+| Less than or equal | <=       | 2 <= 2       | 3 <= 2        |
+| Greater or equal   | >=       | 3 >= 3       | 2 >= 3        |
+| Equal              | ==       | 3 == 3       | 3 == 2        |
+| Not equal          | !=       | 3 != 2       | 2 != 2        |
+
+
+An expression can chain together multiple comparisons with the AND operator `&&`, and they all must hold in order for the whole expression to be `True`. For example, we can express that `1+1` is between `1` and `3` using the following expression.
+
+```{r}
+1 < (1 + 1) && (1 + 1) < 3
+```
+
+The average of two numbers is always between the smaller number and the larger number. We express this relationship for the numbers `x` and `y` below. You can try different values of `x` and `y` to confirm this relationship.
+
+```{r}
+x <- 12
+y <- 5
+min(x, y) <= (x + y)/2 && (x + y)/2 <= max(x, y)
+```
+
+Strings can also be compared, and their order is alphabetical. A shorter string is less than a longer string that begins with the shorter string.
+
+```{r}
+"Dog" > "Catastrophe" && "Catastrophe" > "Cat"
+```
+
+
+
+
+

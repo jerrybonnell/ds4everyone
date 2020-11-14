@@ -94,12 +94,17 @@ For example, entering `3.4 * (1.7 + 2.3)` produces `13.6` as the result and `2^5
 Instead of `^` to mean exponentiation, you can use `**`.
 There should not be a space between the two `*`.
 
-Another important operation is `%`, which is the *remainder*.
+Another important operation is `%%`, which is the *remainder*.
+Let X and Y be two doubles such that Y is not equal to 0.
+The value of the remainder of X divided by Y is the remainder when we keep either subtracting from X or adding to X the value of Y until the absolute value we generate from X is smaller than the absolute value of Y.
+Below, 10.0 contains 4 times 2.3.
+By subtracting 2.3 from 10.0 four times, we arrive at 0.8, which is the remainder.
 
 ```{r}
 3.4 * (1.7 + 2.3)
 2^5
 2 ** 5
+10.0 %% 2.3
 ```
 
 Below is the summary of the mathematical operations.

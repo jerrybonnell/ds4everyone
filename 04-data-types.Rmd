@@ -1,15 +1,611 @@
-# Data Types
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Data Types and Vectors
 
-Every value has a type, and the built-in type function returns the type of the result of any expression.
+In this chapter we learn the principal data types of R and an important data structure "vector".
 
-One type we have encountered already is a built-in function. R indicates that the type is a `builtin`.
+## Principal Data Types in R
+
+We previously talked about mathematical expressions and data sets.
+Our data sets take the form of tables, where the column representing attributes with labels and the rows represent the data objects.
+What do you expect to see as the value for an attribute belonging to an individual?
+More precisely, what kind of information comprises the thing you see in a cell of a table?
+If you break down the information into pieces in the framework of R, upi get to one of the four types:
+* a whole number, which we call the *integer* type,
+* a real number, which we call the *double* type,
+* a truth value representing true or false, which R calls the *logical* type and we commonly call the *Boolean* type, and
+* a character sequence, which R calls the *character* type and we commonly call the *string* type.
+
+### A quick overview of the data types
+
+We often call the logical type as the *Boolean* type.
+Some programming languages have multiple integer types and double types depending on how large (or how small) numbers they can represent.
+The vacuum tubes we mentioned earlier as one of the principal ideas in the early modern computers had the role of regulating flow of electricity.
+The architects of the machines used two conditions, the existence of current and the non-existence of current, for information coding.
+We used the word *bit* to present the dichotomy, 1 for having the current and 0 for not having the current.
+All the computer models that followed used the principle.
+An integer type consists of some fixed number of (for example, 32) bits.
+One of the bits for representing the sign (1 for negative numbers and 0 for non-negative numbers) and the rest are to represent the absolute value of the number with the power-of-2 denominations.
+The power-of-2 denominations consist of the powers of 2 in increasing order starting from the 0-th power (which is equal to 0): $2^0 = 1, 2^1 = 2, 2^2 = 4, 2^3 = 8, 2^4 = 16, \ldots$.
+We call this the *binary representation* as opposed to the *decimal representation* as we write numbers in our daily life.
+For example,
+$$
+0 \cdots 0 1 1 1 0 1
+$$
+in the representation is to represent by reading the bits from right to left,
+$$
+1 \cdot 2^0 + 0 \cdot 2^1 + 1 \cdot 2^2 + 1 \cdot 2^3 + 1 \cdot 2^4
+$$
+which is equal to $1 + 4 + 8 + 16 = 29$.
+This means that there is a limit to how large a positive whole number or how small a negative whole number R can accurately represent.
+If a number should go out of the range of accurately-presentable whole numbers, R switches to a oduble number using some approximation.
+
+To represent a double number, computers split the number of bits it can use to three parts: the sign (1 bit), the *significand*, and the *exponent*.
+How R uses the significand and exponents in representing a real number will be too technical. 
+Where the value of base is 2 or 10, depending the standard the system uses.
+
+$$
+(\mathrm{sign}) ~(\mathrm{number~significand~represents}) \cdot (\mathrm{base})^{\mathrm{number~exponent~represents}}
+$$
+<!-- The significand refers to a number greater than or equal to 1 and strictly less than 2. By subtracting one from the significand you get a number greater than or equal to 0 and strictly less than 1. R uses the inverse powers of 2 to represent the significand (minus 1): $1/2, 1/2^2, 1/2^3, 1/2^4, \ldots$. For example, 0.75 is equal to $1/2 + 1/4$ and so its significand (minus 1) is $110\cdots 0$.
+With $1$ that we have subtracted back in, $110\cdots 0$ represents $1.75$.
+The exponent part is the integer representation in a smaller scale: with one bit for the sign and the remaining exponent bits for the absolute value of the exponent.
+-->
+The representation in the significant part uses the inverse powers of 2: 1/2, 1/4, 1/8, $\ldots$, down to a certain value $1/2^m$, where $m$ is the length of the significand part.
+By combining these fractional quantities and the value of 1 we automatically add, we can obtain an approximation for a number between 1 and 2.
+Like integer, the double type thus has a range of numbers it can record an approximation.
+
+### Specifiying Whole Number Literals
+
+If you type a sequence of numerals with intention of specifying a whole number, R shows it as a whole number to you, but it internally processes it as a double number.
+If you want to ensure that the number remain a whole number, you attach the uppercase `L` after the numerals.
+
+You cannot attach the letter `L` to a numerical sequence with a decimal point.
+
+
+A *character* is a character sequence.
+We use a matching pair of double quotations or a matching pair of single quotation marks (a matching pair of apostrophes) to mark the start and the end of the character sequence we specify its contents.
+An advantage of using the double quotation marks is that single quotation marks can appear in the character sequence.
+
+Here are some examples of these data types.
+
+```{r}
+TRUE
+FALSE
+3675
+3657L
+-34
+1.07
+"programming languages"
+'United States of America'
+```
+
+Notice that the R substituted the single quotation marks we used for the last literal with double quotation marks.
+
+### The Function `typeof()`
+
+The function `typeof()` responds with the typoe of data.
+Let us see what it says about the literals we defined in the above.
+
+```{r}
+typeof(TRUE)
+typeof(FALSE)
+typeof(3675)
+typeof(3657L)
+typeof(-34)
+typeof(1.07)
+typeof("programming languages")
+typeof('United States of America')
+```
+
+The `typeof()` function is applicable to other staff.
+Recall that `abs` is the function that returns the absolute value of a number.
+If you ask R what type `abs` is, it says `builtin`.
 
 ```{r}
 typeof(abs)
 ```
 
-This chapter will explore many useful types of data.
+In the previous chapter, we saw some examples of using functions from the package `tidyverse`.
+One function was `filter()`.
+What is the type of `filter()`?
 
+```{r}
+library(tidyverse)
+typeof(filter)
+```
+
+__Combining Doubles and Integers__
+
+The double data type is an extension of the integer type.
+When a mathematical expression contains a double and an integer, the result is always a double.
+The third expression `4L + 1` adds an integer 4 and a double together and so is double.
+In the fourth one, 1 is also an integer, and so the result is an integer.
+We can confirm the types using `typeof()`.
+
+```{r}
+3.5 + 1.2
+3L + 1.3
+4L + 1
+4L + 1L
+typeof(4L + 1)
+typeof(4L + 1L)
+```
+
+
+### Finding the Size Limit
+
+How big numbers (or negative with big absolute value) can a double represent?
+To specify a double number with a large absolute value, we can use the `e` expression.
+If you type a literal that goes beyond the range, R gives you `Inf` or `-Inf` to mean that the number is out of range.
+Let's start with `e1000`.
+
+```{r, error=TRUE}
+-1.0e1000
+1.0e1000
+```
+
+So, using whether the result is `Inf` or not, we can explore around where between the boundary from the presentable numbers and the non-presentable numbers are:
+
+```{r, error=TRUE}
+1.0e500
+1.0e400
+1.0e300
+1.0e310
+1.0e305
+1.0e306
+1.0e307
+1.5e308
+1.6e308
+1.7e308
+1.8e308
+1.790e308
+```
+
+So, around `1.79e308` is the limit.
+The quantity is large enough so as to accommodate the computation we will do in the course.
+
+
+How about integers? We can do the same explorations with `L` at the end of the number literals.
+If you supply too big an integer that is presentable as a double, you get an error message saying that R must convert it to a double.
+Around 2,147,000,000 (2 billions and 247 millions), the boundary exists.
+
+## Strings and Their Operations
+
+There is a variety of operations that are available in the base R (that is, the R without library incorporation) for manipulating strings.
+A part of the `tidyverse` super-library is the `stringr` library.
+We will discuss some `stringr` functions later.
+Right now, let us introduce some of the standard functions of string manipulations in the base R.
+
+### Conversions to and from Numbers
+
+First of all, the characters are not compatible with numbers.
+You cannot apply mathematical operations to strings even if their character contents are interpret-able as numbers.
+In other words, `"4786"` is a character sequence with four characters, `"4"`, `"7"`, `"8"`, and `"6"`.
+It is not the number "four thousand, seven hundred, and eight-six".
+Knowing that the string can mean the number, we can generate an integer representing the number using the function `as.integer`.
+
+```{r}
+as.integer("4786")
+```
+
+The `as` functions are useful also when you want to interpret a string as a double and when you want to interpret a number as a string.
+The functions `as.double` and `as.character` converts a string to a double number and a number to a string, respectively.
+
+```{r}
+as.double("3.14")
+as.double("456")
+as.character(3.14159265)
+as.character(-465)
+```
+
+### Substring
+
+If you know the contents of the string, you can count the characters in the sequence to obtain its length.
+However, if you do not know or if the string is very long, you can rely on R to do the counting for you using `nchar`.
+
+```{r}
+nchar("310A Ungar Building, 1365 Memorial Drive, Coral Gables, Florida 33146")
+```
+A string is a sequence of characters.
+Each character composing a string receives a unique position.
+The positioning starts from the left end of the sequence.
+The first position has value 1.
+For example, the four characters of the string `"song"`, `"s"`, `"o"`, `"n"`, and `"g"` has positions 1, 2, 3, and 4, respectively.
+You can specify a string and two positions and obtain a new string consisting of the characters between the two positions.
+For example, the substring from position 2 to position 3 of the string "song" is "on".
+The name of the function is `substring`.
+The syntax is `substring(some_string, start, end)` where `some_string` from which we will build a substring, `start` is the staring position, and `end` is the ending position.
+
+```{r}
+substring("song", 2, 3)
+```
+
+You can omit the ending position if it is the last position of the string.
+If the starting number is less than -1, R adjusts it to 1, and
+if the ending number is greater than the length of the string, R adjusts it to the length of the string.
+If the ending position is smaller than the starting position, the substring is the empty.
+
+```{r}
+substring("song", 2)
+substring("song", -1, 6)
+substring("song", 2, 0)
+```
+
+
+
+
+### Pasting
+
+Often, we want to combine multiple into a single string.
+We call the action *concatenation*.
+There are two types of concatenation.
+One type connects strings with no gap, the other connects strings with on white space inserted in between.
+The two actions are `paste0` and `paste` in R.
+Below, we think of concatenating three strings `"data"`, `"science"`, and `"101"` with the two methods individidually.
+
+
+```{r}
+s <- "data"
+t <- "science"
+u <- "101"
+s
+t
+u
+stu <- paste0(s, t, u)
+s_t_u <- paste(s, t, u)
+stu
+s_t_u
+```
+
+
+
+
+## Boolean
+
+As we stated before, Boolean is the data type for logical values, true and false.
+`TRUE` is the value representing true and `FALSE` is the one representing false.
+When you use a number where R is expecting to see a Boolean, it interprets 0 as `FALSE` and any non-zero as `TRUE`.
+Here are the two values.
+
+```{r}
+TRUE
+FALSE
+```
+
+### Comparisons 
+
+While we can specify a Boolean value with a Boolean literal, we can use comparisons to generate Boolean values.
+In the case of numbers, we can compare the values of two mathematical expressions.
+There are six types of comparisons `==`, `!=`, `>` `>=`, `<`, and `<=`.
+They represent "is equal to", "is not equal to", "is greater than", "is greater than or equal to", "is smaller", and "is smaller than or equal to".
+For example, `1 + 4 > 7 - 4` asks if the value of `1 + 4` is strictly greater than the value of `1 - 7`.
+The former is 5 and the latter is -6, and so the answer to the comparison is in the affirmative.
+Therefore, the value of the comparison expression is `TRUE`.
+
+With the numbers 5 and 4, the results of comparing the two values with the six comparison operators are as follows:
+
+| Comparison               | Operator | True example | False Example |
+|--------------------------|----------|--------------|---------------|
+| Smaller than             | <        | 4 < 5        | 5 < 4         |
+| Greater than             | >        | 5 > 4        | 4 > 4         |
+| Smaller than or equal to | <=       | 4 <= 4       | 5 <= 4        |
+| Greater than or equal to | >=       | 5 >= 5       | 4 >= 5        |
+| Equal to                 | ==       | 4 == 4       | 5 == 4        |
+| Not equal to             | !=       | 5 != 4       | 4 != 4        |
+
+
+An expression can chain together multiple comparisons with the AND operator `&&`, and they all must hold in order for the whole expression to be `True`. For example, we can express that `1+1` is between `1` and `3` using the following expression.
+
+```{r}
+1 < (1 + 1) && (1 + 1) < 3
+```
+
+You may recall the functions `max` and `min` for obtaining the maximum and the minimum from a group of numbers, respectively.
+One thing to remember is that the minimum is greater than or equal to the average, and the maxim um is greater than or equal to the average.
+The equality holds when the two numbers in the group are all identical.
+Let us set some numbers to variables `x` and `y` and see what the maximum and the minimum functions produce.
+
+```{r}
+x <- 12
+y <- 5
+min(x, y) <= (x + y)/2
+max(x, y) >= (x + y)/2
+```
+
+How about the equality?
+Assuming that we have executed the previous section of the code, we can reuse `x` and `y` in the following computation.
+
+```{r}
+x <- 17
+y <- 17
+min(x, y) == (x + y)/2
+max(x, y) == (x + y)/2
+```
+
+__Boolean Operations__
+
+There are three fundamental Boolean operations.
+They are *negation*, *disjunction*, and *conjunction*.
+Negation flips the value of a Boolean.
+Disjunction tests if at least one of Boolean values appearing on a list is true and conjunction tests if all values appearing on a list are.
+R uses symbols `!`, `||`, and `&&` for them.
+Here are some examples of using the Boolean operations.
+
+```{r}
+a <- TRUE
+b <- FALSE
+c <- TRUE
+!a
+a || b || c
+a && b && c
+```
+
+The roles these operations play are analogous to the roles $-$, $+$, and $*$ play in the numbers.
+
+__Comparing Strings__
+
+R can compare strings for equality and non-equality using `==` and `!=`.
+R can also compare two to see if one is greater than the other and if one is smaller than the other.
+To compare two strings, R compares their characters position-wise, starting from the beginning.
+The position-wise continues until it reaches a position where either no comparison is possible because either at least one string has no characters remaining or the two strings showing non-identical pair of characters.
+In the first case, if R has run out of characters on both sides, it asserts that the two strings are equal to each other, otherwise, the one that has just run out of characters is smaller than the other.
+In the second case, R examines the *character code* of the two characters.
+R (and any programming language) uses a table of characters where each character has a unique number.
+The result of comparing two characters is that if the two characters are not equal to each other, then the character with at a lower position than the other is smaller than the other as character.
+
+
+```{r}
+a <- "Jason"
+b <- "Bourne"
+c <- "Matt"
+d <- "Damon"
+a < b
+a > b && c > d
+a > b || d < c
+!(a < b)
+```
+
+The examples below show how R interprets numbers to Boolean values.
+
+```{r}
+3.0 == TRUE
+-5 == FALSE
+0 == TRUE
+0 == FALSE
+```
+
+## Vectors
+
+You might have been wondering about the meaning of the `[1]` that appears when you inquire about the value of an expression.
+The square brackets `[]` in R means the position in a series of distinct elements.
+The `[1]` indicates that the value that follows is the first element of the series that contains the value.
+Wait! What we are saying here is that the value is not a standalone value "per se" but it appears as an element of a series.
+
+Encompassing a value in a series is a distinctive feature of R.
+In more technical terms, R uses *vectorization* to put objects in vectors.
+Suppose we have assigned a value of 10 to an object `a`.
+
+```{r}
+a <- 10
+```
+
+Then `a` is a *vector* containing one element, whose value is 10.
+If you type `a` as the expression, R returns
+
+```{r}
+a
+```
+
+The `[1] 10` appearing as the output states exactly that.
+
+The way we access an element of a vector is to state the position of the element in the sequence comprising the vector inside square brackets and attach it after the name of the vector.
+So, let us see what `a[1]` returns.
+The expression means to refer to the first element of `a`, which we know to be 10.
+
+```{r}
+a[1]
+```
+
+Wait a second, it still says `[1] 10`.
+Do you get `10` instead?
+Because a vector is the most primitive information structure that R uses, there is no smaller structure.
+This means that you can apply `[1]` as many times you want to `a`.
+
+```{r}
+a[1][1]
+a[1][1][1]
+a[1][1][1][1]
+a[1][1][1][1][1]
+```
+
+Since the number inside the brackets specifies a position, you can try a number other than 1.
+It is only that in the case of `a`, positions other than 1 do not exist.
+
+```{r}
+a[2]
+a[0]
+```
+
+What are these?
+`NA` is short-hard for "not available" and means that there is no such a thing.
+`numeric(0)` means that it is a vector with no elements.
+Once you get to length 0, `[1]` becomes `NA` but `[0]` produces `numeric(0)`.
+
+```{r}
+a[0][1]
+a[0][0]
+```
+
+`numeric(N)` with `N` produces a series having length `N` where each element if 0.
+So `numeric(0)` is a number sequence having 0.
+Similar operations are possible for `character` and `logical'.
+For `character`, the value is `""`, which is the string having length 0.
+For `logical`, the value is `FALSE`.
+
+```{r}
+series_n <- numeric(6)
+series_c <- character(8)
+series_l <- logical(7)
+series_n
+series_c
+series_l
+```
+
+We can then examine there contents and even change the values.
+Below we change the values of `series_n` at positions 2 and 4 to 2 and 4, respectively.
+
+```{r}
+series_n[2] <- 2
+series_n[4] <- 4
+series_n
+series_n[2]
+series_n[4]
+```
+
+Let's play with these series a bit more.
+In addition to specify a single position, you can give a range of positions, "from here to there".
+The syntax for a range specification is `FROM:TO` where `FROM` is the starting position and `TO` is the ending position.
+The code below changes the values for the 6 positions of `series_n` and then provides examples of some range indexing.
+
+```{r}
+series_n[1] = 3
+series_n[2] = 5
+series_n[3] = 7
+series_n[4] = 11
+series_n[5] = 13
+series_n[6] = 17
+series_n
+series_n[1:5]
+series_n[2:4]
+series_n[2:2]
+```
+
+If the `END` value is smaller than the `START` value, the elements appear in the reverse order.
+
+```{r}
+series_n[4:1]
+```
+
+
+You can use the negative sign in the range and position specification.
+The `-` sign means "all positions other than".
+If the negative sign appears with the `FROM` or the `TO` index, then the other index must have the negative sign.
+In the case of the negative ranging, the order between `FROM` and `TO` does not matter.
+
+```{r}
+series_n
+series_n[-3]
+series_n[-2:-4]
+series_n[-4:-2]
+```
+
+Can you specify a series of positions to generate a subsequence:?
+Yes, you can.
+For such an operation, it is good to know how to create a sequence with element specification.
+The creation of this kind uses the function `c`, which represents to "combine".
+The syntax is quite simple.
+Within the parentheses following the initial `c`, state the elements of the series with a comma in between.
+
+```{r}
+c(6, 2, 3)
+c("university", "colleges", "and", "schools")
+c(3.0, 4.0, 2.0, 2.2, -4.5, -25.7)
+```
+
+Using the `c` construction, you can obtain a subseries of a mother sequence with specific positions.
+R retrieves the elements individually, and whether the numbers repeat or whether the numbers are in order do not matter.
+
+```{r}
+series_n[c(1,3,4)]
+series_n[c(4,4,3,3,5,3,5,3)]
+```
+
+### The Combine Function
+
+Let us look at the combine more closely.
+We can define two series having the same lengths using the combine function.
+In two series having the same lengths, we can execute component-wise addition, subtraction, multiplication, division, and remainder.
+
+```{r}
+a <- c(2, 3, 4, 5, 1, 6)
+b <- c(9, 8, 7, 1, 2, 1)
+a + b
+a - b
+a * b
+a / b
+a %% b
+```
+
+We can also apply an identical action to every element of a series.
+
+```{r}
+a + 100
+a - 7
+a * 3
+b / 2
+b %% 3
+```
+
+Not only can we apply mathematical operations but also we can apply comparison.
+```{r}
+a > b
+a >= 3
+```
+
+Once you have a sequence of Boolean whose length is equal to the vector at hand, you can use that Boolean sequence (or vector) to select elements to generate subvectors.
+
+```{r}
+a[a > b]
+a[a >= 3]
+```
+
+You can access some properties of the number.
+`length`, `max`, and `min` provide the legnth of a vector, the maximum among the elements in a vector, and the minimum among the elements in it, respectively.
+Since the elements are comparable with each other, the maximum and minimum are available for string vector as well.
+
+```{r}
+length(a)
+max(a)
+min(a)
+ggg <- c("a", "b", "c", "aa", "bb", "cc")
+max(ggg)
+min(ggg)
+```
+
+In the case of numbers, the summation of all elements is possible.
+
+```{r}
+sum(a)
+```
+
+Another important feature of the function `c` is you can connect two vectors with `c`.
+Here we recall the vectors `a` and `b` from earlier and then present the difference between the component-wise addition `a + b` and the sequence connection `c(a, b)`.
+
+```{r}
+a
+b
+a + b
+c(a, b)
+```
+
+Since a single value is a vector, connecting a vector with a conspicuously single value are actually vector concatenation.
+You can connect more than two elements.
+
+```{r}
+c(a, 10)
+c(78, a)
+c(79, a, 17)
+```
+
+## String Manipulations with `stringr`
+
+
+
+<!--
 ## Numbers 
 
 Computers are designed to perform numerical calculations, but there are some important details about working with numbers that every programmer working with quantitative data should know. R (and most other programming languages) distinguishes between two different types of numbers:
@@ -66,11 +662,6 @@ We can confirm these are integers using the `typeof` function.
 typeof(-123456789L)
 ```
 
-Check out what happens when we try placing an `L` after a decimal value! 
-
-```{r}
-3.2L
-```
 
 When a `double` value is combined with an `integer` value using some arithmetic operator, then the result is always a `double` value. In most cases, two integers combine to form another integer, but any number (`integer` or `double`) divided by another will be a `double` value. Very large or very small `double` values are displayed using scientific notation.
 
@@ -250,5 +841,5 @@ Strings can also be compared, and their order is alphabetical. A shorter string 
 
 
 
-
+-->
 
