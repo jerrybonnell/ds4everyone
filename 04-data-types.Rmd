@@ -611,6 +611,7 @@ R provides programmers with convenient and powerful functions for creating and m
 The `mean` of a collection of numbers is its average value: the sum divided by the length. Each of the examples below performs a computation on the vector called `highs`.
 
 ```{r}
+highs <- c(87.5, 87.5, 66.5, 90.0, 65.5, 71.0)
 length(highs)
 ```
 
@@ -851,6 +852,7 @@ str_detect(s, "[0-9]")
 
 There are some other details about regular expressions and matching, but we will not present them here.
 We will present any additional detail wherever we use it.
+
 
 ### `stringr` Functions
 
