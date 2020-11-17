@@ -657,6 +657,7 @@ Each of these functions takes some vector `x` as an argument and returns a vecto
 | `sort(x)`          | Sort the elements                                                    |
 
 
+<!--
 The `stringr` package from the tidyverse provides us a collection of useful functions for working with character vectors. A full cheat sheet can be found [here](https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf), but listed here are some of the commonly used ones. Following are functions that take a character vector `x` as an argument and return a vector.  
 
 | **Function**        | **Description**                                              |
@@ -694,7 +695,7 @@ The following function is a helpful diagnostic tool to view matched patterns.
 | **Function**         | **Description**                                                                  |
 |----------------------|----------------------------------------------------------------------------------|
 | `str_view_all(x, pattern)` | Visualizes all pattern matches in vector `x`                |
-
+-->
 
 ## Lists 
 

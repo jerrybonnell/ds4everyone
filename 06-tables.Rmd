@@ -1,3 +1,194 @@
-# Tables 
+# Tables
 
-chapter on tables begins here
+In the previous chapter, we studied the `stringr` package, which is part of
+`tidyverse`. In this chapter, we introduce some other packages from `tidyverse`.
+Since calling up `tidyverse` automatically calls up the packages it  contains,
+there is no need for you to memorize where those packages come from and call up
+the individual packages as you need to use them.
+Data scientists often refer to the importance of data cleaning, stating that
+without data cleaning no data analysis results are meaningful. Some are even
+bolder to say that the most important process in data science is data cleaning
+because from their point of view, the analysis process after data cleaning is a
+routine to a great degree.
+
+## Data Formats
+
+The data sets that data scientists handle are quite often *rectangular* tables.
+In a rectangular table, the rows have an identical number of cells and the columns have an identical number of cells, thus allowing accessing any cell by specifying a row and a column together. A conventional structure of a rectangular data in R is as follows:
+
+* The rows represent individual objects, whose information is available in the data set.
+* The columns represent individual properties, about which the data set provides information for each object. We often call the properties *attributes* as well as *variables*.
+* The columns have unique names. We call then *attribute names* and *variable names*. If the names are unique, we use "attributes" and "variables" for "attribute names" and "variable names",
+respectively.
+* The rows may have unique names. If they do, either there is an attribute specifically for the names or the table offers the row names as additional information.
+
+
+### Data Sets Readily Available in `tidyverse`
+
+The `tidyverse` package comes with scores of data sets.
+
+```{r}
+library(tidyverse)
+```
+
+By typing `data()` you can see a list of data sets available in the RStudio environment you are in. If you do not call up `tidyverse` the list is probably short. For each data set you see on the list, you can inquire for some details, if there is any information available. To see the information, you type the name of the data set with a single question mark in front of it.
+
+The Motor Trend Car Road Test data set `mtcars` is one data set available through `tidyverse`.
+
+```{r}
+?mtcars
+```
+
+Now let us load the data set by executing a simple assignment.
+We call the data set by the name `myc`.
+
+```{r}
+myc <- mtcars
+```
+
+
+You can check the contents of `myc` by typing its name.
+
+```{r}
+myc
+```
+
+*Data frame* is a term R uses to refer to data formats like the `mtcars` data set.
+In its simplest form, a data frame consists of single-dimensional vectors where each vector has a name.
+This data set has row names.
+We learn of the existence of row names when we see that R prints the data without a column name for the row names.
+
+You can access an individual attribute (other than the row name information, which is not an attribute) by attaching the dollar sign to the name of the data frame and then the attribute name.
+For example, by typing `myc$cyl`, you get the entire sequence for the column `cyl`.
+Alternatively, if you know the position of the attribute in the data set, you can attach a pair square brackets with a comma and the position to get to the vector.
+The `cyl` is at position 2 of the data, so the following two produces the same results.
+
+```{r}
+myc$cyl
+myc[,2]
+```   
+
+How do you access a row of the data set?
+Since the data set has row names, we can use a row name to access a row.
+The syntax is different from the one for column access, though.
+We use the square brackets instead of the dollar sign and inside the brackets place the row name and a comma.
+
+Let us see what appear as the row names of the data set.
+You can use `row.names(DATA_SET_NAME)` to obtain the listing of the row names.
+
+```{r}
+row.names(myc)
+```
+
+Let us grab the row for "Datsun 710".
+
+```{r}
+myc["Datsun 710",]
+```
+Since the row is the third one, we can use `[3,]` instead.
+
+```{r}
+myc[3,]
+```
+
+In summary, to access the columns and the rows, here are the rules we should follow:
+
+* We use a pair `DATA_SET_NAME[X,Y]` to access a cell at row position `X` and column position `Y`, where `DATA_SET_NAME` is the name of the data set and `X` and `Y` are positive integers.
+* If we omit the X-part, like `DATA_SET_NAME[,Y]`, the expression specifies the entire column at position `Y`. If `S` is the name of the column, we can use an alternate expression `DATA_SET_NAME$S`.
+* If we omit the Y-part, like `DATA_SET_NAME[X,]`, the expression specifies the entire row at position `X`. If the data set has row names and `W` is the name of the row at position `X` (that is, it must be a string), we can substitute the index with the name as in `DATA_SET_NAME[W,]`.
+
+### Examining the Rows, Columns, Cells, and Row Names
+
+You can use the function `unique` to obtain the unique values.
+We find that there are three possibilities 4, 6, and 8.
+
+```{r}
+unique(myc$cyl)
+```
+
+We already know how to inquire about the maximum, minimum, etc. for a vector.
+Let us check out the `mpg` attribute (which is Miles Per Gallon) in terms of the maximum, the minimum, and the listing in the increasing order.
+
+```{r}
+max(myc$mpg)
+min(myc$mpg)
+sort(myc$mpg)
+```
+
+```{r}
+filter(myc,mpg == 33.9)
+```
+
+The function comes from a `tidyverse` package `dplyr`.
+We will study `dplyr` next.
+
+### Building a data set from its components.
+
+Before moving on to `dplyr`, let us see how you can create a data set.
+Suppose you have tests scores in Chemistry and Spanish for four people, Gail, Henry, Irwin, and Joan.
+You can create three vectors, `names`, `Chemistry`, and `Spanish` each represening the names, the scores in Chemsitry, and the scores in Spanish, and then assemble them into a data file using the function `data.frame`.
+The `data.frame` takes a series of columns as arguments.
+The columns appear in the data set as you specify them in the arguments.
+You can specify the names of the rows using an optional argument `row.names=`.
+
+
+```{r}
+names <- c("Gail", "Henry", "Irwin", "Joan")
+Chemistry <- c( 99, 98, 80, 92 )
+Spanish <- c(87, 85, 90, 88)
+ddd <- data.frame(Chemistry, Spanish, row.names = names)
+```
+
+Let us see how we can access the data on the tiny data set `ddd`.
+
+```{r}
+ddd$Chemistry
+ddd$Spanish
+row.names(ddd)
+ddd["Henry",]
+```
+
+### Reading Data from an External Source
+
+Usually data scientists need to load data from files.
+The package `readr` of `tidyverse` offers ways for that.
+Let us start with loading `tidyverse`.
+
+```{r}
+library(tidyverse)
+```
+
+With the package `readr` can you read from, among others, comma-separated files (CSV files) and tab-delimited files (TAB files).
+To read files, we specify in a string the location of the file and then use the function for reading the file, `read_csv` if it is a CSV file and `read_tab` if it is a TAB file.
+Here is an example of reading from a URL of a file available on the internet.
+
+```{r}
+path <- "https://data.bloomington.in.gov/dataset/117733fb-31cb-480a-8b30-fbf425a690cd/resource/2b2a4280-964c-4845-b397-3105e227a1ae/download/pedestrian-and-bicyclist-counts.csv"
+data <- read_csv(path)
+```
+
+The data set shows the traffic in the city of Bloomington, the hometown of the Indiana University at Bloomington.
+You can change the head part of the data by the function `head`.
+The function call `head(DATA_SET_NAME)` produces some first rows of the data set `DATA_SET_NAME`.
+
+```{r}
+head(data)
+```
+Note that some attributes have space in them.
+To access the column corresponding of the attribute, you cannot simply type of the attribute because of the white space.
+You need to put the names in a matching pair of quotes (single quotes, double quotes, and backquotes will do).
+
+```{r}
+data$"N College and RR"
+```
+
+## Creating and Removing
+
+## Adding More Data
+
+## Transposing
+
+## Handling Blanks (aka "NA")
+
+## Saving Data Frames
+
