@@ -194,7 +194,7 @@ Using simulations we learn that the Null Hypothesis has a p-value of 6.6% (or 0.
 ## Case Study: Entering Harvard
 
 Harvard University is one of the most, if not the most, prestigious universities in the United States. A recent lawsuit by [Students for Fair Admissions (SFFA)](https://studentsforfairadmissions.org/) led by Edward Blum against Harvard University alleges that Harvard has used soft racial quota to keep the numbers of Asian-Americans low.
-Put differently, the allegation claims that, from the pool of Harvard-admissible American applicants, Harvard uses a racial discriminatory score that allows the college to choose disproportionately less Asian-Americans. As of this writing, the lawsuit is currently in a Federal Appeals Court.
+Put differently, the allegation claims that, from the pool of Harvard-admissible American applicants, Harvard uses a racial discriminatory score that allows the college to choose disproportionately less Asian-Americans. As of this writing, the lawsuit has been appealed and is to appear before the Supreme Court.
 
 This section examines the "Harvard model" to assess, at a basic level, the claim put forward by the lawsuit.  
 
@@ -387,21 +387,21 @@ set.seed(1)
 
 ### A midterm grumble? 
 
-CSC220 is an introductory Computer Science course at the University of Miami. One offering of the course had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads the section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following a exam?
+A Computer Science course at the University of Miami had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads the section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following a exam?
 
 If we were to fill that lab section with randomly selected students from the class, it is possible that their average midterm grade will look a lot like the score the grumbling students are unhappy about. It turns out that what we have stated here is a chance model that we can simulate. 
 
-Let's have a look at the data from each (anonymized) student in the course. The following tibble `csc220` contains midterm and final scores, and the lab section the student is enrolled in. 
+Let's have a look at the data from each (anonymized) student in the course. The following tibble `csc_labs` contains midterm and final scores, and the lab section the student is enrolled in. 
 
 ```{r message = FALSE, warning = FALSE}
-csc220 <- read_csv("data/csc220.csv")
-csc220
+csc <- read_csv("data/csc_labs.csv")
+csc
 ```
 
 We can use the dplyr verb `group_by` to examine the mean midterm grade as well as the number of students in each section. 
 
 ```{r message = FALSE}
-lab_stats <- csc220 %>%
+lab_stats <- csc %>%
   group_by(section) %>%
   summarize(midterm_avg = mean(midterm),
             count = n())
@@ -423,7 +423,7 @@ __Alternative Hypothesis:__ The section H midterm grades are too low.
 To form a random sample, we will need to sample *without* replacement 9 students from the course to fill up the theoretical "lab section H".  
 
 ```{r}
-random_sample <- csc220 %>%
+random_sample <- csc %>%
   select(midterm) %>%
   slice_sample(n = 9, replace = FALSE)
 random_sample
@@ -439,7 +439,7 @@ Now that we know how to simulate one value, we can wrap this into a function.
 
 ```{r}
 one_simulated_mean <- function(x) {
-  random_sample <- csc220 %>%
+  random_sample <- csc %>%
     select(midterm) %>%
     slice_sample(n = 9, replace = FALSE)
   return(mean(pull(random_sample, midterm)))
@@ -517,7 +517,7 @@ Regardless of the cut-off point, a significance level states that if an observed
 
 ### The verdict: is the TA guilty? 
 
-We can set a modest significance level at 95% for the CSC220 case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level if so. 
+We can set a modest significance level at 95% for the course case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level if so. 
 
 We overlay the observed statistic on the empirical histogram. As before, the orange bars show the 95% significance region.
 
@@ -695,15 +695,17 @@ ggplot(tibble(differences)) +
 
 First observe how the distribution is centered around 0. Under the assumption of the null hypothesis, there is no difference between the final exam averages in the two course offerings and, therefore, the difference clusters around 0. 
 
-Also observe that the observed test statistic is also somewhat close to the center. To get a better sense of how close, we should compute the P-value. 
+Also observe that the observed test statistic is quite far from the center. To get a better sense of how far, we compute the P-value. 
 
 ```{r}
 sum(differences >= observed_statistic) / 10000
 ```
 
-This means that the chance of obtaining a mean difference at least as large as $4.92$ is around 15%. By standards of the conventional cut-off points we have discussed, this would not bring enough convincing evidence to refute the null hypothesis. 
+This means that the chance of obtaining a mean difference at least as large as $6.10$ is around 8%. By standards of the conventional cut-off points we have discussed, we would have enough evidence to refute the null hypothesis at a 90% significance level. Would this be enough to convince us that the tutoring program is indeed effective? Let us consider for a moment what it would mean if it does not. 
 
-An important remark must be made: this does *not* mean we take the null hypothesis to be true, bearing the implication that the tutoring program is ineffective. Indeed, the permutation test only evaluated one criteria -- that is, difference in final exam scores -- as a measure for improvement. There are other criteria we did not consider, like class participation, which may have benefited from the program. It would be up to the judgment of the department on how to use these results in deciding the merit of the tutoring program. 
+If we were to demand a higher significance level, say 95%, our observed statistic is no longer significant. The logical next step would be to conclude that the null hypothesis is true, bearing the implication that the tutoring program is ineffective. This would be a statistical fallacy! Even if our results are not significant at the desired level, we do *not* take the null hypothesis to be true. Put another way, we fail to reject the null hypothesis. That is a mouthful! 
+
+The problem here is a lack of evidence. A lack of evidence does not prove that something *does not* exist, e.g., the tutoring program is *not* effective; it very well could be, but our study missed it. Indeed, our permutation test only evaluated one criteria -- that is, difference in final exam scores -- as a measure for improvement. There are other criteria we could have considered, like class participation, which may have benefited from the program. It would be up to the judgment of the department on how to use these results in deciding the merit of the tutoring program. 
 
 ### Another Permutation Test: NFL and NCAA players 
 

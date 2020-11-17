@@ -3,9 +3,11 @@ output:
   pdf_document: default
   html_document: default
 ---
+
 # Testing Hypotheses
 
-Data scientists are often faced with yes-no questions about the world. You have seen some examples of such questions in this course:
+see comments
+<!-- Data scientists are often faced with yes-no questions about the world. You have seen some examples of such questions in this course:
 
 * Is chocolate good for you?
 * Did water from the Broad Street pump cause cholera?
@@ -856,5 +858,5 @@ In such a situation, one way to validate the reported result is by replicating t
 ### Technical Note: The Other Kind of Error
 
 There is, of course, another kind of error: concluding that the treatment does nothing when in fact it does something. Discussions of that error are outside the scope of this course. Just be aware that life isn't easy: if you set up your test to reduce one of the two errors, you almost always increase the other one.
-
+--> 
 
