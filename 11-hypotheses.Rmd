@@ -423,7 +423,7 @@ __Alternative Hypothesis:__ The section H midterm grades are too low.
 To form a random sample, we will need to sample *without* replacement 9 students from the course to fill up the theoretical "lab section H".  
 
 ```{r}
-random_sample <- csc220 %>%
+random_sample <- csc %>%
   select(midterm) %>%
   slice_sample(n = 9, replace = FALSE)
 random_sample
@@ -439,7 +439,7 @@ Now that we know how to simulate one value, we can wrap this into a function.
 
 ```{r}
 one_simulated_mean <- function(x) {
-  random_sample <- csc220 %>%
+  random_sample <- csc %>%
     select(midterm) %>%
     slice_sample(n = 9, replace = FALSE)
   return(mean(pull(random_sample, midterm)))
@@ -517,7 +517,7 @@ Regardless of the cut-off point, a significance level states that if an observed
 
 ### The verdict: is the TA guilty? 
 
-We can set a modest significance level at 95% for the CSC220 case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level if so. 
+We can set a modest significance level at 95% for the course case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level if so. 
 
 We overlay the observed statistic on the empirical histogram. As before, the orange bars show the 95% significance region.
 
