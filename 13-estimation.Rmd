@@ -5,248 +5,764 @@ output:
 ---
 # Estimation
 
-As we mentioned earlier, the maximum, the minimum, and the medians are part of what we call "order statistics".
-Order statistics are values at certain positions in numerical data.
-We expand the concept of order statistics in this chapter and learn about percentiles and quartiles.
-We then learn a very important technique in data science *bootstrapping* to produce distributions from a sample.
-We apply the order statistics to the distributions we generate using bootstrapping and obtain confidence intervals.
+The previous chapters have developed ways to show how to use data to decide between competing questions about the world. For instance, does Harvard enroll proportionately less Asian-Americans than other private universities in the United States; are the exam grades in one lab section of a course too low when compared to other lab sections; can an experimental drug bring an improvement to patients recovering from brain trauma? We evaluated questions like these by means of an *hypothesis test* where we put forward two hypotheses: a *null* hypothesis and an *alternative* hypothesis.  
 
-## Ranking and Order Statistics
+Often times we are interested in what a value might look like. For instance, airlines might be interested in the median flight delay of their flights to preserve customer satisfaction; political candidates may look to the percentage of voters favoring them to gauge how aggressive their campaigning should be. 
 
-Let us start by loading the library `tidyverse`.
+Put in the language of statistics, we are interested in *estimating* some unknown *parameter* about a population. If we had all the data available to us, we could compute the parameter with ease. However, we often do not have access to the full population (as is the case with polling voters) or there may be too much data to work with that it becomes computationally prohibitive (as is the case with flights).  
+
+We have seen before that empirical distributions can provide reliable approximations to the true (and usually unknown) distribution and that, likewise, a statistic computed from it can provide a reliable estimate of the parameter in question. However, the value of a statistic can turn out *differently* depending on the random samples that are drawn to compose a empirical distribution. How much can the value of a statistic vary? Could we quantify this uncertainty?  
+
+This chapter develops a way to answer this question using an important technique in data science called the *bootstrap*. We begin by introducing order statistics and percentiles. This will provide us the tools needed to develop the bootstrap to produce distributions from a sample, in which we apply order statistics to the generated distributions to obtain something called the *confidence interval*.
+
+## Order Statistics 
+
+The minimum, maximum, and the median are part of what we call *order statistics*. Order statistics are values at certain positions in numerical data after reordering the data in ascending order. 
+
+### Prerequisites
+
+This section will make use of data for all flights that departed New York City in 2013. The dataset is made available by the [Bureau of Transportation Statistics](https://www.transtats.bts.gov/) in the United States. Let's also load in the `tidyverse` as usual.   
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+### The `flights` data frame 
+
+In our prior exploration of this data frame, we generated empirical distributions of departure delays. Let's revisit this study and visualize the departure delays again. 
+
+```{r dpi=80,  fig.align="center", message = FALSE, warning = FALSE}
+ggplot(flights) + 
+  geom_histogram(aes(x = dep_delay, y = ..density..), col="grey", bins = 30)
+```
+
+As before, we are interested in the bulk of the data here, so we can ignore the 1.83% of flights with delays of more than 150 minutes.
 
 ```{r}
+flights150 <- flights %>%
+  filter(dep_delay <= 150)
+```
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(flights150) + 
+  geom_histogram(aes(x = dep_delay, y = ..density..), col="grey", bins = 30)
+```
+
+Let's extract the departure delay column as a vector. 
+
+```{r}
+dep_delays <- flights150 %>% pull(dep_delay)
+```
+
+### `median`
+
+The *median* is a popular order statistic that gives us a sense of the central tendency of the data. It is the value at the middle position in the data after reordering of the values.
+
+```{r}
+median(dep_delays)
+```
+
+This tells us that half of the flights had early departures -- not bad! Recall that we also used the mean to understand the central tendency. Note that the *mean* (or *average*) is a statistic, but it is not an order statistic. Let's compare with the mean of departure delays. 
+
+```{r}
+mean(dep_delays)
+```
+
+There is quite a bit of discrepancy between the two. Observe that the histogram above has a very long right tail; the mean is pulled upward by flights with long departure delays. When the distribution is skewed like the one here, the median can be a stronger indicator of central tendency. 
+
+There are cases, by the way, where two median exists. Such an event occurs exactly when the number of values is an even number. If there are 10 values, the 5th and the 6th values in the ascending order are the two medians. The one at the lower position in the order is the *odd median* and the other one, i.e., the one at the higher position in the order, is the *even median*. To compute the median in this case, we usually take the average of the odd and even median.  
+
+### `min` and `max` 
+
+What is the earliest flight that left? We can find out by looking for the *minimum* departed flight delay. 
+
+```{r}
+min(dep_delays)
+```
+
+The authors admit that this flight might have left a little too early for their liking. What about the latest flight? 
+
+```{r}
+max(dep_delays)
+```
+
+Recall that this maximum is actually artificial because we filtered all rows whose departure delay was more than 150. To recover the true maximum, we need to refer to the original `flights` data. 
+
+```{r}
+flights %>%
+  pull(dep_delay) %>%
+  max(na.rm = TRUE)
+```
+
+That is almost a *22 hour* delay -- better book a hotel room! 
+
+## Percentiles 
+
+Now that we have an understanding of order statistics, we can use it to develop the notion of a *percentile*. We will also explore a closely related concept called the *quartile*.  
+
+You are probably already familiar with the concept of percentiles from sports or [standardized testing like the SAT](https://collegereadiness.collegeboard.org/pdf/understanding-sat-scores.pdf). Organizations like the College Board talk so much about percentiles -- to the extent of writing full guides on how to interpret them -- because they are indicators of how students perform relative to other exam-takers. Indeed, the percentile is another order statistic that tells us something about the *rank* of a data point after reordering the elements in a dataset. Now that we have an understanding of order statistics, we can use it to develop the notion of a *percentile*. We will also explore a closely related concept called the *quartile*.     
+
+### Prerequisites
+
+Before starting, let's load the `tidyverse` as usual.
+
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-We previously used a National Football League receiver data set.
-This time, we will use an NCAA receiver data set covering the years 2005 - 2011, which is available at [Football Outsiders](https://www.footballoutsiders.com/college-xp/2012/2005-11-college-football-receiver-data-targets-and-catches).
+### The `finals` tibble  
 
+In the spirit of the College Board, we will examine exam scores to develop an understanding of percentiles. Recall that the `finals` data frame contains final exams from two offerings of an undergraduate computer science course taught at the University of Miami. Let's load it in. 
 
-```{r}
-path0 <- "data/ncaa-receivers-2005-2011.csv"
-ncaa0 <- read_csv(path0)
-```
-Here is the list of attributes of the data. 
-
-```{r}
-spec(ncaa0)
+```{r message = FALSE}
+finals <- read_csv("data/final_exams.csv")
+finals
 ```
 
-The attributes are slightly different from the National Football League data.
-The performance attributes are in three groups: overall, standard, and passing.
-An offensive turn has at most four plays (which we call "downs").
-The goal of an offensive turn is to either bring the ball to an area beyond the goal line of the opponent (a "touchdown") or move forward by at least 10 yards.
-If the offensive team is successful in accomplishing the 10-yard-forward goal, the team gues to play offense again.
-The strategy to use depends on how many yards the team has to move the ball forward and how many downs remaining.
-The "standard" situations are: the first down, the second down with at most 7 yards towards the 10-yard-forward accomplishment, the third down with at most 4 yards to go, and the fourth down with at most 4 yards to go.
-The other situations are "passing".
-In "passing" situations, the best strategy for the offensive team is to have the quarterback throw the ball to a receiver since throwing, if successful, can gain many yards.
-In "standard" situations, in addition to a throwing play, the team can try to move the ball forward by having a player carry the ball forward.
-The defense team, whose main goal is to prevent the defense team from moving the ball forward, has to anticipate a play to happen and act according to the play that emerges.
-In a "passing" play, the defense team can position its players in anticipation of a throw to happen, while in a "standard" play, the team may be ready for both a throw and a run.
-The data shows the receiver performance in "standard" and "passing" downs separately, and overall. 
-
-
-As in the case of the National Football League data, the same receiver may appear more than once and so create an attribute that combines the player name and the year using `mutate`.
+The dataset contains final scores from a total of 105 students. 
 
 ```{r}
-ncaa <- ncaa0 %>%
-  mutate(player_year = str_c(Player, " ", Year)
-         )
-spec(ncaa)
+nrow(finals)
 ```
 
-How many rows of data do we have?
-What are the maximum and minimum of the yardage data?
-How about the average?
-Who achieved the maximum value?
+We will not concern ourselves with the individual offerings of the course this time. Since the scores are of interest for this study, let us extract a vector of scores from the tibble.  
 
 ```{r}
-nrow(ncaa)
-max(ncaa$Yards)
-min(ncaa$Yards)
-sum(ncaa$Yards)/length(ncaa$Yards)
-maxy <- max(ncaa$Yards)
-ncaa %>% filter(Yards == maxy)
+scores <- finals %>%
+  pull(grade)
 ```
 
-The data set has 7323 rows, and the maximum and the minimum of the yardage attribute is 1962 and 6, respectively.
-The average is 299.9 yards.
-[Michael Crabtree](https://sports.yahoo.com/nfl/players/9274/), who presently (in 2020) plays for the Arizona Cardinals achieved the record in 2007 as a Texas Tech receiver.
+To orient ourselves to the data, we can look at the maximum and minimum scores. 
 
-Here is the distribution of the yardage of the players.
-We observe that the distribution stretches to the right.
+```{r}
+max(scores)
+min(scores)
+```
 
+We may be alarmed to see that the minimum score of 0. Some insight into the course would reveal that there were a few students who did not appear for the final exam (don't be one of them!). 
+
+Finally, let us visualize the distribution of scores. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(ncaa, aes(x = Yards, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(0, 2000, 10))
+ggplot(finals) + 
+  geom_histogram(aes(x = grade, y = ..density..), 
+                 col="grey", fill = "darkcyan", bins = 10)
 ```
 
-Let us look at the peak area, which is somewhere below 200.
 
-```{r dpi=80,  fig.align="center", message = FALSE}
-ncaa1 <- ncaa
-filter(ncaa1, Yards < 200)
-ggplot(ncaa1, aes(x = Yards, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(0, 200, 10))
-```
+### The `quantile` function
 
-So the peak is much smaller than the average.
-
-### Percentile
-
-Percentile is an order statistic where the position of the data is not the rank but a percentage that specifies relative position in the data.
-The advantage of using percentile is that the position specification does not directly take into account the data size.
-What do we mean by that?
-Suppose we have two lists of exam scores, `listA` with scores of 50 students and `listB` with scores of 4000 students.
-Think of "top 10" in each data set.
-Since 10 is 20% of 50 elements, there are 20% chances for a student to be among the top 10 group in `listA`, while the chances are 0.25% in `listB`.
-That is, if we specify a top group with its size, the significance being in the top group varies depending on the size of the population and so we must to specify the size of the underlying group, e.g., "top 10 in a group of 4000 students".
-
-Percentile is a concept that eliminates the use of population size in specifying the position.
-We simply represent the position its relative position to the entire population.
-Instead of saying "top 10 in a group", we say top 20%.
-Two strategies exist in specifying percentile: starting from the top and starting from the bottom.
-We specify the former by attaching the word "top" and the latter "bottom".
-The bottom percentile is more common than the top percentile.
-The bottom percentile corresponds to mearing the distance from the very left end of the distribution.
-
-Let us look at some percentile values in the yardage data.
+The percentile is an order statistic where the position of the data is not the rank but a percentage that specifies relative position in the data. For instance, the 50th percentile is the smallest value that is at least as large as 50% of the elements in `scores`; it must be a value on the list of scores. We can compute this simply with the `quantile()` function in R. 
 
 ```{r}
-yardage <- ncaa$Yards
-sortedyards <- sort(yardage)
-percentile <- function(x) {
-  return(sortedyards[x*length(sortedyards)/100])
+quantile(scores, c(0.5), type = 1)
+```
+
+The value at the 50th percentile is something we already know: the median score! 
+
+```{r}
+median(scores)
+```
+
+The `quantile` function gives the value that cuts off the first *n* percent of the data values when it is sorted in ascending order. There are many ways to compute percentiles (see the help page for a sneak peek, with `?quantile`). The one that matches the definition used here corresponds to `type = 1`.      
+
+The additional argument passed in is a vector of desired percentages. These must be between 0 and 1. This is how `quantile` gets its name: *quantiles* are *percentiles* scaled to have a value between 0 and 1, e.g. `0.5` rather than `50`. 
+
+Let us look at some more percentile values in the vector of scores.
+
+```{r}
+quantile(scores, c(0.05, 0.2, 0.9, 0.95, 0.99, 1), type = 1)
+```
+
+Let's pick apart some of these values. We see that the value at the 5th percentile is the lowest exam score that is at least as large as 5% of the scores. We can confirm this easily by summing the number of scores less than 17 and dividing by the total number of scores.  
+
+```{r}
+sum(scores < 17) / length(scores)
+```
+
+Moving on up, we see that the 95th and 99th percentiles are quite close together. We also observe that the 100th percentile is 98, which corresponds to the maximum score obtained on the final. That is, a 98 is at least as large as 100% of the scores, which is the entire class.  
+
+The 0th percentile is simply the smallest value in the dataset, as 0% of the data is at least as large as it. In other words, there is no exam score in the class lower than a 0. 
+
+```{r, error=TRUE}
+quantile(scores, c(0), type = 1)
+```
+
+If the College Board says a student is in the "top 10 percentile", this would be a misnomer. What they really mean to say is that the student is in the $1 - \text{top X percentile}$, or 90th percentile. 
+
+### Quartiles
+
+In addition to the medians, common percentiles are the $1/4$th and $3/4$th, which we often call the bottom quarter and the top quarter. Basically, we chop the data in quarters and use the boundaries between the neighboring quarters. Since these percentiles partition the data into quarters, these are given a special name: *quartiles*. 
+
+```{r, error=TRUE}
+quantile(scores, c(0/4, 1/4, 2/4, 3/4, 4/4), type = 1)
+```
+
+Observe what happens when we omit the vector of percentages. 
+
+```{r}
+quantile(scores, type = 1)
+```
+
+The corresponding 0th, 25th, 50th, 75th, and 100th percentiles of the vector are returned. 
+
+### Combining two percentiles
+
+By combining two percentiles, we can get a rough sense of the distribution. For example, the combination of 25th and 75th percentiles represents the "middle" 50%. Similarly, the 2.5th and 97.5th percentiles represent the middle 95% of the data. That is, 
+
+```{r}
+quantile(scores, c(0.025, 0.975), type = 1)
+```
+
+95% of the scores is between 0 and 95. We could find this more directly by realizing that the middle 95% corresponds to going up and down from the 50th percentile by half of that amount, which is 47.5%.
+
+```{r}
+middle_area <- 0.95
+quantile(scores, 0.5 + (middle_area / 2) * c(-1, 1), type = 1)
+```
+
+As one more example, here is the middle 90% of scores. 
+
+```{r}
+middle_area <- 0.90
+quantile(scores, 0.5 + (middle_area / 2) * c(-1, 1), type = 1)
+```
+
+### Advantages of percentiles 
+
+Percentile is a useful concept because it eliminates the use of population size in specifying the position; that is, the position specification does not directly take into account the size of the data. What do we mean by that?
+
+Let's return to the example of final exam scores. Suppose that one offering of the class contained 50 students while another had 200 students. Consider the "top 10 students" in each class. 
+
+Since top 10 is 20% of 50 students, there is a 20% chance for a student to be among the top 10, while the chances decrease to 5% for the class of 200. That is, if we specify a top group with its size, the significance being in the top group varies depending on the size of the population and so we must to specify the size of the underlying group, e.g., "top 10 in a group of 4000 students". Percentiles are nice in that they are not sensitive to these changes.
+
+
+## Bootstrapping
+
+It is usually the case that a data scientist will receive a collection of samples from an underlying population to which she has no access. If she had access to the underlying population, she could calculate the parameter value directly. Since that is impossible, is there a way for her to deal with the sample collection at hand to generate a range of values for the statistic?
+
+Yes! This is a technique we call *resampling*, which is more popularly known as *bootstrapping*. In bootstrapping, we treat the dataset at hand as the true population and generate samples from it. But there is a catch. Each sample data set that we generate should be equal in size to the original. This necessarily means that our sampling plan be done *with* replacement, rather than without. 
+
+Since the samples have the same size as the original with the use of replacement, duplicates and omissions can arise. That is, there are items that will appear multiple times as well as items that are missing. Because randomness is involved, the discrepancy varies.
+
+### Prerequisites
+
+This section will defer again to the New York City flights in 2013 from the [Bureau of Transportation Statistics](https://www.transtats.bts.gov/). Let's also load in the `tidyverse` as usual.   
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+### Population parameter: the median time spent in the air 
+
+When studying this dataset, we have spent a lot of time examining flight departure delays. This time we will turn our attention to another variable in the tibble which tracks the amount of time a flight spent in air, in minutes. The variable is called `air_time`.
+
+Let's visualize the distribution of air time in `flights`.
+
+Recall the distribution of departure delays in `flights150`. 
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(flights) + 
+  geom_histogram(aes(x = air_time, y = ..density..), 
+                 col="grey", fill = "darkcyan", bins = 20)
+```
+
+As before, let's concentrate on the bulk of the data and filter out any flights that flew for more than 400 minutes.  
+
+```{r}
+flights400 <- flights %>%
+  filter(air_time < 400) %>%
+  drop_na()
+```
+
+We plot this distribution one more time. 
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(flights400) + 
+  geom_histogram(aes(x = air_time, y = ..density..), 
+                 col="grey", fill = "darkcyan", bins = 20)
+```
+
+The parameter we will select for this study is the mean air time. 
+
+```{r}
+pop_mean <- flights400 %>%
+  pull(air_time) %>%
+  mean()
+pop_mean
+```
+
+Let us see how well we can estimate this value based on a sample of the flights. We will study two such samples: an artificial sample and a random sample.  
+
+### First try: A mechanical sample 
+
+For our mechanical sample, we will assume that we have been given only a cross-section of the flights data and try to estimate the population median based on this sample. Let us suppose we have been given the flight data for only the months of September and October.     
+
+```{r}
+flights_sample <- flights400 %>%
+  filter(month == 9 | month == 10)
+```
+
+There are 55,522 flights appearing in the subset. Let's visualize the distribution of air time from our sample. 
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(flights_sample) + 
+  geom_histogram(aes(x = air_time, y = ..density..), 
+                 col="grey", fill = "darkcyan", bins = 20)
+```
+
+It appears close to the population of flights, though there are notable differences: flights that have longer air times (between 300 and 400 minutes) appear exaggerated in this dataset. Let's compute the mean from this sample.
+
+```{r}
+sample_mean <- flights_sample %>%
+  pull(air_time) %>%
+  mean()
+sample_mean
+```
+
+It is quite different from the population median. Nevertheless, this subset of flights will serve as the dataset from which we will bootstrap our samples. Put another way, __we will treat this sample as if it were the population.__  
+
+### Bootstrapping the Sample Mean
+
+To perform a bootstrap, we will draw from the sample, at random __with replacement__, the same number of times as the size of the sample dataset. 
+
+To simplify the work, let us extract the column of air times as a vector. 
+
+```{r}
+air_times <- flights_sample %>% pull(air_time)
+```
+
+We know already how to sample at random with replacement from a vector using `sample`. Computing the sample mean is also straightforward: just pipe the returned vector into `mean`. 
+
+```{r}
+sample_mean <- air_times %>% 
+  sample(replace = TRUE) %>%
+  mean()
+sample_mean
+```
+
+Let us move this work into a function we can call. 
+
+```{r}
+one_sample_mean <- function() {
+  sample_mean <- flights_sample %>% 
+    pull(air_time) %>%
+    sample(replace = TRUE) %>%
+    mean()
+  return(sample_mean)
 }
 ```
 
-Let us examine some percentile values.
+Give it a run! 
 
-```{r, error=TRUE}
-percentile(5)
-percentile(20)
-percentile(50)
-percentile(90)
-percentile(95)
-percentile(99)
-percentile(99.9)
-percentile(100)
-```
-Tne 50 percentile point is the median of the data.
-The median yardage is 207 yards.
-The last four values demonstrate how long the stretch of the data is.
-The 90 percentile is only 678, the 95 percentile is 859, the 99 percentile is 1210, the 99.9 percentile is 1911, and the 100 percentile is the maximum 1962.
-The gap between the 99.9 percentile and the 100 percentile is a staggering 340 yards.
-It appears how an amazing player Michael Crabtree was as a college football player.
-
-The percentile does not exist for 0%.
-
-```{r, error=TRUE}
-percentile(0)
-```
-We can obtain the top percentile using 100 minus the percentile value in question.
-
-### Quartile and Range Statistics
-
-In addition to the medians, important percentiles are the 1/4 and 3/4, which we often call the bottom quarter and the top quarter.
-Basically, we chop the data in quarters and use the boundaries between the neighboring quarters.
-The quartiles and the median are as follows:
-
-
-```{r, error=TRUE}
-percentile(25)
-percentile(50)
-percentile(75)
+```{r}
+one_sample_mean()
 ```
 
-Let's look at a different quantity.
-`YdsPerCatch` is the average number of yards the receiver advanced the ball with his catch.
+This function is actually quite useful. Let's generalize the function so that we may call it with other datasets we will work with. The modified function will receive three parameters: (1) a tibble to sample from, (2) the column to work on, and (3) the statistic to compute. 
 
+```{r}
+one_sample_value <- function(df, label, statistic) {
+  sample_value <- df %>% 
+    pull({{ label }}) %>%
+    sample(replace = TRUE) %>%
+    statistic()
+  return(sample_value)
+}
+```
+
+We can now call it as follows. 
+
+```{r}
+one_sample_value(flights_sample, air_time, mean)
+```
+
+> Q: What's the deal with those (ugly) double curly braces (`{{`) ? To make R programming more enjoyable, the tidyverse allows us to write out column names, e.g. `air_time`, just like we would variable names. The catch is that when we try to use such syntax sugar from inside a function, R has no idea what we mean. In other words, when we say `pull(label)` R thinks that we want to extract a vector from a column called `label`, despite the fact we passed in `air_time` as an argument. To lead R in the right direction, we surround `label` with `{{` so that R knows to interpret `label` as, indeed, `air_time`. 
+
+### Empirical Distribution of the Sample Mean
+
+We now have all the pieces in place to perform the bootstrap. We will replicate this process many times so that we can compose an empirical distribution of all the bootstrapped sample means. Let's repeat the process 10,000 times. 
+
+```{r}
+bstrap_means <- replicate(n = 10000, one_sample_value(flights_sample, air_time, mean))
+```
+
+Let us visualize the bootstrapped sample means using a histogram. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(ncaa, aes(x = YdsPerCatch, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(0, 40, 1))
+df <- tibble(bstrap_means)
+ggplot(df, aes(x = bstrap_means, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins = 8)
 ```
 
-The distribution looks more symmetric than the yardage, with the peak at 12.
-Let us define a function for computing the percentile for `YdsPerCatch`.
-We will obtain the max, the min, the mean, and the percentiles at 10, 25, 50, 75, and 90.
+### Did it Capture the Parameter?
+
+How often does the population mean fall somewhere in the empirical histogram? Does it reside 
+"somewhere at the center" or at the fringes where the tails are? Let us be more specific by what we mean when we say "somewhere at the center": the middle 95% of bootstrapped means containing the population mean.  
+
+We can identify the "middle 95%" using the percentiles we learned from the last section. Here they are: 
 
 ```{r}
-sorted_ypcatch <- sort(ncaa$YdsPerCatch)
-percentile_ypcatch <- function(x) {
-  return(sorted_ypcatch[x*length(sorted_ypcatch)/100])
+desired_area <- 0.95
+middle95 <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle95
+```
+
+Let us annotate this interval on the histogram. 
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+df <- tibble(bstrap_means)
+
+ggplot(df, aes(x = bstrap_means, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins = 8) +
+  geom_segment(aes(x = middle95[1], y = 0, xend = middle95[2], yend = 0), 
+                   size = 2, color = "salmon") 
+```
+
+```{r}
+pop_mean
+```
+
+Our population mean is 149.6 minutes -- that is nowhere to be seen in this interval or even in the histogram! It would seem then that in all of the 10,000 replications of the bootstrap, not even one was able to capture the population mean. What happened? 
+
+Recall the subset selection we used: all flights in September or October. This was a very artificial selection that is prone to bias. We learned before when we discussed sampling plans that bias in the data can mislead the results, especially when using a convenient sample such as the one here. 
+
+### Second try: A random sample 
+
+We will now try to estimate the population mean using a random sample of flights. Let us select at random without replacement 10,000 flights from the data. 
+
+```{r}
+flights_sample <- flights400 %>% 
+  slice_sample(n = 10000, replace = FALSE)
+```
+
+We will visualize what our random sample looks like. 
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(flights_sample) + 
+  geom_histogram(aes(x = air_time, y = ..density..), 
+                 col="grey", fill = "darkcyan", bins = 20)
+```
+
+Let us also compute the sample mean again. 
+
+```{r}
+sample_mean <- flights_sample %>%
+  pull(air_time) %>%
+  mean()
+sample_mean
+```
+
+We observe that the sample mean is also much closer to the population mean, unlike our mechanical selection attempt. This is confirmation of the Law of Averages (finally) at work: when we sample at random and the sample size is large, the distribution of the sample closely follows that of the flight population. 
+
+Let us now repeat the bootstrap. Recall that we will treat this sample as if it were the population. 
+
+### Empirical Distribution of the Sample Mean (revisited)
+
+We have done all the hard work already in setting up the bootstrap. To redo the process, we need only to pass in the random sample contained in `flights_sample`. As before, let us repeat the process 10,000 times. 
+
+```{r}
+bstrap_means <- replicate(n = 10000, one_sample_value(flights_sample, air_time, mean))
+```
+
+We will identify the "middle 95%". Here is the interval:
+
+```{r}
+desired_area <- 0.95
+middle95 <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle95
+```
+
+Let us annotate this interval on the histogram. We will also plot the population mean as a red dot. 
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+df <- tibble(bstrap_means)
+
+ggplot(df, aes(x = bstrap_means, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins = 8) +
+  geom_segment(aes(x = middle95[1], y = 0, xend = middle95[2], yend = 0), 
+                   size = 2, color = "salmon") +
+  geom_point(aes(x = pop_mean, y = 0), color = "red", size = 3)
+```
+
+The population mean of 149.6 minutes falls in this interval. We conclude that the "middle 95%" interval of bootstrapped means successfully captured the parameter. 
+
+### Lucky try? 
+
+Our interval of bootstrapped means captured the parameter in the air time data. But were we just lucky? We can test it out. 
+
+We would like to see how often the "middle 95%" interval captures the parameter. We will need to redo the entire process many times to find an answer. More specifically, we will follow the recipe:
+
+* Generate a sample of size 10,000 from the population. For the sampling plan, sample at random without replacement. 
+* Do 10,000 replications of the bootstrap process and find the "middle 95%" interval of bootstrapped means. 
+
+We will repeat this process 100 times so that we end up with 100 intervals; we will count how many of them contain the population mean.  
+
+```{r}
+all_the_bootstraps <- function() {
+  desired_area <- 0.95
+    
+  flights_sample <- flights400 %>% slice_sample(n = 10000, replace = FALSE)
+  bstrap_means <- replicate(n = 10000, one_sample_value(flights_sample, air_time, mean))
+  middle95 <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+  return(middle95)
 }
-min(sorted_ypcatch)
-max(sorted_ypcatch)
-mean(sorted_ypcatch)
-percentile_ypcatch(10)
-percentile_ypcatch(25)
-percentile_ypcatch(50)
-percentile_ypcatch(75)
-percentile_ypcatch(90)
 ```
-
-The maximum of 43 is quite stunning, given that it is even difficult to advance by 10 yards in four downs.
-
-By combining two percentiles, we can get a rough sense of the distribution.
-For example, the combination of 25% and 75% percentiles represents the "middle" 50%.
-Similarly, the 37.5% and 62.5% percentiles jointly represent the middle quarter, and the 45% and 55% jointly represent the middle 10%.
-The way we arrive at 37.5 and 62.5 is to add/subtract one half of 25 to/from 50.
-The way we arrive at 45.0 and 55.0 is to add/subtract one half of 10 to/from 50.
 
 ```{r}
-c(percentile_ypcatch(25),percentile_ypcatch(75))
-c(percentile_ypcatch(50-25/2),percentile_ypcatch(50+25/2))
-c(percentile_ypcatch(50-10/2),percentile_ypcatch(50+10/2))
-
+intervals <- replicate(n = 100, all_the_bootstraps())
 ```
 
-By the way, who achieved the heihgt yards per catch?
+> NOTE: This simulation will take awhile (> 20 minutes). Grab a coffee!
 
+Let's examine some of the intervals of bootstrapped means. 
 
 ```{r}
-maxy <- max(ncaa$YdsPerCatch)
-ncaa %>% filter(YdsPerCatch == maxy)
+intervals[,1]
 ```
-
-Interestingly, the player Darius Williams became the target only 13 and caught the ball only three times.
-How did Michael Crabtree do?
 
 ```{r}
-ncaa %>% filter(Player == "Michael Crabtree")
+intervals[,2]
 ```
-Michael Crabtree has two entries in 2007 and in 2006, where his yards per catch is 14.6 and 12.0, respectively.
+
+Let’s transform `intervals` into a tibble which will make it easier to understand and visualize the results.
+
+```{r}
+left_column <- intervals[1,]
+right_column <- intervals[2,]
+```
+
+```{r}
+interval_df <- tibble(
+  replication = 1:100,
+  left = left_column,
+  right = right_column
+)
+interval_df
+```
+
+How many of these contain the population mean? We can count the number of intervals where the population mean is between the left and right endpoints. 
+
+```{r}
+interval_df %>%
+  filter(left <= pop_mean & right >= pop_mean) %>%
+  nrow()
+```
+
+We can visualize these intervals by stacking them on top of each other vertically. The vertical red line shows where the population mean lies. Under real-life circumstances, we do not know where it is. 
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(interval_df) + 
+  geom_segment(aes(x = left, y = replication, 
+                   xend = right, yend = replication), color = "salmon") +
+  geom_vline(xintercept = pop_mean, color = "red") + 
+  xlab("Air time (minutes)")
+```
+
+We expect about 95 of the 100 intervals to cross the vertical line; meaning, it contains the parameter. We would label such intervals as "good". If an interval does not, oh well -- that's the nature of chance. Fortunately, these do not occur often. In fact, they should occur about 5 times among 100 trials, or 95%. The strength of statistics lies not in clairvoyance, but in the ability to quantify our uncertainty. 
+
+### Bootstrap round-up 
+
+Before we close this section, we end with a quick summary on how to perform a bootstrap. 
+
+__Goal:__ To estimate some population parameter we do not know about, e.g., the mean air time of New York City flights. 
+
+* Select a sampling plan. A safe bet is to sample at *random* without replacement from the population. Be sure that the sample drawn is *large* in size.
+* Bootstrap the random sample (this time, *with* replacement) and compute the desired statistic from it. 
+* Replicate this process a great number of times to obtain many bootstrapped samples.
+* Find the "middle 95%" interval of the bootstrapped samples. 
+
+## Confidence Intervals 
+
+The previous section developed a way to estimate the value of a parameter we do not know. Because chance is an inevitable part of drawing a random sample, we cannot be precise and offer a single value for this estimate, e.g., we can determine that the mean height of all individuals in the United States is *exactly* 5.3 feet. Instead, we provide an *interval* of estimates by looking at a bulk of values that are "somewhere in the center". Typically this entails looking at the "middle 95%" interval, but we may prefer other intervals such as the "middle 90%" or even the "middle 99%".  
+
+Recall that knowing the value of the parameter beforehand is a rare luxury out of reach; if we could obtain it somehow, there would be no need for statistical methods like the bootstrap. Instead, data scientists rely on intervals of estimates with confidence that the parameter will sit on this interval some percentage of the time. 
+
+These "intervals of estimates" are so important to statistics and data science that they are given a special name: the *confidence interval*. This section will explore confidence intervals, and their use, in greater depth. 
 
 
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let’s load it in as usual.
+
+```{r message = FALSE}
+library(tidyverse)
+```
+
+We will also bring forward the `one_sample_value` function we wrote in the previous section. 
+
+```{r}
+one_sample_value <- function(df, label, statistic) {
+  sample_value <- df %>% 
+    pull({{ label }}) %>%
+    sample(replace = TRUE) %>%
+    statistic()
+  return(sample_value)
+}
+```
+
+For the running example in this section, we will turn to American football from the National Collegiate Athletic Association (NCAA) covering the years 2005 from 2011, which is available at [Football Outsiders](https://www.footballoutsiders.com/college-xp/2012/2005-11-college-football-receiver-data-targets-and-catches). There are two things to note before working with the data: 
+
+* The same receiver may appear more than once across different seasons so we eliminate any duplicate players from the tibble using `distinct`. 
+* Because real-life circumstances often do not grant us access to the population, we will mimic such circumstances by using only a random sample of the data and treating that as our population. We will select 1,000 random samples without replacement.
+
+Let us load in this dataset and o
+
+```{r echo = FALSE}
+set.seed(10)
+```
+
+```{r message = FALSE}
+path <- "data/ncaa-receivers-2005-2011.csv"
+ncaa <- read_csv(path) %>%
+  distinct(Player, .keep_all = TRUE) %>%
+  slice_sample(n = 1000, replace = FALSE)
+```
+
+We can inspect the resulting table. Note that there are 1,000 rows in the tibble.
+
+```{r}
+ncaa
+```
+
+### Estimating a Population Median 
+
+We will apply bootstrapping to the `ncaa` tibble to estimate an unknown parameter: the ratio of yards per catch. Let us first form a subset of the tibble with the relevant data. 
+
+```{r}
+yards_catches_df <- ncaa %>%
+  transmute(player = Player,
+            catches = Catches,
+            yards = Yards,
+            ratio = yards / catches
+            )
+yards_catches_df
+```
+
+Let us visualize the histogram of yards per catch. 
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(yards_catches_df) + 
+  geom_histogram(aes(x = ratio, y = ..density..), 
+                 col="grey", fill = "darkcyan", bins = 20)
+```
+
+We can inspect the maximum ratio value which is an impressive 43 yards per catch by Darius Williams. 
+
+```{r}
+yards_catches_df %>%
+  slice_max(order_by = ratio)
+```
+
+The maximum ratio value helps us realize just how far away a value like 43 yards per catch is from the bulk of ratios. In fact, according to the histogram it appears that there are several "unusual" ratios that appear towards the far right of the histogram.  
+
+We saw earlier that the mean can be "pulled" up or down by unusually large or small values. Under such circumstances, we prefer to use the median as it is not sensitive to extreme ratio values. The median ratio in this sample is about 11.23 yards per catch. 
+
+```{r}
+yards_catches_df %>%
+  pull(ratio) %>%
+  median()
+```
+
+We are now ready to bootstrap from this random sample. Recall that `one_sample_value` will perform the bootstrap for us. We will replicate the bootstrap process a large number of times, say 10,000, so that we can plot an empirical histogram of the bootstrapped medians. 
+
+```{r}
+# Do the bootstrap!
+bstrap_medians <- replicate(n = 10000, one_sample_value(yards_catches_df, ratio, median))
+```
+
+As before, we will identify the 95% confidence interval. Here is the interval:
+
+```{r}
+desired_area <- 0.95
+middle <- quantile(bstrap_medians, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle
+```
+
+Let us plot the empirical histogram and annotate the interval on this histogram. 
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+df <- tibble(bstrap_medians)
+ggplot(df, aes(x = bstrap_medians, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
+  geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
+                   size = 2, color = "salmon")
+```
+
+This looks a lot like what we saw in the previous section, with one key difference: there is no dot indicating where the parameter is! We do not know where the dot will fall or if it is even on this interval. 
+Statistics is not clairvoyance. It is a means to quantify uncertainty. What we have obtained is a 95% confidence interval of estimates, which means that about 95% of the time we will get it right. But that also leaves a 5% chance where we are totally off. Can we control the amount of uncertainty in our results? 
 
 
-## Bootstrapping and Confidence Interval
+### Levels of Uncertainty: 80% and 99% Confidence Intervals
+
+So far we have examined the 95% confidence interval. Let us see what happens to the interval of estimates when we increase our level confidence. We will examine a 99% confidence interval.
+
+```{r}
+desired_area <- 0.99
+middle <- quantile(bstrap_medians, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle
+```
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+df <- tibble(bstrap_medians)
+ggplot(df, aes(x = bstrap_medians, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
+  geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
+                   size = 2, color = "salmon")
+```
+
+The interval is much wider! It goes from about 10.9 yards per catch to 11.6. We observe a trade-off: as we increase our confidence in the interval of estimates, this is compensated by making the interval *wider*. That is, a 99% confidence interval has a chance of missing the parameter only 1% of the time now. 
+
+Let us move in the other direction and try a 80% confidence interval. 
+
+```{r}
+desired_area <- 0.80
+middle <- quantile(bstrap_medians, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle
+```
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+df <- tibble(bstrap_medians)
+ggplot(df, aes(x = bstrap_medians, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
+  geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
+                   size = 2, color = "salmon")
+```
+
+This interval is *much* narrower than the 99% interval and only goes from 11 to 11.4 yards per catch. This is a much tighter set of estimates, but we traded a narrower interval for lower confidence. This interval has a chance of missing 20% of the time. 
 
 
-Sometimes a data scientist receives a collection of samples from the underlying population to which she has no access.
-If she had access to the underlying population, she might attempt to generate an array of samples, from which she would generate a distribution of the statistic of interest.
-Since that is impossible, is there a way for to deal with the sample collection at hand to generate a range of values for the statistic?
-Yes, we call that *resampling* or *bootstrapping*.
-In resampling (or bootstrapping) you treat the data set at hand as the true population and generate samples from them.
-But there is a catch.
-Each sample data set you generate should be equal in size to the original you have.
-In stead of sampling without replacement, you use sample with replacement.
-Since the sample data sets have the same size as the original, with the use of replacement, you get duplicates and omissions; that is, there are items appearing multiple times in and there are items missing.
-Because of the use of randomness, the discrepancy varies.
+### Confidence Intervals as an Hypothesis Test
+
+Confidence intervals can be used for more than trying to estimate a population parameter. One popular use case for the confidence interval is something we saw in the previous chapter: the hypothesis test. 
+
+Let us reconsider the 95% confidence interval we obtained. The average ratio goes from 10.98 yards per catch to 11.5 yards per catch. Suppose that the NCAA is interested in testing the following hypothesis about its players:  
+
+__Null hypothesis.__ The average ratio of yards per catch of NCAA receivers is 12 yards per catch. 
+
+__Alternative hypothesis.__ The average ratio of yards per catch of NCAA receivers is not 12 yards per catch. 
+
+If we were testing this hypothesis at the 95% significance level, we would comfortably reject the null hypothesis. Why? 
+
+A population ratio of 12 yards per catch does not sit on our 95% confidence interval for the population ratio. Therefore, at this level of significance, a value of 12 is not plausible.
+
+If we were to lower our confidence (to say 90% or 80%), we may not have rejected the null hypothesis. This raises an important point about cut-offs: some fields demand a high level of significance for a result to be accepted by its scientific community; other fields may require much less convincing. For instance, [experimental studies](https://arxiv.org/pdf/0706.3283.pdf) in Physics demand significance levels at 99.9% [or even 99.99%](https://journals.aps.org/prd/pdf/10.1103/PhysRevD.93.122002?casa_token=LX4dEzEBwoEAAAAA%3ATEemb6ulsnfx89acCPP-GoEzMsjLDng26HX5YJ0CMZczkdOrPpmiHTLaFyUR3c6jZcuDYVgJys92eRU) for a result to be even considered publishable. It is not hard to imagine why: findings in Physics are usually axiomatic and rejecting a null hypothesis implies the discovery of phenomena in nature. A 99.99% confidence interval would guarantee that such a discovery is a fluke only 0.01% of the time. 
+
+The basis for using confidence intervals as a hypothesis test is rooted in statistical theory. In practice, we simply check whether the value supplied by the null hypothesis sits on the confidence interval or not.  
+
+### Final remarks: Use Bootstrap with Care 
+
+We end this section with some points to keep in mind when applying bootstrapping. 
+
+* Avoid introducing bias into the sample that is used as input for bootstrapping. The sampling plan of simple random sampling will usually work best.    
+* When the size of a random sample is moderately sized enough, the chance of the bootstrapped sample being identical to it is extremely rare. Therefore, you should aim to work with large random samples. 
+* TBA
 
 
-### Resampling
+<!--
 
-Recall the birthday paradox we studied earlier.
-There, we noticed that if 23 people are in a room, the chances are fifty-fifty that there are two people having the same birthdays among the 23.
-The resampling idea resembles a situation in which there are 365 people instead of 23.
-There are already very good chances of having two people the same birthdays with just 23 people.
-If there are 365 people, you can divide the 365 people into about 16 groups of 23, each having fifth-fifty chances of two people with identical birthdays, and there are possibilities that there are cross-group matches of birthdays.
-Since there are 365 birthdays, duplication eliminates birthdays from the list of birthdays appearing.
 Let us formalize the discussion a little.
 Suppose we have a sample at hand with $N$ elements, which we will treat as the population.
 We will sample $N$ elements from the $N$-element set with replacement.
@@ -255,170 +771,16 @@ The ratio between the number of ways to select the $N$ elements in an arbitrary 
 \frac{N}{N}\cdot \frac{N-1}{N} \cdot \cdots \cdot \frac{1}{N}
 \]
 This quantity is approximately $\sqrt{2\pi N}/e^{N}$ for any large enough $N$.
-The value $e$ is what we call *Euler's constant* and is about 2.718, and so for a large enough $B$, the ratio is quite small.
+The value $e$ is what we call *Euler's constant* and is about 2.718, and so for a large enough $N$, the ratio is quite small.
 Thus, the analysis guarantees that the samples we generate practically will not look like the original.
 
-### Getting ready
+ Recall the birthday paradox we studied earlier.
+There, we noticed that if 23 people are in a room, the chances are fifty-fifty that there are two people having the same birthdays among the 23.
+The bootstrapping idea resembles a situation in which there are 365 people instead of 23.
+There are already very good chances of having two people the same birthdays with just 23 people.
+If there are 365 people, you can divide the 365 people into about 16 groups of 23, each having fifth-fifty chances of two people with identical birthdays, and there are possibilities that there are cross-group matches of birthdays.
+Since there are 365 birthdays, duplication eliminates birthdays from the list of birthdays appearing. 
 
-Let us start with loading the `tidyverse` package and loading the NCAA data.
-
-```{r}
-library(tidyverse)
-```
-```{r}
-path0 <- "data/ncaa-receivers-2005-2011.csv"
-ncaa0 <- read_csv(path0)
-ncaa <- ncaa0 %>%
-  mutate(player_year = str_c(Player, " ", Year))
-spec(ncaa)
-```
-
-Let us create a subset of the data mechanically.
-We will select Year 2006.
-There are 1004 receivers appearing in the subset.
-
-```{r}
-ncaa1 <- filter(ncaa, Year == 2006)
-nrow(ncaa1)
-yards <- ncaa1$YdsPerCatch
-```
-
-Assume this is the population we have at hand.
-The method for generating a subset of an equal size with replacement can be the following.
-
-```{r}
-resample <- function(x) {
-  sample(x, size = length(x), replace = TRUE)
-}
-```
-
-Using `resample`, we can generate a series of bootstrapped data set and generate the distribution of the averages of the data.
-
-```{r}
-averages <- vector("double", 500)
-for (i in 1:500) {
-  averages[i] <- sum(resample(yards))/length(yards)
-}
-averages <- sort(averages)
-```
-
-Let us also define again the function that returns the percentile.
-
-```{r}
-percentile <- function(x, y) {
-  return(x[y * length(x) / 100])
-}
-```
-
-Here are the minimum, maximum, and the quartiles of the averages.
-
-```{r}
-averages[1]
-percentile(averages, 25)
-percentile(averages, 50)
-percentile(averages, 75)
-percentile(averages, 100)
-
-
-```
-
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-df <- tibble(averages)
-ggplot(df, aes(x = averages, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(11, 13, 0.05))
-```
-
-The 90% range of the averages is
-```{r}
-the_range <- c(percentile(averages,5),percentile(averages,95))
-```
-
-In other words, this is the range that covers 90% of the yards per catch values of the receivers.
-
-Now we can check how many of the receivers in the true population falls in this region.
-
-```{r}
-ncaa2 <- filter(ncaa, YdsPerCatch >= the_range[1] & YdsPerCatch <= the_range[2])
-nrow(ncaa2) / nrow(ncaa)
-overall_mean <- mean(ncaa$YdsPerCatch)
-```
-
-Let us see the distribution of the averages of the 2006 data in contrast with the mean of the means (in green) and the overall mean (in red).
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-df <- tibble(averages)
-mean_of_means <- percentile(averages,50)
-ggplot(df, aes(x = averages, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(11, 13, 0.05)) +
-  geom_point(aes(x = overall_mean, y = 0), color = "red", size = 3) +
-  geom_point(aes(x = mean_of_means, y = 0), color = "green", size = 3)
-```
-
-
-
-### Doing the thing again
-
-The subset selection that we used `Year == 2006` was very artificial because there may have been some annual bias on the data in 2006.
-The gap between the red and the green dot is an indication of such a bias.
-So, let us try again.
-This time, we select 1000 data points, about the same number as the 2006 data, by random sampling.
-
-```{r}
-yards2 <- sample(ncaa$YdsPerCatch, size = 1000, replace = TRUE)
-mean(yards2)
-```
-
-We then perform the series of definitions and operations as we did before.
-We use different names for some data: `yards` to for the 1000 subset of the yardage column and `averages2` for the means we generate from bootstrapping.
-
-```{r}
-resample <- function(x) {
-  sample(x, size = length(x), replace = TRUE)
-}
-averages2 <- vector("double", 500)
-for (i in 1:500) {
-  averages2[i] <- sum(resample(yards2))/length(yards2)
-}
-averages2 <- sort(averages2)
-```
-
-
-Now we project the data.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-percentile <- function(x, y) {
-  return(x[y * length(x) / 100])
-}
-df2 <- tibble(averages2)
-mean_of_means <- percentile(averages2,50)
-overall_mean <- mean(yards2)
-ggplot(df, aes(x = averages2, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(11, 13, 0.05)) +
-  geom_point(aes(x = overall_mean, y = 0), color = "red", size = 4) +
-  geom_point(aes(x = mean_of_means, y = 0), color = "green", size = 2)
-```
-
-To see more clearly the two dots, we use size 4 for the red dot and use size 2 for the green dot.
-The order we plot the two is red first, and so the small dot in green will surely appear on top of the red dot without completely covering the red.
-We see that the two dots overlap with each other.
-Our conclusion from the second experiment is that the true overall average must be sitting in the interval between the 5 percentile and 95 percentile with 90% confidence.
-See yourself by examining the values.
-
-```{r}
-c(percentile(averages2,5),percentile(averages2,95))
-overall_mean
-```
-
-### Confidence Intervals
-
-We call the interval we used to encompass the mean of the means a *confidence interval*.
-We attach the size of the coverage of the interval as an attributed of the interval, e.g., 90% confidence interval, 95% confidence interval, etc.
-A confidence interval means that by way of resampling (or some other method) we are "confident" that the true value must be sitting in the interval.
-So, the 
-
-
-<!--
 ```{r}
 nfl <- read_csv("data/nfl_receiving0.csv")
 ncaa <- read_csv("data/ncaa-receivers-2005-2011.csv")

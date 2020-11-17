@@ -34,7 +34,6 @@ grade,class
 51,A
 46,A
 39,A
-0,A
 3,A
 70,A
 67,A
@@ -68,8 +67,6 @@ grade,class
 65,B
 55,B
 68,B
-0,B
-0,B
 53,B
 65,B
 54,B
@@ -81,7 +78,6 @@ grade,class
 89,B
 37,B
 84,B
-0,B
 74,B
 95,B
 74,B
@@ -98,6 +94,7 @@ grade,class
 52,B
 64,B
 71,B
+0,B
 66,B
 77,B
 90,B
