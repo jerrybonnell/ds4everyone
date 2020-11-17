@@ -148,7 +148,60 @@ row.names(ddd)
 ddd["Henry",]
 ```
 
-### Reading Data from an External Source
+__Write-in Data Set__
+
+The package `dplyr` brings some useful methods for creating data sets.
+The first method allows you to create a data set manually.
+You can use `dplyr` to write out the attributes and then data rows as they should appear in the table. For example, in the following:
+
+```{r}
+tribble(~Name,~English,~Mathematics,
+               "Johnny",100,90,
+               "Katy",90,100,
+               "Lauren",89,94,
+               "Manuel",95,79,
+               "Nancy",80,80)
+```
+
+__Systematic Creation__
+
+The package `tibble` brings a way for mechanical generation.
+
+```{r}
+tibble(x=1:10, y=x*x, z = 1.5*x - 0.2)
+```
+The `seq` that is native of R allows you to create a sequence.
+The syntax is `seq(START,END,GAP)`, where the sequence starts from `START` and then adds `GAP` to the sequence until the value exceeds `END`.
+We can create the sequence with the name "x", and then add three other columns based on the value of "x".
+
+```{r}
+tibble(x = seq(1,10,0.5), y = sin(x), z = cos(x), w = x^3 - 10*x^2 + x - 2)
+```
+__Creating a Row Name Attribute from Row Names or Row Index__
+
+Row names and row indexes are out of reach using the attachment of the dollar sign and the attribute name.
+The reason is that row names or indexes are not attributes.
+To be able to process data using row indexes or row names, it is conveninent to be able to have a matching attribute.
+A great benefit of `tibble` is you have functions to accomplish this.
+
+Let us go back to the `mtcars` data set.
+We have loaded it to the variable `myc` earlier.
+Let us do that again.
+We convert the row names to an attribute using the function `rownames_to_column(DATA,NEW_NAME)`.
+In the syntax, `DATA` is the data set and `NEW_NAME` is the name of the attribute of the row names.
+The function produces a new data set, and so let us capture it in a new data set, `myc2`.
+
+Let us do this and examine the head of the original and the new version.
+
+```{r}
+myc <- mtcars
+myc2 <- rownames_to_column(myc,"name")
+head(myc)
+head(myc2)
+```
+
+
+__Reading Data from an External Source__
 
 Usually data scientists need to load data from files.
 The package `readr` of `tidyverse` offers ways for that.
@@ -164,7 +217,7 @@ Here is an example of reading from a URL of a file available on the internet.
 
 ```{r}
 path <- "https://data.bloomington.in.gov/dataset/117733fb-31cb-480a-8b30-fbf425a690cd/resource/2b2a4280-964c-4845-b397-3105e227a1ae/download/pedestrian-and-bicyclist-counts.csv"
-data <- read_csv(path)
+bloom <- read_csv(path)
 ```
 
 The data set shows the traffic in the city of Bloomington, the hometown of the Indiana University at Bloomington.
@@ -172,21 +225,129 @@ You can change the head part of the data by the function `head`.
 The function call `head(DATA_SET_NAME)` produces some first rows of the data set `DATA_SET_NAME`.
 
 ```{r}
-head(data)
+head(bloom)
 ```
 Note that some attributes have space in them.
 To access the column corresponding of the attribute, you cannot simply type of the attribute because of the white space.
-You need to put the names in a matching pair of quotes (single quotes, double quotes, and backquotes will do).
+You need to put the names in a matching pair of quotes (single quotation marks, double quotes, and backward single quotation marks will do).
 
 ```{r}
-data$"N College and RR"
+bloom$"N College and RR"
 ```
 
-## Creating and Removing
+## Creating and Removing Attributes
+
+The package `dplyr` offers five important functions for data manipulation.
+
+* `mutate()`: for adding new attributes from existing attributes
+* `select()`: for selecting or deselecting attributes
+* `filter()`: for selecting rows
+* `summarise()`: for summarizing rows by groups
+* `arrange()`: for reordering rows.
+
+```{r}
+library(tidyverse)
+```
+
+Let us load `mtcars` as before and call it `myc`, and then as before, convert the row names to a real attribute.
+Call the new attribute "make_model".
+
+```{r}
+myc <- mtcars
+myc2 <- rownames_to_column(myc,"make_model")
+```
+
+__The function `mutate()`__
+
+The function `mutate` creates a new attribute using the values of existing attributes.
+The syntax for `mutate` is
+
+* `mutate(DATA_SET_NAME, NEW_NAME = EXPRESSION, OPTION)`
+
+where the `NEW_NAME = EXPRESSION` specifies the name of the new attribute and how to compute it, and `OPTION` is an option to specify the location of the new attribute relative to the existing attributes.
+The position option is either of the form `.before=NUMBER` or of the form `.after=NUMBER` with `NUMBER` specifying the position of the column insertion and `.before` and `.after` specifying the insertion is before and after of the column  at position `NUMBER`, respectively.
+The `EXPRESSION` can be either a mathematical expression or a function call.
+Here is one example, where the new attribute is `which_make`.
+We derive the value of "make" from the value of `make_model` by taking the first word from `make model.
+The insertion position is before the second attribute, `mpg`.
+To execute the replacement, we use `str_replace` by matching the pattern `" .*"` (one white space and then any charactrer sequence) with `""`.
+Note how we use the attribute name `make_model` in the expression.
+We told you earlier that string operations are applicable to individual strings or string vectors.
+
+The expression follows that rule.
+
+```{r}
+myc3 <- mutate(myc2, which_make = str_replace(make_model, " .*", ""), .before=2)
+```
+
+The function adds the new column to the original `myc2` tentatively and returns the resultant data set.
+The original stays the same, as we see below.
+
+```{r}
+head(myc3)
+```
+
+```{r}
+head(myc2)
+```
+
+How many different values appear in the `which_make` attribute?
+We can use `unique` for removing duplicates to find out.
+We can even apply `sort` to the result that `unique` produces to make the list have its elements in the alphabetical order.
+
+```{r}
+sort(unique(myc3$which_make))
+```
+
+
+When we need to create multiple new attributes, we can repeat the above process as many times as we create new columns.
+That would be a little cumbersome because we do not need the intermediate products.
+Conveniently there is the concept of "piping" with which you can pass data from one function to another.
+The way to use piping is simple.
+
+* You start by stating the initial database.
+* For each operation to form, you append `%>%` and then the operation, where you omit the data-set-name part.
+* If you need to save the result in a data set, you add `%-> THE_FINAL_NAME%` at the end.
+
+Here is a way to execute `mutate` twice on `myc2` where the first one is the same as before and the second one is for adding a new attribute representing the product of `mpg` and `disp`.
+We capture the resulting output in `myc4`.
+
+```{r}
+myc2 %>% mutate(which_model = str_replace(make_model, " .*", ""), .before=2) %>% mutate(mpg_disp = mpg * disp, .after=2) -> myc4
+```
+
+The expression in the above has only two `mutate` calls.
+If you get to add more operations, the expression can ge very long.
+To make the expression easier to parse, you can think of folding it by entering the return key to make it easier to read.
+You enter expressions line by line in R, and so you should be mindful of where to break lines.
+If the expression looks complete, the R environment executes what you've entered.
+Typically, we end a line with a directive like `%>%` and `%->%` so the environment understands that the line is incomplete.
+
+
+
+```{r}
+myc2 %>%
+  mutate(which_model = str_replace(make_model, " .*", ""), .before=2) %>%
+  mutate(mpg_disp = mpg * disp, .after=2) ->
+  myc4
+```
+
+
+
+
+__The function `select()`__
+__The function `filter()`__
+
+__The function `arrange()`__
+
+__The function `summarise()`__
+
+
+
 
 ## Adding More Data
 
-## Transposing
+## Transposing (aka Pivoting)
 
 ## Handling Blanks (aka "NA")
 
