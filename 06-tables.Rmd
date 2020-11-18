@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Tables
 
 In the previous chapter, we studied the `stringr` package, which is part of
@@ -91,11 +96,22 @@ Since the row is the third one, we can use `[3,]` instead.
 myc[3,]
 ```
 
+How do we know how many rows and columns in the data as well as the names of the attributes?
+The following functions, `nrow`, `ncol`, and `colnames` answer those questions, respectively.
+
+```{r}
+nrow(myc)
+ncol(myc)
+colnames(myc)
+```
 In summary, to access the columns and the rows, here are the rules we should follow:
 
 * We use a pair `DATA_SET_NAME[X,Y]` to access a cell at row position `X` and column position `Y`, where `DATA_SET_NAME` is the name of the data set and `X` and `Y` are positive integers.
 * If we omit the X-part, like `DATA_SET_NAME[,Y]`, the expression specifies the entire column at position `Y`. If `S` is the name of the column, we can use an alternate expression `DATA_SET_NAME$S`.
 * If we omit the Y-part, like `DATA_SET_NAME[X,]`, the expression specifies the entire row at position `X`. If the data set has row names and `W` is the name of the row at position `X` (that is, it must be a string), we can substitute the index with the name as in `DATA_SET_NAME[W,]`.
+
+
+
 
 ### Examining the Rows, Columns, Cells, and Row Names
 
@@ -126,7 +142,7 @@ We will study `dplyr` next.
 
 Before moving on to `dplyr`, let us see how you can create a data set.
 Suppose you have tests scores in Chemistry and Spanish for four people, Gail, Henry, Irwin, and Joan.
-You can create three vectors, `names`, `Chemistry`, and `Spanish` each represening the names, the scores in Chemsitry, and the scores in Spanish, and then assemble them into a data file using the function `data.frame`.
+You can create three vectors, `names`, `Chemistry`, and `Spanish` each represening the names, the scores in Chemistry, and the scores in Spanish, and then assemble them into a data file using the function `data.frame`.
 The `data.frame` takes a series of columns as arguments.
 The columns appear in the data set as you specify them in the arguments.
 You can specify the names of the rows using an optional argument `row.names=`.
@@ -177,6 +193,16 @@ We can create the sequence with the name "x", and then add three other columns b
 ```{r}
 tibble(x = seq(1,10,0.5), y = sin(x), z = cos(x), w = x^3 - 10*x^2 + x - 2)
 ```
+__Rotating Data__
+
+Sometimes we want to switch from the row-major view to the column-major by rotating the data.
+The rotation is very simple. You have only to use the function `t()`.
+
+```{r}
+t(ddd)
+```
+
+
 __Creating a Row Name Attribute from Row Names or Row Index__
 
 Row names and row indexes are out of reach using the attachment of the dollar sign and the attribute name.
@@ -220,7 +246,7 @@ path <- "https://data.bloomington.in.gov/dataset/117733fb-31cb-480a-8b30-fbf425a
 bloom <- read_csv(path)
 ```
 
-The data set shows the traffic in the city of Bloomington, the hometown of the Indiana University at Bloomington.
+The data set shows the traffic in the city of Bloomington, the hometown of the Indiana University at Bloomington, Indiana.
 You can change the head part of the data by the function `head`.
 The function call `head(DATA_SET_NAME)` produces some first rows of the data set `DATA_SET_NAME`.
 
@@ -235,15 +261,30 @@ You need to put the names in a matching pair of quotes (single quotation marks, 
 bloom$"N College and RR"
 ```
 
-## Creating and Removing Attributes
 
-The package `dplyr` offers five important functions for data manipulation.
+__Saving Data__
 
-* `mutate()`: for adding new attributes from existing attributes
+Saving a data file is easy.
+You use `write_csv(DATA_NAME,PATH)` where `DATA_NAME` is the name of the data frame to save and `PATH` is the "path name" of the file.
+Below, the action is to store the data frame `bloom` as "data/bloom.csv"; that is the folder in which R is running R has a folder "data" and the target of saving is "bloom.csv" in the folder. 
+
+```{r}
+write_csv(bloom, "data/bloom.csv")
+```
+
+
+
+## Data Preparation with `dplyr`
+
+As we mentioned earlier, preprocessing data is such an important aspect of data science that some experts dare to say that the step is the most important step,
+`dplyr` is a collection of useful functions for manipulating the data.
+The package `dplyr` offers five important functions for data manipulation plus some miscellaneous ones.
+
+* `mutate()` and `rename()`: for adding new attributes from existing attributes and for renaming rows
 * `select()`: for selecting or deselecting attributes
-* `filter()`: for selecting rows
-* `summarise()`: for summarizing rows by groups
+* `filter()` and `slice()`: for selecting rows with criteria or by row numbers
 * `arrange()`: for reordering rows.
+* `group_by()` and `summarise()`: for grouping rows and summarizing them into single rows
 
 ```{r}
 library(tidyverse)
@@ -270,7 +311,7 @@ The `EXPRESSION` can be either a mathematical expression or a function call.
 Here is one example, where the new attribute is `which_make`.
 We derive the value of "make" from the value of `make_model` by taking the first word from `make model.
 The insertion position is before the second attribute, `mpg`.
-To execute the replacement, we use `str_replace` by matching the pattern `" .*"` (one white space and then any charactrer sequence) with `""`.
+To execute the replacement, we use `str_replace` by matching the pattern `" .*"` (one white space and then any character sequence) with `""`.
 Note how we use the attribute name `make_model` in the expression.
 We told you earlier that string operations are applicable to individual strings or string vectors.
 
@@ -313,7 +354,7 @@ Here is a way to execute `mutate` twice on `myc2` where the first one is the sam
 We capture the resulting output in `myc4`.
 
 ```{r}
-myc2 %>% mutate(which_model = str_replace(make_model, " .*", ""), .before=2) %>% mutate(mpg_disp = mpg * disp, .after=2) -> myc4
+myc2 %>% mutate(which_make = str_replace(make_model, " .*", ""), .before=2) %>% mutate(mpg_disp = mpg * disp, .after=2) -> myc4
 ```
 
 The expression in the above has only two `mutate` calls.
@@ -327,29 +368,193 @@ Typically, we end a line with a directive like `%>%` and `%->%` so the environme
 
 ```{r}
 myc2 %>%
-  mutate(which_model = str_replace(make_model, " .*", ""), .before=2) %>%
+  mutate(which_make = str_replace(make_model, " .*", ""), .before=2) %>%
   mutate(mpg_disp = mpg * disp, .after=2) ->
   myc4
+```
+__The function `rename()`__
+
+The function allows you to rename a specific attribute.
+The syntax is `NEW_NAME = OLD_NAME`.
+Below, we replace the name `wt` with `weight` amd `cyl` with `cylinder`.
+
+```{r}
+myc2 %>% rename(weight = wt, cylinder = cyl)
+```
+
+
+__The function `select()`__
+
+The selection of attributes occurs when you want to focus on a subset of the attributes of a data set at hand.
+The function `select()` allows the selection in multiple possible ways.
+
+In the simplest form of `select()`, we list the attributes we wish to include in the data with a comma in between.
+
+
+```{r}
+myc4 %>% select(make_model,which_make,mpg,cyl)
+```
+The listing can take `|` to mean "or", `&` to mean "and", and `!` to mean "not".
+To simplify a complex specification, `select` allows `c(...)` for a list.
+It also takes attribute matching options like `starts_with()`, `ends_with()`, and `contains()`, 
+The example below demonstrates the use of some of these.
+The criterion for selection is: in addition to`mpg` and `cyl`, any attribute whose name starts with some character other than "m" and contains "a" somewhere.
+
+
+```{r}
+myc4 %>% select(mpg,cyl | !starts_with("m") & contains("a"))
+```
+Another selection expression is `matches(EXP)` where `EXP` is a regular expression.
+Recall that `^` and `$` are the start and end of a string, respectively, and `[a-z]{3,5}` means any lowercase alphabet sequence having length between 3 and 5.
+The regular expression below thus means any "lowercase name having length between 3 and 5".
+
+```{r}
+myc4 %>% select(matches("^[a-z]{3,5}$"))
 ```
 
 
 
+__Handling Missing Values__
 
-__The function `select()`__
+The filtering function is useful when data has holes, which R presents as NA meaning "not available".
+You can create a vector containing any number of NA.
+Below, the data set has four columns and six rows, in which NA appears in row 6.
+
+```{r}
+na_data <- tibble( name = c("Donny", "Ely", "Freddie", "Gaby", "Huey", "Ivy"), A = c(1, 2, 3, 4, 5, NA), B = c(100, 90, 80, 90, 70, NA), C = c(99, 89, 85, 70, 65, 67))
+na_data
+```
+
+If you need to get rid of all rows with NA, you can use `drop_na` which is part of `dplyr` (and thus, of tidyverse`).
+
+```{r}
+na_data %>% drop_na() -> na_data2
+na_data2
+```
+
+Alternatively, you can use `replace_na` to give an instruction how to handle NA appearing in specific columns.
+The syntax for the instruction is simple.
+For each attribute you make a placement, state its name, add an equal sign, and then add the value you want to use for replacement.
+The replacement instructions must appear in a list, even if there is only one replacement instruction.
+
+Below, we place any NA in "A" with 0, in "B" with 77, and in "C" with 66.
+You may state an instruction for an attribute with no occurrences of NA.
+
+```{r}
+na_data %>% replace_na(list(A = 0, B = 77, C = 66))
+```
+
 __The function `filter()`__
+
+The function `filter` allows you to select rows using criteria.
+The syntax is to put an expression for the inclusion criterion.
+Below, we select only those rows whose value for "B" is less than or equal to 90.
+The filter function by default, removes all rows for which evaluating the criteria is not possible due to NA.
+
+```{r}
+na_data %>% filter(B <= 90)
+```
+
+If you have multiple criteria you want to apply conjunctively (meaning all of them have to be true), you can connect the individual criteria with a comma in between.
+
+```{r}
+na_data %>% filter(B <= 90, B >= 80)
+```
+
+The filtering function has something clever, you can compute some values on the fly using some attributes and feed them into the filtering criterion.
+Recall that `min` computes the minimum among the values in a vector.
+You can use the function to compute the minimum in "B" ignoring the NA in the attribute.
+The filtering function below takes the minimum and then keeps only those rows whose "B" value is less than or equal to the minimum.
+
+```{r}
+na_data %>% filter(C <= min(B, na.rm = TRUE))
+```
 
 __The function `arrange()`__
 
-__The function `summarise()`__
+The function `arrange` allows you to reorder rows.
+To arrange rows, you state a list of attributes in the order you want to use in arranging.
+For each attribute you want to reder in the descending order, you put the attribute name in `desc`.
+Below, we arrange data in the increasing order of `cyl` and then for each group of rows having a common `cyl` value, arrange them in the descending order of `mpg`.
 
 
+```{r}
+myc2 %>% arrange(cyl,desc(mpg))
+```
 
 
-## Adding More Data
+__The function `slice()`__
 
-## Transposing (aka Pivoting)
+The function is for selecting rows by specifying the rows position.
+You can specify one row with its row number, a range of rows with a number pair `A:B` where you can you an expression involving `n()` to specify the number of rows in the data.
+The following use of `slice()` uses the range `(n()-10):(n()-2)` is the range starting from the tenth line above the last line and ending at the second line above the last line.
 
-## Handling Blanks (aka "NA")
 
-## Saving Data Frames
+```{r}
+myc2 %>% slice((n()-10):(n()-2))
+```
+
+YOu can use `slice_head(n = NUMBER)` and `slice_tail(n = NUMBER)` to select the top `NUMBER` rows and the last `NUMBER` rows, respectively.
+
+```{r}
+myc2 %>% slice_head(n = 10)
+myc2 %>% slice_tail(n = 11)
+```
+
+
+__The functions `group_by()` and `summarize()`__
+
+These functions come handy when you want to examine data by grouping rows and obtaining some summary numbers within each group.
+The syntax for `group_by` is simple. You list the attributes with which you want to build groups.
+The syntax for `summarize()` is to add `SUMMARY = EXP` where t`SUMMARY` is the name of the summary column and `EXP` is the expression for the summary.
+The example below uses `gear` and `cyl` for grouping, computes the averages of `mpg` and `disp`, and saves it in `myc4`.
+
+
+```{r}
+mtcars %>% rownames_to_column("make_model") %>%
+  group_by(gear,cyl) %>% summarize(avgmpg = mean(mpg), avgdisp = mean(disp)) -> myc4
+```
+
+## Adding More Attribute
+
+You can combine two data frames using a common attribute as the key for combining; that is, finding values in appearing in both data frames and then connecting rows have the names in common.
+In general, if there multiple matches between the two data frames concerning the attribute, each possible row matches will appear.
+The general syntax is `JOIN_METHOD_NAME(DATA1, DATA2, by="NAME")`.
+Here `DATA1' and `DATA2` are the names of the data frames and `NAME` is the name of the key attributes.
+There are four join functions.
+The differences among them are in how they treat non-matching values.
+
+* `left_join`: Exclude any rows in `DATA2` with no matching values in `DATA1`.
+* `right_join`; Exclude any rows in `DATA1` with no matching values in `DATA2`.
+* `inner_join`: Exclude any rows in `DATA2` and `DATA1` with no matching values in the other data frame.
+* `full_join`: No exclusions.
+
+The example below shows the results of four join operations.
+
+```{r}
+testA <- tibble( name = c("Adriana", "Beth", "Candy", "Emily"), Chem110 = c(90, 80, 95, 87), Spa101 = c(99, 50, 70, 78))
+testB <- tibble( name = c("Adriana", "Beth", "Candy", "Florence"), MTH161 = c(80, 88, 93, 88), Bio110 = c(91, 61, 73, 83))
+testA
+testB
+```
+
+```{r}
+ljoined = left_join(testA, testB, by="name")
+ljoined
+rjoined = right_join(testA, testB, by="name")
+rjoined
+ijoined = inner_join(testA, testB, by = "name")
+ijoined
+fjoined = full_join(testA, testB, by="name")
+fjoined
+```
+
+You can stack up rows using `bind_rows`.
+
+```{r}
+testC <- tibble( name = c("Gail", "Helen", "Iman", "Jackie"), Chem110 = c(87, 88, 90, 79), Spa101 = c(77, 74, 94, 84))
+bind_rows(testA, testC)
+```
+
+
 
