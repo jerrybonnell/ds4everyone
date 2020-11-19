@@ -13,16 +13,7 @@ description: "This is a minimal example of using the bookdown package to write a
 
 # Welcome {-}
 
-Computational and Inferential Thinking 
-The Foundations of Data Science 
 
-By Ani Adhikari and John DeNero
+Jerry Bonnell and Mitsunori Ogihara
 
-Contributions by David Wagner and Henry Milner
-
-This is the textbook for the Foundations of Data Science class at UC Berkeley.
-
-View this textbook online on GitHub Pages.
-
-The contents of this book are licensed for free consumption under the following license:
-Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0).
+This is the textbook for the Data Science for the World class at University of Miami.
