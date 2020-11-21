@@ -5,26 +5,21 @@ output:
 ---
 # Tables
 
-In the previous chapter, we studied the `stringr` package, which is part of
-`tidyverse`. In this chapter, we introduce some other packages from `tidyverse`.
-Since calling up `tidyverse` automatically calls up the packages it  contains,
-there is no need for you to memorize where those packages come from and call up
-the individual packages as you need to use them.
-Data scientists often refer to the importance of data cleaning, stating that
-without data cleaning no data analysis results are meaningful. Some are even
-bolder to say that the most important process in data science is data cleaning
-because from their point of view, the analysis process after data cleaning is a
-routine to a great degree.
+In the previous chapter, we studied the `stringr` package, which is part of `tidyverse`.
+In this chapter, we go over more packages from `tidyverse`.
+There is no need for you to memorize where those packages come from and call up the individual packages as you need to use them.
+Data scientists often refer to the importance of data cleaning, stating that without data cleaning no data analysis results are meaningful.
+Some are even bolder to say that the most important process in data science is data cleaning because from their point of view, the analysis process after data cleaning is a routine to a great degree.
 
 ## Data Formats
 
 The data sets that data scientists handle are quite often *rectangular* tables.
-In a rectangular table, the rows have an identical number of cells and the columns have an identical number of cells, thus allowing accessing any cell by specifying a row and a column together. A conventional structure of a rectangular data in R is as follows:
+In a rectangular table, the rows have an identical number of cells and the columns have an identical number of cells, thus allowing accessing any cell by specifying a row and a column together.
+A conventional structure of a rectangular data in R is as follows:
 
-* The rows represent individual objects, whose information is available in the data set.
-* The columns represent individual properties, about which the data set provides information for each object. We often call the properties *attributes* as well as *variables*.
-* The columns have unique names. We call then *attribute names* and *variable names*. If the names are unique, we use "attributes" and "variables" for "attribute names" and "variable names",
-respectively.
+* The rows represent individual objects, whose information is available in the data set. We often call them *observations*.
+* The columns represent properties of the observations. We often call the properties *attributes* as well as *variables*.
+* The columns have unique names. We call then *attribute names* and *variable names*. If the names are unique, we use *attributes* and *variables* for attribute names and variable names, respectively.
 * The rows may have unique names. If they do, either there is an attribute specifically for the names or the table offers the row names as additional information.
 
 
@@ -36,27 +31,36 @@ The `tidyverse` package comes with scores of data sets.
 library(tidyverse)
 ```
 
-By typing `data()` you can see a list of data sets available in the RStudio environment you are in. If you do not call up `tidyverse` the list is probably short. For each data set you see on the list, you can inquire for some details, if there is any information available. To see the information, you type the name of the data set with a single question mark in front of it.
+By typing `data()` you can see a list of data sets available in the RStudio environment you are in.
+Quite a few data come with `tidyverse`.
+If your session has not yet loaded `tidyverse`, the list can be short.
 
-The Motor Trend Car Road Test data set `mtcars` is one data set available through `tidyverse`.
+For each data set you see on the list, you can inquire for some details, if there is any information available.
+To see the information, you type the name of the data set with a single question mark in front of it.
+
+The _Motor Trend Car Road Test_ data set `mtcars` is one data set available through `tidyverse`.
 
 ```{r}
 ?mtcars
 ```
 
-Now let us load the data set by executing a simple assignment.
+Let us load the data set by executing a simple assignment.
 We call the data set by the name `myc`.
+We accomplish the naming with an assignment.
 
 ```{r}
 myc <- mtcars
 ```
-
 
 You can check the contents of `myc` by typing its name.
 
 ```{r}
 myc
 ```
+
+The designation `<dbl>` appearing indicates that the column has only double values.
+The leftmost column in the table does not have the column header or the type designation.
+The strings appearing in the column are the row names.
 
 *Data frame* is a term R uses to refer to data formats like the `mtcars` data set.
 In its simplest form, a data frame consists of single-dimensional vectors where each vector has a name.
@@ -104,6 +108,7 @@ nrow(myc)
 ncol(myc)
 colnames(myc)
 ```
+
 In summary, to access the columns and the rows, here are the rules we should follow:
 
 * We use a pair `DATA_SET_NAME[X,Y]` to access a cell at row position `X` and column position `Y`, where `DATA_SET_NAME` is the name of the data set and `X` and `Y` are positive integers.
@@ -122,7 +127,7 @@ We find that there are three possibilities 4, 6, and 8.
 unique(myc$cyl)
 ```
 
-We already know how to inquire about the maximum, minimum, etc. for a vector.
+We already know how to inquire about the maximum, minimum, and other properties of a vector.
 Let us check out the `mpg` attribute (which is Miles Per Gallon) in terms of the maximum, the minimum, and the listing in the increasing order.
 
 ```{r}
@@ -136,24 +141,39 @@ filter(myc,mpg == 33.9)
 ```
 
 The function comes from a `tidyverse` package `dplyr`.
-We will study `dplyr` next.
+We will study `dplyr` later in this chapter.
+
+
 
 ### Building a data set from its components.
 
 Before moving on to `dplyr`, let us see how you can create a data set.
+The package `tibble` offers some useful tools when you are creating a data.
+
 Suppose you have tests scores in Chemistry and Spanish for four people, Gail, Henry, Irwin, and Joan.
-You can create three vectors, `names`, `Chemistry`, and `Spanish` each represening the names, the scores in Chemistry, and the scores in Spanish, and then assemble them into a data file using the function `data.frame`.
+You can create three vectors, `names`, `Chemistry`, and `Spanish` each representing the names, the scores in Chemistry, and the scores in Spanish, and then assemble them into a data file using the function `data.frame`.
 The `data.frame` takes a series of columns as arguments.
 The columns appear in the data set as you specify them in the arguments.
 You can specify the names of the rows using an optional argument `row.names=`.
+
+Below, we show a small experiment with the database idea we have just described.
+We create two data sets, `ddd` and `dddX`.
+The former does not have the row name column specification, and the latter does not.
 
 
 ```{r}
 names <- c("Gail", "Henry", "Irwin", "Joan")
 Chemistry <- c( 99, 98, 80, 92 )
 Spanish <- c(87, 85, 90, 88)
-ddd <- data.frame(Chemistry, Spanish, row.names = names)
+ddd <- data.frame(names, Chemistry, Spanish)
+dddX <- data.frame(Chemistry, Spanish, row.names = names)
+ddd
+dddX
 ```
+Notice the difference between the two appears in the handling of the "names" list.
+In the former, the names, "Gail", "Henry", "Irwin", and "Joan", appear as elements of the column with column name "names".
+The data type designation `<chr>` means "character" and so indicates that the column consists of strings.
+In the latter, the column lacks the name and type specification, and so represents the row names. 
 
 Let us see how we can access the data on the tiny data set `ddd`.
 
@@ -163,6 +183,9 @@ ddd$Spanish
 row.names(ddd)
 ddd["Henry",]
 ```
+
+
+
 
 __Write-in Data Set__
 
@@ -186,6 +209,7 @@ The package `tibble` brings a way for mechanical generation.
 ```{r}
 tibble(x=1:10, y=x*x, z = 1.5*x - 0.2)
 ```
+
 The `seq` that is native of R allows you to create a sequence.
 The syntax is `seq(START,END,GAP)`, where the sequence starts from `START` and then adds `GAP` to the sequence until the value exceeds `END`.
 We can create the sequence with the name "x", and then add three other columns based on the value of "x".
@@ -193,21 +217,67 @@ We can create the sequence with the name "x", and then add three other columns b
 ```{r}
 tibble(x = seq(1,10,0.5), y = sin(x), z = cos(x), w = x^3 - 10*x^2 + x - 2)
 ```
+
+
 __Rotating Data__
 
 Sometimes we want to switch from the row-major view to the column-major by rotating the data.
 The rotation is very simple. You have only to use the function `t()`.
+Simply applying `t()` does not complete the task of transposition.
+Below, we rotate the `mtcars` data set.
 
 ```{r}
-t(ddd)
+t(mtcars)
 ```
 
+
+It is imperative that the data you are rotating has row names.
+Let us take the following example of data we construct with `tribble`
+
+```{r}
+ddd <- tribble(~Name,~English,~Mathematics,
+               "Johnny",100,90,
+               "Katy",90,100,
+               "Lauren",89,94,
+               "Manuel",95,79,
+               "Nancy",80,80)
+ddd
+```
+
+The data does not have row names.
+The student names are the values of the attribute "Name".
+If we rotate the data using `t`, we get the following.
+
+```{r}
+dddT <- t(ddd)
+dddT
+```
+
+The three columns of `ddd` become rows and the rows of `ddd` appear as columns `[,1]` through `[,5]`.
+These are merely column index specifications.
+We can tell R to handle `dddT` as a data frame.
+
+```{r}
+ddd1 <- t(ddd)
+dddT <- as.data.frame(ddd1)
+dddT
+```
+The `[,`]` etc. now are now column names "V1" etc., but we still have "Name" as a row.
+We thus must turn "Name" as a column name and _then_ rotate.
+In the following, we process `ddd` with column conversion of "Name" to row names, then apply `t`.
+Voila!
+
+```{r}
+ddd1 <- column_to_rownames(ddd, "Name")
+dddT <- t(ddd1)
+dddT
+```
 
 __Creating a Row Name Attribute from Row Names or Row Index__
 
 Row names and row indexes are out of reach using the attachment of the dollar sign and the attribute name.
 The reason is that row names or indexes are not attributes.
-To be able to process data using row indexes or row names, it is conveninent to be able to have a matching attribute.
+To be able to process data using row indexes or row names, it is convenient to be able to have a matching attribute.
 A great benefit of `tibble` is you have functions to accomplish this.
 
 Let us go back to the `mtcars` data set.
@@ -226,6 +296,16 @@ head(myc)
 head(myc2)
 ```
 
+___Moving Columns___
+
+When you want to change the order of columns by moving a column from the present location to another.
+We can relocate a column using the `relocate` function by specifying which column should go where.
+The syntax is `relocate(DATA_NAME,ATTRIBUTE,NEW_LOCATION)`.
+The specification for the new location is either by `.before=NAME` or by `.after=NAME`, where `NAME` is the name of a column.
+
+```{r}
+ddd %>% relocate(Name, .after=Mathematics)
+```
 
 __Reading Data from an External Source__
 
@@ -261,7 +341,6 @@ You need to put the names in a matching pair of quotes (single quotation marks, 
 bloom$"N College and RR"
 ```
 
-
 __Saving Data__
 
 Saving a data file is easy.
@@ -271,6 +350,10 @@ Below, the action is to store the data frame `bloom` as "data/bloom.csv"; that i
 ```{r}
 write_csv(bloom, "data/bloom.csv")
 ```
+
+
+
+
 
 
 
@@ -340,7 +423,6 @@ We can even apply `sort` to the result that `unique` produces to make the list h
 sort(unique(myc3$which_make))
 ```
 
-
 When we need to create multiple new attributes, we can repeat the above process as many times as we create new columns.
 That would be a little cumbersome because we do not need the intermediate products.
 Conveniently there is the concept of "piping" with which you can pass data from one function to another.
@@ -364,14 +446,40 @@ You enter expressions line by line in R, and so you should be mindful of where t
 If the expression looks complete, the R environment executes what you've entered.
 Typically, we end a line with a directive like `%>%` and `%->%` so the environment understands that the line is incomplete.
 
-
-
 ```{r}
 myc2 %>%
   mutate(which_make = str_replace(make_model, " .*", ""), .before=2) %>%
   mutate(mpg_disp = mpg * disp, .after=2) ->
   myc4
 ```
+
+It is possible to combine multiple `mutate` functions into one with a comma in between, but you can specify only one place for insertion.
+Also, you can use the attribute name for the column position.
+
+```{r}
+myc2 %>%
+  mutate(which_make = str_replace(make_model, " .*", ""), mpg_disp = mpg * disp, hp_per_wt = hp / wt, .after=make_model) ->
+  myc4
+myc4
+```
+Also, there is an option of which original attributes to keep after computing the new attributes.
+The way to specify the keep choice is to use `.keep=OPTION` where `OPTION` is one of "all", "used", "unused", and "none", which mean all, only those you used in mutation, only those you did not use in mutation, and none, respectively.
+The following mutation expression creates three new attributes, "which_make", "mpg_disp", and "hp_per_wt", put them after "make_model", and keep only those you used "make_model", "mpg", "disp", "hp" and "wt". 
+
+```{r}
+myc2 %>%
+  mutate(which_make = str_replace(make_model, " .*", ""), mpg_disp = mpg * disp, hp_per_wt = hp / wt, .keep='used', .after = make_model) ->
+  myc4
+myc4
+```
+__The function `transmute()`__
+
+The function `transmute()` is a variant of `mutate()` where you keep only new attributes you generate.
+
+```{r}
+myc2 %>% transmute(which_make = str_replace(make_model, " .*", ""), mpg_disp = mpg * disp, hp_per_wt = hp / wt)
+```
+
 __The function `rename()`__
 
 The function allows you to rename a specific attribute.
@@ -382,14 +490,21 @@ Below, we replace the name `wt` with `weight` amd `cyl` with `cylinder`.
 myc2 %>% rename(weight = wt, cylinder = cyl)
 ```
 
-
 __The function `select()`__
 
 The selection of attributes occurs when you want to focus on a subset of the attributes of a data set at hand.
 The function `select()` allows the selection in multiple possible ways.
 
 In the simplest form of `select()`, we list the attributes we wish to include in the data with a comma in between.
+Here is the same `myc4` we used.
 
+```{r}
+myc2 %>%
+  mutate(which_make = str_replace(make_model, " .*", ""), mpg_disp = mpg * disp, hp_per_wt = hp / wt, .after=make_model) ->
+  myc4
+myc4
+```
+We select four from this data.
 
 ```{r}
 myc4 %>% select(make_model,which_make,mpg,cyl)
@@ -399,7 +514,6 @@ To simplify a complex specification, `select` allows `c(...)` for a list.
 It also takes attribute matching options like `starts_with()`, `ends_with()`, and `contains()`, 
 The example below demonstrates the use of some of these.
 The criterion for selection is: in addition to`mpg` and `cyl`, any attribute whose name starts with some character other than "m" and contains "a" somewhere.
-
 
 ```{r}
 myc4 %>% select(mpg,cyl | !starts_with("m") & contains("a"))
@@ -411,8 +525,6 @@ The regular expression below thus means any "lowercase name having length betwee
 ```{r}
 myc4 %>% select(matches("^[a-z]{3,5}$"))
 ```
-
-
 
 __Handling Missing Values__
 
@@ -443,6 +555,45 @@ You may state an instruction for an attribute with no occurrences of NA.
 ```{r}
 na_data %>% replace_na(list(A = 0, B = 77, C = 66))
 ```
+
+There is a way to fill missing values by dragging the non-NA value immediately above an NA to its position.
+In this manner, all NA's after the first non-NA will acquire a value.
+This works when the top row does not have an NA.
+In the case where the top row has an NA and the bottom row does not have an NA, you can drag the values upwards instead.
+You can combine the two actions in a bidirectional manner, either going down and then up or going up and then down.
+The directional specifications are: "up", "down", "updown", and "downup".
+You can use the option `.direction = DIRECTION` with one of the four in place of `DIRECTION`.
+The default direction is "down", and so you do not have state it.
+
+In the example below, we create a data set of three attributes with many NA's.
+The first column `name` has "James" in the top row and so you can fill downward to eliminate all the NA's.
+The second column `math` is the opposite. The top row has an NA and the bottom does not.
+You can fill upward.
+The last column `soc` has an NA in the top row and an NA in the bottom row, and so a single-directional filling would leave out the top or the bottom NA.
+We can fill using bidirectional replacement.
+You can see the difference between when you use "down" and when you use "downup" for the third column.
+
+```{r}
+name = c("James", NA, NA, "Karol", NA, NA, "Lindsay", NA, NA)
+math = c(NA, 8, NA, 7, 6, 5, 4, NA, 7)
+soc = c(NA, 6, 7, 8, NA, NA, 9, 8, NA)
+data0 <- tibble(name, math, soc)
+data0
+data0 %>% fill(name) %>% fill(math, .direction = "up") %>% fill(soc, .direction = "down")
+data0 %>% fill(name) %>% fill(math, .direction = "up") %>% fill(soc, .direction = "downup")
+```
+
+If you want to make an across-the-board replacement of NA with a specific value, you can use `replace(is.na(.), X)`.
+Here `X` is a value whose data type matches all the NA's.
+In the case of `data0` in the above, "name" has strings and the other two have double values.
+You thus cannot use replace the NA's across the board with a single value.
+Rather, you need to split it into two steps, with the first step taking care of the NA's in "name" and then the second taking care of filling the remaining NA's with 0.
+
+
+```{r}
+data0 %>% fill("name") %>% replace(is.na(.), 0)
+```
+
 
 __The function `filter()`__
 
@@ -554,6 +705,60 @@ You can stack up rows using `bind_rows`.
 ```{r}
 testC <- tibble( name = c("Gail", "Helen", "Iman", "Jackie"), Chem110 = c(87, 88, 90, 79), Spa101 = c(77, 74, 94, 84))
 bind_rows(testA, testC)
+```
+
+## Pivoting Tables
+
+Sometimes you encounter a situation in which you need to incorporate attributes as rows.
+Look at the following simple data set with four scores for three people.
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+toyexam <- tibble( name = c("Robert", "Susan", "Teresa"), exam1 = c(10, 9, 8), exam2 = c(8, 7, 9), exam3 = c(9.5, 10, 8.2), final = c(7, 7.5, 6.5))
+```
+
+```{r}
+toyexam
+```
+
+What if we want to find the relationship between individual exam scores and the final (we will see such explorations of relations in the next chapter on)?
+To make such comparisons, it is convenient that the three exam scores appear in just one column pair, with one column representing which exam score it is and the other representing the score, like:
+
+```{r}
+tibble( name = c("Robert", "Robert", "Robert", "Susan", "Susan", "Susan", "Teresa", "Teresa", "Teresa"), final = c(7.0, 7.0, 7.0, 7.5, 7.5, 7.5, 6.5, 6.5, 6.5), exams = c("1", "2", "3", "1", "2", "3", "1", "2", "3"), score = c(10, 8, 9.5, 9, 7, 10.0, 8, 9, 8.2))
+```
+
+You can use `pivot_longer` to accomplish the task.
+The syntax for `pivot_longer` is very complex, and so we do not go over it in detail.
+The one below takes the `toyexam`, merges all the columns whose names start with "exam" (the `starts_with` from `stringr` does the job), creates the new column with name "exams" from the collection, designates the prefix "exam" in the column names for removable, and presents the corresponding values under the column "score".
+
+
+```{r}
+toyexam %>% pivot_longer(cols = starts_with("exam"), names_to = "exams", names_prefix = "exam", values_to = "score") -> toyexam_longer
+toyexam_longer
+```
+
+In contrast with `pivot_longer`, `pivot_wider` does the action to reverse the `pivot_longer`.
+The function `pivot_wider` grabs a pair of columns and spreads the pair into a series of columns.
+One column of the pair serves as the source for the new column names after spreading.
+For each value appearing in the source column, the function creates a new column by the name.
+The value appearing opposite to the source value appears as the value for the column corresponding to the source.
+
+Below, we create a new data frame from `toyexam_longer` using the pair ("names", "score").
+To specify the selection, we use a pair of arguments `names_from = exams` and `values_from = score`.
+
+```{r}
+toyexam_longer %>% pivot_wider(names_from = exams, values_from = score)
+```
+Since the values appearing in the "exams" column are simply numbers, the resultant column names with spreading are those numbers. If we want to add a prefix to those numbers, we can specify the prefix with an argument `names_prefix = PREFIX`, where `PREFIX` is a string serving as the prefix.
+In the example below, we use "EX" as the prefix.
+
+```{r}
+toyexam_longer %>% pivot_wider(names_from = exams, values_from = score, names_prefix = "EX")
 ```
 
 

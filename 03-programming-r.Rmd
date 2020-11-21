@@ -626,14 +626,14 @@ The table with the rearrangement reveals that the most fuel efficient cars on th
 As we mentioned earlier, tidyverse is a collection packages, each having to do with data visualization and processing.
 The packages in the suite include:
 
+* stringr for manipulating string attributes
+* readr for reading data from data files
+* tibble for creating tables and making simple modifications
 * dplyr for data manipulation (e.g., filtering, reordering, etc.)
-* forcat for handling attributes with categories
+* tidyr for tidying up data tables
 * ggplot2 for visualization (e.g., creating graphs)
 * purrr for data mapping and processing nested data
-* readr for reading data from data files
-* stringr for manipulating string attributes
-* tibble for create tables
-* tidyr for tidying up data tables
+<!--* forcat for handling attributes with categories -->
 
 We will talk most of these packages in the next few sections.
 While these packages have specific focuses, once we have loaded the `tidyverse` package, we can call any functions from the individual packages.
