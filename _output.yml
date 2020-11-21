@@ -5,6 +5,6 @@ bookdown::gitbook:
     toc:
       collapse: section
       before: |
-        <li><a href="./">data science for everyone</a></li>
+        <li class="toc-logo"><a href="./"><img src="images/sticker.png"></a></li>
       after: |
         <li><a href="https://bookdown.org" target="_blank">Published with bookdown</a></li>
