@@ -761,5 +761,68 @@ In the example below, we use "EX" as the prefix.
 toyexam_longer %>% pivot_wider(names_from = exams, values_from = score, names_prefix = "EX")
 ```
 
+### A Case Study
 
+```{r}
+library(tidyverse)
+```
 
+Here is a data ser representing various scores from a course in Computer Science.
+
+```{r}
+read_csv("data/csc_course.csv")
+```
+
+The "number" column shows q unique number of each student.
+There are ten "labXX" attributes, eleven "hwXX" attributes, and three "qzXX" scores.
+Suppose we want compute for each index between 1 and 10, the difference of the "hw" value at the index fomr the "lab" value at the previous, that is, `hw10 - lab10`, `hw09 - lab09`, and so.
+We make the following plan.
+
+* Read the data and substitute each NA with 0.
+* Create a data subset consisting of "number" and the ten "lab" scores.
+* Pivot using the "lab" scores, extract the two characters following the prefix "lab", attach them after "number" to create a temporary ID.
+* Repeat the same concerning the homework scores.
+* The temporary ID is common between the two data subsets. Unite the two data sets using the common ID.
+* Using the "lab" and "hw" scores, compute the difference.
+* From the new merged version, remove the temporary ID.
+
+The code below has descriptions of each transformation.
+
+```{r}
+# Load data and replace all NA's with 0
+# Save it as `csc0`
+read_csv("data/csc_course.csv") %>%
+  replace(is.na(.), 0) -> csc0
+# Create a lab part `csc_lab` by:
+# (a) selecting "number" and the ten lab scores,
+# (b) pivoting the lab scores into an attribute pair (lab_index,lab_score)
+#     while removing "lab" from the attribute names,
+#     where selection of the columns for pivoting is by way of specifying all the columns other than "number",
+# (c) creating a new attribute "temp_id" by connecting the value appearing in "number",
+#     an underscore, and the value appearing in "lab_index"
+csc0 %>% select(number, lab01:lab10) %>%
+  pivot_longer(cols = !number, names_to = "lab_index", values_to = "lab_score", names_prefix="lab" ) %>%
+  mutate(temp_id = str_c(number, "_", lab_index)) -> csc_lab
+# Create a homework part `hw_lab` by:
+# (a) selecting "number" and the first ten homework scores,
+# (b) pivoting the homework scores into an attribute pair (hw_index,hw_score)
+#     while removing "hw" from the attribute names,
+#     where selection of the columns for pivoting is by way of specifying all the columns other than "number",
+# (c) creating a new attribute "temp_id" by connecting the value appearing in "number",
+#     an underscore, and the value appearing in "hw_index"
+csc0 %>% select(number, hw01:hw10) %>%
+  pivot_longer(cols = !number, names_to = "hw_index", values_to = "hw_score", names_prefix="hw" ) %>%
+  mutate(temp_id = str_c(number, "_", hw_index)) -> csc_hw
+# check the two sub parts
+csc_lab
+csc_hw
+# Create a merger `csc_new` by:
+# (a) call `full_join` using "temp_id" as the attribute for connecting
+# (b) compute the difference as a new attribute "diff"
+# (c) create a new attribute "index" whose values are identical to those of "lab_index"
+# (d) select five columns "number", "index", "lab_socre", "hw_score", and "diff" in this order.
+full_join(csc_lab, csc_hw, name = temp_id) %>% mutate(diff = hw_score - lab_score) %>%
+  mutate(index = lab_index) %>%
+  select(number,index,lab_score,hw_score,diff) -> csc_new
+csc_new
+```
