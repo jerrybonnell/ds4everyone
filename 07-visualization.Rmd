@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 # Visualization 
 
@@ -49,7 +49,7 @@ The term variable emphasizes that the feature can have different values for diff
 Variables that have numerical values, such as 'highway miles per gallon' or 'engine displacement' are called *quantitative* or *numerical* variables.
 -->
 
-### The layered grammar of graphics
+### The "Grammer" of Graphics with `ggplot`
 
 The grammar of graphics in R states that it is possible to build every plot from the same few components, which we call *layers*:
 
@@ -68,7 +68,7 @@ The value that follows `mapping = ` is the *aesthetic*, which specifies the prop
 `ggplot` uses the function `aes()` for specifying aesthetics.
 We use `aes()` to specify the attributes to plot using the expression `mapping = aes(...)`.
 
-### Scatter Plots 
+## Scatter Plots 
 
 Let's start our exploration with the __point__.
 
@@ -135,7 +135,7 @@ ggplot(mpg) +
   geom_point(aes(x = displ, y = hwy))
 ```
 
-__Coloring Points__
+### Coloring Points
 
 Let us go back to the plot and see where the points are.
 It appears to us that the points are following some downward trend.
@@ -254,7 +254,9 @@ mpg %>% filter(cty < 10 | cty > 32.5) %>% relocate(cty, .after=year) %>%
 
 We see that the four Dodges and one Jeep are the far left points and two Volkswagens are the far right points.
 
-__Use Articulations Other Than Colors__
+### Use Articulations Other Than Colors
+
+__Shapes__
 
 Instead of using colors, you can use shapes and fill strengths to differentiate between points.
 The argument for the fill strength is `alpha = XXX` where `XXX` is the attribute.
@@ -323,7 +325,7 @@ ggplot(mpg4) +
   geom_point(aes(x = displ, y = efficiency, shape = eff_type, color = class))
 ```
 
-### Line Graphs
+## Line and Smooth Plots
 
 Now we move on to line plotting.
 Recall that we can create a data set of values using `tibble`.
