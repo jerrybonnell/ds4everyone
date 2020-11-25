@@ -196,6 +196,26 @@ ggplot(data = mpg3) +
   geom_point(mapping = aes(x = displ, y = hwy, color = cylname))
 ```
 
+Given that `ggplot` plotted by treating `cyl` as continuous values, we can try using true continuous values for colors.
+The attribute `cty` is one such and represents the city fuel efficiency.
+
+Let us try using it.
+```{r}
+ggplot(data = mpg2) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = cty))
+```
+
+Can we use a different color than blue?
+Yes, we append `scale_color_gradient(low = XXX, high = YYY)` at the end with two colors names of our choice.
+Here we pick two colors, "yellow3" and "blue".
+
+```{r}
+ggplot(data = mpg2) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = cty)) +
+  scale_color_gradient(low = "yellow3", high="blue")
+```
+Where do we get those color names?
+You can use the [reference here](https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pdf).
 
 <!--
 To wit, we can add the following two lines.
@@ -211,94 +231,221 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
 
 -->
 
-When we see that the plot of `hwy` against `displ`, we notice that there is a some sort of downward trend, i.e., the bigger engine a car has, the less fuel efficient it is.
-That is the advantage of using visualization.
-Human eyes are able to recognize possible *associations* between them.
-Typically the associations human eyes find are: the dots get higher as we go to the right, the dots get lower as we go the right, the dots look like a U-shape in which the half-way point on the horizontal axis appear to be at the lowest, the dots look oike an inverted U-shape in which the half-way point on the horizontal axis appear to be at the highest, and the dots are everyone with no visually observable concentration of dots.
-Of such patterns, the first two and the last one are the easiest of observed with naked eyes. We call the first one the positve association, the second the negative association, and the last no association.
-When we make such visual categorization of the patterns, or the lack thereof, there are points that are conspicuously out of place in terms of the categorization we make.
-We call such out-of-place points *outliers*.
-An intuitive nature of outliers is that the points we plot collectively pronounce the association between the two variables more strongly without them.
+Here is one more plot.
+This we plot `hwy` against `cty` with the colors.
+We naturally assume that the higher the `hwy` value is, the higher the `cty` value is, vice versa.
+Plotting the data confirms our intuition about the *positive association*, as opposed to the *negative association* that we observed in the downward trend in the plot of `hwy` against `displ`.
 
-Can we add anything to the association examination with the two dimensional scatter plots?
-One possibility is to color the points according to some cateogry that appears in the data set.
-The variable "class" is a categorical one, and so we can use it as a variable for determining the coloring.
-To specifying the coloring scheme, you have only to specify the coloring category to the `aes` specification using the argument `color=NAME` where `NAME` is the name of the variable to use for the coloring.
-The color choice is automatic; that is, `ggplot2` chooses the colors according to the values appearing in the variable.
 
-```{r, fig.align="center", dpi=80}
-ggplot(data = mpg) +
-  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+```{r}
+ggplot(mpg3) + geom_point(aes(x = cty, y = hwy, color = cylname))
 ```
 
-There are seven categories in the `class` attribute.
-Those names appear in the color specification legend.
-To those whose visual color sensitivity is high, this is a very effetive approach.
+We observe two points to be very far to the right and one point to be very to the left.
+We may call such data points *outliers* meaning that they do appear conforming to the associations that other obversations are following.
+What are on earth these points?
+We can them using `filter()`.
+We also relocate `cty` after `year`.
 
-With the color assignment, the outliers look more out of place than without.
-Which ones look to be outliers?
-To the authors of the text, they are (a) the two appear about the horizontal line of 40 with x less than 2, and (b) the six with `x` greater than 5 and `y` between 20 and 30.
-Let us remove those points before plotting.
-In the code below, we create a data set `mpg2` after excluding those outlier points.
-
-```{r, fig.align="center", dpi=80}
-mpg2 <- mpg %>% filter(hwy<40) %>% filter(displ <= 5 | hwy <= 20)
-ggplot(data = mpg2) +
-  geom_point(aes(x = displ, y = hwy, color = class))
+```{r}
+mpg %>% filter(cty < 10 | cty > 32.5) %>% relocate(cty, .after=year) %>%
+  relocate( hwy, .before = cyl)
 ```
 
-Note that our filtering process eliminates the points in the "2seater" class, and so the number of classes decreases from seven to six.
-Now the visualization pronounces the negative association between displacement and highway mileage more clearly.
-We can even bold to say that sports cars are outliers in the negative association!
-Even though sports cars have larger engines, they are more efficient than other cars with more engines because of their smaller body form, compared to SUVs.
+We see that the four Dodges and one Jeep are the far left points and two Volkswagens are the far right points.
 
-__Other types of aesthetics.__
+__Use Articulations Other Than Colors__
 
-It is possible to use a different type of articular than the coloring.
-include other types of aesthetics other than `color`.
-They are `alpha`, which is the darkness of the color, and `shape`, which is the shape of point.
-
-The two plots we present below use `alpha` and `shape`, respectively.
+Instead of using colors, you can use shapes and fill strengths to differentiate between points.
+The argument for the fill strength is `alpha = XXX` where `XXX` is the attribute.
 
 ```{r, fig.align="center", dpi=80, warning = FALSE}
-ggplot(data = mpg2) +
-  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+ggplot(mpg3) + geom_point(aes(x = cty, y = hwy, alpha = class))
 ```
+
+You can specify both `alpha` and `color`, even using different attributes.
+See an example below.
 
 ```{r, fig.align="center", dpi=80, warning = FALSE}
-ggplot(data = mpg2) +
-  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+ggplot(mpg3) + geom_point(aes(x = cty, y = hwy, alpha = displ, color = class))
 ```
 
-It is possible to combine these.
-Below, we use `color` and `shape` concurrently.
+You can choose to use different shapes using the `shape = ` argument.
+Below, we use `shape` and `color` on the same attribute `class`.
+`ggplot` collpses the two legends into one.
 
 ```{r, fig.align="center", dpi=80, warning = FALSE}
-ggplot(data = mpg2) +
-  geom_point(mapping = aes(x = displ, y = hwy, shape = class, color = class))
+ggplot(mpg3) + geom_point(aes(x = cty, y = hwy, shape = class, color = class))
 ```
 
-### Positional Adjustments
+__Jittering__
 
-The careful reader will observe that there are 234 entries in the data set. However, much less (only 109 to be exact) appears in the initial (before filtering) scatter plot.
-The issue is that the points are rounded so the points appear on a grid and many points overlap each other.
-We refer to the problem as __overplotting__.
-This makes it hard to see where the mass of the data is. 
-
-It is possible to solve the overplotting problem by "jittering", which is to give some wiggling to the locations dots representing the points.
-We specify the use of jitters by inserting the argument `position = "jitter"` in the aesthetics.
-Since there are many directions along which `ggplot2` can move a point, we can anticipate that `ggplot2` is unlikely to move two points to the same locations.
-Thus, jittering spreads the points out.
+You may notice that despite there are 234 entries in the data set, much fewer points (only 109 to be exact) appears in the initial (before filtering) scatter plot of `mpg`.
+This is because many points collide on the plot.
+We call the phenomenon __overplotting__, meaning one point appearing on another.
+It is possible to nudge points to a random direction in a small quantity.
+By making all directions possible, we can make complete overplotting a rare event.
+We call the random nudging arrangement *jittering*.
+To jitter, we add an argument `position = "jitter"` to `geom_point` (not inside `aes`).
 
 ```{r, fig.align="center", dpi=80}
-ggplot(data = mpg2) +
-  geom_point(mapping = aes(x = displ, y = hwy), position = "jitter")
+ggplot(mpg3) +
+  geom_point(mapping = aes(x = cty, y = hwy, color = class), position = "jitter")
+```
+In the first chart in this section, we plotted `hwy` against `displ`.
+In that plot, by substituting `cty` for `hwy`, we obtain a similar plot of `cty` against `displ`.
+What if we want to see now both `hwy` and `cty` against `displ`?
+Is it possible to merge the two plots into one?
+Yes, we do the merger easily using pivoting.
+Recall that `pivot_longer` combines multiple columns into one.
+We can create a new data frame that combines the values from `hwy` and `cty` under the name `efficiency` while specifying whether the value is from `hwy` or from `cty` under the name `eff_type`.
+
+
+
+
+
+```{r}
+mpg3 %>% pivot_longer(cols = c(hwy,cty), names_to = "eff_type", values_to = "efficiency") -> mpg4
+```
+
+Then we can plot `efficency` against `displ` by showing `eff_type` using the shape and `class` using the color.
+
+```{r}
+ggplot(mpg4) +
+  geom_point(aes(x = displ, y = efficiency, shape = eff_type, color = class), position = "jitter")
+```
+
+The "jitter" option makes it a bit busy.
+Let us take it away.
+
+```{r}
+ggplot(mpg4) +
+  geom_point(aes(x = displ, y = efficiency, shape = eff_type, color = class))
 ```
 
 ### Line Graphs
 
-Line graphs are among the most common visualizations.
-We often use line graphs to study chronological trends and patterns.
+Now we move on to line plotting.
+Recall that we can create a data set of values using `tibble`.
+The data frame `xyzw` has four attributes, `x`, `y`, `z`, and `w`.
+The range of `x` is [-2.5,2.5] with 0.25 as a step width.
+The functions for `y`, `z`, and `w` are $2x - x^2 + 20$, $3x - 10$, and $-x+\sin(x)$, respectively.
+
+Let us learn how to print the three functions.
+
+
+```{r}
+xyzw <- tibble( x = seq(-2.5, 2.5, 0.25), y = 2 * x - x * x + 20, z = 3 * x - 10, w = -x + 10 * sin(x))
+```
+
+We start with printing the function `y` against `x`.
+We can use the same strategy as `geom_point()` by simply substituting `geom_line` for `geom_point`.
+A curious phenomenon is the attributes `x` and `y` coincide with the argument names `x` and `y` inside the `aes`.
+So the meaning of `x` and `y` are different depending on which side of the equality sign they fall.
+
+```{r}
+ggplot(xyzw, aes(x = x, y = y)) + geom_line()
+```
+The `y` appearing on the side of the plot refers to the attribute 
+
+We can add `w` to the plot using an additional `geom_line`.
+Since it uses `w`, we need to update `y` in the `aes` in the additional `geom_line`.
+
+```{r}
+ggplot(xyzw, aes(x = x, y = y)) + geom_line() + geom_line(aes(y = z))
+```
+Note that `ggplot` automatically extends the range of the `y` axis so that it can plot both the `y` and `w` functions.
+
+We can switch the order between the `y` line plot and the `z` line plot.
+To accomplish this, we will make the in-`ggplot` `aes` to specify `x` only and then the line plots specify their `y` attributes.
+The resulting plot is always the same, except that `w` appears in place of `y` to the side of the plot.
+
+```{r}
+ggplot(xyzw, aes(x = x)) + geom_line(aes(y = w)) + geom_line(aes(y = z))
+```
+You may notice that the sinusoidal curve is actually a concatenation of sraightline pieces.
+If we do not want to give in to either `y` or `w`, we can specify what the text says using `ylab(Y_LABEL_NAME)`, where `Y_LABEL_NAME` is the text you want to use.
+For much the same reason, you have `xlab`.
+We can change the line color using `color = `m, change the line width using `size = `, and the line type using `linetype = `.
+We have already covered the available color names in `tidyverse`, and you can pick any color from there.
+For size, its default value is 1.
+Available line types are "twodash", "solid", "longdash", "dotted", "dotdash", "dashed", and "blank".
+An example below assigns a label to each axis and selects color, size, and type for each line. 
+
+```{r}
+ggplot(xyzw, aes(x = x)) +
+  geom_line(aes(y = w), color = "pink", size = 2, linetype = "dotted") +
+  geom_line(aes(y = z), color = "forestgreen", size = 1, linetype = "dashed") +
+  ylab("y or z value") +
+  xlab("x value")
+```
+
+```{r}
+ggplot(xyzw, aes(x = x, y  = y)) + geom_line(aes(color = "salmon pink"))
+```
+
+Below is a trick perhaps a bit beyond of what we must learn in this course, but if you want to show the color specifications as a legend, you can `scale_color_manual`.
+`scale_color_manual` is a variant of `scale_color_gradient`.
+You can specify a series of color names and a series of matching number of color labels and then use the color labels in `aes`.
+
+```{r}
+ggplot(xyzw, aes(x = x)) +
+  geom_line(aes(y = y, color = "y(x)"), size = 1, linetype = "solid") +
+  geom_line(aes(y = z, color = "z(x)"), size = 1, linetype = "dashed") +
+  geom_line(aes(y = w, color = "w(x)"), size = 2, linetype = "dotted") +
+  scale_color_manual("",
+    breaks = c("y(x)", "z(x)", "w(x)"),
+    values = c("blue", "forestgreen", "pink")) +
+  xlab("x value") +
+  ylab("y(x)|z(x)|w(x)")
+```
+
+__Smooth Lines__
+
+An alternative to the line plot is a *smooth line plot*.
+The way to use is pretty much the same as `geom_line`.
+
+```{r}
+ggplot(xyzw, aes(x = x, y = y)) + geom_smooth()
+```
+You may notice that the piece-wise straight line of `y` is now a curved line.
+
+It is possible to mix a line and a smooth line in one plot as we show below.
+The black line segments are from the piece-wise line segments resulting from `geom_line`.
+
+```{r}
+ggplot(mpg3, aes(x = hwy, y = cty)) +
+  geom_line() +
+  geom_smooth()
+```
+
+It is possible to specify colors and line types as before.
+
+```{r}
+ggplot(mpg3, aes(x = hwy, y = cty)) +
+  geom_line(aes(color = "actual"), linetype = "dotted") +
+  geom_smooth(aes(color = "central")) +
+  scale_color_manual("", breaks = c("actual", "central"),
+    values = c("red", "blue"))
+```
+
+Notice a band of grey appearing surrounding the smooth line.
+`geom_smooth` uses a mathematical method to determine the smooth line.
+You can instruct `geom_smooth` to use a specific method, but what methods are available and how to state the selection is beyond the scope of this course.
+`geom_smooth` also produces a ribbon over the line.
+The ribbon is for showing the range of possibilities, meaning that all smooth lines that stay inside the ribbon are possibilities with the thick line in the center.
+
+Let us do one more plot using the combination of a line and a smooth, where we plot `hwy` against `displ`.
+
+```{r}
+ggplot(mpg3, aes(x = displ, y = cty)) +
+  geom_line(aes(color = "actual"), linetype = "dotted") +
+  geom_smooth(aes(color = "central")) +
+  scale_color_manual("", breaks = c("actual", "central"),
+    values = c("gold3", "aquamarine4"))
+```
+
+<!--
 For instance, we can use a line graph to study `airmiles`, which contains data about passenger miles on commercial US airlines between 1937 and 1960. 
 
 ```{r, echo = FALSE}
@@ -370,6 +517,9 @@ ggplot(mpg, aes(x = displ, y = hwy)) +
 ```
 
 In the rewritings we have taken here, the same effect is obtained. 
+
+-->
+
 
 ## Visualizing Categorical Distributions 
 
