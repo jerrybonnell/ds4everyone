@@ -10,7 +10,7 @@ Unfortunately, there is only so much you can do with glancing at values.
 There is a substantial limitation to what you can obtain when the data at hand is so large.
 Visualization is a powerful tool in such cases.
 In this chapter we introduce the `ggplot2` package for visualization.
-The `ggplot2` package is part of `tidyverse`, and like other packages, it is suffifient to load the `tidyverse` package.
+The `ggplot2` package is part of `tidyverse`, and like other packages, loading `tidyverse` is sufficient.
 
 ## Visualizing with `ggplot2`
 
@@ -49,23 +49,29 @@ The term variable emphasizes that the feature can have different values for diff
 Variables that have numerical values, such as 'highway miles per gallon' or 'engine displacement' are called *quantitative* or *numerical* variables.
 -->
 
-### The "Grammer" of Graphics with `ggplot`
+### The Building Blocks of `ggplot`
 
-The grammar of graphics in R states that it is possible to build every plot from the same few components, which we call *layers*:
+Each visualization with `ggplot` consists of some building blocks.
+We call them *layers*.
+There are three types of layers:
 
-* (1) a __data set__ upon which we will build plots,
-* (2) a __coordinate system__, which we use as references for plotting, and
-* (3) a series of geometrical objects, which we call __geoms__.
+* the base layer, which consists of the background and the coordinate system,
+* the plot layers, which consist of individual plots, and
+* the ornament layers, which consists of titles, legends, labels, etc.
 
+We call the plot layers `geom` layers because each plot layer requires a call to a function with the name starting with `geom_`.
 There are many geoms available in `ggplot`.
-The most popular and intuitive to our senses are bar charts, line charts, and scatter plots.
-The geom types corresponding to these charts are *bar* geoms, *line* geoms, and *point* geoms, respectively.
-To specify the underlying layer, we use the function `ggplot()`.
-To place a geom, we use the function `geom_XXX` where `XXX` is the name of the geom type (for example, `line`).
-We specifying the first two layers, (1) and (2), using arguments `data = ...` and `mapping = ...`.
-The value that follows `data = ` must be a data frame, for example, `mpg`.
-The value that follows `mapping = ` is the *aesthetic*, which specifies the properties of the plotting layer and the the properties of each geom.
-`ggplot` uses the function `aes()` for specifying aesthetics.
+The most popular and the most intuitive to our senses are bar charts, line charts, scatter plots, and histograms.
+We cover all these types in this chapter.
+The geom types corresponding to these charts are *bar* geoms, *line* geoms, *point* geoms, and *histogram~ geoms, respectively.
+
+To specify the base layer, we use the function `ggplot()`.
+
+We quite specify the first two layers, (1) and (2), using two major arguments `data = ...` and `mapping = ...`.
+They are for specifying the data set and the coordinate system, respectively.
+Thus, the value that follows `data = ` must be a data frame, for example, `mpg`, and the value that follows `mapping = ` must be a specification of  *aesthetic*.
+Often, a plot uses two orthogonal axes with either axis represents an attribute of the data frame.
+In the case of orthogonal axes, an aesthetic speficatio takes the form `aes(x = AAA, y = BBB)` where `AAA` and `BBB` are attributes.
 We use `aes()` to specify the attributes to plot using the expression `mapping = aes(...)`.
 
 ## Scatter Plots 
@@ -421,7 +427,7 @@ ggplot(mpg3, aes(x = hwy, y = cty)) +
   geom_smooth()
 ```
 
-It is possible to specify colors and line types as before.
+It is possible to specify colors and line types in `geom_smooth` as well.
 
 ```{r}
 ggplot(mpg3, aes(x = hwy, y = cty)) +
@@ -447,8 +453,10 @@ ggplot(mpg3, aes(x = displ, y = cty)) +
     values = c("gold3", "aquamarine4"))
 ```
 
-<!--
-For instance, we can use a line graph to study `airmiles`, which contains data about passenger miles on commercial US airlines between 1937 and 1960. 
+__Another Example__
+
+Let us pick another example.
+We can use a line graph to study `airmiles`, which contains data about passenger miles on commercial US airlines between 1937 and 1960. 
 
 ```{r, echo = FALSE}
 df_airmiles <- data.frame(
@@ -464,10 +472,6 @@ ggplot(data = df_airmiles) +
 
 Notice that two charts appear as the result since we call `ggplot` twice.
 The line geom creates the familiar line graph we typically think of while the smooth geom "smooths" the line to aid the eye in seeing overall patterns; the line geom, in contrast, is much more "ridgy".
-`geom_smooth` uses a mathematical method to determine the smooth line.
-You can instruct `geom_smooth` to use a specific method, but what methods are available and how to state the selection is beyond the scope of this course.
-`geom_smooth` also produces a ribbon over the line.
-The ribbon is for showing the range of possibilities, meaning that all smooth lines that stay inside the ribbon are possibilities with the thick line in the center.
 
 The smooth geom can be useful to confirm the negative trend we have observed in the `mpg` data frame.
 
@@ -510,7 +514,7 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
     geom_smooth(data = filter(mpg, class != "2seater"))
 ```
 
-We can also write this more concisely by omitting some keywords:
+We can also write this more concisely by omitting some keywords as below, and the result is the same.
 
 ```{r, fig.align="center", dpi=80, message = FALSE, warning = FALSE, results = FALSE}
 ggplot(mpg, aes(x = displ, y = hwy)) + 
@@ -518,23 +522,31 @@ ggplot(mpg, aes(x = displ, y = hwy)) +
     geom_smooth(data = filter(mpg, class != "2seater"))
 ```
 
-In the rewritings we have taken here, the same effect is obtained. 
-
--->
 
 
-## Visualizing Categorical Distributions 
+## Visualizing Categorical Attributes
 
-Data come in many forms that are not numerical. Data can be pieces of music, or places on a map. They can also be categories into which you can place individuals. Here are some examples of *categorical* variables.
+The point, line, and smooth plots are for viewing relations among numerical attributes.
+As you are well aware, numerical attributes are not the only type of attributes in a data set.
+There are attributes representing categories, and we call them *categorical attributes*.
+A categorical attribute has a fixed, finite number of possible values, which we call *categories*.
+The categories of a categorical attribute are distinct from each other, but other are no other binary relationships than we can assert on them (such that a category is "greater than" another).
+A special categorical attribute is a *binary category*, where there are exactly two values.
+A binary category that we are probably the most familiar with is the *Boolean category*, which has "true" and "false" as its values.
+Because of the familiarity, we often identify a binary category as a Boolean category.
 
-* The individuals are pies sold, and the variable is the type of pie.
-* The individuals are diamonds, and the variable is the quality of the cut.
-* The individuals are car manufacturers, and the variable is the class of the car, e.g., "compact", "SUV",  and "pickup."
-* The individuals are survey respondents, and the variable is the response they choose from among "Not at all satisfied," "Somewhat satisfied," and "Very satisfied."
+In data sets, categories in a categorical attribute are strings.
+Some times, categories are whoe numbers 1, 2, ..., representing indexes.
+Such cases may require some attention when processing with R, because R may think if the attributes as numbers.
+
+We have seen examples of categorical attributes before.
+The `class` attribute in the `mpg` data set is one.
 
 ### Prerequisites
 
-This section will continue to make use of `ggplot2`, so we will need the tidyverse. Moreover, we will make use of datasets that are not available in the tidyverse, but are available in the package `faraway`. 
+As before, let us load `tidyverse`.
+Moreover, we will make use of data sets that are not available in `tidyverse` but are available in the package `faraway`.
+So, we load the package too.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
@@ -543,21 +555,25 @@ library(faraway)
 
 ### The `happy` and `diamonds` data frames
 
-The table `happy` contains data on 39 students in a Univeristy of Chicago MBA class. 
+The table `happy` contains data on 39 students in a University of Chicago MBA class. 
 
 ```{r}
 happy
 ```
 
-Armed with what we have learned about `ggplot2`, we can begin answering questions about this dataset using table manipulation and visualization techniques. For instance, which "happiness" scores are the most frequent among the students? Moreover, can an association be determined between feelings of belongingness and higher scores of happiness? How about family income?  
+Armed with what we have learned about `ggplot2`, we can begin answering questions about this data set using table manipulation and visualization techniques.
+For instance, which "happiness" scores are the most frequent among the students?
+Moreover, can we discover an association between feelings of belonging and higher scores of happiness?
+How about family income?  
 
-Before we inspect this dataset any further, we will also consider another table called `diamonds`, which contains data on almost 54,000 diamonds.   
+Before we inspect the `happy` data set any further, we will also consider another table `diamonds`, which contains data on almost 54,000 diamonds.   
 
 ```{r}
 diamonds
 ```
 
-The *values* of the categorical variable *cut* are "fair", "good", "very good", "ideal", and "premium". We can look at how many diamonds are in each category. 
+The *values* of the categorical variable *cut* are "fair", "good", "very good", "ideal", and "premium".
+We can look at how many diamonds are in each category by using `group_by()` and `summarise()`.
 
 ```{r, message = FALSE}
 diamonds %>%
@@ -565,28 +581,39 @@ diamonds %>%
   summarise(count = n())
 ```
 
-The table shows the number of diamonds of each cut. We call this a *distribution table*. A distribution shows all the values of a variable, along with the frequency of each one.
+The table shows the number of diamonds of each cut.
+We call this a *distribution table*.
+A distribution shows all the values of a variable, along with the frequency of each one.
+Recall that the summary does not persist on the `diamonds` data set and so the data set remains the same after summarization.
 
 ### Bar Chart
 
-The bar chart is a familiar way of visualizing categorical distributions. It displays a bar for each category. The bars are equally spaced and equally wide. The length of each bar is proportional to the frequency of the corresponding category.
+The bar chart is a familiar way of visualizing categorical distributions.
+Each category of a categorical attribute has a number it has an association with, and a bar chart presents the numbers for the categories using bars, where the height/width of the bars represent the numbers.
+Typically, the bars in a bar chart appear either all vertically or all horizontally with an equal space in between and with the same width/height (that is, the non-variable dimension of the bars).
 
 ```{r, fig.align="center", dpi=80, warning = FALSE}
 ggplot(data = diamonds, mapping = aes(x = cut)) + 
   geom_bar()
 ```
 
-The y-axis displays *cut*, a variable from `diamonds`. However, the x-axis displays *count*, a variable not from `diamonds`. How is this possible? 
+The x-axis displays the values for the *cut* attribute while the y-axis says "count".
+The label "count" is the result of `geom_bar()` generating bars.
+Since the number of observations is greater than there are categories, `geom_bar()` decides to count the occurrences of each category.
+The word "count" says that it is the result of counting.
+We often call the inner working of the `geom_bar()` (and other geom functions) for number generation __stat__.
 
-Line geoms and point geoms simply plot the raw values given from the dataset. Bar geoms, however, calculate *new* values to plot, like a *count*. The algorithm used to compute the new values is called a statistical transformation, or __stat__. It works as follows.
+<!-- The algorithm used to compute the new values is called a statistical transformation, or __stat__. It works as follows.
 
 ```{r, echo=FALSE, fig.align="center", fig.asp=1/2, fig.cap="Figure courtesy of *R for Data Science*, Grolemund and Wickham"}
 knitr::include_graphics('images/visualization-stat-bar.png')
 ```
 
-To summarize: `ggplot2` transforms the raw table to a new dataset of categories with its corresponding counts. From this new table, the bar plot is constructed by mapping `cut` to the x-axis and `count` to the y-axis. 
+-->
 
-The default stat used is `stat_count()`, which counts the number of cases at each `x` position. If the counts are already present in the dataset and we would prefer to instead use these directly  for the heights of the bars, we can set `stat = "identity"`. For instance, consider this table about popular pies sold at a bakery. The "count" is already present in the `sold` variable. 
+Thus, `ggplot2` transforms the raw table to a new dataset of categories with its corresponding counts. From this new table, the bar plot is constructed by mapping `cut` to the x-axis and `count` to the y-axis. 
+
+The default stat `geom_bar()` uses for counting is `stat_count()`, which counts the number of cases at each `x` position. If the counts are already present in the dataset and we would prefer to instead use these directly  for the heights of the bars, we can set `stat = "identity"`. For instance, consider this table about popular pies sold at a bakery. The "count" is already present in the `sold` variable. 
 
 ```{r, fig.align="center", dpi=80, warning = FALSE}
 store_pies <- tribble(
@@ -601,36 +628,75 @@ ggplot(data = store_pies) +
   geom_bar(mapping = aes(x = pie, y = sold), stat = "identity")
 ```
 
-Note how both `x` and `y` aesthetics must be provided when using the `identity` stat. 
+Note how we provide both `x` and `y` aesthetics when using the `identity` stat. 
 
 ### Towards numerical variables 
 
-Let's turn to the `happy` data frame. We can consider the *categories* to be points on the 10-point scale, and the *individuals* the students in each interval. Let's determine this distribution table. 
+Let's turn to the `happy` data frame.
+We can consider the *categories* to be points on the 10-point scale, and the *individuals* the students in each interval.
+Let's determine this distribution table using `group_by` and `sumarize`.
+Below, we take the `happy` data set and execute grouping by `happy`.
+The category for the happy value is `happiness` in this new data set `happy_students`.
+We summarize in terms of the counts `n()` and we state the count as an attribute  `number`.
+
 
 ```{r out.width = "50%", fig.align="default", message = FALSE}
-happy_students <- group_by(happy, happy) %>% 
-  summarise(count = n())
+happy_students <- group_by(happy, happiness = happy) %>% 
+  summarize(number = n())
 happy_students
 ```
 We can now use this table, along with the graphing skills that we acquired above, to draw a bar chart that shows which scores are most frequent among the 39 students.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy_students) + 
-  geom_bar(aes(x = reorder(happy, -count), y = count), stat = "identity") +
-  xlab("Happy score")
+  geom_bar(aes(x = happiness, y = number), stat = "identity") +
+  xlab("Happy score") + ylab("Count")
 ```
+Here R treats the happy score as numerical values.
+That is the reason that we see 2.5, 5.0, 7.5, and 10.0 on the x-axis.
+Can we make the values string?
+We can treat the happy scores as strings, using `as.character()` function.
+Below, instead of simply saying `x = happiness`, the argument states `x = as.charac ter(happuness)`.
 
-There is something unsettling about this chart. Though it does answer the question of which "happy" scores appear most frequently among the students, it doesn't list the scores in chronological order. It is treating `happy` as a categorical variable.
 
-But the scores are fixed chronological units that do have an order. Let's see what happens when we try to take that into account. In the `ggplot2` code written above, `reorder()` was used to sort the categories (scores) from highest to lowest. Let's run the code again without sorting by count.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
+```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy_students) + 
-  geom_bar(aes(x = happy, y = count), stat = "identity") +
-  xlab("Happy score")
+  geom_bar(aes(x = as.character(happiness), y = number), stat = "identity") +
+  xlab("Happy score") + ylab("Count")
+```
+This almost looks good, excpet that "10" appears at the start, instead of at the end.
+This is the result of treating the values as strings.
+There is an alternate treatment - treating the values as "factors".
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(happy_students) + 
+  geom_bar(aes(x = as.factor(happiness), y = number), stat = "identity") +
+  xlab("Happy score") + ylab("Count")
 ```
 
-Now the scores are in increasing order. We can attempt an answer to our second question: is there an association between feelings of belonginess and "happy" scores? Put another way, what relationship, if any, exists between `love` and `happy`? 
+
+We can also reorder the bars in the descending order of `number.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(happy_students) + 
+  geom_bar(aes(x = reorder(happiness, desc(number)), y = number), stat = "identity") +
+  xlab("Happy score") + ylab("Count")
+```
+
+There is something unsettling about this chart.
+Though it does answer the question of which "happy" scores appear most frequently among the students, it doesn't list the scores in chronological order.
+So, let's return to the first map.
+
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(happy_students) + 
+  geom_bar(aes(x = happiness, y = number), stat = "identity") +
+  xlab("Happy score") + ylab("Count")
+```
+
+Now the scores are in increasing order.
+We can attempt an answer to our second question: is there an association between feelings of belonging and "happy" scores? Put another way, what relationship, if any, exists between `love` and `happy`? 
+
 
 ### More on positional adjustments
 
@@ -650,13 +716,24 @@ ggplot(happy) +
   geom_bar(aes(x = happy, fill = as.factor(happy)))
 ```
 
+The legend that appears says "as.factor(happy)", because we used the value for coloring.
+We can change the title with the use of `labs(fill = ...)` ornamentation.
+
+```{r eval = FALSE}
+ggplot(happy) +
+  geom_bar(aes(x = happy, color = as.factor(happy))) + labs(fill="happy")
+ggplot(happy) +
+  geom_bar(aes(x = happy, fill = as.factor(happy))) + labs(fill="happy")
+```
+
+
 To make this code work, note how the parameter passed to the `color` and `fill` aesthetic is converted to a factor, or categorical variable, via `as.factor()`. As discussed, the `happy` variable is *numerical*. However, `ggplot2` can only color or fill a bar chart based on a categorical variable.    
 
 Something interesting happens when the fill aesthetic is mapped to another variable other than `happy`, e.g., `love`.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as.factor(love)))
+  geom_bar(aes(x = happy, fill = as.factor(love))) + labs(fill = "love")
 ```
 
 This visualization produces a "stacked" bar chart! Each bar is a composite of both `happy` and `love`. It also reveals something else that is interesting: feelings of belonginess are associated with higher marks on the "happy" scale. While we must maintain caution about making any causative statements at this point, this visualization demonstrates that bar charts can be a useful aid when exploring a dataset for possible relationships.
@@ -667,16 +744,26 @@ The stacking is performed by the position adjustment specified by the `position`
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as.factor(love)), position = "fill")
+  geom_bar(aes(x = happy, fill = as.factor(love)), position = "fill")  +
+  labs(fill = "love")
 ```
 
 * `position = "dodge"` places the stacked bars directly *beside* one another. This makes it easier to compare individual values. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as.factor(love)), position = "dodge")
+  geom_bar(aes(x = happy, fill = as.factor(love)), position = "dodge")+
+  labs(fill = "love")
 ```
+We can adjust the values of the x-axis to whole numbers using `as.factor` again.
+We can also the title "relation between happiness and love".
 
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(happy) +
+  geom_bar(aes(x = as.factor(happy), fill = as.factor(love)), position = "dodge") +
+  labs(fill = "love") +
+  labs(title = "relation between happiness and love")
+```
 Bar charts are intended as visualizations of categorical variables. When the variable is numerical, the numerical relations between its values have to be taken into account when we create visualizations. That is the topic of the next section. Before ending the discussion here, we turn to one more important piece of `ggplot2` magic.  
 
 ### Coordinate Systems 
@@ -712,6 +799,13 @@ ggplot(happy) +
 ```
 
 This can also be a neat trick for eliminating the (awkward) gap between the bars and the x-axis :-)
+
+
+
+
+
+
+
 
 ## Visualizing Numerical Distributions 
 
