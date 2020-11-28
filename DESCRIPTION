@@ -12,6 +12,7 @@ Imports:
   faraway,
   nycflights13,
   htmlwidgets,
+  datasauRus,
   gapminder,
   ggplot2,
   tidyverse,

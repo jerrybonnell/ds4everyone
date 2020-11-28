@@ -327,12 +327,11 @@ nrow(filter(flights, dep_delay > -10 & dep_delay <= 0)) / nrow(flights)
 
 Let us now think of the 336,776 flights as a population, and draw random samples from it with replacement.
 As we may try using various values for the number of samples, let us define a function for sampling and plotting.
-The function `empirical_hist_delay()` takes the sample size as its argument, which we call `nn`, and draws an empirical histogram of the results.
-The reason that we use `nn` instead of the most natural single-letter name `n` is that the function `slice_sample` has an argument whose name is `n`. 
+The function `empirical_hist_delay()` takes the sample size as its argument, which we call `n`, and draws an empirical histogram of the results.
 
 ```{r}
-empirical_hist_delay <- function(nn) {
-  flights_sample <- slice_sample(flights, n = nn, replace = TRUE)
+empirical_hist_delay <- function(n) {
+  flights_sample <- slice_sample(flights, n = n, replace = TRUE)
   ggplot(flights_sample, aes(x = dep_delay, y = ..density..)) + 
     geom_histogram(breaks = delay_bins, color = "gray")
 }
@@ -373,28 +372,174 @@ Because of the two properties, we can use random samples in statistical inferenc
 The indistinguishable nature of empirical distributions is quite powerful.
 When the population is large, we can turn to sampling to generate a sample data set of a reasonably large size, which saves computation time.
 
-## Parameters, statistics, and simulation
+## Aside: The Mean and Median are Meaningful  
 
 There are quantitative evaluations that we commonly use in statistical analysis.
-For instance, in a population of flights that departed New York City (NYC) in 2013, the *median* departure delay can tell us something about the central tendency of the data -- are most departure flights delayed, on time, or are they ahead of schedule?
-Similarly, in baseball, the ability of a player to produce a hit takes the *average* (or *mean*) hit rate as its measure.
-When a baseball player takes a stand as a hitter in a game, the result is one of four-ball, dead-ball, hit, and out.
-In the first two, the hitter advances to the first base due to the pitcher either throws four balls (balls outside the strike zone for which the hitter did not swing the bat) or hits the batter with a ball where the ball would have been outside the strike zone.
-In the third one, the player hits a ball within a zone spreading in front of him and reaches the first base before being the defensive player touches him.
+For instance, in a population of flights that departed New York City (NYC) in 2013, the *median* departure delay can tell us something about the central tendency of the data -- are most departure flights delayed, on time, or are they ahead of schedule? Similarly, in baseball, the ability of a player to produce a hit is measured by the player's *average* (or *mean*) hit rate; the hitting rate is the number of hits divided by the number of times the player stood in the batter box.
+
+<!-- When a baseball player takes a stand as a hitter in a game, the result is one of four-ball, dead-ball, hit, and out. In the first two, the hitter advances to the first base due to the pitcher either throwing four balls (balls outside the strike zone for which the hitter did not swing the bat) or hits the batter with a ball where the ball would have been outside the strike zone.In the third one, the player hits a ball within a zone spreading in front of him and reaches the first base before the defensive player touches him.
 In this case, the player advances to the first base, or depending on what transpires after hitting of the ball, may advances to a base beyond the first one.
-In the last one, the hitter does not advance to the first base.
-The hitting rate is the number of hits divided by the number of times the player stood in a batter box.
+In the last one, the hitter does not advance to the first base. --> 
 
-Median and average (or mean) are *parameters* of the population.
-Also, median is an *order static*, meaning that the value emerges when the data undergoes reordering.
-Note that there are two medians exist when there are an even number of data.
-If there are 10 values, the 5th and the 6th values in the ascending order are the two medians.
-The one at the lower position in the order is the *odd median* and the other one, i.e., the one at the higher position in the order, is the *even median*.
+The criteria *median* and *mean* are useful for understanding properties of a population. When we calculate a quantity from a population, we call such quantities *parameters* of the population. Thus, the median and mean are two useful parameters we wish to estimate somehow. We will see how to in the next section, but for now we will study some properties of the mean and median to develop an appreciation for its usefulness. 
+
+First some vocabulary: 
+
+> The *mean* or *average* (we will use both interchangeably) of a vector of numbers is the sum of the elements divded by the number of elements in the vector. 
+
+> The *median* is the value at the middle position in the data after reordering the values. It is also called an *order statistic*, which we will learn about later.  
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let's load it in as usual.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### Properties of the Mean 
+
+The function `mean` returns the mean of a vector. 
+
+```{r}
+some_numbers <- c(8, 1, 8, 7, 9)
+mean(some_numbers)
+```
+
+We can note some properties of the mean based on this example. 
+
+* The mean is not necessarily an element in the vector. 
+* The mean must be between the smallest and largest values in the vector and it need not be exactly in the middle between these two extremes. 
+* If the vector is measured in some unit (e.g. $ft^2$), the mean carries the same unit.
+* The mean is a "smoother". For instance, imagine that the numbers in the vector above are dollar amounts owned by five friends. They pool the money together and deal out the money in even amounts among the friends. The amount each person will have is given in the above output: \$6.6.    
+* Proportions are means. If a vector consists of only 1s and 0s, the sum of the vector is the number of 1s in it, and the mean is the *proportion* of 1s in the vector. Following is an example: 
+
+```{r}
+ones_and_zeros <- c(1, 1, 0, 0)
+sum(ones_and_zeros)
+```
+
+```{r}
+mean(ones_and_zeros)
+```
+
+Thus, the mean tells us that 50\% of the values in `ones_and_zeros` are 1s. 
+
+### The Mean is a Measure of Central Tendency 
+
+Let us visualize the distribution of `some_numbers` using a histogram. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+tibble(some_numbers) %>%
+  ggplot() + 
+  geom_histogram(aes(x = some_numbers, y = ..density..),
+                 color = "gray", fill = "darkcyan", binwidth = 1)
+```
+
+If we imagine the base of a histogram as a seesaw, then the mean is the *pivot* by which the seesaw is supported by. We can denote this point visually using a triangle. 
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+tibble(some_numbers) %>%
+  ggplot() + 
+  geom_histogram(aes(x = some_numbers, y = ..density..),
+                 color = "gray", fill = "darkcyan", binwidth = 1) +
+  geom_point(aes(x = mean(some_numbers), y = -0.02), 
+             color = "salmon", shape = 17, size = 4)
+```
+
+The pivot is the point at which this "seesaw" is balanced. If we nudge the point in any direction, say toward 7.5, the seesaw tips over to the right; if it is closer to 5, the seesaw tips to the left. That pivot is the mean. Thus,
+
+> The mean is the "pivot" or "balancing point" of the histogram.
+
+### Symmetric distributions 
+
+Here is another vector called `symmetric`.
+
+```{r}
+symmetric <- c(8, 8, 8, 7, 9)
+```
+
+Let us visualize this distribution. We note that it is symmetric around 3. 
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot(tibble(symmetric)) + 
+geom_histogram(aes(x = symmetric, y = ..density..),
+               bins = 3,
+               color = "gray", fill = "darkcyan") +
+geom_point(aes(x = mean(symmetric), y = -0.02), 
+           color = "salmon", shape = 17, size = 4)
+```
+
+The mean and the median will both equal to 8.
+
+```{r}
+mean(symmetric)
+median(symmetric)
+```
+
+Thus, our next property: 
+
+> For symmetric distributions, in general, the mean and the median will equal.
+
+What if the distribution was not symmetric? We already have an example of one in the numbers contained by `not_symmetric`. Let us overlay both on the same histogram.  
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot() + 
+  geom_histogram(data = tibble(symmetric), aes(
+                       x = symmetric, y = ..density..),
+                 color = "gray", fill = "darkcyan", binwidth = 1) +
+  geom_histogram(data = tibble(some_numbers), aes(
+                     x = some_numbers, y = ..density..), alpha = 0.8,
+                 color = "gray", fill = "salmon", binwidth = 1) + 
+  geom_point(aes(x = mean(symmetric), y = -0.02), 
+             color = "darkcyan", shape = 17, size = 4) + 
+  geom_point(aes(x = mean(some_numbers), y = -0.02), 
+             color = "salmon", shape = 17, size = 4)
+```
+
+The cyan histogram shows the distribution represented by `symmetric` and the orange the distribution represented by `some_numbers`. If we again imagine the x-axis as a seesaw, we see that the cyan distribution balances around the pivot at 8. Both the mean and median of the cyan distribution is equal to 8. 
+
+The orange histogram of `some_numbers` starts out the same as the cyan at the right end but its left bar is at the value 1; the darker shading shows where the two histograms overlap. The median of the orange distribution is also 8. However, in order to keep this distribution "balanced" on the seesaw, we need to scoot the pivot to the left, to 6.6. That is the mean of the orange histogram.    
+
+```{r}
+median(some_numbers)
+mean(some_numbers)
+```
+
+### The Mean of Two Identical Distributions is the Same 
+
+We end this section with one more important property about means. We said earlier that the mean of a vector is just the sum of its elements divided by the number of elements. However, observe that we could have calculated it in different ways:
+
+$$\begin{align*}
+\mbox{mean} &=~ \frac{8 + 1 + 8 + 7 + 9}{5} \\ \\
+&=~ 8 \cdot \frac{1}{5} ~~ +  8 \cdot \frac{1}{5} ~~ + ~~ 1 \cdot \frac{1}{5} ~~ + ~~ 7 \cdot \frac{1}{5} ~~ + ~~ 9 \cdot \frac{1}{5} \\ \\
+&=~ 8 \cdot \frac{2}{5} ~~ + ~~ 1 \cdot \frac{1}{5} ~~ + ~~ 7 \cdot \frac{1}{5} ~~ + ~~ 9 \cdot \frac{1}{5} \\ \\
+\end{align*}$$
+
+This rewriting reveals an important point: each unique value in the vector is *weighted* by the proportion of times it appears. For instance, we see that 8 has much more weight than either 1 or 7 because it appears more often in the vector. 
+
+Let us consider another example. 
+
+```{r}
+lots_of_repetition <- c(8, 8, 8, 1, 1, 8, 7, 7, 9, 9)
+mean(lots_of_repetition)
+```
+
+This vector has the same mean as `some_numbers`. What is the point here? The mean of a vector depends only on the distinct values and their proportions, *not* on the number of elements in the vector. Put differently, the mean depends only on the *distribution* of values.
+
+Thus, our final property: 
+
+> If two vectors have the same distribution, their means will equal. 
 
 
-In many situations we do not know the parameters of the distribution.
-Sampling offers estimates of the parameters.
-Since large-scale sampling produces an empirical distribution close to the true population, we anticipate that the parameters we obtain from empirical distributions are close to the true ones when the sample size is large.
+## Simulating a Statistic
+
+In many situations we do not know the value of a parameter of a population. It turns out that sampling is a reliable tool that can offer a good estimate of a parameter. Since large-scale sampling produces an empirical distribution that is close to the true population, we hope that the value we compute from it will also be close enough to the parameter we obtain from the population when the sample size is large. 
+
+Before jumping into the tidyverse, first some vocabulary: 
+
+* A *parameter* is some useful quantitative evaluation criteria about a population. For instance, a parameter is the mean height of all individuals in the United States. This is typically unknown to us. 
+* A *statistic* is a value obtained from an empirical distribution (which we can generate). The purpose of a statistic is to *estimate* a parameter. When we compute the mean or median from an empirical distribution, we call these statistics the *sample* mean and median, respectively.  
 
 
 ### Prerequisites
@@ -493,7 +638,7 @@ Let us turn to simulating the median flight delay in the `flights` data frame. R
 
 We will draw random samples of size 1,000 from the population of flights and simulate the median.  
 
-### Step 2: Write the Code for Estimation
+### Step 2: Write Code for Estimation
 
 We know how to generate a random sample of 1,000 flights. 
 
@@ -552,7 +697,7 @@ This is because the empirical distributions of 1,000 flight departure delays are
 We know that we generated before looked a lot like the true distribution of flight delays.
 We can guess that in running the experiment, each empirical distribution with 1,000 flights would have liked like the true one.
 
-### Example: Touchdown percentage in the `receivers2019` data frame
+### Example: Proportion of Touchdowns in `receivers2019` 
 
 We end this section with an example from football. The `receivers0` data frame contains data of receivers in the National Football League in the 2017, 2018, and 2019 seasons. The data comes from [The Football Database](http://www.footballdb.com/index.html). The dataset has 1,511 rows and 13 columns. We note some of the most important variables:
 
@@ -588,7 +733,7 @@ receivers <- receivers0 %>%
 receivers
 ```
 
-For this example, we will study the percentage of players whose longest yardage ended in a touchdown for the 2019 season. Since we have access to the population, we know the value of the parameter. Let's record it. 
+For this example, we will study the proportion of players whose longest yardage ended in a touchdown for the 2019 season. Since we have access to the population, we know the value of the parameter. Let's record it. 
 
 To begin, let's filter the data frame to include only the data from 2019. We will call this data frame `receivers2019`. 
 
@@ -596,22 +741,22 @@ To begin, let's filter the data frame to include only the data from 2019. We wil
 receivers2019 <- filter(receivers, Year == 2019)
 ```
 
-The percentage of longest yards is the fraction of `TRUE`'s in the `is_lg_td` column. Recall that Boolean variables are really just `1`'s and `0`'s. Thus, we can sum the number of `TRUE`'s and divide by the total number of players. This is equivalent to computing the mean for the `is_lg_td` column.  
+The proportion of longest yards is the fraction of `TRUE`'s in the `is_lg_td` column. Recall that Boolean variables are just `1`'s and `0`'s. Thus, we can sum the number of `TRUE`'s and divide by the total number of players. This is equivalent to computing the mean for the `is_lg_td` column.  
 
 ```{r}
-percent_td <- receivers2019 %>%
+prop_td <- receivers2019 %>%
   pull(is_lg_td) %>%
   mean()
-percent_td
+prop_td
 ```
 
 So about 18.5% of the longest yardages of players ended in a touchdown. How good would our statistic be? 
 
 ### Step 1: Select the Statistic to Estimate
 
-We will draw random samples of size 1,000 from the population of players and simulate the percentage of player yardages that end in a touchdown.   
+We will draw random samples of size 1,000 from the population of players and simulate the proportion of player yardages that end in a touchdown.   
 
-### Step 2: Write the Code for Estimation
+### Step 2: Write Code for Estimation
 
 We already know how to generate a random sample of 1,000 players.  
 
@@ -620,7 +765,7 @@ sampled <- receivers2019 %>%
   slice_sample(n = 1000, replace = TRUE)
 ```
 
-We also know how to compute the sample percentage of this sample. 
+We also know how to compute the sample proportion of this sample. 
 
 ```{r}
 sampled %>%
@@ -632,11 +777,11 @@ As before, let's wrap this up into a function we can use in our map.
 
 ```{r}
 one_sample_percentage <- function(x) {
-  sample_percent <- receivers2019 %>%
+  sample_prop <- receivers2019 %>%
     slice_sample(n = 1000, replace = TRUE) %>%
     pull(is_lg_td) %>%
     mean()
-  return(sample_percent)
+  return(sample_prop)
 }
 ```
 
@@ -646,19 +791,19 @@ We will issue 10,000 repetitions of our simulation. Here is the map that makes u
 
 ```{r}
 num_repetitions <- 10000
-percentages <- map_dbl(1:num_repetitions, one_sample_percentage)
+props <- map_dbl(1:num_repetitions, one_sample_percentage)
 ```
 
 We can now visualize the empirical distribution of the statistic using a histogram. 
 
 ```{r}
-ggplot(tibble(percentages)) + 
-  geom_histogram(aes(x = percentages, y = ..density..), 
-                 fill = "darkcyan", color = "gray", bins = 20) + 
-  geom_point(aes(x = percent_td, y = 0), color = "salmon", size = 3)
+ggplot(tibble(props)) + 
+  geom_histogram(aes(x = props, y = ..density..), 
+                 fill = "darkcyan", color = "gray", bins = 15) + 
+  geom_point(aes(x = prop_td, y = 0), color = "salmon", size = 3)
 ```
 
-Observe how the sample percentages cluster around the value 0.185, which is the value of the population percentage given by `percent_td` (see the light orange dot). 
+Observe how the sample proportions cluster around the value 0.185, which is the value of the population proportion given by `prop_td` (see the light orange dot). 
 
 Once again, we see that the statistic provides a good estimate of a parameter. 
 
