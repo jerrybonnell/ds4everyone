@@ -826,3 +826,128 @@ full_join(csc_lab, csc_hw, name = temp_id) %>% mutate(diff = hw_score - lab_scor
   select(number,index,lab_score,hw_score,diff) -> csc_new
 csc_new
 ```
+
+## Writing Functions
+
+We have used several times by now, the word "function".
+Here are some basic rules about functions.
+
+* _A function is a block of chord with a name that allows execution from other codes._ This mean that you can take any part of a working (i.e., all parentheses and brackets in the part have matching counterparts in the same part) and specify it to be a function.
+* _If the function is active in the present run of R, each time a code call the function, the code of the function runs._ This means that R suspends the execution of the present code and processes the execution of the code of the function. When it finishes running the code of the function, it returns to the execution of the one it has suspended.
+* _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return()` at the end so as to specify the value it has computed.
+* _If a function has the role of returning a value, the call itself represents the value it computes._ So you store the value the function computes in a variable using an assignment.
+* _A function may require some number of values to use in its calculation._ We call them *arguments*. When using a function that requires, the arguments must appear in the call.
+
+### A Very Simple Function
+
+Here is a very simple function, `one_Ten`, which prints the sequence of integers from 1 to 10.
+The definition of the function takes the form `one_ten <- function() { ... }`.
+
+```{r, error = TRUE}
+one_ten <- function() { print(1:10) }
+```
+Here is what happens when you call the function.
+```{r}
+one_ten()
+```
+Note that the call stands alone, i.e., you can use it without anything else but its name and a pair of parentheses.
+By replacing the code appearing inside the curly brackets, you can define a different function with the same name `one_ten()`.
+Let us reverse the order in which the numbers appear,
+
+```{r, error = TRUE}
+one_ten <- function() { print(10:1) }
+```
+Here is what happens when you call the function.
+```{r}
+one_ten()
+```
+
+The new behavior of `one_tne()` substitues the old one, and you cannot replay the behavior of the previous version.
+
+### Functions That Compute a Value
+
+To make a function compute a value, you add a line `return(VALUE)` at the end of the code in the brackets.
+The function `my_family()` returns a list of names for persons.
+Remember the `c()` function?
+The function creates a new list with 19 names and returns the list.
+
+```{r}
+my_family <- function() {
+  return(c("Amy", "Billie", "Casey", "Debbie", "Eddie", "Freddie", "Gary",
+           "Hary", "Ivy", "Jackie", "Lily", "Mikey", "Nellie", "Odie",
+           "Paulie", "Quincy", "Ruby", "Stacey", "Tiffany"))
+}
+```
+
+The call for the function produces the list that the function returns.
+
+
+```{r}
+a <- my_family()
+a
+```
+
+Now whenever you need the 19-name list, you can either call the function or refer to the variable `a` that holds the list.
+
+### Functions That Take Arguments
+
+To write a function that takes arguments, you determine how many arguments you need and determine the names you want to use for the arguments during the execution of the code for the function.
+The `functionn()` declaration now has the names of the arguments.
+You put them in the order you want to use with a comma in between.
+Below, we define a function for computing the maximum of two numbers with a feature that if both numbers are smaller than 0, the maximum is not the maximum of the two negative numbers, but 0.
+Note that we use the pairwise maximum twice in the code:
+first for computing the maximum between the two arguments `x` and `y`, and then computing the maximum between the maximum and 0.
+In that manner, if the first maximum is negative, the function returns 0 instead.
+
+```{r, error = TRUE}
+max0 <- function(x, y) { return(max(0, max(x, y))) }
+```
+
+Here is the demonstration of how the function works.
+
+```{r}
+max0(-10, 2)
+max0(-10, -13)
+```
+
+
+### Practical Examples
+
+
+Recall the data set `mtcars`.
+We introduce a function that returns the country of origin of a make.
+We follow the previous procedure for migrating the row names to an attribute and taking the prefix of the row names to the `which_make` attribute.
+There are 22 makes that appear in the attribute.
+We get to it by applying the function `unique()` to the `which_make` attribute.
+We create a 22-element list of the country of origin corresponding to the `make` list.
+Now the `car_origin()` function takes a string representing a make, finds its position in the `makes` list using the `match` function, and then returns the element of the country of origin list at the position.
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+myc <- mtcars
+myc2 <- rownames_to_column(myc,"make_model")
+myc3 <- mutate(myc2, which_make = str_replace(make_model, " .*", ""), .before=2)
+makes <- unique(myc3$which_make)
+makes
+countries <- c("Japan", "Japan", "USA", "USA", "USA", "USA", "USA", "USA",
+             "USA", "Italy", "Japan", "Japan", "USA", "USA", "USA", "USA",
+             "France", "Italy", "USA", "Italy", "Italy", "Sweden")
+countries[match("AMC",makes)]
+```
+```{r}
+car_origin <- function(x) {
+  return(countries[match(x,makes)])
+}
+car_origin("Toyota")
+```
+
+Now we can furnish the `myc3` data set by creating a new column `country` as the result of applying the function `car_origin()` to the attribute `which_make`.
+
+
+```{r}
+myc3 %>% mutate(country = car_origin(which_make), .after = 2) 
+```
