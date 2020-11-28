@@ -4,23 +4,37 @@ output:
   html_document: default
 ---
 
-# Stardard Deviation and Normal Distribution
+# Towards Normality
 
-We have seen previously the concepts of mean (a.k.a., average) and order statistics.
-Another important statistic in examining distributions is *standard deviation*, which measures generally how much the data points are away from the mean.
-The mean and the standard deviation jointly provide descriptions of distributions at hand.
+We have studied several statistics in this course such as the mean and order statistics like the median. We have also drawn empirical distributions to simulate a statistic to see if it approximates well some parameter value of interest. For some statistics, like total variation distance, we saw that the distribution skewed in some direction. But the empirical distribution for the sample mean has consistently shown something that resembles a bell shape, regardless of the underlying population.  
+
+Recall that a goal of this course is to make inferences about data in a population for which we know very little about. If we can extract properties of random samples that are true *regardless of the underlying population*, we have at hand a powerful tool for doing inference. The distribution of the mean is one such property, which we will develop more in depth in this chapter.      
+
+When we refer to these bell-like curves, we are talking about a distribution called the *normal distribution*. To develop an intuition for this, we will first examine a new (but important) statistic called the *standard deviation*, which measures generally how much the data points are away from the mean. It is important because the shape of a normal distribution is completely determinable from its mean and standard deviation. We will then study that by taking a large number of samples from a population, where each sample has no relation to another, the resulting distribution will look like -- you guessed it -- a normal distribution. 
+
+<!-- The mean and the standard deviation jointly provide descriptions of distributions at hand.
 There is a type of distributions which we call *normal distributions* (or *bell curves*).
-The shape of a normal distribution is completely determinable from its mean and standard deviation.
 We learn that if we take a large number of samples from a population, where sample values have no relations with each other, then the distribution of the mean you obtain from large number of samples will look like a normal distribution.
 Not only that, the resemblance between the distribution of the mean and the normal distribution increases as the number of samples increases.
 By taking advantage of the property, you can "map" a collection of samples onto the normal distribution that the samples are likely to represent.
 We call the mapping *Z-score*.
-The mapping is universal, and so by applying the mapping to collections of samples, you can compare data from difference collections.
+The mapping is universal, and so by applying the mapping to collections of samples, you can compare data from difference collections. --> 
 
 ## Standard Deviation
 
-Suppose we have some number, say $N$, of samples and for each sample, we have its measurement.
-Let us say $x_1, \ldots, x_N$ are the measurements.
+The *standard deviation* (or *SD* for short) measures how much the data points are away from the mean. Put another way, it is a measure of the *spread* in the data. 
+
+### Prerequisites
+
+We will continue to make use of the tidyverse in this section so let us load it in. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### Definition of Standard Deviation
+
+Suppose we have some number, say $N$, of samples and for each sample, we have its measurement. Let us say $x_1, \ldots, x_N$ are the measurements.
 The mean of the samples is the total of $x_1, \ldots, x_N$ divided by the number of samples $N$, that is
 \[
 \frac{x_1 + \cdots + x_N}{N}
@@ -33,125 +47,381 @@ The *variance* of the samples is the average of the square amounts of these samp
 We use symbol $\sigma^2$ to represent the variance.
 Because of the subtraction of the mean from the individual values, the variance measures the spread of the data around the mean.
 Since each term in the total is a square, the unit of the variance is the square of the unit of the samples.
-For example, if the original measure is the meters then the unit of the variance is the square of the meters.
+For example, if the original measure is meters then the unit of the variance is square meters.
 To make the two units comparable to each other, we take the square root of the variance, which we denote by $\sigma$.
 \[
 \sigma = \sqrt{\frac{(x_1 - \mu)^2 + \cdots + (x_N - \mu)^2}{N}}
 \]
 We call the quantity $\sigma$ the *standard deviation*.
 
-Suppose we have drawn ten sample exam scores $78, 89, 98, 90, 96, 90, 84, 91, 98, 76$.
-Let us compute the mean, the element-wise difference from the mean, and then the deviation.
+### Example: Exam Scores 
+
+Suppose we have drawn ten sample exam scores.
 
 ```{r}
-data1 <- c(78, 89, 98, 90, 96, 90, 84, 91, 98, 76)
-mu1 <- mean(data1)
-diff1 <- data1 - mean(data1)
-sigma1 <- sqrt(mean( diff1 * diff1 ))
-mu1
-diff1
-sigma1
+sample_scores <- c(78, 89, 98, 90, 96, 90, 84, 91, 98, 76)
+sample_scores
 ```
 
-The mean is 89 points and the standard deviation is 7.2938 points.
-Here is another group of data, $88, 89, 93, 90, 86, 90, 84, 91, 93, 86$, which consists of 10 elements.
+Let us first compute the mean and the squared element-wise differences from the mean. 
 
 ```{r}
-data2 <- c(88, 89, 93, 90, 86, 90, 84, 91, 93, 86)
-mu2 <- mean(data2)
-diff2 <- data2 - mean(data2)
-sigma2 <- sqrt(mean( diff2 * diff2 ))
+mu <- mean(sample_scores)
+diffs_from_mu_squared <- (sample_scores - mean(sample_scores)) ** 2
+mu
+diffs_from_mu_squared
+```
+
+Computing the variance is straightforward. We need only to sum up `diffs_from_mu_squared` and divide the resulting quantity by the number of scores. 
+
+```{r}
+variance <- sum(diffs_from_mu_squared) / length(sample_scores)
+variance
+```
+
+Finding the standard deviation is easy -- just take the square root! 
+
+```{r}
+sdev <- sqrt(variance)
+sdev
+```
+
+The mean is 89 points and the standard deviation is about 7.3 points. Let us visualize the distribution of scores. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+tibble(sample_scores) %>%
+  ggplot() + 
+  geom_histogram(aes(x = sample_scores, y = ..density..),
+                 color = "gray", fill = "darkcyan", binwidth = 3) + 
+  scale_x_continuous(breaks = seq(70, 100, 4))
+```
+
+
+Let us compare these scores with another group of 10 scores.
+
+```{r}
+sample_scores2 <- c(88, 89, 93, 90, 86, 90, 84, 91, 93, 80)
+sample_scores2
+```
+
+We will repeat the above steps. 
+
+```{r}
+mu2 <- mean(sample_scores2)
+diffs_from_mu_squared2 <- (sample_scores2 - mean(sample_scores2)) ** 2
+variance2 <- sum(diffs_from_mu_squared2) / length(sample_scores2)
+sdev2 <- sqrt(variance2)
+```
+
+Let us examine the mean and standard deviation of this group. 
+
+```{r}
 mu2
-diff2
-sigma2
+sdev2
 ```
 
-The group has the same mean but the deviation is much smaller deviation.
-You may notice that the range of the difference values are larger in the first list than in the second list.
-Here are the maximum and the minimum from the two lists.
-
+Interestingly, the group has the same mean but the standard deviation is much smaller. Notice that the sum of the squared difference values are much larger in the first vector than in the second. 
 
 ```{r}
-c(max(diff1),min(diff1))
-c(max(diff2),min(diff2))
+sum(diffs_from_mu_squared)
+sum(diffs_from_mu_squared2)
 ```
 
-Here is a third group of data, $94, 84, 94, 84, 94, 84, 84, 94, 94, 84$.
+This tells us that the grades in the second group are closer together. We can confirm our findings with a histogram of the score distribution. 
 
-```{r}
-data3 <- c(94, 84, 94, 84, 94, 84, 84, 94, 94, 84)
-mu3 <- mean(data3)
-diff3 <- data3 - mean(data3)
-sigma3 <- sqrt(mean( diff3 * diff3 ))
-mu3
-diff3
-sigma3
+```{r dpi=80, fig.align="center", message = FALSE}
+tibble(sample_scores2) %>%
+  ggplot() + 
+  geom_histogram(aes(x = sample_scores2, y = ..density..),
+                 color = "gray", fill = "darkcyan", binwidth = 3) + 
+  scale_x_continuous(breaks = seq(70, 100, 4))
 ```
 
-The mean  is the same, the maximum and minimum of the differences are much the same as those from the second set, but the deviation is higher.
-What this quick examination tells you is that simply calculating the diffs from the mean does not give you the whole picture about the spread.
-
-R comes with a function `sd` that computes the sample standard deviation.
-We can compare them with the sigma values we have computed side by side.
-
-```{r}
-c(sigma1,sd(data1))
-c(sigma2,sd(data2))
-c(sigma3,sd(data3))
-```
-
-Because the use of $N-1$ in place of $N$, the values on the right column are greater than those on the left.
+Observe that the scores are much closer together compared to the first histogram. 
 
 
+### Sample Standard Deviation
 
+Often in the calculation of standard deviation, instead of dividing by $N$, we divide by $N-1$. We call the versions of $\sigma^2$ and $\sigma$ with division by $N$ the *population variance* and the *population standard deviation*, respectively. The versions that use division by $N-1$ are the *sample variance* and *sample standard deviation*.
 
-### Sample Deviation and Population Deviation
+There is a subtle consideration in why we want to use $N-1$ for the variance. To see why, suppose you have made up your mind on the value of the mean, say it is 6, and determine all the values in your data __except for the last one__. Here is an example of the situation. 
 
-Often in the calculation of standard deviation, instead of dividing by $N$, we divide by $N-1$.
-We call the versions of $\sigma^2$ and $\sigma$ with division by $N$ the *population variance* and the *population deviation*, respectively.
-The versions with division by $N-1$ are the *sample variance* and *sample deviation*.
-
-There is a subtle consideration in why we want to use $N-1$ for the average.
-Let us say you have made up your mind on the value of the mean and determine and allocate the values to your data so they produce the same mean.
-Let us say you have complete liberty in the choice of values, meaning the values can be as large as you want and as small as you want.
-Once you have finished determining $N-1$ values, you have no freedom any more because you have a constraint that the total of the $N$ values is equal to $N$ times the average
 \[
-\mu = \frac{x_1 + \cdots + x_N}{N}
+\mu = 6 = \frac{2 + 8 + 4 + \text{ ?}}{4}
 \]
-By substituting $\mu$ and $x_1, \ldots, x_{N-1}$ with your choices, you get
+
+Once you have finished determining three out of the four values, you no longer have anymore freedom in choosing the fourth value. This is because of a constraint composed by the mean formula. That is, if we isolate the sum of the numbers from above...
+
+
 \[
-x_N = N\mu - (x_1 + \cdots + x_{N-1})
+2 + 8 + 4 + \text{ ?} = 6 * 4
 \]
-So, in the formula that involves $\mu$ and $x_1, \ldots, x_N$, like the one for variance, there are not $N$ independent values, there are only $N-1$ of them.
-The difference in quantity by using $N-1$ instead of $N$ may not be large, specifically, when $N$ is large and the differences are small.
-Still, for an accurate understanding of the data spread, the choice can be highly critical.
+
+Thus, we can figure quite easily the value of the $?$. 
+
+\[
+\text{ ?} = 6 * 4 - (2 + 8 + 4) = 10 
+\]
+
+The phenomena we observed is representative of a general fact. In the formula that involves $\mu$ and $x_1, \ldots, x_N$, like the one for variance, there are no longer $N$ independent values, there are only $N-1$ of them.
+
+The difference in quantity by using $N-1$ instead of $N$ may not be large, specifically, when $N$ is large and the differences are small. Still, for an accurate understanding of the data spread, the choice can be highly critical. For this reason, statisticians prefer to work with the sample standard deviation when dealing with samples. We will do so as well for the remainder of this course.  
+
+### The `sd` function
+
+Fortunately R comes with a function `sd` that computes the *sample* standard deviation. We  compare them side-by-side with the values we computed earlier.
+
+```{r}
+c(sdev,sd(sample_scores))
+c(sdev2,sd(sample_scores2))
+```
+
+Because of the use of $N-1$ in place of $N$, the values in the right column are greater than those on the left.
 
 
+## More on Standard Deviation
+
+The previous section introduced the notion of standard deviation (SD) and how it is a measure of *spread* in the data. We build upon our discussion of SD in this section. 
+
+### Prerequisites
+
+We will continue to make use of the tidyverse. To demonstrate an example of the use (as well as misuses) of SD, we also load in two synthetically generated datasets from the package `datasauRus`.
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(datasauRus)
+```
+
+We retrieve the two datasets here, and will explore them shortly. 
+
+```{r, message = FALSE, warning = FALSE}
+star <- datasaurus_dozen %>%
+  filter(dataset == "star") 
+bullseye <- datasaurus_dozen %>%
+  filter(dataset  == "bullseye")
+```
+
+### Working with SD 
+
+To see what we can glean from the SD, let us turn to a more interesting dataset. The tibble `starwars` contains data about all characters in the Star Wars canon. The table records a wealth of information about each character, e.g., name, height (cm), weight (kg), home world, etc.  Pull up the help (`?starwars`) for more information about the dataset. 
+
+```{r}
+starwars
+```
+
+Let us focus on the characters' heights. It turns out that the height information is missing for some of them; let us remove these entries from the dataset. 
+
+```{r}
+filter(starwars, is.na(height))
+```
+
+```{r}
+starwars_clean <- starwars %>%
+  filter(!is.na(height))
+```
+
+Here is a histogram of the characters' heights. 
+
+```{r dpi=80, fig.align="center", warning = FALSE, message = FALSE}
+ggplot(starwars) + 
+  geom_histogram(aes(x = height, y = ..density..),
+                 color = "gray", fill = "darkcyan", bins = 20)
+```
+
+The average height of Star Wars characters is just over 174 centimeters (or 5'8''), which is about 1.4 centimeters shorter than the average height of men in the United States (5'9''). 
+
+```{r}
+mean_height <- starwars_clean %>%
+  pull(height) %>%
+  mean()
+mean_height
+```
+
+The SD tells us how far off a character's height is from the average, which is about 34.77 centimeters. 
+
+```{r}
+sd_height <- starwars_clean %>%
+  pull(height) %>%
+  sd()
+sd_height
+```
+
+The shortest character in cannon is the legendary Jedi Master Yoda, registering a height of just 66 centimeters!
+
+```{r}
+starwars_clean %>%
+  arrange(height) %>%
+  head(1)
+```
+
+Yoda is about 108 centimeters shorter than the average height. 
+
+```{r}
+66 - mean_height
+```
+
+Put another way, Yoda is about 3 SDs *below* the average height. 
+
+```{r}
+(66 - mean_height) / sd_height
+```
+
+We can repeat the same steps for the tallest character in canon: the Quermian Yarael Poof.   
+
+```{r}
+starwars_clean %>%
+  arrange(desc(height)) %>%
+  head(1)
+```
+
+Yarael Poof's height is about 2.58 SDs *above* the average height.  
+
+```{r}
+(264 - mean_height) / sd_height
+```
+
+It seems then that the tallest and shortest characters are only a few SDs away from the mean -- no more than 3. The mean and SD is useful in this way: all the heights of Star Wars characters can be found within 3 SDs of the mean. This gives us a good sense as to where the histogram falls on the number line.
+
+### Standard units
+
+The number of standard deviations a value is away from the mean can be calculated as follows: 
+\[
+z = \frac{\text{value} - \text{mean}}{\text{SD}}
+
+\]
+
+The resulting quantity $z$ measures *standard units* and is sometimes called the *z-score*. We saw two such examples of standard units when studying the tallest and shortest Star Wars characters. 
+
+R provides a function `scale` that converts values into standard units. Such a transformation is called *scaling*. For instance, we can add a new column with all of the heights in standard units. 
+
+```{r}
+starwars_clean %>%
+  mutate(su = scale(height)) %>%
+  select(name, height, su)
+```
+
+As before, note that the standard units are much less than 3 SDs (in general, they need not be). 
+
+Scaling is often used in data analysis as it allows us to put data in a comparable format. Let us visit another example to see why.
+
+### Example: Judging a Contest 
+
+Suppose three eccentric judges evaluated eight contestants at a contest. They evaluate each contestant on the scale of 1 to 10. Enter the judges. 
+
+* __Mrs. Sweet.__ Her cakes are loved by everyone. She also has a reputation for giving high scores. She has never given a score below 5.
+* __Mr. Coolblood.__ He has a reputation of being ruthless with a strong penchant for corn dogs. He has never given a high score to anyone in the past.
+* __MS Hodgpodge.__ Her salsa dip is quite spicy. Yet she tends to spread her scores fairly. If there are enough contestants, she gives 1 or 2 to at least one contestant and 9 or 10 to at least one contestant.
+
+Here are the results.
+
+```{r}
+contest <- tribble(~name, ~sweet, ~coolblood, ~hodgepodge,
+                        "Ashley",  9, 5, 9,
+                        "Bruce",   8, 6, 4,
+                        "Cathryn", 7, 5, 5,
+                        "Drew",    8, 2, 1,
+                        "Emily",   9, 7, 7,
+                        "Frank",   6, 1, 1,
+                        "Gail",    8, 4, 4,
+                        "Harry",   5, 3, 3
+                        ) 
+contest
+```
 
 
+Would it be enough to simply total their scores to determine the winner? Or should we take into account their eccentricities and *scale* the scores somehow? 
+
+That is where standard units come to play. We adjust each judge's scores by subtracting his/her mean and then dividing it by his/her standard deviation. After adjustment, each score represents relative to the standard deviation how much away the original score is from the mean.
+
+Let us compute the raw total of the three scores, and compare this with the scaled scores. 
+
+```{r}
+contest %>% mutate(
+  sweet_su = scale(sweet),
+  hodge_su = scale(hodgepodge),
+  cool_su = scale(coolblood),
+  raw_sum = sweet + coolblood + hodgepodge, 
+  scaled_sum = sweet_su + hodge_su + cool_su
+  ) %>%
+  select(name, raw_sum, scaled_sum)
+```
+
+Based on the raw scores, we identify a two-way tie between Ashely and Emily. The scaled scores allow us to break the scores and we can announce, with confidence, Emily as the winner! 
+
+### Be careful with summary statistics! 
+
+The SD is part of what we call *summary statistics* as they are useful for *summarizing* information about a distribution. The SD tells us about the *spread* of the data and where a histogram might sit on a number line. 
+
+Indeed, SD is an important tool and we will continue our study of it in the following sections. However, SD -- as with all summary statistics -- must be used with caution. We end our discussion in this section with an instructive example as to why.  
+
+Recall that we have two datasets `star` and `bullseye`. Each contains some `x` and `y` coordinate pairs. Let us examine some of the `x` coordinates in each.
+
+```{r}
+star_x <- star %>%
+  pull(x)
+head(star_x)
+```
+
+```{r}
+bullseye_x <- bullseye %>%
+  pull(x)
+head(bullseye_x)
+```
+
+The values seem close, but look different enough. Let us compute the SD. 
+
+```{r}
+sd(star_x)
+sd(bullseye_x)
+```
+
+How about the mean?
+
+```{r}
+mean(star_x)
+mean(bullseye_x)
+```
+
+The result points to a clear answer: both distributions represented by `star_x` and `bullseye_x` have the *exact* same SD and mean. We may be tempted then to conclude that both distributions are *equivalent*. We would be mistaken!
+
+Whenever in doubt, turn to visualization. We plot a histogram of the distributions overlaid on top of each other. If the distributions are actually equal, we expect this to be reflected in the histogram. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+datasaurus_dozen %>%
+  filter(dataset == "star" | dataset == "bullseye") %>%
+  ggplot() + 
+  geom_histogram(aes(x = x, y = ..density.., fill = dataset),
+                 color = "gray", alpha = 0.9, bins = 10) + 
+  scale_x_continuous(breaks = seq(15, 90, 5))
+```
+
+The histogram confirms that, contrary to what we might expect, these distributions are very much different -- despite having the same SD and mean! Thus, the moral of this lesson: be careful with summary statistics and __always visualize your data.__ 
+
+The `star` and `bullseye` datasets have an additional `y` coordinate which we have ignored in this study. We leave it as an exercise to the reader to determine if the distributions represented by `y` are also different yet have identical summary statistics. 
 
 
+## The Normal Curve
 
+The mean and SD are key pieces of information in determining the shape of some distributions.
+The most famous of them is the *normal distribution*, which we turn to in this section. 
 
-## Normal Distribution
+### Prerequisites 
 
-The mean and standard deviation are key pieces of information in determining the shape of some distributions.
-The most typical of the distributions means and standart deviations play a role in determining shapes are *normal distributions*.
-The distribution takes the form
+We will continue to make use of the tidyverse so let us load it in. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### The Standard Normal Curve
+
+The standard normal curve has a rather complicated formula: 
 
 $$
 \phi(z) = {\frac{1}{\sqrt{2 \pi}}} e^{-\frac{1}{2}z^2}, ~~ -\infty < z < \infty
 $$
-In the formula, $\pi$ is the constant $3.141592\ldots$ and $e$ is *Euler's number* $2.71828\ldots$.
-So there are only two parameters appearing in the formula, $\mu$ and $\sigma$.
-The value of $z$ can be any real number.
-Recall that to examine a continuous distribution function, we use a vertical slice between two values of x, under the curve and above the x-axis.
 
-As usual, let us call for `tidyverse`.
-
-```{r}
-library(tidyverse)
-```
+where $\pi$ is the constant $3.141592\ldots$ and $e$ is *Euler's number* $2.71828\ldots$. It is best to think of this visually as in the following plot. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
@@ -163,27 +433,18 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Here is an area between -1 and 1.
+The values on the x-axis are in *standard units* (or *z*-scored values). We observe that the curve is symmetric around 0 where the "bulk" of the data is close to the mean. Following are some properties about the curve: 
 
-
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
-  stat_function(fun = dnorm, 
-                xlim = c(-1,1), geom = "area", fill = "cyan") +
-  scale_x_continuous(breaks = seq(-3, 3, 1)) +
-  ylab("ɸ(z)") +
-  xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -1 < z < 1") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-R comes with the function `dnorm` that we can use whenever we need the density function of a bell curve.
-
+* The total area under the curve is 1.
+* The curve is symmetric so it inherits a property we know about symmetric distributions: the mean and median are both 0. 
+* The SD is 1 which, fortunately for us, is clearly identifiable on the x-axis.   
+* The curve has two *points of inflection* at -1 and +1, which are annotated on the following plot.  
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1), color = "green") +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1), color = "black") +
+  geom_point(aes(x = -1, y = 0.24), color = "red", size = 3) + 
+  geom_point(aes(x = 1, y = 0.24), color = "red", size = 3) + 
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
@@ -191,1054 +452,49 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-The shape of the curve resembles an upside-down bell, thus the name "bell curve".
-The plot below shows two normal distributions, both having mean 0, where one has standard deviation 1 and the other 2.
-Note that the shape is more prominent with standard deviation 1 than with 2. 
+Observe how the curve looks like a salad bowl in the regions $(-\infty, -1)$, and $(1, \infty)$ and in the region $(-1, 1)$ the bowl is flipped upside down! 
 
+### Area Under the Curve
 
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-ggplot(data = data.frame(x = c(-6, 6)), aes(x)) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 2), color = "blue") +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1), color = "red") +
-  scale_x_continuous(breaks = seq(-6, 6, 1)) +
-  ylab("ɸ(z)") +
-  xlab("z") +
-  ggtitle("Bell Curves ~ (μ = 0, σ = 2) (in Blue) & ~ (μ = 0, σ = 1) (in Red)") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-### The Area Under the Curve
-
-A major benefit of bell curves is that the probability of its value falling in a region is calculable.
-R provides `dnorm` as a function that takes as its parameters the value of x, the mean, and the standard deviation.
-
-```{r}
-dnorm(0, mean = 0, sd = 1)
-dnorm(1, mean = 0, sd = 1)
-dnorm(2, mean = 0, sd = 1)
-```
-
-The function `integrate` enables to compute the area below the curve between two points.
-We need to define the function whose area under curve you need to obtain.
-In our case, we first define the function `mynorm` as one that returns the value of the normal distribution with mean 0 and standard deviation 1.
-Then we can ask `integrate` to return the value of the area by specifying the function (we will use the function we have just defined `mynorm`) and the left and right points on the x-axis.
-
-
-```{r}
-mynorm <- function(x) {
-  return(dnorm(x, mean = 0, sd = 1))
-}
-integrate(mynorm, -1,1)
-integrate(mynorm, -2,2)
-integrate(mynorm, -3,3)
-integrate(mynorm, -1000,1000)
-```
-
-R computes the area by approximating the area as a collection of histograms.
-Because of the use of approximation, there are chances that the computation has some error.
-The comment "with absolute error < ..." refers to the approximation error.
-"e-15" means 10 to the power of negative 15.
-"7.6e-15" thus refers to a number
-$$
-0.0000000000000076
-$$
-It is a very small amount.
-Now returning the return values of `integrate`, the area for $[-1,1]$ is about $0.6827$, the area for $[-2,2]$ is about $0.9545$, and the area for $[-3,3]$ is about $0.9973$.
-Recalling that the function that normal distributions specify probabilities, we can infer from the above results the following: in the normal distribution with mean 0 and standard deviation 0
-* the probability that a sample falls between $[-1,1]$ is 68.27%
-* the probability that a sample falls between $[-2,2]$ is 95.45%
-* the probability that a sample falls between $[-3,3]$ is 99.73%
-
-We can visually examine those quantities.
-
-
+We can find the area under the standard normal curve with the function `pnorm`. Let us use this function to find the amount of area to the left of $z = -1$. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
   stat_function(fun = dnorm, 
-                xlim = c(-2,2), geom = "area", fill = "yellow") +
+                xlim = c(-3,-1), geom = "area", fill = "salmon") +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -2 < z < 2") +
+  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < -1") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+```{r}
+pnorm(-1)
+```
+
+So about 15.9% of the data lies to the left of $z = -1$. Recall from our properties that the curve is symmetric and that the total area must sum to 1. We can take advantage of these two to calculate other areas, e.g., the area to the *right* of -1. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
   stat_function(fun = dnorm, 
-                xlim = c(-3,3), geom = "area", fill = "salmon") +
+                xlim = c(-1,3), geom = "area", fill = "salmon") +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -3 < z < 3") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-Also, we can calculate the area from the left end ($-\infty$) to any given point of a normal distribution, using `pnorm`.
-
-
-```{r}
-pnorm(1)
-```
-
-We can visualize the area.
-
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
-  stat_function(fun = dnorm, 
-                xlim = c(-3,1), geom = "area", fill = "salmon") +
-  scale_x_continuous(breaks = seq(-3, 3, 1)) +
-  ylab("ɸ(z)") +
-  xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < 1") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-The numerical value of the shaded area can be found by calling `pnorm`.
-
-### Exam Scores
-
-
-One of the most frequent references to the bell curves occurs in the analysis of test scores.
-
-[Student Performance in Exams](https://www.kaggle.com/spscientist/students-performance-in-exams) is a data set available from the data archive [Kaggle](http://www.kaggle.com).
-
-```{r}
-path <- "data/StudentsPerformance.csv"
-students_data <- read_csv(path)
-```
-
-Here is the histogram of the math scores.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(students_data, aes(x = `math score`, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(0, 100, 4)) 
-```
-
-Here is the histogram of the reading scores.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(students_data, aes(x = `reading score`, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(0, 100, 4)) 
-```
-
-
-Here is the histogram of the writing scores.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(students_data, aes(x = `writing score`, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(0, 100, 4)) 
-```
-Let us compute the mean and standard deviation of the math scores.
-
-```{r}
-math_mean <- mean(students_data$`math score`)
-math_sd <- sd(students_data$`math score`)
-c(math_mean,math_sd)
-```
-
-
-Let us define an attribute that works on the `math score` attribute and produces the `dnorm` value with respect to the mean and standard deviation we have just obtained.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-math_norm <- dnorm(students_data$`math score`, mean = math_mean, sd = math_sd)
-```
-
-
-```{r}
-pnorm(95, mean = math_mean, sd = math_sd)
-nrow(filter(students_data, students_data$`math score` <= 95)) / nrow(students_data)
-
-
-```
-We can overlay the norm al distribution on top of the histogram.
-
-```{r}
-ggplot(students_data, aes(x = `math score`, y = ..density..)) + 
-  geom_histogram(col="grey", breaks = seq(0, 100, 4)) +
-  geom_line(mapping = aes(x = `math score`, y = math_norm), color = "red") +
-  #scale_x_continuous(breaks = seq(-3, 3, 1)) +
-  #ylab("ɸ(z)") +
-  xlab("score") +
-  ggtitle("Normal curve and the histogram") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-We notice the following.
-* The histogram shows strong resemblance to the curve.
-* The right end shows that the histograms and the curve go beyond 100, but 100 is the maximum and so there are no data points beyond 100.
-
-How close the curve is to the histogram?
-Let us compare the proportion of students whose math score is at most 95 with respect to the two distributions.
-Here
-```{r}
-pnorm(95, mean = math_mean, sd = math_sd)
-nrow(filter(students_data, students_data$`math score` <= 95)) / nrow(students_data)
-```
-
-The normal distribution says 97.17% while the actual record is 97.80%.
-Pretty close.
-How about 85?
-
-```{r}
-pnorm(85, mean = math_mean, sd = math_sd)
-nrow(filter(students_data, students_data$`math score` <= 85)) / nrow(students_data)
-```
-
-The two valus are 89.38% versus 89.70%.
-
-## Central Limit Theorem
-
-The Central Limit Theorem states that the distribution of the average of resembles a normal distribution.
-More precisely, it states the following.
-Suppose we can draw an arbitrary number of samples from some distribution, so that none of the samples you affect your next sample.
-Suppose also that for some number $N$, we will draw $N$ samples from the distribution and take the average of the $N$ samples we draw.
-Since the average is over samples, which take random values, unless the original distribution is not constant, the value of the average shows variation.
-Then, the distribution of the average looks like a normal distribution, and the larger $N$ becomes, the stronger the resemblance becomes.
-
-The beauty of the theorem is that the resemblance to the normal distribution is universal, i.e., it applies to _any_ distribution.
-The only requirement for the theorem to be applicable is that the underlying distribution is sample-able.
-The underlying distribution does not even have to be continuous.
-For example, we can take a fair coin, assign $1$ to "Heads" and $-1$ to "Tails".
-The action of throwing the coin $N$ times and taking the average results in the distribution similar to the normal distribution with mean 0 and standard deviation $\sqrt{\frac{N}{N-1}}$.
-By increasing the value of $N$, we can make the distribution of the average closer to the normal distribution with mean $0$ and standard deviation $1$.
-
-### Applications of the Central Limit Theorem
-
-The Central Limit Theorem says the average of samples follows a distribution similar to a normal distribution.
-
-```{r}
-library(tidyverse)
-```
-
-Let us load the receiver data sets and obtain the yardage values into `yards1` and `yards2` for NFL and NCAA, respectively.
-We also compute the mean of the two lists and store them into `mean1` and `mean2`, respectively.
-
-
-
-
-```{r}
-path1 <- "data/nfl_receiving0.csv"
-path2 <- "data/ncaa-receivers-2005-2011.csv"
-rec_data1 <- read_csv(path1)
-rec_data2 <- read_csv(path2)
-yards1 <- rec_data1$Yds
-yards2 <- rec_data2$Yards
-mean1 <- mean(yards1)
-mean2 <- mean(yards2)
-c(mean1,mean2)
-```
-
-As we noticed in our previous exploration, the gap appears to be large.
-
-The Central Limit Theorem needs a distribution of sample averages.
-Let us think of averages of some number of samples from them.
-
-```{r}
-sample_ave <- function(x,c) {
-  return(mean(sample(x, size = c, replace = TRUE)))
-}
-```
-```{r}
-ggplot(rec_data1) +
-#ggplot(df, aes(x = dist3, ..density..)) + 
-geom_histogram(aes(x = Yds, y = ..density..), breaks = seq(0, 2000, 10), fill="Red", alpha = 0.4)
-```
-```{r}
-ggplot(rec_data2) +
-#ggplot(df, aes(x = dist3, ..density..)) + 
-geom_histogram(aes(x = Yards, y = ..density..), breaks = seq(0, 2000, 10), fill="seagreen4", alpha = 0.4)
-```
-Let us generate distributions of 100 averages of 100 samples from the two lists.  
-```{r}
-sample_ave_dist <- function(x, c, d) {
-  vals <- vector("double", d)
-  for (i in 1:d) { vals[i] <- sample_ave(x, c) } 
-  return(vals)
-}
-```
-
-Here are the two sample distributions.
-```{r}
-dist1 <- sample_ave_dist(yards1,400,100)
-dist2 <- sample_ave_dist(yards2,400,100)
-```
-
-Let us look at the key statistics of the data.
-
-```{r}
-mean1 <- mean(dist1)
-mean2 <- mean(dist2)
-sd1 <- sd(dist1)
-sd2 <- sd(dist2)
-c(mean1,mean2)
-c(sd1,sd2)
-c(max(dist1),max(dist2))
-c(min(dist1),min(dist2))
-```
-
-Let us build a data frame using the two lists and then plot the distributions and the corresponding bell curves.
-
-```{r}
-df <- data.frame(dist1,dist2)
-```
-
-
-```{r}
-dnorm1 <- dnorm(df$dist1, mean = mean1, sd = sd1)
-dnorm2 <- dnorm(df$dist2, mean = mean2, sd = sd2)
-ggplot(df) +
-#ggplot(df, aes(x = dist3, ..density..)) + 
-geom_histogram(aes(x = dist1, y = ..density..), breaks = seq(200, 350, 5), fill="red", alpha = 0.4) +
-geom_histogram(aes(x = dist2, y = ..density..), breaks = seq(200, 350, 5), fill="seagreen4", alpha = 0.4) +
-geom_line(mapping = aes(x = dist1, y = dnorm1), color = "red") +
-geom_line(mapping = aes(x = dist2, y = dnorm2), color = "seagreen4") +
-  #scale_x_continuous(breaks = seq(-3, 3, 1)) +
-  #ylab("ɸ(z)") +
-  xlab("average yardage") +
-  ggtitle("Average yardage distributions") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-We do see that the two sample average distributions resemble normal distributions.
-
-
-### Z-score
-
-*Z-scoring* is the way to convert collections of data into a comparable format.
-Suppose 3 judges evaluated 8 contestants at a competition.
-They evaluate each contestant in the scale of 1 to 10.
-One of the judges, Mrs. Sweet, has a reputation of being forgiving and giving high scores. She has never given a score below 5.
-Another judge, Mr. Coolblood, has a reputation of being ruthless. He has never given a high score to anyone in the past.
-The third judge, MS Hodgpodge, tends to spread her scores all across the range. If there are enough contestants, she gives 1 or 2 to at least one contestant and 9 or 10 to at least  one contestant.
-How do we integrate the scores they have provided for the contestants to determine the winner?
-
-That is where Z-scoring comes to play.
-We adjust each judge's scores by subtracting his/her mean and then dividing it by his/her standard deviation.
-After adjustment, each score represents relative to the standard deviation how much away the original score is from the mean.
-
-```{r}
-library(tidyverse)
-```
-
-Suppose below are the raw scores of the judges on the eight contestants.
-
-```{r}
-contest_raw <- tribble(~Name, ~Sweet, ~Coolblood, ~Hodgepodge,
-                        "Ashley",  9, 5, 9,
-                        "Bruce",   8, 6, 4,
-                        "Cathryn", 7, 5, 5,
-                        "Drew",    8, 2, 1,
-                        "Emily",   9, 7, 7,
-                        "Frank",   6, 1, 1,
-                        "Gail",    8, 4, 4,
-                        "Harry",   5, 3, 3
-                        ) 
-contest_raw
-```
-
-__MAYBE SOME VISUALIZATION OF DATA__
-
-Let us compute the sum of the three scores for the eight contestants.
-
-```{r}
-contest_raw %>% mutate(simple_sum = Sweet + Coolblood + Hodgepodge)
-```
-
-Let us write a function for Z-scoring.
-
-```{r}
-zscore <- function(x) {
-  x1 <- x
-  x2 <- x1 - mean(x)
-  s <- sum(x2 * x2) / (length(x) - 1)
-  return(x2 / s)
-}
-```
-
-Now let us add the scores
-
-
-```{r}
-contest_raw %>% mutate(Sweet_zscore = zscore(Sweet), Cool_zscore = zscore(Coolblood), Hodge_zscore = zscore(Hodgepodge), simple_sum = Sweet + Coolblood + Hodgepodge, zscore_sum = Sweet_zscore + Cool_zscore + Hodge_zscore)
-
-```
-We observe that the total Z score is higher for Emily than for Ashley and so can break a tie between the two by choosing Emily as the winner!
-
-<!--
-
-# Mean and Standard Deviation
-
-In this course we have studied several different statistics, including total variation distance, the maximum, the median, and also the mean. Under clear assumptions about randomness, we have drawn empirical distributions of all of these statistics. Some, like the maximum and the total variation distance, have distributions that are clearly skewed in one direction or the other. But the empirical distribution of the sample mean has almost always turned out close to bell-shaped, regardless of the population being studied.
-
-If a property of random samples is true *regardless of the population*, it becomes a powerful tool for inference because we rarely know much about the data in the entire population. The distribution of the mean of a large random sample falls into this category of properties. That is why random sample means are extensively used in data science.
-
-In this chapter, we will study means and what we can say about them with only minimal assumptions about the underlying populations. Question that we will address include:
-
-* What exactly does the mean measure?
-* How close to the mean are most of the data?
-* How is the sample size related to the variability of the sample mean?
-* Why do empirical distributions of random sample means come out bell shaped?
-* How can we use sample means effectively for inference?
-
-
-
-## Properties of the Mean 
-
-In this course, we have used the words "average" and "mean" interchangeably, and will continue to do so. The definition of the mean will be familiar to you from your high school days or even earlier.
-
-__Definition.__ The *average* or *mean* of a collection of numbers is the sum of all the elements of the collection, divided by the number of elements in the collection.
-
-The function `mean` returns the mean of a vector. 
-
-```{r}
-not_symmetric <- c(2, 3, 3, 9)
-mean(not_symmetric)
-```
-
-### Prerequisites
-
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-library(readtext)
-```
-
-### Basic Properties
-
-The definition and the example above point to some properties of the mean.
-
-* It need not be an element of the collection.
-* It need not be an integer even if all the elements of the collection are integers.
-* It is somewhere between the smallest and largest values in the collection.
-* It need not be halfway between the two extremes; it is not in general true that half the elements in a collection are above the mean.
-* If the collection consists of values of a variable measured in specified units, then the mean has the same units too.
-
-
-We will now study some other properties that are helpful in understanding the mean and its relation to other statistics.
-
-### The Mean is a "Smoother"
-
-You can think of taking the mean as an "equalizing" or "smoothing" operation. For example, imagine the entries in `not_symmetric` above as the dollars in the pockets of four different people. To get the mean, you first put all of the money into one big pot and then divide it evenly among the four people. They had started out with different amounts of money in their pockets (\$2, \$3, \$3, and \$9), but now each person has \$4.25, the mean amount.
-
-### Proportions are Means
-
-If a collection consists only of ones and zeroes, then the sum of the collection is the number of ones in it, and the mean of the collection is the proportion of ones.
-
-```{r}
-zero_one <- c(1, 1, 1, 0)
-sum(zero_one)
-```
-
-```{r}
-mean(zero_one)
-```
-
-You can replace 1 by the Boolean `TRUE` and 0 by `FALSE`:
-
-```{r}
-mean(c(TRUE, TRUE, TRUE, FALSE))
-```
-
-Because proportions are a special case of means, results about random sample means apply to random sample proportions as well.
-
-### The Mean and the Histogram 
-
-The mean of the collection {2, 3, 3, 9} is 4.25, which is not the "halfway point" of the data. So then what does the mean measure?
-
-To see this, notice that the mean can be calculated in different ways.
-
-$$\begin{align*}
-\mbox{mean} ~ &=~ 4.25 \\ \\
-&=~ \frac{2 + 3 + 3 + 9}{4} \\ \\
-&=~ 2 \cdot \frac{1}{4} ~~ + ~~ 3 \cdot \frac{1}{4} ~~ + ~~ 3 \cdot \frac{1}{4} ~~ + ~~ 9 \cdot \frac{1}{4} \\ \\
-&=~ 2 \cdot \frac{1}{4} ~~ + ~~ 3 \cdot \frac{2}{4} ~~ + ~~ 9 \cdot \frac{1}{4} \\ \\
-&=~ 2 \cdot 0.25 ~~ + ~~ 3 \cdot 0.5 ~~ + ~~ 9 \cdot 0.25
-\end{align*}$$
-
-The last expression is an example of a general fact: when we calculate the mean, each distinct value in the collection is *weighted* by the proportion of times it appears in the collection.
-
-This has an important consequence. The mean of a collection depends only on the distinct values and their proportions, not on the number of elements in the collection. In other words, the mean of a collection depends only on the distribution of values in the collection.
-
-Therefore, __if two collections have the same distribution, then they have the same mean.__
-
-For example, here is another collection that has the same distribution as `not_symmetric` and hence the same mean.
-
-```{r}
-not_symmetric
-```
-
-```{r}
-same_distribution <- c(2, 2, 3, 3, 3, 3, 9, 9)
-mean(same_distribution)
-```
-
-The mean is a physical attribute of the histogram of the distribution. Here is the histogram of the distribution of `not_symmetric` or equivalently the distribution of `same_distribution`.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-tibble(not_symmetric) %>%
-  ggplot() + 
-  geom_histogram(aes(x = not_symmetric, y = ..density..),
-                 color = "gray", fill = "darkcyan", binwidth = 1)
-```
-
-Imagine the histogram as a figure made out of cardboard attached to a wire that runs along the horizontal axis, and imagine the bars as weights attached at the values 2, 3, and 9. Suppose you try to balance this figure on a point on the wire. If the point is near 2, the figure will tip over to the right. If the point is near 9, the figure will tip over to the left. Somewhere in between is the point where the figure will balance; that point is the 4.25, the mean.
-
-> The mean is the center of gravity or balance point of the histogram.
-
-To understand why that is, it helps to know some physics. The center of gravity is calculated exactly as we calculated the mean, by using the distinct values weighted by their proportions.
-
-Because the mean is a balance point, it is sometimes displayed as a *fulcrum* or triangle at the base of the histogram.
-
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-tibble(not_symmetric) %>%
-  ggplot() + 
-  geom_histogram(aes(x = not_symmetric, y = ..density..),
-                 color = "gray", fill = "darkcyan", binwidth = 1) +
-  geom_point(aes(x = mean(not_symmetric), y = -0.02), 
-             color = "salmon", shape = 17, size = 4)
-```
-
-### The Mean and the Median
-
-If a student's score on a test is below average, does that imply that the student is in the bottom half of the class on that test?
-
-Happily for the student, the answer is, "Not necessarily." The reason has to do with the relation between the average, which is the balance point of the histogram, and the median, which is the "half-way point" of the data.
-
-The relationship is easy to see in a simple example. Here is a histogram of the collection {2, 3, 3, 4} which is in the vector `symmetric`. The distribution is symmetric about 3. The mean and the median are both equal to 3.
-
-```{r}
-symmetric <- c(2, 3, 3, 4)
-```
-
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-ggplot(tibble(symmetric)) + 
-geom_histogram(aes(x = symmetric, y = ..density..),
-               bins = 3,
-               color = "gray", fill = "darkcyan") +
-geom_point(aes(x = mean(symmetric), y = -0.02), 
-           color = "salmon", shape = 17, size = 4)
-```
-
-```{r}
-mean(symmetric)
-```
-
-```{r}
-quantile(symmetric, c(0.5), type = 1)
-```
-
-In general, __for symmetric distributions, the mean and the median are equal.__
-
-What if the distribution is not symmetric? Let's compare `symmetric` and `not_symmetric`.
-
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-ggplot() + 
-  geom_histogram(data = tibble(symmetric), aes(
-                       x = symmetric, y = ..density..),
-                 color = "gray", fill = "darkcyan", binwidth = 1) +
-  geom_histogram(data = tibble(not_symmetric), aes(
-                     x = not_symmetric, y = ..density..), alpha = 0.8,
-                 color = "gray", fill = "salmon", binwidth = 1) + 
-  geom_point(aes(x = mean(symmetric), y = -0.02), 
-             color = "darkcyan", shape = 17, size = 4) + 
-  geom_point(aes(x = mean(not_symmetric), y = -0.02), 
-             color = "salmon", shape = 17, size = 4)
-```
-
-The dark cyan histogram represents the original `symmetric` distribution. The salmon pink colored histogram of `not_symmetric` starts out the same as the cyan at the left end, but its rightmost bar has slid over to the value 9. The darker shaded region in salmon pink is where the two histograms overlap.
-
-The median and mean of the salmon pink distribution are both equal to 3. The median of the cyan distribution is also equal to 3, though the right half is distributed differently from the left.
-
-But the mean of the cyan distribution is not 3: the salmon pink histogram would not balance at 3. The balance point has shifted to the right, to 4.25.
-
-In the cyan distribution, 3 out of 4 entries (75%) are below average. The student with a below average score can therefore take heart. He or she might be in the majority of the class.
-
-In general, __if the histogram has a tail on one side (the formal term is "skewed"), then the mean is pulled away from the median in the direction of the tail__.
-
-### Example
-
-The data frame `sf2015` contains salary and benefits data for San Francisco City employees in 2015. As before, we will restrict our analysis to those who had the equivalent of at least half-time employment for the year.
-
-```{r message = FALSE}
-url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/san_francisco_2015.csv"
-sf2015 <- read_csv(url) %>% filter(Salaries > 10000)
-```
-
-As we saw earlier, the highest compensation was above \$600,000 but the vast majority of employees had compensations below \$300,000.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(sf2015) + 
-  geom_histogram(aes(x = `Total Compensation`, y = ..density..),
-                 breaks = seq(10000, 700000, 25000),
-                 color = "gray", fill = "darkcyan")
-```
-
-This histogram is skewed to the right; it has a right-hand tail.
-
-The mean gets pulled away from the median in the direction of the tail. So we expect the mean compensation to be larger than the median, and that is indeed the case.
-
-```{r}
-compensation <- pull(sf2015, `Total Compensation`)
-quantile(compensation, c(0.5), type = 1)
-```
-
-```{r}
-mean(compensation)
-```
-
-Distributions of incomes of large populations tend to be right skewed. When the bulk of a population has middle to low incomes, but a very small proportion has very high incomes, the histogram has a long, thin tail to the right.
-
-The mean income is affected by this tail: the farther the tail stretches to the right while the remainder stays the same, the larger the mean becomes. But the median is not affected by values at the extremes of the distribution because the bulk of the data is unchanged. That is why economists often summarize income distributions by the median instead of the mean.
-
-## Variability
-
-The mean tells us where a histogram balances. But in almost every histogram we have seen, the values spread out on both sides of the mean. How far from the mean can they be? To answer this question, we will develop a measure of variability about the mean.
-
-We will start by describing how to calculate the measure. Then we will see why it is a good measure to calculate.
-
-### Prerequisites
-
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-library(gapminder)
-library(nycflights13)
-```
-
-### The Rough Size of Deviations from Average
-
-For simplicity, we will begin our calculations in the context of a simple vector `any_numbers` consisting of just four values. As you will see, our method will extend easily to any other vector of values.
-
-```{r}
-any_numbers <- c(1, 2, 2, 10)
-```
-
-The goal is to measure roughly how far off the numbers are from their average. To do this, we first need the average:
-
-```{r}
-# Step 1. The average.
-
-mean_value <- mean(any_numbers)
-mean_value
-```
-
-Next, let's find out how far each value is from the mean. These are called the *deviations from the average*. A "deviation from average" is just a value minus the average. The data frame `calculation_steps` displays the results.
-
-```{r}
-deviations <- any_numbers - mean_value
-calculation_steps <- tibble(
-  value = any_numbers, 
-  deviation_from_average = deviations
-)
-calculation_steps
-```
-
-Some of the deviations are negative; those correspond to values that are below average. Positive deviations correspond to above-average values.
-
-To calculate roughly how big the deviations are, it is natural to compute the mean of the deviations. But something interesting happens when all the deviations are added together:
-
-```{r}
-sum(deviations)
-```
-
-The positive deviations exactly cancel out the negative ones. This is true of all lists of numbers, no matter what the histogram of the list looks like: __the sum of the deviations from average is zero__.
-
-Since the sum of the deviations is 0, the mean of the deviations will be 0 as well:
-
-```{r}
-mean(deviations)
-```
-
-Because of this, the mean of the deviations is not a useful measure of the size of the deviations. What we really want to know is roughly how big the deviations are, regardless of whether they are positive or negative. So we need a way to eliminate the signs of the deviations.
-
-There are two time-honored ways of losing signs: the absolute value, and the square. It turns out that taking the square constructs a measure with extremely powerful properties, some of which we will study in this course.
-
-So let's eliminate the signs by squaring all the deviations. Then we will take the mean of the squares:
-
-```{r}
-# Step 3. The squared deviations from average
-
-squared_deviations <- deviations ** 2
-calculation_steps <- calculation_steps %>%
-  mutate(sq_deviation_from_average = squared_deviations)
-calculation_steps
-```
-
-```{r}
-# Step 4. Variance = the mean squared deviation from average
-variance <- mean(squared_deviations)
-variance
-```
-
-__Variance:__ The mean squared deviation calculated above is called the variance of the values.
-
-While the variance does give us an idea of spread, it is not on the same scale as the original variable as its units are the square of the original. This makes interpretation very difficult.
-
-So we return to the original scale by taking the positive square root of the variance:
-
-```{r}
-# Step 5.
-# Standard Deviation:    root mean squared deviation from average
-# Steps of calculation:   5    4      3       2             1
-sd <- variance ** 0.5
-sd
-```
-
-### Standard Deviation
-
-The quantity that we have just computed is called the *standard deviation* of the list, and is abbreviated as SD. It measures roughly how far the numbers on the list are from their average.
-
-__Definition.__ The SD of a list is defined as the *root mean square of deviations from average*. That's a mouthful. But read it from right to left and you have the sequence of steps in the calculation.
-
-__Computation.__ The five steps described above result in the SD. You can also use the function `sd` to compute the SD of values in a vector:
-
-```{r}
-sd(any_numbers)
-```
-
-When we are working specifically with the *population* standard deviation, and not a sample from it, we will prefer to use `pop.sd` by defining the following function. This undoes a statistical correction provided by R. 
-
-```{r}
-pop.sd <- function(x) sd(x) * sqrt((length(x)-1) / length(x))
-```
-
-### Working with the SD
-
-To see what we can learn from the SD, let's move to a more interesting dataset than `any_numbers`. The data frame `gapminder` contains a subset of data from the [Gapminder project](http://gapminder.org/), which provides values for life expectancy, GDP per capita, and population, every five years, from 1952 to 2007. For this study, we will concentrate on the data from the most recent year reported, 2007.   
-
-```{r}
-gap2007 <- gapminder %>%
-  filter(year == 2007)
-gap2007
-```
-
-Here is a histogram of life expectancy.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(gap2007) +
-  geom_histogram(aes(x = lifeExp, y = ..density..),
-                 color = "gray", fill = "darkcyan")
-```
-
-It is no surprise that the life expectancy of modern countries clusters around 70 and above. The average life expectancy in 2007 is approximately 67 years old.  
-
-```{r}
-mean_lexp <- mean(pull(gap2007, lifeExp))
-mean_lexp
-```
-
-About how far off are the countries' life expectancy from the average? This is measured by the SD of life expectancy, which is about 12 years.
-
-```{r}
-sd_lexp = sd(pull(gap2007, lifeExp))
-sd_lexp
-```
-
-Japan ranked highest with a life expectancy of 82.6 years. 
-
-```{r}
-arrange(gap2007, desc(lifeExp)) %>%
-  head(5)
-```
-
-Japan was about 15.6 years above the average life expectancy!
-
-```{r}
-82.603 - mean_lexp
-```
-
-That's a deviation from average, and it is about 1.29 times the standard deviation:
-
-```{r}
-(82.603 - mean_lexp) / sd_lexp
-```
-
-In other words, the highest life expectancy for a country in 2007 was about 1.29 SDs above average.
-
-At a life expectancy of approximately 40 years, Swaziland ranked among the lowest in the world with respect to life expectancy. Its life expectancy was about 2.3 SDs below average. 
-
-```{r}
-arrange(gap2007, lifeExp) %>%
-  head(5)
-```
-
-```{r}
-(39.613 - mean_lexp) / sd_lexp
-```
-
-Swaziland (now officially known as Eswatini) experienced [high prevalence of HIV/AIDS](https://reliefweb.int/report/swaziland/swaziland-life-expectancy-drop-40-yrs-2010-report) in the years leading up to 2007, which contributed to a dramatic decline in life expectancy.   
-
-What we have observed is that the highest- and lowest-ranking countries in terms of life expectancy were both just a few SDs away from the average life expectancy. This is an example of why the SD is a useful measure of spread. No matter what the shape of the histogram, the average and the SD together tell you a lot about where the histogram is situated on the number line.
-
-### First main reason for measuring spread by the SD 
-
-__Informal statement.__ In all numerical data sets, the bulk of the entries are within the range "average $\pm$ a few SDs".
-
-For now, resist the desire to know exactly what fuzzy words like "bulk" and "few" mean. We will make them precise later in this section. Let's just examine the statement in the context of some more examples.
-
-We have already seen that the life expectancies of countries around the world in 2007 were in the range "average $\pm$ 3 SDs".
-
-What about GDP per capita? Here is a histogram of the distribution, along with the mean and SD. 
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(gap2007) +
-  geom_histogram(aes(x = gdpPercap, y = ..density..),
-                 color = "gray", fill = "darkcyan")
-```
-
-```{r}
-mean_gdp <- mean(pull(gap2007, gdpPercap))
-sd_gdp <- sd(pull(gap2007, gdpPercap))
-c(mean_gdp, sd_gdp)
-```
-
-The average GDP per capita was \$11,680.07, and the SD was about \$12,859.94.
-
-How far off is GDP per capita from the average? Just as we did with the heights, let's look at the two extreme values of the ages.
-
-Norway has the highest, at $49,357.19. 
-
-```{r}
-arrange(gap2007, desc(gdpPercap)) %>%
-  head(5)
-```
-
-This is about 2.93 SDs above average.
-
-```{r}
-(49357.19 - mean_gdp) / sd_gdp
-```
-
-The lowest GDP per capita was recorded by Republic of the Congo. This is about 0.89 SDs below average.   
-
-```{r}
-arrange(gap2007, gdpPercap) %>%
-  head(5)
-```
-```{r}
-(277.5519 - mean_gdp) / sd_gdp
-```
-
-What we have observed for life expectancy and GDP per capita is true in great generality. For *all* lists, the bulk of the entries are no more than 2 or 3 SDs away from the average.
-
-### Chebychev's Bounds
-
-The Russian mathematician [Pafnuty Chebychev](https://en.wikipedia.org/wiki/Pafnuty_Chebyshev) (1821-1894) proved a result that makes our rough statements precise.
-
-> For all lists, and all numbers $z$, the proportion of entries that are in the range "average $\pm z$ SDs" is at least $1 - \frac{1}{z^2}$
-
-It is important to note that the result gives a bound, not an exact value or an approximation.
-
-What makes the result powerful is that it is true for all lists – all distributions, no matter how irregular.
-
-Specifically, it says that for every list:
-
-* the proportion in the range "average $\pm$ 2 SDs" is __at least $1 - 1/4$ = 0.75__
-* the proportion in the range "average $\pm$ 3 SDs" is __at least $1 - 1/9$ $\approx$ 0.89__
-* the proportion in the range "average $\pm$ 4.5 SDs" is __at least $1 - 1/{4.5}^2$ $\approx$ 0.95__
-
-As we noted above, Chebychev's result gives a lower bound, not an exact answer or an approximation. For example, the percent of entries in the range "average $\pm$ 2 SDs" might be quite a bit larger than 75%. But it cannot be smaller.
-
-### Standard units
-
-In the calculations above, the quantity $z$ measures *standard units*, the number of standard deviations above average.
-
-Some values of standard units are negative, corresponding to original values that are below average. Other values of standard units are positive. But no matter what the distribution of the list looks like, Chebychev's bounds imply that standard units will typically be in the (-5, 5) range.
-
-To convert a value to standard units, first find how far it is from average, and then compare that deviation with the standard deviation.
-
-\[ z = \frac{\text{value} - \text{average}}{\text{SD}}\]
-
-As we will see, standard units are frequently used in data analysis. It is so useful, in fact, that R provides a function `scale` to convert a vector of numbers to standard units using the above formula. 
-
-### Example
-
-As we saw in an earlier section, the data frame `flights` contains a column `dep_delay` consisting of the departure delay times, in minutes, of over thousands of flights that departed NYC in 2013. We will create a new column called `delay_standard` by applying the function `scale` to the column of delay times. This allows us to see all the delay times in minutes as well as their corresponding values in standard units. Note that we filter any flights where missing data, i.e. `NA`, is present.
-
-```{r}
-flights_standard <- flights %>%
-  drop_na() %>% 
-  transmute(dep_delay,
-            delay_standard = scale(dep_delay))
-flights_standard
-```
-
-The standard units that we can see are consistent with what we expect based on Chebychev's bounds. These are of quite small size. 
-
-But something rather alarming happens when we sort the delay times from highest to lowest. The standard units that we can see are extremely high!
-
-```{r}
-arrange(flights_standard, desc(delay_standard))
-```
-
-What this shows is that it is possible for data to be many SDs above average -- and for flights to be delayed by almost 22 hours, yikes! The highest value of delay is about 32 in standard units.
-
-However, the proportion of these extreme values is small, and Chebychev's bounds still hold true. For example, let us calculate the percent of delay times that are in the range "average $\pm$ 3 SDs". This is the same as the percent of times for which the standard units are in the range (-3, 3). That is about 98%, as computed below, consistent with Chebychev's bound of "at least 89%".
-
-```{r}
-within_3_sd <- nrow(filter(flights_standard, between(delay_standard, -3, 3)))
-within_3_sd / nrow(flights_standard)
-```
-
-The histogram of delay times is shown below, with the horizontal axis in standard units. By the table above, the right hand tail continues all the way out to $z = 32.15$ standard units (1301 minutes). The area of the histogram outside the range $z = -3$ to $z = 3$ is about 2%, put together in tiny little bits that are mostly invisible in the histogram.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(flights_standard) + 
-  geom_histogram(aes(x = delay_standard, y = ..density..),
-                 color = "gray", fill = "darkcyan") + 
-  scale_x_continuous(breaks = seq(-3, 33, 3)) + 
-  xlab("Delay (Standard Units)")
-```
-
-
-## The SD and the Normal Curve
-
-We know that the mean is the balance point of the histogram. Unlike the mean, the SD is usually not easy to identify by looking at the histogram.
-
-However, there is one shape of distribution for which the SD is almost as clearly identifiable as the mean. That is the bell-shaped distribution. This section examines that shape, as it appears frequently in probability histograms and also in some histograms of data.
-
-### Prerequisites
-
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-library(readtext)
-```
-
-### A Roughly Bell-Shaped Histogram of Data
-
-Let us look at the distribution of heights of mothers in our familiar sample of 1,174 mother-newborn pairs. The mothers' heights have a mean of 64 inches and an SD of 2.5 inches. Unlike the life expectancy of countries around the world, the mothers' heights are distributed fairly symmetrically about the mean in a bell-shaped curve.
-
-```{r message = FALSE}
-url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/baby.csv"
-baby <- read_csv(url)
-```
-
-```{r}
-heights <- pull(baby, `Maternal Height`)
-mean_height <- round(mean(heights), 1)
-mean_height
-```
-
-```{r}
-sd_height <- round(sd(heights), 1)
-sd_height
-```
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(baby) + 
-  geom_histogram(aes(x = `Maternal Height`, y = ..density..), 
-                 color = "gray", fill = "darkcyan",
-                 breaks = seq(55.5, 72.5, 1)) + 
-  scale_x_continuous(breaks = seq(-3, 3.1, 1)*sd_height + mean_height)
-```
-
-The last two lines of code in the cell above change the labeling of the horizontal axis. Now, the labels correspond to "average $\pm z$ SDs" for 
-$z = 0, \pm 1, \pm 2,$ and $\pm 3$. Because of the shape of the distribution, the "center" has an unambiguous meaning and is clearly visible at 64.
-
-### How to Spot the SD on a Bell Shaped Curve
-
-To see how the SD is related to the curve, start at the top of the curve and look towards the right. Notice that there is a place where the curve changes from looking like an "upside-down cup" to a "right-way-up cup"; formally, the curve has a point of inflection. That point is one SD above average. It is the point $z = 1$, which is "average plus 1 SD" = 66.5 inches.
-
-Symmetrically on the left-hand side of the mean, the point of inflection is at $z = -1$, that is, "average minus 1 SD" = 61.5 inches.
-
-In general:
-
-> For bell-shaped distributions, the SD is the distance between the mean and the points of inflection on either side.
-
-### The standard normal curve
-
-All the bell-shaped histograms that we have seen look essentially the same apart from the labels on the axes. Indeed, there is really just one basic curve from which all of these curves can be drawn just by relabeling the axes appropriately.
-
-To draw that basic curve, we will use the units into which we can convert every list: standard units. The resulting curve is therefore called the *standard normal curve*.
-
-The standard normal curve has an impressive equation. But for now, it is best to think of it as a smoothed outline of a histogram of a variable that has been measured in standard units and has a bell-shaped distribution.
-
-$$
-\phi(z) = {\frac{1}{\sqrt{2 \pi}}} e^{-\frac{1}{2}z^2}, ~~ -\infty < z < \infty
-$$
-
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
-  scale_x_continuous(breaks = seq(-3, 3, 1)) +
-  ylab("ɸ(z)") +
-  xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < ∞") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-As always when you examine a new histogram, start by looking at the horizontal axis. On the horizontal axis of the standard normal curve, the values are standard units.
-
-Here are some properties of the curve. Some are apparent by observation, and others require a considerable amount of mathematics to establish.
-
-* The total area under the curve is 1. So you can think of it as a histogram drawn to the density scale.
-
-* The curve is symmetric about 0. So if a variable has this distribution, its mean and median are both 0.
-
-* The points of inflection of the curve are at -1 and +1.
-
-* If a variable has this distribution, its SD is 1. The normal curve is one of the very few distributions that has an SD so clearly identifiable on the histogram.
-
-Since we are thinking of the curve as a smoothed histogram, we will want to represent proportions of the total amount of data by areas under the curve.
-
-Areas under smooth curves are often found by calculus, using a method called integration. It is a fact of mathematics, however, that the standard normal curve cannot be integrated in any of the usual ways of calculus.
-
-Therefore, areas under the curve have to be approximated. That is why almost all statistics textbooks carry tables of areas under the normal curve. It is also why all statistical systems, especially statistical programming languages like R, include methods that provide excellent approximations to those areas.
-
-### The standard normal "cdf"
-
-The fundamental function for finding areas under the normal curve is `pnorm`. It takes a numerical argument and returns all the area under the curve to the left of that number. Formally, it is called the "cumulative distribution function" of the standard normal curve. That rather unwieldy mouthful is abbreviated as cdf.
-
-Let us use this function to find the area to the left of $z = 1$ under the standard normal curve.
-
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
-  stat_function(fun = dnorm, 
-                xlim = c(-3,1), geom = "area", fill = "salmon") +
-  scale_x_continuous(breaks = seq(-3, 3, 1)) +
-  ylab("ɸ(z)") +
-  xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < 1") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-The numerical value of the shaded area can be found by calling `pnorm`.
-
-```{r}
-pnorm(1)
-```
-
-That's about 84%. We can now use the symmetry of the curve and the fact that the total area under the curve is 1 to find other areas.
-
-The area to the right of $z = 1$ is about 100% - 84% = 16%.
-
-```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
-  stat_function(fun = dnorm, 
-                xlim = c(1,3), geom = "area", fill = "salmon") +
-  scale_x_continuous(breaks = seq(-3, 3, 1)) +
-  ylab("ɸ(z)") +
-  xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) 1 < z < ∞") +
+  ggtitle("Normal curve ~ (μ = 0, σ = 1) -1 < z < ∞") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ```{r}
-1 - pnorm(1)
+1 - pnorm(-1)
 ```
 
-The area between $z = -1$ and $z = 1$ can be computed in several different ways. It is the salmon-colored area under the curve below.
+That's about 84% of the data. 
+
+Here is a trickier problem: how much area is within 1 SD? Put another way, what is the area between $z = -1$ and $z = 1$? That's the orange-shaded area in the following plot.  
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
@@ -1254,27 +510,24 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-
-For example, we could calculate the area as "100% - two equal tails", which works out to roughly 100% - 2x16% = 68%.
-
-Or we could note that the area between $z = 1$ and $z = -1$ is equal to all the area to the left of $z = 1$, minus all the area to the left of $z = -1$. 
+You might be able to guess at a few ways to answer this. One way to do it is to find the area to left of $z = -1$ (shaded in dark cyan) and subtract it from the area to the left of $z = 1$. This resulting subtraction is the area in orange, between $z = -1$ and $z = 1$. 
 
 ```{r}
 pnorm(1) - pnorm(-1)
 ```
 
-By a similar calculation, we see that the area between $z = -2$ and $z = 2$ is about 95%.
+That's about 68.3% of the data. 
+
+How much data is within 2 SDs?  
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
   stat_function(fun = dnorm, 
                 xlim = c(-2,2), geom = "area", fill = "salmon") +
-  stat_function(fun = dnorm, 
-                xlim = c(-3,-2), geom = "area", fill = "darkcyan") +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
-  xlab("z") + 
+  xlab("z") +
   ggtitle("Normal curve ~ (μ = 0, σ = 1) -2 < z < 2") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
@@ -1283,614 +536,332 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
 pnorm(2) - pnorm(-2)
 ```
 
-In other words, if a histogram is roughly bell shaped, the proportion of data in the range "average $\pm 2$ SDs" is about 95%. 
+That's about 95% of the data. To complete the story, let's look at the amount of data within 3 SDs.
 
-That is quite a bit more than Chebychev's lower bound of 75%. Chebychev's bound is weaker because it has to work for all distributions. If we know that a distribution is normal, we have good approximations to the proportions, not just bounds.
+```{r}
+pnorm(3) - pnorm(-3)
+```
 
-The table below compares what we know about all distributions and about normal distributions. Notice that when $z = 1$, Chebychev's bound is correct but not illuminating.
+That covers *almost* all the data, but mind the italics. There is still about 0.3% of the data that lies beyond 3 SDs, which can happen. 
 
-| Percent in Range | All Distributions: Bound | Normal Distribution: Approximation |
-|---------------:|:------------------:|:-------------------:|
-|average $\pm$ 1 SD  | at least 0%         | about 68%           |
-|average $\pm$ 2 SDs | at least 75%        | about 95%           |
-|average $\pm$ 3 SDs | at least 88.888...% | about 99.73%        |
+Therefore, for a standard normal curve, we can calculate the probability of where a sample might lie. We have: 
 
+* a sample that falls within $\pm 1$ SD is about __68%__.
+* a sample that falls within $\pm 2$ SDs is about __95%__.
+* a sample that falls between $\pm 3$ is about __99.73%__.
 
-## The Central Limit Theorem
+### Exam Scores and the `dnorm` function
 
-Very few of the data histograms that we have seen in this course have been bell shaped. When we have come across a bell shaped distribution, it has almost invariably been an empirical histogram of a statistic based on a random sample.
+A frequent -- and perhaps even cliched -- reference point to the bell curve occurs in the analysis of test scores.
 
-The examples below show two very different situations in which an approximate bell shape appears in such histograms.
+[Student Performance in Exams](https://www.kaggle.com/spscientist/students-performance-in-exams) is a data set available from the data archive [Kaggle](http://www.kaggle.com).
+
+```{r message = FALSE}
+path <- "data/StudentsPerformance.csv"
+students_data <- read_csv(path)
+```
+
+Here is the histogram of math scores.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(students_data, aes(x = `math score`, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", breaks = seq(0, 100, 4)) 
+```
+
+Here is the histogram of the reading scores.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(students_data, aes(x = `reading score`, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", breaks = seq(0, 100, 4)) 
+```
+
+Here is the histogram of the writing scores.
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(students_data, aes(x = `writing score`, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", breaks = seq(0, 100, 4)) 
+```
+
+Let us compute the mean and standard deviation of the math scores.
+
+```{r}
+math_mean <- mean(students_data$`math score`)
+math_sd <- sd(students_data$`math score`)
+c(math_mean,math_sd)
+```
+
+We can create a normal curve using the function `dnorm`. It takes as arguments a vector of x values, the mean, and SD; in terms of the plot, it returns the "y coordinate" for each corresponding x value. Let us construct a normal curve for the math scores using the mean and SD we have just obtained, and overlay it atop the histogram. 
+
+```{r}
+math_norm <- dnorm(students_data$`math score`, mean = math_mean, sd = math_sd)
+```
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+ggplot(students_data, aes(x = `math score`, y = ..density..)) + 
+  geom_histogram(col="grey", fill = "darkcyan", breaks = seq(0, 100, 4)) +
+  geom_line(mapping = aes(x = `math score`, y = math_norm), color = "salmon") +
+  xlab("score") +
+  ggtitle("Normal curve and the histogram") 
+```
+
+We observe the following.
+
+* The histogram shows strong resemblance to the normal curve.
+* The right end shows that the histograms and the curve go beyond 100, but 100 is the maximum and so there are no data points beyond 100.
+
+How close is the curve to the histogram? Let us compare the proportion of students whose math score is at most 95 with respect to the two distributions.
+
+```{r}
+pnorm(95, mean = math_mean, sd = math_sd)
+```
+
+```{r}
+num_rows <- students_data %>%
+  filter(`math score` <= 95) %>%
+  nrow()
+num_rows / nrow(students_data)
+```
+
+The normal distribution says 97.17% while the actual record is 97.80%. Pretty close. 
+
+How about 85?
+
+```{r}
+pnorm(85, mean = math_mean, sd = math_sd)
+```
+
+```{r}
+num_rows <- students_data %>%
+  filter(`math score` <= 85) %>%
+  nrow()
+num_rows / nrow(students_data)
+```
+
+The two values are 89.38% versus 89.70%.
+
+## Central Limit Theorem
+
+As noted at the outset of this chapter, the bell-shaped distribution has been a running motif through most of our examples. While most of the data histograms we studied have not turned out bell-shaped, the empirical distributions representing some simulated statistic has reliably turned out that way.
+
+This is no coincidence. In fact, it is the consequence of an impressive theory in statistics called the *Central Limit Theorem*. We will study the theorem in this section, but let us first see a situation where a bell-shaped distribution results to set up the context. 
 
 ### Prerequisites
 
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
+We will make use of the tidyverse in this chapter, so let’s load it in as usual.
 
-```{r, message = FALSE, warning = FALSE}
+```{r}
 library(tidyverse)
-library(readtext)
-library(nycflights13)
 ```
 
-### Net Gain in Roulette 
+We will also work with receiver data from the NFL and NCAA in this section, so let us load in those datasets. 
 
-In an earlier section, the bell appeared as the rough shape of the total amount of money we would make if we placed the same bet repeatedly on different spins of a roulette wheel.
-
-```{r message=FALSE}
-wheel <- read_csv("data/roulette_wheel.csv")
-wheel
+```{r message = FALSE}
+nfl <- read_csv("data/nfl_receiving0.csv")
+ncaa <- read_csv("data/ncaa-receivers-2005-2011.csv")
 ```
 
-Recall that the bet on red pays even money, 1 to 1. We defined the function `red_winnings` that returns the net winnings on one $1 bet on red. Specifically, the function takes a color as its argument and returns 1 if the color is red. For all other colors it returns -1.
+### Net Allotments from a Clumsy Clerk 
 
-```{r}
-red_winnings <- function(color) {
-  if(color == "red") {
-    return(1)
-  } else {
-    return(-1)
-  }
-}
-```
+Recall that in an earlier section, we simulated the story of a minister and the doubling grains. In that story, the amount of grains a minister receives doubles each day; by the end of the 64th day, he expects to receive an impressive total of $2^{64}-1$ grains. 
 
-The data frame `red` shows each pocket's winnings on red.
+The king has put a clerk in charge to assign the correct amount of grains each day. However, she is human and tabulates the grains by hand, so is prone to error: she may double count the number of grains on some days or forget to count a day altogether. But for the most part she gets it right. 
 
-```{r}
-red <- wheel %>%
-  mutate(winnings_red = map_dbl(color, red_winnings))
-red
-```
-
-Your net gain on one bet is one random draw from the Winnings: Red column. There is an 18/38 chance making \$1, and a 20/38 chance of making -\$1. This probability distribution is shown in the histogram below.
-
-```{r}
-ggplot(red) + 
-  geom_histogram(aes(x = winnings_red, y = ..density..), 
-                 breaks = seq(-1.5, 1.6, 1),
-                 color = "gray", fill = "darkcyan")
-```
-
-Now suppose you bet many times on red. Your net winnings will be the sum of many draws made at random with replacement from the distribution above.
-
-It will take a bit of math to list all the possible values of your net winnings along with all of their chances. We won't do that; instead, we will approximate the probability distribution by simulation, as we have done all along in this course.
-
-The code below simulates your net gain if you bet $1 on red on 400 different spins of the roulette wheel.
-
-```{r}
-one_roulette_simulation <- function(x, num_bets) {
-  spins <- slice_sample(red, n = num_bets, replace = TRUE)
-  net_gain_red <- sum(pull(spins, winnings_red))
-  return(net_gain_red)
-}
-```
-
-```{r}
-num_bets <- 400
-repetitions <- 10000
-net_gains <- map_dbl(1:repetitions, one_roulette_simulation, num_bets)
-```
-
-Let's generalize our simulation function a bit so that we can re-use it in
-later simulations. Mainly we are replacing the column `winnings_red` with 
-a generic `label`, and likewise `red` with `df`. We also substitute `sum`
-for some functional called `statistic`. 
-
-```{r}
-one_simulation <- function(x, df, label, func, num_draws) {
-  sample_df <- slice_sample(df, n = num_draws, replace = TRUE)
-  results <- func(pull(sample_df, {{ label }}))
-  return(results)
-}
-```
-
-```{r}
-num_bets <- 400
-repetitions <- 10000
-net_gains <- map_dbl(.x = 1:repetitions, 
-                     .f = one_simulation,
-                     df = red,
-                     label = winnings_red,
-                     func = sum, 
-                     num_draws = num_bets)
-```
-
-Let's now visualize the results. 
-
-```{r}
-tibble(net_gains) %>%
-  ggplot() + 
-  geom_histogram(aes(x = net_gains, y = ..density..),
-                 breaks = seq(-80, 50, 6),
-                 color = "gray", fill = "darkcyan") + 
-  scale_x_continuous(breaks = seq(-80, 40, 20)) +
-  xlab("Net Gain on Red")
-```
-
-That's a roughly bell shaped histogram, even though the distribution we are drawing from is nowhere near bell shaped.
-
-__Center.__ The distribution is centered near -20 dollars, roughly. To see why, note that your winnings will be \$1 on about 18/38 of the bets, and -\$1 on the remaining 20/38. So your average winnings per dollar bet will be roughly -5.26 cents:
-
-```{r}
-average_per_bet <- 1*(18/38) + (-1)*(20/38)
-average_per_bet
-```
-
-So in 400 bets you expect that your net gain will be about -\$21:
-
-```{r}
-400 * average_per_bet
-```
-
-For confirmation, we can compute the mean of the 10,000 simulated net gains:
-
-```{r}
-mean(net_gains)
-```
-
-__Spread.__ Run your eye along the curve starting at the center and notice that the point of inflection is near 0. On a bell shaped curve, the SD is the distance from the center to a point of inflection. The center is roughly -\$20, which means that the SD of the distribution is around \$20.
-
-In the next section we will see where the \$20 comes from. For now, let's confirm our observation by simply calculating the SD of the 10,000 simulated net gains:
-
-```{r}
-sd(net_gains)
-```
-
-__Summary.__ The net gain in 400 bets is the sum of the 400 amounts won on each individual bet. The probability distribution of that sum is approximately normal, with an average and an SD that we can approximate.
-
-### Average Flight Delay
-
-The data frame `flights` contains data on departure delays of 336,776 flights that departed NYC in 2013. As we have seen before, the distribution of delays has a long right-hand tail.
-
-```{r}
-flights <- flights %>%
-  drop_na()
-```
-
-```{r dpi=80, fig.align="center", message = FALSE, warning = FALSE}
-ggplot(flights) +
-  geom_histogram(aes(x = dep_delay, y = ..density..),
-                 color = "gray", fill = "darkcyan")
-```
-
-The mean delay was about 16.6 minutes and the SD was about 39.5 minutes. Notice how large the SD is, compared to the mean. Those large deviations on the right have an effect, even though they are a very small proportion of the data.
-
-```{r}
-mean_delay <- mean(pull(flights, dep_delay))
-sd_delay <- sd(pull(flights, dep_delay))
-c(mean_delay, sd_delay)
-```
-
-Now suppose we sampled 400 delays at random with replacement. You could sample without replacement if you like, but the results would be very similar to with-replacement sampling. If you sample a few hundred out of 336,776 without replacement, you hardly change the population each time you pull out a value.
-
-In the sample, what could the average delay be? We expect it to be around 12 or 13, because that's the population average; but it is likely to be somewhat off. Let's see what we get by sampling. 
-
-```{r}
-sampled <- slice_sample(flights, n = 400, replace = TRUE)
-mean(pull(sampled, dep_delay))
-```
-
-The sample average varies according to how the sample comes out, so we will simulate the sampling process repeatedly and draw the empirical histogram of the sample average. That will be an approximation to the probability histogram of the sample average.
-
-```{r}
-sample_size <- 400
-repetitions <- 10000
-sample_means <- map_dbl(.x = 1:repetitions, 
-                     .f = one_simulation,
-                     df = flights,
-                     label = dep_delay,
-                     func = mean, 
-                     num_draws = sample_size)
-```
+This yields three events on a given day: the counting was *as expected*, it was *double counted*, or the clerk *forgot*. We said that the probabilities for these events are $2/3$, $1/3$, and $1/3$, respectively. Here is the distribution. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-tibble(sample_means) %>%
-  ggplot() + 
-  geom_histogram(aes(x = sample_means, y = ..density..),
-                 color = "gray", fill = "darkcyan") + 
-  scale_x_continuous(breaks = seq(6, 22, 2))
+df <- tribble(~event, ~probability,
+              "as expected", 2/3,
+              "double counted", 1/3,
+              "forgot", 1/3
+              )
+ggplot(df) + 
+  geom_bar(aes(x = event, y = probability), 
+                 stat = "identity", fill = "darkcyan")
 ```
 
-Once again, we see a rough bell shape, even though we are drawing from a very skewed distribution. The bell is centered somewhere between 12 and 13, as we expect.
+The number of grain allotments received after 64 days is the *sum* of draws made at random with replacement from this distribution.  
 
-### Central Limit Theorem
-
-The reason why the bell shape appears in such settings is a remarkable result of probability theory called the __Central Limit Theorem__.
-
-> The Central Limit Theorem says that the probability distribution of the sum or average of a large random sample drawn with replacement will be roughly normal, *regardless of the distribution of the population from which the sample is drawn*.
-
-As we noted when we were studying Chebychev's bounds, results that can be applied to random samples *regardless of the distribution of the population* are very powerful, because in data science we rarely know the distribution of the population.
-
-The Central Limit Theorem makes it possible to make inferences with very little knowledge about the population, provided we have a large random sample. That is why it is central to the field of statistical inference.
-
-### Proportion of Purple Flowers
-
-Recall Mendel's probability model for the colors of the flowers of a species of pea plant. The model says that the flower colors of the plants are like draws made at random with replacement from {Purple, Purple, Purple, White}.
-
-In a large sample of plants, about what proportion will have purple flowers? We would expect the answer to be about 0.75, the proportion purple in the model. And, because proportions are means, the Central Limit Theorem says that the distribution of the sample proportion of purple plants is roughly normal.
-
-We can confirm this by simulation. Let's simulate the proportion of purple-flowered plants in a sample of 200 plants.
+Using `sample` we can see the result of the grain allotment on any given day. 
 
 ```{r}
-colors <- c('Purple', 'Purple', 'Purple', 'White')
-model <- tibble(colors)
-model
+allotment <- sample(c(0, 1, 2), prob = c(1/3, 2/3, 1/3), replace = TRUE, size = 1) 
+allotment
 ```
+
+If `allotment` turns out `1`, the minister received the correct amount of grains that day; `0` indicates that no grains were received and `2` means he received double the amount. The minister hopes that the allotments will total to be 64 and, to the king's dismay, perhaps even more.  
+
+We are now ready to simulate one value of the statistic. Let us put our work into a function we can use called `one_simulation`.
+
 ```{r}
-num_plants <- 200
-repetitions <- 10000
-# define a proportion with a functional 
-flower_proportion <- function(x) sum(x == 'Purple') / length(x)
-
-sample_props <- map_dbl(.x = 1:repetitions, 
-                     .f = one_simulation,
-                     df = model,
-                     label = colors,
-                     func = flower_proportion, 
-                     num_draws = num_plants)
-
+one_simulation <- function() {
+  allotments <- sample(c(0, 1, 2), prob = c(1/3, 2/3, 1/3), replace = TRUE, size = 64)
+  return(sum(allotments))
+} 
+one_simulation()
 ```
 
-```{r dpi=80, fig.align="center", message = FALSE}
-tibble(sample_props) %>%
-  ggplot() + 
-  geom_histogram(aes(x = sample_props, y = ..density..),
-                 breaks = seq(0.65, 0.85, 0.01),
-                 color = "gray", fill = "darkcyan") 
+The following code simulates 10,000 times the net allotments the minister received at the end of the 64th day. 
+
+```{r echo = FALSE}
+set.seed(1000)
 ```
 
-There's that normal curve again, as predicted by the Central Limit Theorem, centered at around 0.75 just as you would expect.
+```{r}
+num_repetitions <- 10000
+net_allotments <- replicate(n = num_repetitions, one_simulation())
 
-How would this distribution change if we increased the sample size? Let's run the code again with a sample size of 800, and collect the results of simulations in the same table in which we collected simulations based on a sample size of 200. We will keep the number of repetitions the same as before so that the two columns have the same length.
-
-```{r} 
-num_plants <- 800
-
-sample_props2 <- map_dbl(.x = 1:repetitions, 
-                     .f = one_simulation,
-                     df = model,
-                     label = colors,
-                     func = flower_proportion, 
-                     num_draws = num_plants)
-```
-
-```{r dpi=80, fig.align="center", message = FALSE}
-# get the sample proportion results in a table-ready form for plotting
-plot_df <- tibble(
-  props = c(sample_props, sample_props2),
-  from =  c(rep("sample proportion: 200", 10000), 
-            rep("sample proportion: 800", 10000))
+results <- tibble(
+  repetition = 1:num_repetitions,
+  net_allotments = net_allotments
 )
-
-ggplot(plot_df) + 
-  geom_histogram(aes(x = props, y = ..density.., fill = from),
-                 breaks = seq(0.65, 0.85, 0.01),
-                 alpha = 0.8, position = "identity")
+results
 ```
 
-Both distributions are approximately normal but one is narrower than the other. The proportions based on a sample size of 800 are more tightly clustered around 0.75 than those from a sample size of 200. Increasing the sample size has decreased the variability in the sample proportion.
-
-This should not be surprising. We have learned many times of the intuition that a larger sample size generally reduces the variability of a statistic. However, in the case of a sample average, we can *quantify* the relationship between sample size and variability.
-
-Exactly how does the sample size affect the variability of a sample average or proportion? That is the question we will examine in the next section.
-
-## The Variability of the Sample Mean
-
-By the Central Limit Theorem, the probability distribution of the mean of a large random sample is roughly normal. The bell curve is centered at the population mean. Some of the sample means are higher, and some lower, but the deviations from the population mean are roughly symmetric on either side, as we have seen repeatedly. Formally, probability theory shows that the sample mean is an *unbiased* (i.e., serving to no prior judgment about the matter top be estimated) estimate of the population mean.
-
-In our simulations, we also noticed that the means of larger samples tend to be more tightly clustered around the population mean than means of smaller samples. In this section, we will quantify the variability of the sample mean and develop a relation between the variability and the sample size.
-
-### Prerequisites
-
-We will make use of the tidyverse in this chapter, so let's load it in as usual.
-
-```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
-library(readtext)
-library(nycflights13)
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(results) + 
+  geom_histogram(aes(x = net_allotments, y = ..density..), 
+                 color = "gray", fill = "darkcyan", bins = 15)
 ```
 
-### Flight delays revisited
+We observe a bell-shaped curve, even though the distribution we drew from does not look bell-shaped. Note the the distribution is __centered__ around 64 days, as expected. With kudos to the clerk for a job well done, we note that accomplishing such a feat in reality would be impossible.    
 
-Let's start with our data frame `flights` of flight delays. The mean delay is about 12.56 minutes, and the distribution of delays is skewed to the right.
+To understand the __spread__, look for the inflection point in this histogram. That point occurs at around 70 days, which means the SD is the distance from the center to this point -- that looks to be about 5.6 days. 
 
 ```{r}
-flights <- flights %>%
-  drop_na()
+results %>%
+  pull(net_allotments) %>%
+  sd()
 ```
+
+To confirm the bell-shaped curve we are seeing, we can create a normal distribution from this mean and SD and overlay it atop the empirical histogram. We observe that it provides a good fit. 
 
 ```{r}
-pop_mean <- mean(pull(flights, dep_delay))
-pop_mean
+curve <- dnorm(net_allotments, mean = 64, sd = 5.66)
 ```
 
-```{r dpi=80, fig.align="center", message = FALSE, warning = FALSE}
-ggplot(flights) +
-  geom_histogram(aes(x = dep_delay, y = ..density..),
-                 color = "gray", fill = "darkcyan") + 
-  geom_point(aes(x = pop_mean, y = 0), size = 2, color = "salmon")
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(results) + 
+  geom_histogram(aes(x = net_allotments, y = ..density..), 
+                 color = "gray", fill = "darkcyan", bins = 15) +
+  geom_line(mapping = aes(x = net_allotments, y = curve), color = "salmon") 
 ```
-Now let's take random samples and look at the probability distribution of the sample mean. As usual, we will use simulation to get an empirical approximation to this distribution.
 
-We will define a function `simulate_sample_mean` to do this, because we are going to vary the sample size later. The arguments are the sample size and the number of simulations. This function will re-use the `one_simulation` function we wrote in the previous section. 
+### Central Limit Theorem 
+
+The Central Limit Theorem is a formalization of the phenomena we observed from the doubling grains story. Formally, it states the following. 
+
+> The sum or average of a large random sample that is identically and independently distributed will resemble a normal distribution, regardless of the underlying distribution from which the sample is drawn. 
+
+The "identically and independently distributed" condition, often abbreviated simply as IID, is a mouthful. It means that the random samples we draw must have no relation to each other, i.e., the drawing of one sample (say, the event *forgot*) does not make another event more or less likely of occcuring. Hence, we prefer a sampling plan of sampling with replacement. 
+
+The Central Limit Theorem is a powerful concept because it becomes possible to make inferences about unknown populations with very little knowledge. And, the larger the sample size becomes, the stronger the resemblance. 
+
+### Receiver Yardage in the NFL and NCAA 
+
+The Central Limit Theorem says that the sum of IID samples follows a distribution that resembles a normal distribution. Let us turn to the receiver data in the NFL and NCAA. In a large sample of football receivers, what is the sample average for yardage? According to the theorem, we expect the distribution to be roughly normal. 
+
+Here is the yardage distribution for NFL players. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(nfl) +
+  geom_histogram(aes(x = Yds, y = ..density..), color = "gray", fill="darkcyan")
+```
+
+And here it is for NCAA players. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(ncaa) +
+  geom_histogram(aes(x = Yards, y = ..density..), color = "gray", fill="darkcyan")
+```
+
+Observe how these data histograms look nothing like a normal distribution. 
+
+Let us simulate the average yardage in a sample of 100 players for both the NFL and NCAA leagues. We will write a function to simulate one value for us. 
 
 ```{r}
-one_simulation <- function(x, df, label, func, num_draws) {
-  sample_df <- slice_sample(df, n = num_draws, replace = TRUE)
-  result <- func(pull(sample_df, {{ label }} ))
-  return(result)
-}
+one_simulation <- function(df, label, sample_size) {
+  sample_mean <- df %>%
+    slice_sample(n = sample_size, replace = TRUE) %>%
+    pull({{ label }}) %>%
+    mean()
+  return(sample_mean)
+} 
 ```
+
+The function `one_simulation` takes as arguments the tibble `df`, the column `label` to use for computing the statistic, and the sample size `sample_size`. 
+
+Here is one run of the function with the NFL data. 
 
 ```{r}
-simulate_sample_mean <- function(sample_size, repetitions) {
-  means <- map_dbl(.x = 1:repetitions, 
-                   .f = one_simulation,
-                   df = flights,
-                   label = dep_delay,
-                   func = mean, 
-                   num_draws = sample_size)
-
-  print(paste("Sample size: ", sample_size))
-  print(paste("Population mean: ", mean(pull(flights, dep_delay))))
-  print(paste("Average of sample means: ", mean(means)))
-  print(paste("Population SD: ", sd(pull(flights, dep_delay))))
-  print(paste("SD of sample means: ", sd(means)))
-  
-  means_df <- tibble(means)
-  g <- ggplot(means_df) + 
-    geom_histogram(aes(x = means, y = ..density..), bins = 20,
-                   color = "gray", fill = "darkcyan") +
-    ggtitle(paste("Sample size ", sample_size))
-  return(g)
-}
+one_simulation(nfl, Yds, 100)
 ```
 
-Let us simulate the mean of a random sample of 100 delays, then of 400 delays, and finally of 625 delays. We will perform 10,000 repetitions of each of these process. 
+As before, we will simulate the statistic for NFL receivers 10,000 times. 
 
-```{r dpi=80, fig.align="center", message = FALSE, warning = FALSE}
-g <- simulate_sample_mean(100, 10000)
-g
-```
-
-```{r dpi=80, fig.align="center", message = FALSE, warning = FALSE}
-g <- simulate_sample_mean(400, 10000)
-g
-```
-
-```{r dpi=80, fig.align="center", message = FALSE, warning = FALSE}
-g <- simulate_sample_mean(625, 10000)
-g
-```
-
-You can see the Central Limit Theorem in action – the histograms of the sample means are roughly normal, even though the histogram of the delays themselves is far from normal.
-
-You can also see that each of the three histograms of the sample means is centered very close to the population mean. In each case, the "average of sample means" is very close to 16.66 minutes, the population mean. Both values are provided in the printout above each histogram. As expected, the sample mean is an unbiased estimate of the population mean.
-
-### The SD of All the Sample Means
-
-You can also see that the histograms get narrower, and hence taller, as the sample size increases. We have seen that before, but now we will pay closer attention to the measure of spread.
-
-The SD of the population of all delays is about 40 minutes.
-
-```{r}
-pop_sd <- sd(pull(flights, dep_delay))
-pop_sd
-```
-
-Take a look at the SDs in the sample mean histograms above. In all three of them, the SD of the population of delays is about 40 minutes, because all the samples were taken from the same population.
-
-Now look at the SD of all 10,000 sample means, when the sample size is 100. That SD is about one-tenth of the population SD. When the sample size is 400, the SD of all the sample means is about one-twentieth of the population SD. When the sample size is 625, the SD of the sample means is about one-twentyfifth of the population SD.
-
-It seems like a good idea to compare the SD of the empirical distribution of the sample means to the quantity "population SD divided by the square root of the sample size."
-
-The cell takes a while to run, as it's a large simulation. But you'll soon see that it's worth the wait.
-
-```{r}
-experiment <- function(x, repetitions) {
-  means <- map_dbl(.x = 1:repetitions, 
-                   .f = one_simulation,
-                   df = flights,
-                   label = dep_delay,
-                   func = mean, 
-                   num_draws = x)
-  return(sd(means))
-}
+```{r echo = FALSE}
+set.seed(1000)
 ```
 
 ```{r}
-repetitions <- 10000
-sample_sizes <- seq(25, 626, 25)
-sd_means <- map_dbl(.x = sample_sizes, 
-                    .f = experiment,
-                    repetitions = repetitions)
-```
+num_repetitions <- 10000
+sample_means <- replicate(n = num_repetitions, one_simulation(nfl, Yds, 100))
 
-Here are the numerical values in tabular form. For each sample size in the first column, 10,000 random samples of that size were drawn, and the 10,000 sample means were calculated. The second column contains the SD of those 10,000 sample means. The third column contains the result of the calculation "population SD divided by the square root of the sample size."
-
-```{r}
-sd_comparison <- tibble(
-  sample_sizes = sample_sizes, 
-  sd_10000_sample_means = sd_means, 
-  `pop_sd/sqrt(n)` = pop_sd / sqrt(sample_sizes)
+nfl_results <- tibble(
+  repetition = 1:num_repetitions,
+  sample_mean = sample_means, 
+  league = "NFL"
 )
-sd_comparison
+nfl_results
 ```
 
-The values in the second and third columns are very close. If we plot each of those columns with the sample size on the horizontal axis, the two graphs are essentially indistinguishable.
+Let us repeat the simulation for the NCAA receivers. 
+
+```{r echo = FALSE}
+set.seed(1000)
+```
+
+```{r}
+sample_means <- replicate(n = num_repetitions, one_simulation(ncaa, Yards, 100))
+
+ncaa_results <- tibble(
+  repetition = 1:num_repetitions,
+  sample_mean = sample_means,
+  league = "NCAA"
+)
+ncaa_results
+```
+
+Let us merge the two tibbles together so that we can plot the empirical distributions together. 
+
+```{r}
+results <- bind_rows(nfl_results, ncaa_results)
+```
+
+Let us plot the two empirical distributions together. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(results) +
+  geom_histogram(aes(x = sample_mean, y = ..density.., fill = league), 
+                 bins = 20, color = "gray", position = "identity", alpha = 0.8)
+```
+
+Indeed, we see that both distributions are approximately normal, where each centers around a different mean. To confirm the shape, we overlay a normal curve atop each histogram. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-plot_df <- tibble(
-  sample_size = rep(sample_sizes, 2), 
-  sd_sample_means = c(sd_means, pop_sd / sqrt(sample_sizes)),
-  type = c(rep('SD of 10,000 means', length(sample_sizes)),
-           rep('pop_sd/sqrt(n)', length(sample_sizes)))
-)
+dnorm1 <- dnorm(nfl_results$sample_mean, 
+                mean = mean(nfl_results$sample_mean), sd = sd(nfl_results$sample_mean))
+dnorm2 <- dnorm(ncaa_results$sample_mean, 
+                mean = mean(ncaa_results$sample_mean), sd = sd(ncaa_results$sample_mean))
 
-ggplot(plot_df) + 
-  geom_line(aes(x = sample_size, y = sd_sample_means, linetype = type),
-            color = "salmon")
-```
-There really are two curves there. But they are so close to each other that it looks as though there is just one.
-
-What we are seeing is an instance of a general result. Remember that the graph above is based on 10,000 replications for each sample size. But there are many more than 10,000 samples of each size. The probability distribution of the sample mean is based on the means of all possible samples of a fixed size.
-
-Fix a sample size. If the samples are drawn at random with replacement from the population, then
-
-\[ \text{SD of all possible sample means} 
-    = \frac{\text{Population SD}}{\sqrt{\text{sample size}}} \]
-
-This is the standard deviation of the averages of all the possible samples that could be drawn. __It measures roughly how far off the sample means are from the population mean.__
-
-### The Central Limit Theorem for the Sample Mean
-
-If you draw a large random sample with replacement from a population, then, regardless of the distribution of the population, the probability distribution of the sample mean is roughly normal, centered at the population mean, with an SD equal to the population SD divided by the square root of the sample size.
-
-### The Accuracy of the Sample Mean 
-
-The SD of all possible sample means measures how variable the sample mean can be. As such, it is taken as a measure of the accuracy of the sample mean as an estimate of the population mean. The smaller the SD, the more accurate the estimate.
-
-The formula shows that:
-
-* The population size doesn't affect the accuracy of the sample mean. The population size doesn't appear anywhere in the formula.
-* The population SD is a constant; it's the same for every sample drawn from the population. The sample size can be varied. Because the sample size appears in the denominator, the variability of the sample mean *decreases* as the sample size increases, and hence the accuracy increases.
-
-### The Square Root Law 
-
-From the table of SD comparisons, you can see that the SD of the means of random samples of 25 flight delays is about 8 minutes. If you multiply the sample size by 4, you'll get samples of size 100. The SD of the means of all of those samples is about 4 minutes. That's smaller than 8 minutes, but it's not 4 times as small; it's only 2 times as small. That's because the sample size in the denominator has a square root over it. The sample size increased by a factor of 4, but the SD went down by a factor of $2 = \sqrt{4}$. In other words, the accuracy went up by a factor of $2 = \sqrt{4}$. 
-
-In general, when you multiply the sample size by a factor, the accuracy of the sample mean goes up by the square root of that factor.
-
-So to increase accuracy by a factor of 10, you have to multiply sample size by a factor of 100. Accuracy doesn't come cheap!
-
-## Choosing a Sample Size
-
-Candidate A is contesting an election. A polling organization wants to estimate the proportion of voters who will vote for her. Let's suppose that they plan to take a simple random sample of voters, though in reality their method of sampling would be more complex. How can they decide how large their sample should be, to get a desired level of accuracy?
-
-We are now in a position to answer this question, after making a few assumptions:
-
-* The population of voters is very large and that therefore we can just as well assume that the random sample will be drawn with replacement.
-
-* The polling organization will make its estimate by constructing an approximate 95% confidence interval for the percent of voters who will vote for Candidate A.
-
-* The desired level of accuracy is that the width of the interval should be no more than 1%. That's pretty accurate! For example, the confidence interval (33.2%, 34%) would be fine but (33.2%, 35%) would not.
-
-We will work with the sample proportion of voters for Candidate A. Recall that a proportion is a mean, when the values in the population are only 0 (the type of individual you are not counting) or 1 (the type of individual you are counting).
-
-### Width of Confidence Interval 
-
-If we had a random sample, we could go about using the bootstrap to construct a confidence interval for the percent of voters for Candidate A. But we don't have a sample yet – we are trying to find out how big the sample has to be so that our confidence interval is as narrow as we want it to be.
-
-In situations like this, it helps to see what theory predicts.
-
-The Central Limit Theorem says that the probabilities for the sample proportion are roughly normally distributed, centered at the population proportion of 1's, with an SD equal to the SD of the population of 0's and 1's divided by the square root of the sample size.
-
-So the confidence interval will still be the "middle 95%" of a normal distribution, even though we can't pick off the ends as the 2.5th and 97.5th percentiles of bootstrapped proportions.
-
-Is there another way to find how wide the interval would be? Yes, because we know that for normally distributed variables, the interval "center $\pm$ 2 SDs" contains 95% of the data.
-
-The confidence interval will stretch for 2 SDs of the sample proportion, on either side of the center. So the width of the interval will be 4 SDs of the sample proportion.
-
-We are willing to tolerate a width of 1% = 0.01. So, using the formula developed in the last section,
-
-$$
-4 \times \frac{\mbox{SD of the 0-1 population}}{\sqrt{\mbox{sample size}}}
-~ \le ~ 0.01
-$$
-
-So
-
-$$
-\sqrt{\mbox{sample size}} ~ \ge ~ 4 \times \frac{\mbox{SD of the 0-1 population}}{0.01}
-$$
-
-
-### The SD of a collection of 0's and 1's 
-
-If we knew the SD of the population, we'd be done. We could calculate the square root of the sample size, and then take the square to get the sample size. But we don't know the SD of the population. The population consists of 1 for each voter for Candidate A, and 0 for all other voters, and *we don't know what proportion of each kind there are*. That's what we're trying to estimate.
-
-So are we stuck? No, because we can *bound* the SD of the population. Here are histograms of two such distributions, one for an equal proportion of 1's and 0's, and one with 90% 1's and 10% 0's. Which one has the bigger SD?
-
-```{r}
-pop_50 <- c(1, 1, 1, 1, 1, 0, 0, 0, 0, 0)
-pop_90 <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
-
-coins <- tibble(
-  prop = c(pop_50, pop_90),
-  from = c(rep("Proportion of 1's: 0.5", length(pop_50)),
-           rep("Proportion of 1's: 0.9", length(pop_50)))
-  )
-
-ggplot(coins) + 
-  geom_histogram(aes(x = prop, y = ..density.., fill = from),
-                 breaks = seq(-0.5, 1.6, 1), 
-                 alpha = 0.8, position = "identity")
+ggplot() +
+  geom_histogram(data = results, aes(x = sample_mean, y = ..density.., fill = league), 
+                 bins = 20, color = "gray", position = "identity", alpha = 0.8) + 
+  geom_line(data = nfl_results, mapping = aes(x = sample_mean, y = dnorm1), color = "darkcyan") +
+  geom_line(data = ncaa_results, mapping = aes(x = sample_mean, y = dnorm2), color = "salmon4") 
 ```
 
-Remember that the possible values in the population are only 0 and 1.
+<!-- each is about 30 SD -->
 
-The salmon pink histogram (50% 1's and 50% 0's) has more spread than the dark cyan. The mean is 0.5. Half the deviations from mean are equal to 0.5 and the other half equal to -0.5, so the SD is 0.5.
-
-In the dark cyan histogram, all of the area is being squished up around 1, leading to less spread. 90% of the deviations are small: 0.1. The other 10% are -0.9 which is large, but overall the spread is smaller than in the salmon pink histogram.
-
-The same observation would hold if we varied the proportion of 1's or let the proportion of 0's be larger than the proportion of 1's. Let's check this by calculating the SDs of populations of 10 elements that only consist of 0's and 1's, in varying proportions. The function `rep(N, i)` is useful for this. It takes two arguments, the number `N` to repeat and `i` repetitions of it, and returns the desired vector consisting of that many `N`'s, e.g.
-
-```{r}
-c(rep(1, 3), rep(0, 7))
-```
-
-Because we are computing directly the population standard deviation, we will use `pop.sd` instead of the usual `sd` for this experiment. 
-
-```{r}
-pop.sd <- function(x) sd(x) * sqrt((length(x)-1) / length(x))
-```
-
-```{r}
-compute_sd_from_population <- function(i) {
-  # Create a vector of i 1's and (10-i) 0's
-  population <- c(rep(1, i), rep(0, 10 - i))
-  return(pop.sd(population))
-}
-```
-
-```{r}
-sds <- map_dbl(1:9, compute_sd_from_population)
-
-zero_one_sds <- tibble(
-  pop_prop_of_1s = seq(0.1, 0.9, 0.1),
-  pop_sd = sds
-)
-zero_one_sds
-```
-Not surprisingly, the SD of a population with 10% 1's and 90% 0's is the same as that of a population with 90% 1's and 10% 0's. That's because you switch the bars of one histogram to get the other; there is no change in spread.
-
-More importantly for our purposes, the SD increases as the proportion of 1's increases, until the proportion of 1's is 0.5; then it starts to decrease symmetrically.
-
-```{r}
-ggplot(zero_one_sds) + 
-  geom_point(aes(x = pop_prop_of_1s, y = pop_sd), color = "darkcyan")
-```
-
-__Summary:__ The SD of a population of 1's and 0's is at most 0.5. That's the value of the SD when 50% of the population is coded 1 and the other 50% are coded 0.
-
-### The Sample Size
-
-We know that 
-
-$$
-\sqrt{\mbox{sample size}} ~ \ge ~ 4 \times \frac{\mbox{SD of the 0-1 population}}{0.01}
-$$
-
-and that the SD of the 0-1 population is at most 0.5, regardless of the proportion of 1's in the population. So it is safe to take
-
-$$
-\sqrt{\mbox{sample size}} ~ \ge ~ 4 \times \frac{0.5}{0.01} ~=~ 200
-$$
-
-So the sample size should be at least $200^2 = 40,000$. That's an enormous sample! But that's what you need if you want to guarantee great accuracy with high confidence no matter what the population looks like.
-
-
-
-
--->
+We leave it as an exercise to the reader to determine the center and spread for each of the distributions. 
 
 

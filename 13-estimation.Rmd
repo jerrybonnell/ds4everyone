@@ -69,7 +69,11 @@ This tells us that half of the flights had early departures -- not bad! Recall t
 mean(dep_delays)
 ```
 
-There is quite a bit of discrepancy between the two. Observe that the histogram above has a very long right tail; the mean is pulled upward by flights with long departure delays. When the distribution is skewed like the one here, the median can be a stronger indicator of central tendency. 
+There is quite a bit of discrepancy between the two. Observe that the histogram above has a very long right tail; the mean is pulled upward by flights with long departure delays. In general:
+
+> If a distribution has a long tail, the mean will be pulled away from the median in the direction of the tail. Otherwise, if the distribution is symmetrical, the mean and the median will equal. 
+
+When the distribution is "skewed" like the one here, the median can be a stronger indicator of central tendency. 
 
 There are cases, by the way, where two median exists. Such an event occurs exactly when the number of values is an even number. If there are 10 values, the 5th and the 6th values in the ascending order are the two medians. The one at the lower position in the order is the *odd median* and the other one, i.e., the one at the higher position in the order, is the *even median*. To compute the median in this case, we usually take the average of the odd and even median.  
 
