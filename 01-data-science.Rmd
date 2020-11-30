@@ -2,4 +2,141 @@
 
 # Data Science
 
-intro
+Data science is a field of science that aims at discovering patterns and gaining knowledge through analysis of data and developing methods for support such investigation.
+The field has its foundation in mathematics, statistics, computer science, and vision science and contributed to a wide array of disciplines including biology chemistry, economics, literary studies, medicine, physical sciences, psychology, etc.
+
+What are examples of data science?
+Here is a short list (each item with a possible academic discipline that appears the most relevant to it):
+
+* Tracking places where crimes occur in cities for crime prevention (criminology)
+* Tracking social media postings to understand changes in public opinions (political science)
+* Dynamically changing advertisements in search engines based on the browsing history and query terms (marketing)
+* Predicting trajectories of hurricanes (physical sciences)
+* Finding genetic factors contributing diseases (medicine)
+* Differentiating among novelists based on their writing styles (literary studies)
+* Winnowing an enormous candidate list of chemicals for a target effect based on their known properties (chemistry)
+* Diagnosing pulmonary diseases based on patient X ray images (medicine)
+* Identifying students that are at-risk (education)
+
+The prominence of data science comes from the fact that the technologies for collecting, sharing and analyzing data have become widely accessible.
+In many disciplines, research by way of data science has received a formidable status.
+Data science has gained a formidable status is in many disciplines.
+It is thus important for new generations of professionals (educators, scientists, engineers, doctors, etc.) to know how data sciences and know how to start data science explorations.
+The purpose of this course is to introduce its students to the very basic of data science.
+
+We will use the programming language R in our exploration.
+R is a programming language with roots in statistics and has a wide variety to tools that make it easy for its user to conduct statistical analysis and visualization.
+The syntax for R (i.e., the rules for writing the code for R) is more flexible than many other programming languages.
+It also allows its use to create a "notebook", interleaving non-programming parts and programming parts in an intuitive manner.
+Also, R can sit in the computer of its user.
+Without depending on external sources (except when loading programs other people developed for future use and loading data sets from internet sources).
+Thus, after completing the course, the students will be able to keep running and modifying their courses with new data sources and new ideas.
+
+### A Tiny Example
+
+In this course, we use a package `tidyverse`.
+A package is a group of source codes that serve a certain purpose.
+A nonprofit organization promoting R, [CRAN](https://cran.r-project.org/), maintains packages researchers have developed as a resource base for providing them.
+The package `tidyverse` is a collection of packages, which we call a "meta-package", that is useful for data analysis and data visualization.
+
+Here is an example of plotting data using `tidyverse`.
+R comes with a number of data sets.
+One of them is `WordPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
+
+The analysis begins by loading the package into your programming environment.
+
+```{r}
+library(tidyverse)
+```
+
+`tidiverse` uses a specific format for data bases.
+The data set is native to R, not to `tidyverse`, and so we need to load the data set into a format that is processible with `tidyverse`.
+
+
+```{r}
+wp <- as.data.frame(WorldPhones)
+wp
+```
+
+Let us say our goal is to plot the trend in the seven regions over the years.
+To accomplish the goal, we need to transform the data so that the area and the number appear as column pairs.
+Also, we change the row names "1951", etc., to the values of a column.
+
+```{r}
+wp0 <- wp %>% rownames_to_column("Year") %>% pivot_longer(cols = 2:8, names_to = "Area", values_to = "Count")
+# wp1 <- as.data.frame(t(wp)) %>% rownames_to_column("Area")
+wp0
+```
+
+We can now plot the changes in the numbers with the year as the horizontal axis and the count as the vertical axis.
+We assign different colors to the seven areas using the automatic coloring functionality of the plotting function.
+We see that the numbers steadily increased in North America, Europe, and Asia.
+
+```{r}
+ggplot(wp0, aes(x = Year, y = Count)) +
+  geom_point(aes(color = Area))
+```
+
+We can now plot the chnages as bars where the same colors represent the regions.
+
+```{r}
+ggplot(wp0) +
+  geom_bar(aes(x = Year, y = Count, fill = as.factor(Area)), stat = "identity") +
+  labs(fill = "Area")
+
+```
+
+Here is the plan for the course.
+We will first learn the basics of R programming.
+We will then learn how to use `tidyverse` for data formatting and data plotting.
+After that, we will study a variety of techniques for analyzing data and visualizing the results.
+
+We hope you will find our journey interesting.
+
+
+
+
+
+
+<!--
+```{r}
+library(tidyverse)
+library(readtext)
+```
+
+```{r}
+scarlet_url <- "https://dev.gutenberg.org/files/36/36-0.txt"
+scarlet_text <- readtext(scarlet_url)
+head(scarlet_text)
+```
+
+
+```{r}
+main <- scarlet_text[1,2]
+str_sub(main, 100, 200)
+```
+
+```{r}
+str_locate(main, fixed("BOOK ONE\nTHE COMING OF"))
+str_locate(main, "\\n[IXVL][IXVL]*\\.\\n")
+```
+
+```{r}
+main_parts <- unlist(str_split(main, "\\n[I|X|V|L][I|X|V|L]*\\.\\n"))
+length(main_parts)
+for (i in 1:28) {
+  print(str_sub(main_parts[i], 1, 20))
+}
+lll <- str_length(main_parts)
+lll
+```
+
+```{r}
+main_data <- data.frame(as.matrix(lll)) # %>% rename("original" = 1) %>% mutate(first = str_sub(original, 1, 100), .keep = "unused")
+```
+
+```{r}
+nrow(main_data)
+```
+-->
+
