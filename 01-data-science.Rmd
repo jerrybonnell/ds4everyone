@@ -86,6 +86,89 @@ ggplot(wp0) +
 
 ```
 
+### Text Processing
+
+
+You can download from a web site.
+[The Gutenberg Project](http://www.gutenberg.org/) is an international project to provide literary texts in a variety of formats for the public use.
+One of the main literary works the site offers is "Moby Dick" by Herman Melville.
+
+```{r}
+moby_url <- "http://www.gutenberg.org/files/2701/2701-0.txt"
+moby_text <- readtext(moby_url)
+main <- moby_text[1,2]
+```
+
+
+The first 1,000 characters of the text are as follows:
+
+```{r}
+str_sub(main, 1, 1000)
+```
+
+Notice that the text has a header where "\n" represents the return key.
+The real text of the work starts with "  ETYMOLOGY." and ends before "End of Project Gutenberg".
+We extract every character between the the positions these two signature strings spedcify.
+
+```{r}
+p_start <- str_locate(main, fixed("  ETYMOLOGY."))[1]
+p_start
+p_last <- str_locate(main, fixed("End of Project Gutenberg"))[1]
+p_last
+main0 <- str_sub(main, p_start, p_last - 1)
+```
+
+The main text starts with "\\nCHAPTER ".
+We use it as the separator and generate a list of tests, where each element of the list is a chapter.
+The `length(main_parts)` shows the number of elements in the list.
+
+```{r}
+main_parts <- unlist(str_split(main0, "\\nCHAPTER "))
+length(main_parts)
+```
+
+We turn the list of chapter texts into a data set.
+We convert it to all lowercase and replace the return key to the white space.
+Let us see the first 1,000 characters of the 100th chapter.
+Since the work starts with an epilog, the actual chapter number is off by 1, i.e., 99.
+The first three characters, "99.", represent the chapter number.
+
+
+
+```{r}
+main_data <- as.data.frame(main_parts)
+main_data %>% rename(original = main_parts) %>% transmute(origLower = str_replace_all(str_to_lower(original), "\\n", " ")) -> main_data0
+str_sub(main_data0$origLower[100],1,1000)
+```
+
+```{r}
+colnames(main_data0)
+main_data0 %>% mutate(len = str_length(origLower)) -> main_data1
+colnames(main_data1)
+#main_data0$len
+```
+
+We assigned the name "origLower" to the all-lowercase text we generated.
+We compute in each chapter how many times the following words occur: "whale", "ship", "sea", "this", "that", and "god".
+
+```{r}
+main_data1 %>% mutate(whale = str_count(origLower, "whale")) %>% mutate(ship = str_count(origLower, "ship"))%>% mutate(sea = str_count(origLower, "sea")) %>% mutate(this = str_count(origLower, "this")) %>% mutate(that = str_count(origLower, "that"))%>% mutate(god = str_count(origLower, "god")) -> main_data2
+```
+
+We now plot the relationships between "this" and "that" and the relationships between "whale" and "god".
+In the first, we see that where "this" appears a lot "that" appears a lot as well.
+In the second, we see that the occurrences of "god" have nothing to do with the occurrences of "whale", except there is one chapter with a very high number of occurrences of "god".
+
+```{r}
+ggplot(main_data2, aes(x = this, y = that)) +
+  geom_point() + geom_smooth()
+ggplot(main_data2, aes(x = whale, y = god)) +
+  geom_point() + geom_smooth()
+```
+
+
+### A Rough Organization
+
 Here is the plan for the course.
 We will first learn the basics of R programming.
 We will then learn how to use `tidyverse` for data formatting and data plotting.
