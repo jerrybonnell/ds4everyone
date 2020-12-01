@@ -117,7 +117,7 @@ You can download from the web site by providing its link.
 As before, we need `tidyverse`.
 We need another library `readtext`.
 
-```{r}
+```{r message=FALSE, warning = FALSE}
 library(tidyverse)
 library(readtext)
 ```
@@ -127,7 +127,7 @@ The data we load is actually a small table where the actual text of the work app
 We load the data and collect the data in that position and all it "main".
 
 ```{r}
-main <- moby_text <- readtext("http://www.gutenberg.org/files/2701/2701-0.txt")[1,2]
+main <- readtext("https://www.gutenberg.org/files/2701/2701-0.txt")[1,2]
 ```
 
 We can take a look at the first 1,000 characters of the text are as follows:
