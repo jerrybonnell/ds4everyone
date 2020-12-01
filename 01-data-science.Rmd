@@ -32,12 +32,17 @@ Also, R can sit in the computer of its user.
 Without depending on external sources (except when loading programs other people developed for future use and loading data sets from internet sources).
 Thus, after completing the course, the students will be able to keep running and modifying their courses with new data sources and new ideas.
 
-### A Tiny Example
+## The `tidyverse` Package
 
-In this course, we use a package `tidyverse`.
-A package is a group of source codes that serve a certain purpose.
+The bare-bones version of R complete but requires quite a bit of effort to write codes for data analysis.
+People have developed quite a bit of code in R for serving certain purposes and shared as packages.
+You can load a package someone else has written into your R programming environment and use it for your coding.
 A nonprofit organization promoting R, [CRAN](https://cran.r-project.org/), maintains packages researchers have developed as a resource base for providing them.
-The package `tidyverse` is a collection of packages, which we call a "meta-package", that is useful for data analysis and data visualization.
+
+In this course, we use a "package" `tidyverse`.
+The package `tidyverse` is a collection of packages, which we call a "meta-package", that covers all packages useful for data analysis and data visualization.
+
+### An Example
 
 Here is an example of plotting data using `tidyverse`.
 R comes with a number of data sets.
@@ -49,22 +54,36 @@ The analysis begins by loading the package into your programming environment.
 library(tidyverse)
 ```
 
-`tidiverse` uses a specific format for data bases.
-The data set is native to R, not to `tidyverse`, and so we need to load the data set into a format that is processible with `tidyverse`.
+The data part of this data set is a 7x7 table of numbers where the rows correspond to years and the columns correspond to seven geographical areas, North America, Europe, Asia, South America, Oceania, Africa, and Middle America (meaning Central America).
 
+`tidiverse` uses a specific format for data bases.
+The data set is native to R, not to `tidyverse`, and so we need to load the data set into a format that `tidyverse` can analyze.
+
+The next line shows the process of loading data from WorldPhones as a "data frame".
 
 ```{r}
 wp <- as.data.frame(WorldPhones)
+```
+
+By typing the name, you can see the contents.
+
+```{r}
 wp
 ```
 
-Let us say our goal is to plot the trend in the seven regions over the years.
+Suppose our goal is to plot the trend in the seven regions over the years.
 To accomplish the goal, we need to transform the data so that the area and the number appear as column pairs.
 Also, we change the row names "1951", etc., to the values of a column.
 
 ```{r}
 wp0 <- wp %>% rownames_to_column("Year") %>% pivot_longer(cols = 2:8, names_to = "Area", values_to = "Count")
 # wp1 <- as.data.frame(t(wp)) %>% rownames_to_column("Area")
+```
+
+Here is how the new data set looks like. We see that there are seven rows for each year and the area names and their counts vertically in a pair of columns.
+
+
+```{r}
 wp0
 ```
 
@@ -77,7 +96,8 @@ ggplot(wp0, aes(x = Year, y = Count)) +
   geom_point(aes(color = Area))
 ```
 
-We can now plot the chnages as bars where the same colors represent the regions.
+
+We can now plot the changes as bars where the same colors represent the regions.
 
 ```{r}
 ggplot(wp0) +
@@ -86,69 +106,92 @@ ggplot(wp0) +
 
 ```
 
-### Text Processing
+## Text Processing
 
+Here is another example where play with a textual data set.
 
-You can download from a web site.
 [The Gutenberg Project](http://www.gutenberg.org/) is an international project to provide literary texts in a variety of formats for the public use.
 One of the main literary works the site offers is "Moby Dick" by Herman Melville.
+You can download from the web site by providing its link.
+
+As before, we need `tidyverse`.
+We need another library `readtext`.
 
 ```{r}
-moby_url <- "http://www.gutenberg.org/files/2701/2701-0.txt"
-moby_text <- readtext(moby_url)
-main <- moby_text[1,2]
+library(tidyverse)
+library(readtext)
 ```
 
+We load the data from the "Moby Dick" site.
+The data we load is actually a small table where the actual text of the work appearing in Row 1, Column 2.
+We load the data and collect the data in that position and all it "main".
 
-The first 1,000 characters of the text are as follows:
+```{r}
+main <- moby_text <- readtext("http://www.gutenberg.org/files/2701/2701-0.txt")[1,2]
+```
+
+We can take a look at the first 1,000 characters of the text are as follows:
 
 ```{r}
 str_sub(main, 1, 1000)
 ```
 
 Notice that the text has a header where "\n" represents the return key.
-The real text of the work starts with "  ETYMOLOGY." and ends before "End of Project Gutenberg".
-We extract every character between the the positions these two signature strings spedcify.
+The `str_sub` is a method for obtaining a substring. You state inside the parentheses, the source string, the start position, and the end position, where the positions are character positions. 
+
+We can take a look at the last 1,000 characters of the text are as follows:
+
+```{r}
+str_sub(main, str_length(main) - 1000, str_length(main))
+```
+
+
+In the two substrings, you notice that the real text of the work starts with "  ETYMOLOGY." and ends before "End of Project Gutenberg".
+We extract every character between the the positions these two signature strings specify.
+
+To accomplish this, we obtain the locations of the two key phrases and obtain the substring between the two phrases.
 
 ```{r}
 p_start <- str_locate(main, fixed("  ETYMOLOGY."))[1]
-p_start
 p_last <- str_locate(main, fixed("End of Project Gutenberg"))[1]
-p_last
 main0 <- str_sub(main, p_start, p_last - 1)
 ```
 
 The main text starts with "\\nCHAPTER ".
 We use it as the separator and generate a list of tests, where each element of the list is a chapter.
-The `length(main_parts)` shows the number of elements in the list.
+The `length(main_parts)` shows the number of elements in the list (that is the number of chapters, including "EPILOGUE") and `str_length(main_parts)` shows the length of each chapter. 
 
 ```{r}
 main_parts <- unlist(str_split(main0, "\\nCHAPTER "))
 length(main_parts)
+str_length(main_parts)
 ```
 
 We turn the list of chapter texts into a data set.
-We convert it to all lowercase and replace the return key to the white space.
-Let us see the first 1,000 characters of the 100th chapter.
-Since the work starts with an epilog, the actual chapter number is off by 1, i.e., 99.
-The first three characters, "99.", represent the chapter number.
-
-
+We convert it to "all lowercase" and replace the return key to the white space.
+The lowercase version appears as a new column, we call it "origLower".
+We trash the original version.
 
 ```{r}
 main_data <- as.data.frame(main_parts)
 main_data %>% rename(original = main_parts) %>% transmute(origLower = str_replace_all(str_to_lower(original), "\\n", " ")) -> main_data0
+```
+
+Let us see the first 1,000 characters of the 100th chapter.
+Since the work starts with an epilog, the actual chapter number is off by 1, i.e., 99.
+The first three characters, "99.", represent the chapter number.
+
+```{r}
 str_sub(main_data0$origLower[100],1,1000)
 ```
 
+We compute the character length (as we did before) and turn the numbers into a column.
+
 ```{r}
-colnames(main_data0)
 main_data0 %>% mutate(len = str_length(origLower)) -> main_data1
 colnames(main_data1)
-#main_data0$len
 ```
 
-We assigned the name "origLower" to the all-lowercase text we generated.
 We compute in each chapter how many times the following words occur: "whale", "ship", "sea", "this", "that", and "god".
 
 ```{r}
