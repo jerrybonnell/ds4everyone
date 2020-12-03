@@ -23,7 +23,7 @@ We also may notice that there can be *levels* of randomness. We sometimes say "a
 
 In this chapter, we explore randomness.
 
-## Introduction 
+## Introduction {#introrandomness}
 
 We begin our study by learning how to generate random numbers using R. There are many functions that R has which involve random selection; one of these is called `sample()`. It picks one item at random from a list (i.e., vector), where the choice will likely occur at all positions. A prime example of randomness is tossing a coin with chance of heads 50% and chance of tails 50%. 
 
