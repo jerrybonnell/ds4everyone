@@ -1,7 +1,6 @@
 --- 
-title: "Data science for everyone"
-author: "TBA"
-date: "`r Sys.Date()`"
+title: "Data Science for the World"
+author: "Jerry Bonnell and Mitsunori Ogihara"
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 documentclass: book
@@ -16,7 +15,22 @@ description: "This is a minimal example of using the bookdown package to write a
 
 # Welcome {-}
 
+This is the textbook for the course *Data Science for the World* (CSC100) taught at the University of Miami.
 
-Jerry Bonnell and Mitsunori Ogihara
+## Colophon {-}
 
-This is the textbook for the Data Science for the World class at University of Miami.
+This book was written in [bookdown](http://bookdown.org/) inside [RStudio](http://www.rstudio.com/ide/). The website is hosted with [Netlify](https://www.netlify.com), and built from [source](https://github.com/jerrybonnell/ds4everyone) by [GitHub Actions](https://github.com/features/actions).
+
+## License {-}
+
+TBA
+
+
+ 
+
+
+
+
+
+
+

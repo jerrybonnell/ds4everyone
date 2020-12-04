@@ -1,4 +1,0 @@
-
-# Functions and Tables
-
-chapter on functions and tables begins here
