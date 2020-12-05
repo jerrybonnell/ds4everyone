@@ -5,7 +5,7 @@ output:
 ---
 # (PART) Programming fundamentals {-} 
 
-# Programming in R
+# The Programming Language R
 
 The work of a data scietist consists of many aspects:
 * working with domain scientists to determine what questions need addressing

@@ -3,7 +3,7 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Data Types and Vectors
+# The Data Types in R
 
 In this chapter we learn four fundamental data types of R and an important data structure "vector".
 We also spend a bit of time studying the package `stringr`, which is part of `tidyverse`.

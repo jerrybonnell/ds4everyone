@@ -1,3 +1,6 @@
+# Regression
+
+<!--
 # Inference for Regression 
 
 Thus far, our analysis of the relation between variables has been purely descriptive. We know how to find the best straight line to draw through a scatter plot. The line is the best in the sense that it has the smallest mean squared error of estimation among all straight lines.
@@ -564,5 +567,7 @@ If the scatter plot does not look like that, then perhaps the model does not hol
 
 Therefore, we must first decide whether the regression model holds for our data, before we start making predictions based on the model or testing hypotheses about parameters of the model. A simple way is to do what we did in this section, which is to draw the scatter diagram of the two variables and see whether it looks roughly linear and evenly spread out around a line. We should also run the diagnostics we developed in the previous section using the residual plot.
 
+
+-->
 
 
