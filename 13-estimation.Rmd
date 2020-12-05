@@ -3,7 +3,7 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Estimation
+# Bootstrappiing
 
 The previous chapters have developed ways to show how to use data to decide between competing questions about the world. For instance, does Harvard enroll proportionately less Asian-Americans than other private universities in the United States; are the exam grades in one lab section of a course too low when compared to other lab sections; can an experimental drug bring an improvement to patients recovering from brain trauma? We evaluated questions like these by means of an *hypothesis test* where we put forward two hypotheses: a *null* hypothesis and an *alternative* hypothesis.  
 

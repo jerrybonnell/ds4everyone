@@ -1,6 +1,6 @@
 # (PART) Introduction {-} 
 
-# Data Science
+# What Is Data Science?
 
 Data science is a field of science that aims at discovering patterns and gaining knowledge through analysis of data and developing methods for support such investigation.
 The field has its foundation in mathematics, statistics, computer science, and vision science and contributed to a wide array of disciplines including biology chemistry, economics, literary studies, medicine, physical sciences, psychology, etc.

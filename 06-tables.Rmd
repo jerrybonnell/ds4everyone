@@ -3,7 +3,7 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Data Frames in R
+# Data Frames
 
 In the previous chapter, we studied the `stringr` package, which is part of `tidyverse`.
 In this chapter, we go over more packages from `tidyverse`.

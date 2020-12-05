@@ -3,7 +3,7 @@ output:
   html_document: default
   pdf_document: default
 ---
-# Visualization in  R (ggplot)
+# Data Visualization with ggplot
 
 As you develop familiarity in processing data, you learn how to develop intuition from the data at hand by glancing at its values.
 Unfortunately, there is only so much you can do with glancing at values.

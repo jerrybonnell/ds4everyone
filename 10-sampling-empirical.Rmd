@@ -15,7 +15,7 @@ Specifically, we will learn that:
 
 In both cases, the number of samples we draw plays an important role.
 
-## Introduction
+## Introduction {#powerofsampling}
 
 This chapter introduces some sampling preliminaries that we need for building our experiments. 
 

@@ -5,7 +5,7 @@ output:
 ---
 # (PART) Doing Statistics {-} 
 
-# What Is Randomness?
+# Executing Simulations
 
 The previous chapters have shown the basics of tidying, transforming, and visualizing data using R and the tidyverse. Armed with these tools, this unit turns to how we can extract insights from our data. Key to this investigation is statistics and inherent to that is the notion of *randomness*. 
 
