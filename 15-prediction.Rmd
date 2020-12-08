@@ -180,7 +180,7 @@ The way to use linear regression is `lm(data = DATA_NAME, TARGET ~ FORMULA)`, wh
 In our case, there is only one factor, `Height`, so we state `Height` in the place for `FORMULA`.
 
 ```{r}
-fitted <- lm(data = mlb0, Weight ~ Height)
+fitted <- lm(data = mlb, Weight ~ Height)
 ```
 
 We can generate information for the model using `summary()`.
