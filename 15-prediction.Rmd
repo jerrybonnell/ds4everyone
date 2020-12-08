@@ -1,8 +1,363 @@
 # (PART) Advanced Topic {-} 
 
-# Predictive Analysis
+# Regression
 
-<!--
+We will now use R to conduct investigations for information.
+In this chapter, we study the concept of modeling the data.
+We study specifically the concept of *regression*, which is a group of methods for modeling the values of a variable based on the values of other variables.
+We have seen something that resembles regression in the introduction for plotting, where we guessed by examination that the line explaining the highway mileage with the displacement.
+R has the functionality for doing the determination of the line automatically, which we call the *linear model*.
+
+## Linear Regression
+
+*Linear regression* is a method that estimates the value of a variable (which we call the *target*) against a collection of other variables (which we the *factors*) so we can express the value of the target as some combination of the factors, where each factor either adds to or subtracts from the target value estimation.
+The estimation takes the form
+\[
+\mathrm{target} \approx \mathrm{intercept} + \mathrm{scalor}_1 * \mathrm{factor}_1 + \cdots + \mathrm{scalor}_k * \mathrm{factor}_k.
+\]
+Here $\mathrm{intercept}, \mathrm{scalor}_1, \ldots, \mathrm{scalor}_k$ are the parameters we estimate and are universally applicable to data points in the data set.
+
+Let $c$ be the intercept and let $s_1, \ldots, s_k$ be the scalors.
+Given $f_1, \ldots, f_k$ as values of the factors, the estimate according to the model is the sum of $s_i * f_i$ for all $i$ and the intercept $c$; that is, we scale the value of the $i$-th attribute by $s_i$ and add together the "scaled" factors and the intercept.
+The formula for the estimate is thus
+\[
+c + s_1 * f_1 + \cdots + s_k * f_k .
+\]
+The estimate the model produces may not match the actual value.
+So, given a data point $(t,f_1,\ldots,f_k)$ appearing in the data, we compute how much it differs from the estimate by subtracting the estimate from the actual.
+We call this difference the *residual*.
+If the residual is 0, our model perfectly fits the data point.
+We want our model to fit all the data points perfectly, but such a perfect model usually does not exist for a real data set.
+This means that regardless of the parameter choice, some data point produces a non-zero residual.
+Why do we pick our model then?
+We choose our model so that an "overall* residual amount is small.
+
+To assess an *overall* residual amount, simply summing the residual is not good because some residuals are positive and some residuals are negative, and positive and negative values cancel each other.
+We thus use the square of each residual in place of the simple residual amount.
+Since squares are nonnegative, we can avoid the cancellation problem.
+In other words, we use the following *squared residual*
+$$
+(t - (c + s_1 * f_1 + \cdots + s_k * f_k))^2
+$$
+and make the total squared residual as small as possible.
+There is a mathematical method for obtaining the parameter values that achieve the minimum total squared distance, but learning such methods is beyond the scope of this course.
+
+## Correlation
+
+To explain, how a linear regression estimator in R works, let us use an artifial data set.
+Recall that `tibble()` allows you to create a data set.
+The data set `dt` below has four attributes `xx`, `yy`, `zz`, and `ww`.
+The attribute `xx` ranges from 10 to 30 with an equal gap of $0.5$ between two values.
+The value for `yy` is 25 times `xx`.
+The value for `ww` is $0.3$ times the square of `xx` minus 10 times `sin(xx)`.
+The value for `ww` is the sum of `yy` and `zz`.
+
+
+```{r}
+dt <- tibble(xx = seq(10,30,0.5), yy = 25 * xx, zz = - 10 * sin(xx), ww = yy + zz)
+```
+
+Let us use `ggplot` to plot `yy`, `zz`, and `ww` against `xx.
+
+
+```{r}
+ggplot(dt, aes(x = xx, y = yy)) + geom_point() + geom_smooth()
+ggplot(dt, aes(x = xx, y = zz)) + geom_point()
+ggplot(dt, aes(x = xx, y = ww)) + geom_point() + geom_smooth()
+```
+
+We observe that `yy` aligns perfectly with `xx`, `zz` is wavy and shows no trend, and `ww` almost perfectly aligns with `xx` except that it is a bit wavy.
+The observation makes sense because we created `ww` by adding the small wavy `zz` to the perfectly aligning `yy`.
+We thus can anticipate that the regression produces the line close to the function of `yy` as an estimate.
+
+Before getting into the use of regression, we present how in a case like this (one factor for one target), how likely it is the linear progression produces good estimates.
+The statistical concept we use for the investigation is *correlation*.
+Suppose we have some $n$ observations in which we see two attributes $sx$ and $y$.
+Let $\overline{x}$ and $\overline{y}$ denote the means of $x$ and $y$ values, respectively.
+Obtain from each value of $x$ a new value by subtracting $\overline{x}$ from it.
+Similarly, from each value of $y$ a nmew value by subtracting $\overline{y}$ from it.
+The definition of a correlation is as follows:
+\[
+\frac{\mathrm{the~average~of~} $x' y'$}{(\mathrm{the~standard~deviation~of~}$x$) \times (\mathrm{the~standard~deviation~of ~}$y$)}
+\]
+where the average in the numerator uses division by $n-1$ instead of division by $n$. 
+
+R comes the function for computing the correlation. You have only two provide the two sources between which you need to compute the correlation.
+Let us obtain the correlations between `xx` and `yy`, `xx` and `ww`, and `zz`.
+
+```{r}
+cor(dt$xx,dt$yy)
+cor(dt$xx,dt$zz)
+cor(dt$xx,dt$ww)
+```
+
+The range of correlation is between $-1$ and $1$, where $1$ is the perfect positive correlation (for example, a variable has the perfect positive correlation with itself), $-1$ is the perfect negative correlation (for example, a variable has the perfect positive correlation with itself when the opposite sign), and $0$ is no correlation at all.
+We see that the correlation of `xx` is high with `yy` and `zz` and almost nonexistent with `zz`.
+
+## Linear Regression
+
+Now let us run the linear regression on R.
+The function is `lm()`, which is the short-hand for "linear model".
+Running the linear regression function requires two parameters.
+One parameter is the data set, which takes the form `data = DATA_SET_NAME`.
+The other is the target and the factors, which takes the form `TARGET ~ FACTOR_1 + \cdots + FACTOR_k`.
+The regression we have at hand has only one factor, `xx`, and the target is `ww`, and so we call the function as `lm(data = dt, ww ~ xx)`.
+The function returns the result as a collection of tables and numbers.
+Below we store it in `fitted`.
+
+```{r}
+fitted <- lm(data = dt, ww ~ xx)
+```
+
+The function `summary` reveals the information the model has.
+
+```{r}
+summary(fitted)
+```
+
+A key piece of information appears under the heading "Coefficients".
+The "Estimate" column of the segment shows the estimates of the coefficients.
+The function is
+$$
+2.0944 + 24.9283 xx
+$$
+This may be slightly off because the original had 0 intercept but the estimate has 2.0944.
+
+The components of the `summary` are accessible by attaching `$` and the attribute in question.
+
+```{r}
+summary(fitted)$call
+summary(fitted)$r.squared
+summary(fitted)$coefficients
+summary(fitted)$residuals
+```
+
+
+We can force the modeling function to keep the intercept to be 0 by adding `-1` to the formula when calling `lm`.
+
+
+```{r}
+fit1 <- lm(data = dt, ww ~ xx - 1)
+summary(fit1)
+```
+We see that the "Intercept" row under "Coefficients" has disappeared.
+Thus, in the revised model, the estimate is `ww = 25.02464 xx`.
+This is very close to the original.
+
+```{r}
+summary(fit)$r.squared
+summary(fit)$coefficients
+# summary(fit)$residuals
+summary(fit)$correlation
+summary(fit)$coefficients[1:2]
+
+```
+
+[The UCLA SOCR Statistics](http://www.socr.ucla.edu/) is a great resource for statistical concepts and tools.
+[The MLB Height Weight Data Set](http://wiki.stat.ucla.edu/socr/index.php/SOCR_Data_MLB_HeightsWeights) is the data set of 1,034 Major League Baseball players.
+We have downloaded the data and formatted into a comma-separated table.
+Let us load the data.
+```{r}
+mlb <- read_csv("data/mlb.csv")
+```
+
+The number of positions is 9 and the number of teams is 30.
+
+```{r}
+unique(mlb$Position)
+unique(mlb$Team)
+```
+
+Let us plot the weight against the height and draw the smoothed line.
+
+```{r}
+ggplot(mlb, aes(x = Height, y = Weight)) + geom_point() + geom_smooth()
+```
+The smoothed plot is the line that connects the mean for each weight value.
+
+Let us use R compute the regression.
+The way to use linear regression is `lm(data = DATA_NAME, TARGET ~ FORMULA)`, where `DATA_NAME` is the attribute as the target and `FORMULA` is the factors.
+In our case, there is only one factor, `Height`, so we state `Height` in the place for `FORMULA`.
+
+```{r}
+fit <- lm(data = mlb0, Weight ~ Height)
+```
+
+We can generate information for the model using `summary()`.
+
+```{r}
+summary(fit)
+```
+
+The call produces a variety of values.
+
+```{r}
+cor(x = hw$Height, hw$Weight)
+summary(fit)$r.squared
+summary(fit)$coefficients
+summary(fit)$residuals
+```
+
+
+## Exploring the `mtcars`
+
+As usual, our exploration starts with loading the library `tidyverse`.
+
+```{r}
+library(tidyverse)
+```
+
+Our previous exploration of gas mileage used the `mpg` data set.
+This time, we use `mtcars`.
+By typing `?mtcars` you get the information of the data set.
+Here, for your convenience, the information of the eleven attributes.
+
+*	`mpg	Miles/(US) gallon`
+* `cyl	Number of cylinders`
+*	`disp	Displacement (cu.in.)`
+*	`hp	Gross horsepower`
+* `drat	Rear axle ratio`
+*	`wt	Weight (1000 lbs)`
+*	`qsec	1/4 mile time`
+*	`vs	Engine (0 = V-shaped, 1 = straight)`
+*	`am	Transmission (0 = automatic, 1 = manual)`
+*	`gear	Number of forward gears`
+*	`carb	Number of carburetors`
+
+As you can see, all the attributes are numerical.
+By `glimpse(mtcars)` you can inspect the attributes.
+
+```{r}
+glimpse(mtcars)
+```
+
+```{r}
+ggplot(mtcars, aes(x = cyl, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = disp, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = hp, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = drat, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = qsec, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = vs, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = am, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = gear, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = carb, y = mpg)) + geom_point() + geom_smooth()
+```
+The last four, `vs`, `am`, `gear`, and `carb`, and `cyl` are categorical variables each with a small number of choices, and so we will ignore it.
+Let us create a new data set `mtcars1` without these variables, that is, `mpg` and the variables from `disp` to `qsec`.
+
+```{r}
+mtcars1 <- mtcars %>% select(mpg, disp:qsec)
+head(mtcars1)
+```
+The *linear regression* is a method that estimates the value of a variable (which we call the *target*) against a collection of other variables (which we the *factors*) so we can express the value of the target as some combination of the factors, where each factor either adds to or subtracts from the target value estimation.
+The estimation takes the form
+\[
+\mathrm{target} \approx \mathrm{intersept} + \mathrm{scale}_1 * \mathrm{factor}_1 + \cdots + \mathrm{scale}_k * \mathrm{factor}_k
+\] 
+
+
+```{r}
+fit <- lm(mpg ~ disp, data = mtcars1)
+summary(fit)
+fit <- lm(mpg ~ hp, data = mtcars1)
+summary(fit)
+fit <- lm(mpg ~ drat, data = mtcars1)
+summary(fit)
+fit <- lm(mpg ~ wt, data = mtcars1)
+summary(fit)
+fit <- lm(mpg ~ qsec, data = mtcars1)
+summary(fit)
+```
+
+
+```{r}
+fit <- lm(mpg ~., data = mtcars1)
+summary(fit)
+```
+
+
+```{r}
+ggplot(mtcars, aes(x = cyl, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = log(disp), y =mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = log(hp), y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = log(drat), y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = log(wt), y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars, aes(x = log(qsec), y = mpg)) + geom_point() + geom_smooth()
+```
+
+
+```{r}
+fit <- lm(mpg ~., data = mtcars)
+summary(fit)
+```
+
+```{r}
+ggplot(aes(x = wt, y = mpg), data = mtcars) +
+  geom_point() +
+  geom_line(aes(y = 12.30377 - 3.71530 * wt))
+```
+
+```{r}
+mtcars %>% mutate(mpg_fit = 12.30337 - 3.71530 * wt + 2.52023 * am + 0.78711 * drat + 0.82104 * qsec + 0.65541 * gear) -> mtcars2
+```
+
+
+```{r}
+fit <- lm(mpg ~ mpg_fit, data = mtcars2)
+summary(fit)
+```
+
+
+```{r}
+fit <- lm(mpg ~ wt, data = mtcars)
+summary(fit)
+```
+
+
+```{r}
+ggplot(aes(x = wt, y = mpg), data = mtcars) +
+  geom_point() +
+  geom_line(aes(y = 37.2851 - 5.3445 * wt))
+```
+
+
+
+
+
+Let us use the other car data set.
+
+```{r}
+glimpse(mpg)
+```
+
+```{r, fig.align="center", dpi=80}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+Let us compute the correlation values first.
+
+```{r}
+cor(mpg$hwy, mpg$displ)
+cor(mpg$hwy, mpg$cyl)
+cor(mpg$hwy, mpg$year)
+```
+
+Let us now compute the regression.
+
+```{r}
+fit1 <- lm(hwy ~ displ + year + cyl, data = mpg)
+fit2 <- lm(cty ~ displ + year + cyl, data = mpg)
+```
+```{r}
+summary(fit1)
+```
+```{r}
+fit <- lm(hwy~., data = mpg)
+summary(fit)
+```
+<!-- # Predictive Analysis
+
 # Prediction
 
 An important aspect of data science is to find out what data can tell us about the future. What do data about climate and pollution say about temperatures a few decades from now? Based on a person's internet profile, which websites are likely to interest them? How can a patient's medical history be used to judge how well he or she will respond to a treatment?
