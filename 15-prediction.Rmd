@@ -353,8 +353,8 @@ fit2 <- lm(cty ~ displ + year + cyl, data = mpg)
 summary(fit1)
 ```
 ```{r}
-fit <- lm(hwy~., data = mpg)
-summary(fit)
+fitted <- lm(hwy~., data = mpg)
+summary(fitted)
 ```
 <!-- # Predictive Analysis
 
