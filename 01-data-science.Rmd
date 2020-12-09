@@ -2,15 +2,13 @@
 
 # What Is Data Science?
 
-Data science is a field of science that aims at discovering patterns and gaining knowledge through analysis of data and developing methods for support such investigation.
-The field has its foundation in mathematics, statistics, computer science, and vision science and contributed to a wide array of disciplines including biology chemistry, economics, literary studies, medicine, physical sciences, psychology, etc.
+Data science is a field of science that aims at discovering patterns and extracting knowledge through analysis of data and developing methods to support such investigation. The field is rooted in mathematics, statistics, computer science, and vision science and has contributed to a wide array of disciplines, e.g.,  biology, chemistry, economics, literary studies, medicine, physical sciences, and psychology. 
 
-What are examples of data science?
-Here is a short list (each item with a possible academic discipline that appears the most relevant to it):
+What does data science look like? Here is a short list of some examples, followed by a discipline that appears most relevant to the problem. 
 
 * Tracking places where crimes occur in cities for crime prevention (criminology)
-* Tracking social media postings to understand changes in public opinions (political science)
-* Dynamically changing advertisements in search engines based on the browsing history and query terms (marketing)
+* Tracking social media postings to understand changes in public opinion (political science)
+* Dynamically changing advertisements in search engines based on browsing history and query terms (marketing)
 * Predicting trajectories of hurricanes (physical sciences)
 * Finding genetic factors contributing diseases (medicine)
 * Differentiating among novelists based on their writing styles (literary studies)
@@ -18,251 +16,201 @@ Here is a short list (each item with a possible academic discipline that appears
 * Diagnosing pulmonary diseases based on patient X ray images (medicine)
 * Identifying students that are at-risk (education)
 
-The prominence of data science comes from the fact that the technologies for collecting, sharing and analyzing data have become widely accessible.
-In many disciplines, research by way of data science has received a formidable status.
-Data science has gained a formidable status is in many disciplines.
-It is thus important for new generations of professionals (educators, scientists, engineers, doctors, etc.) to know how data sciences and know how to start data science explorations.
-The purpose of this course is to introduce its students to the very basic of data science.
+The prominence of data science comes from the fact that the means for collecting, sharing and analyzing data have become widely accessible thanks to the rise of computers. In many disciplines, research by way of data science has received a formidable status. It is thus important for new generations of professionals (educators, scientists, engineers, doctors, etc.) to understand data science fundamentals and know how to start explorations using data science. The objective of this course is to introduce the basics of data science and to teach data science tools and concepts that have immediate practical value to the students' field of interest.  
 
-We will use the programming language R in our exploration.
-R is a programming language with roots in statistics and has a wide variety to tools that make it easy for its user to conduct statistical analysis and visualization.
-The syntax for R (i.e., the rules for writing the code for R) is more flexible than many other programming languages.
-It also allows its use to create a "notebook", interleaving non-programming parts and programming parts in an intuitive manner.
-Also, R can sit in the computer of its user.
-Without depending on external sources (except when loading programs other people developed for future use and loading data sets from internet sources).
-Thus, after completing the course, the students will be able to keep running and modifying their courses with new data sources and new ideas.
+One such tool that we will study is the programming language R. R has its roots in statistics and has a wide variety of tools that make it easy for R programmers to conduct statistical analysis and visualization. While R is certainly not the only programming language data scientists use -- you may have heard about Python or Julia -- we identify some key reasons for designating it as the language for this course. 
 
-## The `tidyverse` Package
+* The syntax (i.e., the rules for writing code in a programming language) is easier to digest and understand for newcomers to programming. 
+* R is not just a language, but an interactive environment for doing data science. This makes R much more flexible than many other programming languages, and helps focus on specific parts of the data science process. 
+* R allows the use of "notebooks" that allow programmers to interleave code with prose in an intuitive manner. This is a great way for data scientists to explain and share their work with peers. 
 
-The bare-bones version of R complete but requires quite a bit of effort to write codes for data analysis.
-People have developed quite a bit of code in R for serving certain purposes and shared as packages.
-You can load a package someone else has written into your R programming environment and use it for your coding.
-A nonprofit organization promoting R, [CRAN](https://cran.r-project.org/), maintains packages researchers have developed as a resource base for providing them.
+After completing the course, students will be able to keep running and modifying their notebooks with new data sources and ideas.
 
-In this course, we use a "package" `tidyverse`.
-The package `tidyverse` is a collection of packages, which we call a "meta-package", that covers all packages useful for data analysis and data visualization.
+## Enter the `tidyverse`
 
-### An Example
+The bare-bones version of R, sometimes called *base* R, is complete but requires a bit more effort to write code for data analysis. People have developed code in R for serving certain purposes and have shared it as *packages*. Using packages is key to successful application of R; you can load a package someone else has written into your R programming environment and use it for your coding.
 
-Here is an example of plotting data using `tidyverse`.
-R comes with a number of data sets.
-One of them is `WordPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
+A nonprofit organization promoting R, [CRAN](https://cran.r-project.org/) (the **c**omprehensive **R** **a**rchive **n**etwork), maintains packages researchers have developed. The majority of the packages we will be studying in this course are part of the *tidyverse*, which is actually a collection of packages that are useful for data analysis and visualization; they are designed to work together with ease.  
+
+The tidyverse can be installed with just a single line of code. 
+
+```{r eval=FALSE}
+install.packages("tidyverse")
+```
+
+Type the above in the console, and press "Enter" to run it. R will download the packages from CRAN and install them on to your computer. 
+
+Let us see an example of how to plot some data using the `tidyverse`. 
+
+### The World's Telephones
+
+R ships with a number of off-the-shelf data sets you can play with. One of them is `WordPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
 
 The analysis begins by loading the package into your programming environment.
 
-```{r}
+```{r message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-The data part of this data set is a 7x7 table of numbers where the rows correspond to years and the columns correspond to seven geographical areas, North America, Europe, Asia, South America, Oceania, Africa, and Middle America (meaning Central America).
+This dataset is a 7x7 table of numbers where the rows correspond to years and the columns correspond to seven geographical areas: North America, Europe, Asia, South America, Oceania, Africa, and Middle America (meaning Central America).
 
-`tidiverse` uses a specific format for data bases.
-The data set is native to R, not to `tidyverse`, and so we need to load the data set into a format that `tidyverse` can analyze.
+We can inspect the table contents by typing its name into the console. 
 
-The next line shows the process of loading data from WorldPhones as a "data frame".
-
-```{r}
-wp <- as.data.frame(WorldPhones)
+```{r eval = FALSE}
+WorldPhones
 ```
 
-By typing the name, you can see the contents.
-
-```{r}
-wp
+```{r echo = FALSE}
+as.data.frame(WorldPhones)
 ```
 
-Suppose our goal is to plot the trend in the seven regions over the years.
-To accomplish the goal, we need to transform the data so that the area and the number appear as column pairs.
-Also, we change the row names "1951", etc., to the values of a column.
+Run your eye down the table and observe that the number of telephones in each region increases, some by much more than others.  
+
+Suppose our goal is to plot the trend in the seven regions over the years. To accomplish this, we need to do some *data tidying*. Namely, we need the region and the number of telephones to appear as column pairs; we also give the year its own column. 
 
 ```{r}
-wp0 <- wp %>% rownames_to_column("Year") %>% pivot_longer(cols = 2:8, names_to = "Area", values_to = "Count")
-# wp1 <- as.data.frame(t(wp)) %>% rownames_to_column("Area")
+transformed <- WorldPhones %>%
+  as.data.frame() %>%
+  rownames_to_column("Year") %>% 
+  pivot_longer(cols = 2:8, names_to = "Area", values_to = "Count")
 ```
 
-Here is how the new data set looks like. We see that there are seven rows for each year and the area names and their counts vertically in a pair of columns.
-
+Here is how the new dataset looks like. We see that there are seven rows for each year and the regions and their counts appear vertically as a pair of columns.
 
 ```{r}
-wp0
+transformed
 ```
 
-We can now plot the changes in the numbers with the year as the horizontal axis and the count as the vertical axis.
-We assign different colors to the seven areas using the automatic coloring functionality of the plotting function.
-We see that the numbers steadily increased in North America, Europe, and Asia.
+Don't worry if the code above seems overwhelming. We will go over each piece in great detail during the course. For now, just pay attention to what the dataset looks like after the transformation, and how it differs from the original. 
+
+We can now plot the number of telephones with the year as the horizontal axis and the count as the vertical axis. We assign a different color to each of the seven regions.
 
 ```{r}
-ggplot(wp0, aes(x = Year, y = Count)) +
+ggplot(transformed, aes(x = Year, y = Count)) +
   geom_point(aes(color = Area))
 ```
 
+We call this a *scatter plot*, which we will see later in the course. This scatter plot tells us that the numbers steadily increased in North America, Europe, and Asia.
 
-We can now plot the changes as bars where the same colors represent the regions.
+We can also plot the changes as bars where color denotes a certain region.
 
 ```{r}
-ggplot(wp0) +
-  geom_bar(aes(x = Year, y = Count, fill = as.factor(Area)), stat = "identity") +
+ggplot(transformed) +
+  geom_bar(aes(x = Year, y = Count, fill = as.factor(Area)),
+           stat = "identity", position = "fill") +
   labs(fill = "Area")
-
 ```
 
-## Text Processing
+We call this one a *stacked bar chart*, which we will also see later. Every plot tells a different story. This one signals to us how the *proportion* of telephones changes across each region.     
 
-Here is another example where play with a textual data set.
+Can you spot some more differences between the two plots, especially in regards to what they say about the data?
 
-[The Gutenberg Project](http://www.gutenberg.org/) is an international project to provide literary texts in a variety of formats for the public use.
-One of the main literary works the site offers is "Moby Dick" by Herman Melville.
-You can download from the web site by providing its link.
+## Processing Text 
 
-As before, we need `tidyverse`.
-We need another library `readtext`.
+Here is another example where we play with a textual dataset. As before, do not pay attention to the details of the code and what it is doing. Rather, familiarize yourself with the output of each code "block" and observe how it builds up toward accomplishing the goal. 
+
+### The Classics: Herman Melville's Moby Dick  
+
+[The Gutenberg Project](http://www.gutenberg.org/) is an international project to provide literary texts in a variety of formats for public use. One of the main literary works the site offers is "Moby Dick" by Herman Melville. You can download from the website by providing its link.
+
+As before, we need `tidyverse`. We will also use another package called `readtext`.
 
 ```{r message=FALSE, warning = FALSE}
 library(tidyverse)
 library(readtext)
 ```
 
-We load the data from the "Moby Dick" site.
-The data we load is actually a small table where the actual text of the work appearing in Row 1, Column 2.
-We load the data and collect the data in that position and all it "main".
-
+We load the data from the Gutenberg Project and remove any preface or introductory material; we designate the loaded text with the name `moby`, so that we can refer to it again later on. 
 ```{r}
-main <- readtext("https://www.gutenberg.org/files/2701/2701-0.txt")[1,2]
+url <- "https://www.gutenberg.org/files/2701/2701-0.txt"
+moby <- readtext(url) %>%
+  str_sub(27780)
 ```
 
-We can take a look at the first 1,000 characters of the text are as follows:
+The current version of the text is what data scientists call "dirty." To make it tidy, we trim whitespaces and newline characters from the text, and lowercase all characters.   
 
 ```{r}
-str_sub(main, 1, 1000)
+moby_chapters <- unlist(str_split(moby, fixed("CHAPTER"))) %>%
+  str_trim() %>%
+  str_replace_all("\\s+", " ") %>%
+  str_to_lower()
 ```
 
-Notice that the text has a header where "\n" represents the return key.
-The `str_sub` is a method for obtaining a substring. You state inside the parentheses, the source string, the start position, and the end position, where the positions are character positions. 
+We store the text in a table called `moby_df`. 
 
-We can take a look at the last 1,000 characters of the text are as follows:
-
-```{r}
-str_sub(main, str_length(main) - 1000, str_length(main))
+```{r, results='hide'}
+moby_df <- tibble("chapters" = moby_chapters) %>% 
+  slice(-1)
 ```
 
+Here are what the first five chapters of Moby Dick look like after tidying. 
 
-In the two substrings, you notice that the real text of the work starts with "  ETYMOLOGY." and ends before "End of Project Gutenberg".
-We extract every character between the the positions these two signature strings specify.
-
-To accomplish this, we obtain the locations of the two key phrases and obtain the substring between the two phrases.
-
-```{r}
-p_start <- str_locate(main, fixed("  ETYMOLOGY."))[1]
-p_last <- str_locate(main, fixed("End of Project Gutenberg"))[1]
-main0 <- str_sub(main, p_start, p_last - 1)
+```{r eval = FALSE}
+slice_head(moby_df, n = 5)
 ```
 
-The main text starts with "\\nCHAPTER ".
-We use it as the separator and generate a list of tests, where each element of the list is a chapter.
-The `length(main_parts)` shows the number of elements in the list (that is the number of chapters, including "EPILOGUE") and `str_length(main_parts)` shows the length of each chapter. 
+```{r warning = FALSE, message = FALSE, echo = FALSE}
+library(kableExtra)
 
-```{r}
-main_parts <- unlist(str_split(main0, "\\nCHAPTER "))
-length(main_parts)
-str_length(main_parts)
-```
+moby_chapters_tmp <- unlist(str_split(moby, fixed("CHAPTER"))) %>% 
+  str_trim() %>%
+  str_replace_all("\\s+", " ") %>%
+  str_to_lower() %>%
+  str_sub(end = 200) 
+disp_df <- data.frame("chapters" = moby_chapters_tmp)
 
-We turn the list of chapter texts into a data set.
-We convert it to "all lowercase" and replace the return key to the white space.
-The lowercase version appears as a new column, we call it "origLower".
-We trash the original version.
 
-```{r}
-main_data <- as.data.frame(main_parts)
-main_data %>% rename(original = main_parts) %>% transmute(origLower = str_replace_all(str_to_lower(original), "\\n", " ")) -> main_data0
-```
-
-Let us see the first 1,000 characters of the 100th chapter.
-Since the work starts with an epilog, the actual chapter number is off by 1, i.e., 99.
-The first three characters, "99.", represent the chapter number.
-
-```{r}
-str_sub(main_data0$origLower[100],1,1000)
-```
-
-We compute the character length (as we did before) and turn the numbers into a column.
-
-```{r}
-main_data0 %>% mutate(len = str_length(origLower)) -> main_data1
-colnames(main_data1)
-```
-
-We compute in each chapter how many times the following words occur: "whale", "ship", "sea", "this", "that", and "god".
-
-```{r}
-main_data1 %>% mutate(whale = str_count(origLower, "whale")) %>% mutate(ship = str_count(origLower, "ship"))%>% mutate(sea = str_count(origLower, "sea")) %>% mutate(this = str_count(origLower, "this")) %>% mutate(that = str_count(origLower, "that"))%>% mutate(god = str_count(origLower, "god")) -> main_data2
-```
-
-We now plot the relationships between "this" and "that" and the relationships between "whale" and "god".
-In the first, we see that where "this" appears a lot "that" appears a lot as well.
-In the second, we see that the occurrences of "god" have nothing to do with the occurrences of "whale", except there is one chapter with a very high number of occurrences of "god".
-
-```{r}
-ggplot(main_data2, aes(x = this, y = that)) +
-  geom_point() + geom_smooth()
-ggplot(main_data2, aes(x = whale, y = god)) +
-  geom_point() + geom_smooth()
+knitr::kable(
+  head(disp_df, 5), booktabs = TRUE) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F) %>%
+  column_spec(1, width = "30em")
 ```
 
 
-### A Rough Organization
+### Plotting Word Relationships 
 
-Here is the plan for the course.
-We will first learn the basics of R programming.
-We will then learn how to use `tidyverse` for data formatting and data plotting.
-After that, we will study a variety of techniques for analyzing data and visualizing the results.
+Now that we have the main text stored in tabular form, we are ready to do some analysis. Let us look at some associations between words in the text, for instance, between "ship" and "sea", and between "god" and "sea".
 
-We hope you will find our journey interesting.
-
-
-
-
-
-
-<!--
-```{r}
-library(tidyverse)
-library(readtext)
-```
+We compute in each chapter how many times each of the words occur: "ship", "sea", and "god". The results are stored as new columns appended to the table `moby_df`.
 
 ```{r}
-scarlet_url <- "https://dev.gutenberg.org/files/36/36-0.txt"
-scarlet_text <- readtext(scarlet_url)
-head(scarlet_text)
+moby_df <- moby_df %>%
+  mutate(
+    chapter_num = row_number(),
+    ship = str_count(chapters, "ship"),
+    sea = str_count(chapters, "sea"),
+    god = str_count(chapters, "god")
+  ) 
 ```
 
-
-```{r}
-main <- scarlet_text[1,2]
-str_sub(main, 100, 200)
-```
-
-```{r}
-str_locate(main, fixed("BOOK ONE\nTHE COMING OF"))
-str_locate(main, "\\n[IXVL][IXVL]*\\.\\n")
-```
+Here is what those new columns look like. 
 
 ```{r}
-main_parts <- unlist(str_split(main, "\\n[I|X|V|L][I|X|V|L]*\\.\\n"))
-length(main_parts)
-for (i in 1:28) {
-  print(str_sub(main_parts[i], 1, 20))
-}
-lll <- str_length(main_parts)
-lll
+moby_df %>%
+  select(chapter_num, ship, sea, god)
 ```
 
-```{r}
-main_data <- data.frame(as.matrix(lll)) # %>% rename("original" = 1) %>% mutate(first = str_sub(original, 1, 100), .keep = "unused")
+We draw a scatter plot showing the relationships between the pairs "ship" and "sea", and "god" and "sea". The former is shown in cyan and the latter in red. 
+
+```{r message = FALSE}
+ggplot(moby_df) +
+  geom_point(aes(x = sea, y = ship, color = "ship")) + 
+  geom_point(aes(x = sea, y = god, color = "god")) + 
+  ylab("count")
 ```
 
-```{r}
-nrow(main_data)
-```
--->
+We see a strong association between "sea" and "ship" since chapters that mention the word "sea" a lot tend to also mention "ship" a whole lot as well. The relationship between "sea" and "god" is less apparent. There is one chapter where "god" and "sea" both occur frequently, but overall it seems that the occurrences of "god" have nothing to do with occurrences of "sea". 
+
+Indeed, word counts can only take us so far. But they are a first step in the interpretative process. For instance, why does it seem that there is no relationship between the sea, where most of the action takes place, and religion, as exemplified by the occurrences of the word "god"? Machine-assisted analysis of texts in this manner, which extends well beyond word counts, has become so popular that an interdisciplinary field called [Digital Humanities](https://en.wikipedia.org/wiki/Digital_humanities)  has become dedicated to its study. 
+
+### A Rough Outline
+
+Our two introductory examples have hopefully shown you a glimpse of what data science looks like. Here is the plan for the course. 
+
+* We begin with a coverage of the fundamentals of R programming.
+* We will move on to learning how the `tidyverse` can be used for data tidying and visualization.
+* We then study how to extract *insights* from our data using statistical techniques.
+* We end with some special topics, e.g., making *predictions* about data using regression analysis.  
+
+We hope that you will find the journey interesting.
 
