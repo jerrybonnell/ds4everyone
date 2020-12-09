@@ -52,6 +52,10 @@ The value for `yy` is 25 times `xx`.
 The value for `ww` is $0.3$ times the square of `xx` minus 10 times `sin(xx)`.
 The value for `ww` is the sum of `yy` and `zz`.
 
+```{r message=FALSE}
+library(tidyverse)
+```
+
 
 ```{r}
 dt <- tibble(xx = seq(10,30,0.5), yy = 25 * xx, zz = - 10 * sin(xx), ww = yy + zz)
@@ -192,7 +196,7 @@ summary(fitted)
 The call produces a variety of values.
 
 ```{r}
-cor(x = hw$Height, hw$Weight)
+cor(x = mlb$Height, mlb$Weight)
 summary(fitted)$r.squared
 summary(fitted)$coefficients
 summary(fitted)$residuals
