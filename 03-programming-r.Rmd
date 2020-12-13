@@ -3,202 +3,230 @@ output:
   pdf_document: default
   html_document: default
 ---
-# (PART) Programming fundamentals {-} 
+# (PART) Programming Fundamentals {-} 
 
-# The Programming Language R
+# Introduction 
 
-The work of a data scietist consists of many aspects:
-* working with domain scientists to determine what questions need addressing
-* assembling a group of data into a data set for analysis
-* examining the data set to remove any unusable part
-* analyzing the data for addressing the questions
-* sharing the result with the domain scientists
-Some of these steps are quite mechanical and cumbersome, may repeat the same calculation over and over again.
-Some mistakes can lead to wrong conclusions, and you do not want to screw your data science job through simple mistakes.
-To err is human.
-You had better use some method that helps you minimize the chances of error.
-That's where computer programs come to rescue.
+The work of a data scientist consists of many aspects:
+
+* working with domain experts to determine what questions need addressing
+* assembling a group of data into a dataset for analysis
+* examining the dataset to remove any unusable parts
+* analyzing the data to addressing the research question(s)
+* sharing the results with domain experts
+
+Some of these steps are quite mechanical or cumbersome, and may repeat the same calculation again and again. Mistakes are costly; they can lead to wrong conclusions and errors on the job can mean money lost. It would be best not to butcher your data science job because of simple mistakes.
+
+However, to err is human. So how can you minimize the chance of those errors occurring? That's where computer programming come to the rescue.
 
 ## Computers
 
-A computer program is a sequence of characters with which to tell a computer how to perform its task.
-The history of computers is kind of long.
-Early in the 1800s, Charles Babbage invented a machine for calculation, calling it the ["Difference Engine"](https://www.computerhistory.org/babbage/engines/).
-Ada Lovelace, a daughter of English poet Lord Byron, collaborated with Babbage to develop ideas about what the engine could compute beyond addition and multiplication.
-Several attempts to build such mechanical systems to perform calculation had emerged until in the first half of the 1900s during which a series of innovations resulted in the invention of "computers".
-The new inventions used electricity as the source of energy, vacuum tubes for regulating electrical currents, separation between the brain that is responsible for computation and the storage for holding the final and intermediate results of computation, and punch cards for defining the calculation steps to follow.
+A computer program is a sequence of characters with which to tell a computer how to perform its task. The history of computers is kind of long. Early in the 1800s, Charles Babbage invented a machine for calculation, calling it the ["Difference Engine"](https://www.computerhistory.org/babbage/engines/). Ada Lovelace, a daughter of English poet Lord Byron, collaborated with Babbage to develop ideas about what the engine could compute beyond addition and multiplication.
 
+Several attempts to build such mechanical systems to perform calculation had emerged until the first half of the 1900s during which a series of innovations resulted in the invention of "computers". The new inventions used electricity as the source of energy, vacuum tubes for regulating electrical currents, separation between the "brain" that is responsible for computation and the storage for holding the final and intermediate results of computation, and punch cards for defining the calculation steps to follow.
 
 ### Programming languages and Scripting Languages
 
-In the early days of modern computing, programmers had to provide instructions to computers using languages specific to the computers.
-However, as new computers emerged and the number of computers in use grew, there arose the need of languages that programmers can use in describing the instructions.
-That is the birth of modern, machine-independent programming languages.
-Allowing the use of machine-independent languages in writing programmings requires the creation of a layer that sits between programmers who code with universal languages and the computers who will execute the program but do not understand what the languages the programmers use.
-Early on, there was only one layer separating between the programmers and the computers.
-Nowadays there are multiple layers separating between them.
-What these layers do is outside the coverage of the course, we will skip it entirely.
-The key point is that a programmer can use a specific language to write what she intends to do with programmer.
+In the early days of modern computing, programmers had to provide instructions to computers using languages specific to the computers. However, as new computers emerged and the number of computers in use grew, there arose a need for languages that programmers can use in describing the instructions.
 
-Many types of programming languages exist.
-One type is the *scripting language*.
-In a scripting language, a programmer "enters" an environment specific to the language and then executes her program "line by line".
-A *line* of a program is a sequence of characters which is syntactically complete according the syntax of the language.
-In a scripting language programming, a programmer completes writing of a line by pressing the *return key* (and the like), and then the environment immediately parses the line the programmer has entered regarding the syntax of the language and performs any action the line expresses.
+That is the birth of modern, machine-independent programming languages. Allowing the use of machine-independent languages in writing programs requires the creation of a layer that sits between programmers who code with universal languages and the computers who will execute the program but do not understand the languages the programmers use.
 
-### Programming Language R
+Early on, there was only one layer separating programmers from computers. Nowadays there are multiple layers separating between them. What these layers do is outside the coverage of the course, and we will skip it entirely. The key point is that a programmer can use a specific language to write what she intends to do with program.
+
+Many types of programming languages exist. One type is the *scripting language*. In a scripting language, a programmer "enters" an environment specific to the language and then executes her program "line by line". 
+
+A *line* of a program is a sequence of characters which is syntactically complete according to the syntax of the language. In scripting language programming, a programmer completes writing of a line by pressing the *return key* (and the like), and then the environment immediately parses the line the programmer has entered regarding the syntax of the language and performs any action the line expresses.
+
+### Programming in R
 
 We will use the programming language [R](https://www.r-project.org/) in this course.
-There are four major reasons for us to choose R as our language.
+There are four major reasons to choose R as our language.
+
 * R is quite popular. There are many data scientists out there who enjoy conducting science using R.
-* There are so many R codes for the public use. You can adapt such programs to your own needs. Reciprocally, you can share your R codes with others. Some of the popular codes have become libraries, groups of R codes that you can use for specific purposes. You can download such libraries for your own use with a simple line of code.
-* R comes with dozens of data sets that you play with.
-* There exists an easy-to-install R programming environment [RStudio](https://rstudio.com/products/rstudio/download/), where not only can you write codes but also can create notebooks in which R codes and texts alternate.
-
-
-
+* There are so many R codes for public use. You can adapt such programs to your own needs. Reciprocally, you can share your R codes with others. Some of the popular codes have become libraries, groups of R codes that you can use for specific purposes. You can download such libraries for your own use with a simple line of code.
+* R comes with dozens of datasets that you play with.
+* There exists an easy-to-install R programming environment [RStudio](https://rstudio.com/products/rstudio/download/), where not only can you write code but also can create notebooks in which R code and prose alternate.
 
 ## Expressions
 
-In R, executable "lines" must conform to the syntax of the language.
-If a programmer enters a syntactically incorrect line, the environment usually issues an "error message" with some information about why the line failed.
-Entering an incorrect line has not effect on the computing task the programming task she wants to carry out, which means there is nothing to be afraid of about making mistakes!
-A line of an R code consists of what we call *expressions*.
-Several types of expressions exist, serving as building blocks.
-We will introduce the types as they become necessary.
+In R, executable "lines" must conform to the syntax of the language. If a programmer enters a syntactically incorrect line, the environment usually issues an "error message" with some information about why the line failed.
+
+Entering an incorrect line has no effect on the programming task she wants to carry out, which means there is nothing to be afraid of about making mistakes!
+
+A line of an R code consists of what we call *expressions*. Several types of expressions exist, which serve as building blocks. We will introduce the types as they become necessary.
+
 Let us begin with the simple ones: numerals and arithmetic expressions.
 
-__Numerical Literals__
+### Numerical Literals
 
-*Numerical literals* are expressions of numbers with exact specifications of their values.
-There is no ambiguity in the expressions.
-Examples of numerical literals include `415`, `-3.56`, and `1956.5436781`
-An important numerical literal type uses `e` to specify shifting of the decimal point.
-An example of this type is `5.07e-2`.
-The expression means "5.07 times 10 to the power of negative 2" and the value is equal to "0.0507".
-Similarly, `86.5e4` means "86.5 times 10 to the power of 4" and thus equals to `865000`.
-A slight detail that you may want to keep in mind that each value carries a fixed number of digits that it can correctly represent, and so you cannot be too specific about the value.
-For example, you can type `1.5454786e-10` to specify a value, but when an R environment reads the expression, it turns the value into something a bit off, e.g., `1.545479e-10`.
+*Numerical literals* are expressions of numbers with exact specifications of their values. There is no ambiguity in the expressions.
 
-__Arithmetic Expressions__
+Here are some examples of numerical literals. 
 
-You can construct mathematical expressions combining numerical literals and mathematical operations `+`, `-`, `*`, and `/` as we use in mathematics.
-Also, `^` represents exponentiation.
-The same order of operations applied when processing an expression with multiple types of operations in it.
-You can use parentheses, `(` and `)`, to changes the order.
-We often use other types of parentheses in writing mathematical expressions in English.
-However, the other types of parentheses have different meanings in R and so you cannot use them in writing mathematical expressions.
+```{r}
+415
+-3.56
+1956.5436781
+```
 
-When you type an arithmetic expression in an R environment and press the return key, the environment attempts to evaluate the expression.
-For example, entering `3.4 * (1.7 + 2.3)` produces `13.6` as the result and `2^5` produces `32`.
-Instead of `^` to mean exponentiation, you can use `**`.
-There should not be a space between the two `*`.
+An important numerical literal type uses `e` to specify shifting the decimal point. You are probably already familiar with this idea from other courses. It is called writing in *scientific notation*. 
 
-Another important operation is `%%`, which is the *remainder*.
-Let X and Y be two doubles such that Y is not equal to 0.
-The value of the remainder of X divided by Y is the remainder when we keep either subtracting from X or adding to X the value of Y until the absolute value we generate from X is smaller than the absolute value of Y.
-Below, 10.0 contains 4 times 2.3.
-By subtracting 2.3 from 10.0 four times, we arrive at 0.8, which is the remainder.
+```{r}
+5.07e-2
+```
+
+which is equivalent to $5.07 * 10^{-2}$. 
+
+A slight detail that you may want to keep in mind is that each value carries a fixed number of digits that it can correctly represent, and so you cannot be too specific about the value. Consider the following tiny value. 
+
+```{r}
+1.5454786e-10
+```
+
+The value turns out to be slightly off! 
+
+### Arithmetic Expressions
+
+You can construct mathematical expressions combining numerical literals and mathematical operators `+`, `-`, `*`, and `/` as we use in mathematics. Also, `^` represents exponentiation.
+
+The same order of operations apply when processing an expression with multiple types of operations in it. You can use parentheses, `(` and `)`, to change the order. We often use other types of parentheses like `[` and `]` in writing mathematical expressions in English. However, these carry different meaning in R and so cannot be used in writing mathematical expressions.
+
+When you type an arithmetic expression in an R environment and press the return key, R attempts to evaluate the expression. For example:
 
 ```{r}
 3.4 * (1.7 + 2.3)
+```
+
+```{r}
 2^5
+```
+
+Instead of using `^` to mean exponentiation, you can also use `**`. Note that there should not be a space between the two `*`.
+
+```{r}
 2 ** 5
+```
+
+Another important operation is `%%`, which is the *remainder*.
+
+```{r}
 10.0 %% 2.3
 ```
 
-Below is the summary of the mathematical operations.
+After subtracting 2.3 from 10.0 four times, we arrive at 0.8, which is the remainder.
 
-```{r, echo=FALSE}
-operators <- data.frame(Expression.Type=c("Addition", "Subtraction","Multiplication", "Division", "Remainder", "Exponentiation", "Exponentiation"), Operator=c("+", "-", "*", "/", "%", "**", "^"), Example=c("2 + 3", "2 - 3", "2 * 3", "7 / 3", "7 % 3", "2 ** 0.5", "2 ^ 0.5"), Value=c("5", "-1", "6", "2.66667", "1", "1.41421", "1.41421"))
-knitr::kable(operators, col.names = gsub("[.]", " ", names(operators)))
-# knitr::kable(
-#   head(mtcars[, 1:8], 10), booktabs = TRUE,
-#   caption = 'A table of the first 10 rows of the mtcars data.'
 
-```
+<!--Let X and Y be two doubles such that Y is not equal to 0.
+The value of the remainder of X divided by Y is the remainder when we keep either subtracting from X or adding to X the value of Y until the absolute value we generate from X is smaller than the absolute value of Y. -->
 
-Here is an example that shows the difference of having parentheses in the expression.
-The first one produces `10.00043` while the second `20000014`.
+Below is a summary of the mathematical operations.
 
+| Expression    | Operator    |  Example   |
+| --------------| ----------- |----------- | 
+| Addition      | `+`              |  `10 + 1`  | 
+| Subtraction   | `-`              |  `10 - 1`  |
+| Division      | `/`              |  `10 / 1`  |
+| Multiplication   | `*`           |  `10 * 1`  |
+| Remainder   | `%%`               |  `2 - 3`   |
+| Exponentiation   | `^`  or `**`  |  `2^3` or `2**3`  |
+
+
+Here is an example that shows the difference of having parentheses in the expression. Try it by hand first before seeing the answer!
 
 ```{r}
-1 + 2 * 3 * 4 * 5 / 6 ** 7 + 8 - 9 + 10
+2 + 3 * 4 * 5 / 6 ** 2
 ```
 
 ```{r}
-1 + 2 * (3 * 4 * 5 / 6) ** 7 + 8 - 9 + 14
+2 + (3 * 4 * 5 / 6) ** 2
 ```
 
+### Giving Names to Results
 
-__Giving Names to Results__
-When you enter a mathematical expression like the one we presented in the above, R responds by printing the value resulting from its evaluation of the expression, but you cannot recall the value.
-You can *assign* a name to the value R produces and keep it for future use.
-The are three ways to designate the name and the expression in an assignment
+When you enter a mathematical expression like the one we presented in the above, R responds by printing the value resulting from its evaluation of the expression, but you cannot recall the value. Meaning, we can easily compute the value of the following expression. 
 
-`NAME <- EXPRESSION`
+```{r}
+3.4 + 4.2
+```
 
-`EXPRESSION -> NAME`
+But we have no way of *storing* that result! The problem is overcome by *assigning* a name to the value R produces so that we can keep it for future use. 
 
-`NAME = EXPRESSION`
-
-Here `NAME` and `EXPRESSION` respectively refer to the name and the expression you are using in the assignment.
-We call an expression with assigning action an *assignment*.
-For example, `a <- 3.4 + 4.2` means assigning the name `a` to the value of `3.4 + 4.2`.
-Once you have executed it, the assignment will persist until you make another assignment to `a` or you terminate the R environment program you are running.
-We call a named entity with a value an `object`.
-
-You can type `a` to look up the value it is representing at present.
-
-```{r, error=TRUE}
+```{r}
 a <- 3.4 + 4.2
+```
+
+We can check its value by typing its name. 
+
+```{r}
 a
+```
+
+Once you have executed it, the assignment will persist until you make another assignment to `a` or you terminate the R environment program you are running. 
+
+```{r}
 a <- 5 * 15
 a
+```
+
+Note how the value of `a` has changed from `7.6` to `75`. We call such named entities that hold a value `objects`.
+
+> You may have noticed the leading `[1]` in front of the value of `a`. This involves the internal workings of R and is a technical detail, so we ignore it for now. 
+
+What happens when we try to refer to an object that currently does not exist? 
+
+```{r, error=TRUE}
 barnie
 ```
 
-The `[1]` has much to do with the internal workings of R and is very technical, and so we ignore it for a while.
-You see that the value the environment produces changes from `7.6` to `75` when you reassign a value to `a` the second time.
-The message `Error: object `barnie` not found` states that in the present session, you have not assigned any value to the name `barnie`.
+Our first programming error! The message reported is quite informative: it states that in the present session there is no assigned value to the name `barnie`.
 
-To define a name you can use the letters from the alphabet, both uppercase and lowercase, numerals, and the underscore `_`.
-A name cannot contain space or start with a numeral.
+There are some rules about what kinds of names you can give to an object. A name can use any letter from the alphabet, both uppercase and lowercase, numerals, and the underscore `_`. Underscores are useful when you want to include more than one word in a name. 
 
+```{r}
+a_tasty_pie <- 314159
+a_tasty_pie
+```
 
-__Recalling the Value of an Object by Its Name__
-You can write an expression contains an object name.
-When an R environment evaluates an expression, if it encounters a name, it tries to see whether an object by the name exists and if so, substitutes all of its occurrences in the expression with the present value of the object by the name.
-Otherwise, the environment produces an error message.
+A name may not contain spaces or start with a numeral.
 
-```{r, error=TRUE}
-a / 5
+### Using Objects in Expressions 
+
+When an R environment evaluates an expression and encounters a name, it tries to see whether an object by the name exists and, if so, substitutes all of its occurrences in the expression with the present value of the object. 
+
+```{r}
+a_tasty_pie / 2
+```
+
+If the object cannot be found, the environment produces an error message.
+
+```{r error=TRUE}
 a <- barnie * 3
 ```
 
 
-__Function Calls__
+### Function Calls
 
-Another type of expressions is the function call.
-A function is a code object that takes a certain number of objects/values for its execution.
-The expression to call a function for its action is `NAME(ARGS)`, where `NAME` is the name of the function object and `ARGS` is the series of object that the function uses in its calculation.
-The `ARGS` part appears as a list of objects a comma in between.
-The objects are order dependent.
-The function has the concept of the first object, the second object, and so on.
-We call them *arguments*.
+Another type of expression is a *function*, which has the same meaning as the *functions* you learned in math class: something that takes some input, does something with it, and produces an output. In R, a function is an object which takes a certain number of objects/values for its execution. 
 
-R comes with some functions that we are familiar with: `round`, `floor`, `ceiling`, and `abs` for the rounding, rounding down, rounding up, and absolute value functions, respectively.
+Here is an example. This function returns the absolute value of a number. 
+
+```{r}
+abs(-20)
+```
+
+Here are some more examples. 
 
 ```{r}
 a <- -10.5
-round(a)
 floor(a)
 ceiling(a)
 abs(a)
 ```
 
-Functions that you may have seen in mathematics courses are readily available in R. They are `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `log`, and `log10`, which are the sine, cosine, tangent, inverse sine, inverse cosine, inverse tangent, natural logarithm, and logarithm base 10, respectively.
-The unit of the argument is radian for the first three (i.e., 360 degrees are equal to $\pi$ radians).
+<!--The expression to call a function for its action is `NAME(ARGS)`, where `NAME` is the name of the function object and `ARGS` is the series of object that the function uses in its calculation.
+The `ARGS` part appears as a list of objects a comma in between. We call them *arguments*. Arguments are order dependent. --> 
+
+R ships with many functions that we are familiar with from math courses, e.g., `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `log`, and `log10`, which are sine, cosine, tangent, inverse sine, inverse cosine, inverse tangent, natural logarithm, and logarithm base 10, respectively. The unit of the argument is radian for the first three (i.e., 360 degrees are equal to $\pi$ radians).
 
 ```{r}
 sin(1)
@@ -211,64 +239,60 @@ log(10)
 log10(10)
 ```
 
-There are mathematical functions that can take more than argument.
-The `max` and `min` functions are those that return the maximum and the minimum of the argument list, respectively.
-These functions accept any number of arguments.
+Functions can of course take more than one argument. The `max` and `min` functions are those that return the maximum and the minimum of the argument list, respectively.
 
 ```{r}
 max(4, 5, 3)
 min(1, 2, 3, 4, 5, 6)
 ```
 
+These functions accept any number of arguments.
 
 ### Example: Pay Your Debt
 
-You may have heard from your friends and family members preaching you the importance of paying the debt.
-You can use R to do a hypothetical calculation of how quickly your debt would accumulate if you do not pay it.
-Suppose you load 1,000 dollars from an agency with the monthly interest rate of 1%, which means that after each month, not only do you still owe the money you owed one month ago but also you owe one percent of the money you owed.
-For example, after the first month of the mortgage in question, you not only owe the 1,000 dollars you loaned but also its 1 percent, 10 dollars.
-Altogether, at the end of the first month, you owe the total of 1,010 dollars.
-If you fail to repay, the same series of actions will happen after another month, increasing your total debt to 1,010.10 dollars.
-If you fail to repay, the same series of actions will happen.
+You may have heard from friends and family the importance of paying debt. You can use R to do a hypothetical calculation of how quickly your debt would accumulate if you do not pay it.
 
-Let us see how this process balloons your if you DO NOT pay for one year.
+Suppose you load \$1,000 from an agency with a monthly interest rate of 1%, which means that after each month, not only do you still owe the money you owed one month ago but also you owe one percent of the money you owed. 
+
+For example, after the first month of the mortgage in question, you not only owe the \$1,000 you loaned but also 1 percent of it, \$10. Altogether, at the end of the first month, you owe a total of \$1,010.
+
+If you fail to repay, the same series of actions will happen after another month, increasing your total debt to \$1,020.10 dollars. If you fail to repay again, the same series of actions will happen.
+
+Let us see how this process balloons your account if you __DO NOT__ pay for one year.
 
 ```{r}
 1000 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01
 ```
 
-The loan accumulate a little over 126 dollars as its interest.
+The loan accumulate a little over 126 dollars in interest.
 
-The amount does not appear to be much.
-However, if the "principal amount* is large, the effect is substantial.
-For example, if you loan 200 thousand dollars,
+The amount does not appear to be much. However, if the "principal amount* is large, the effect is substantial. For example, consider what happens in a loan of \$200,000.
+
 ```{r}
 200000 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01
 ```
 
-You owe 25,365 dollars as interest.
+That's \$25,365 dollars in interest! 
 
-The expression we used had 12 repetitions of 1.01.
-Using the exponentiation, we can simplify it.
+The expression we used had 12 repetitions of 1.01. Using exponentiation, we can simplify it.
 
 ```{r}
 200000 * 1.01 ^ 12
 200000 * 1.01 ** 12
 ```
 
-Usually when you borrow money from a bank or a mortgage company, you set up a plan for repaying so that you pay the same amount throughout your mortgage.
-In other words, you pay a fixed amount at every anniversary (usually every month since the start).
-The bank or the mortgage company subtracts you payment from the amount of money you owe, and one month later will apply the interest rate to the money you now owe.
-The amount you pay monthly must be so that you owe no more or no less when you make the last payment.
+Usually when you borrow money from a bank or a mortgage company, you set up a plan for repaying so that you pay the same amount throughout your mortgage. In other words, you pay a fixed amount at every anniversary (usually every month since the start). The bank or the mortgage company subtracts your payment from the amount of money you owe, and one month later will apply the interest rate to the money you now owe. The amount you pay monthly must be so that you owe no more or no less when you make the last payment.
+
 There is a formula that gives the monthly payment.
+
 $$
 \mathrm{monthly} = 
 \frac{\mathrm{principal} * \mathrm{rate}^{\mathrm{months}} * (\mathrm{rate} - 1)}{\mathrm{rate}^{\mathrm{months}}-1}
 $$
-Here $\mathrm{principal}$ is the money you borrow, $\math{rate}$ is the monthly rate as the ratio, and $\mathrm{months}$ is the duration of the loan in terms of the number of months. 
+
+Here $\mathrm{principal}$ is the money you borrow, $\mathrm{rate}$ is the monthly rate, and $\mathrm{months}$ is the duration of the loan in terms of the number of months. 
 
 Let us make R do the computation for us.
-Use objects `principal`, `rate`, `months`, and `monthly` to represent the four pieces of information appearing in the equation and `total` to represent the total payment, which is simply `monthly * months`.
 
 ```{r}
 principal <- 1000
@@ -278,364 +302,73 @@ monthly <- principal * rate ^ months * (rate - 1) / (rate ^ months - 1)
 total <- monthly * months
 ```
 
-What the values of `monthly` and `total`?
-R will tell you immediately.
+The objects `principal`, `rate`, `months`, and `monthly` represent the four pieces of information appearing in the equation and `total` represents the total payment, which is simply `monthly * months`.
+
+What are the values of `monthly` and `total`?
 
 ```{r}
 monthly
 total
 ```
 
-We talked about the possibility of not paying for one year.
-Let us use an object `balloon` to represent the amount.
+We talked about the possibility of not paying for one year. Let us use an object `balloon` to represent the amount.
 
 ```{r}
 balloon <- principal * rate ^ months
 balloon
 ```
 
-Assuming that in the case of not paying for one year, you pay all the debt, what is the difference between the two options, and what is the proportion of the difference to the principal?
-Let us use objects `diff` and `diff_percent` to represent the quantities.
+Assuming that in the case of not paying for one year, you pay all the debt, what is the difference between the two options, and what is the proportion of the difference to the principal? Let us use objects `diff` and `diff_percent` to represent the quantities.
 
 ```{r}
 diff <- balloon - total
 diff_percent <- diff / principal * 100
-diff
 diff_percent
 ```
 
-So it is a little over 6% that you will have to pay more.
+So it is a little over 6% that you will have to pay more. 
+
 In other words, we obtain the conclusion:
 
 * Assuming the rate is 1% per month and the loan is for 12 months, if you chose to pay out after 12 months paying none until then, you would have to pay slightly more than 6% of the principal than you would pay with the standard monthly payment program.   
 
-6% does not sound like a significant amount if the principal is small, but what iuf the principal is 20,000 dollars?
-The difference is 1,2000 dollars.
-You have the daily savings of 3 dollars and 28 cents.
-You get an extra cup of coffee at a coffee shop!
+6% does not sound like a significant amount if the principal is small, but what if the principal is 20,000 dollars? Try it out!
 
+## Packages in R
 
-## R Libraries
+The designers of R had statistical computing in mind. Because of the motivation, many mathematical functions are available as we have seen in the above. There are also, as mentioned earlier, groups of codes that you can use when necessary. We call these *packages*. Here is a list of [R packages](https://cran.r-project.org/web/packages/available_packages_by_name.html); the list is quite long.
 
-The designers of R had statistical computing in mind.
-Because of the motivation, many mathematical functions are available as we have seen in the above.
-There are also, as mentioned earlier, groups of codes that you can use hwen necessary.
-We call those programs *packages*.
-[The list of R packages](https://cran.r-project.org/web/packages/available_packages_by_name.html) is quite long.
-Using an R package is in two stages.
-In the first stage, you download the package into your computer where the R environment can see.
-When you download an R environment and install it, its sets up the place for it hold the packages, so there is no need for your to worry about remembering where they are.
-The process is by calling the function `install_packages(...)` where the part `...` represents its argument, which is the name of the package.
-The packages you have installed are readily use-able in your computation.
-When you use one, you have tell the R environment you are using that package.
-The process is by calling the function `library(...)` where the part `...` represents its argument, which is the name of the package.
+Using an R package comes in two stages.
 
-Here are the two steps you follow to use a package whose name is `PACKAGE_NAME`.
-To install, you enter `install.packages(PACKAGE_NAME)` and to use it, you enter
+In the first stage, you download the package on to your computer where the R environment can see. When you download an R environment and install it, it sets up the place for it to hold the packages, so there is no need to worry about remembering where they are. The process is by calling the function `install_packages(...)` where the part `...` represents its argument, which is the name of the package. 
+
+In the second stage, the installed packages are now readily usable. When you use one, you have tell the R environment you are using that package. The process is by calling the function `library(...)` where the part `...` represents its argument, which is the name of the package.
+
+Here are the two steps in a nutshell: to install a package, you enter `install.packages(PACKAGE_NAME)`; to use it, you enter
 `library(PACKAGE_NAME)`.
 
+A package is a collection of objects. Each object has a name. Sometimes two packages contain objects having the same names. If such objects appear, the R environment warns you about the duplicate names, and chooses to use the most recent name assignment ignoring the earlier ones. Also, if you attempt to load a package with the `library` function and if the package needs installation, the R environment gives you a warning.
+Once you have installed the package, the warning will go away. You can also install packages as many times you want.
 
-
-A package is a collection of objects.
-Each object has its name.
-Sometimes two packages contain objects having the same names.
-If such objects appear, the R environment warns you about the duplicate names, and chooses to use the most recent name assignment ignoring the earlier ones.
-Also, if you attempt to load a package with the `library` function and if the package needs installation, the R environment gives you a warning.
-Once you have installed the package, the warning will go away.
-package called `tidyverse`". The solution is to first install it, then run `library()` once again. 
-
-You can also install packages as many times you want.
-R environments are smart.
-If the package in the system is identical to the most current version of the package available on the R web site, the environment skips the installation process.
-A similar is true for the `library` function.
-If a package has already undergone `library` in the current "session", the environment ignores the duplicate `library` function calls.
-
-
-The package we will most frequently use in this course is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science.
-Once you have installed in, calling the package into your computation is as we stated earlier.
-
+The package we will most frequently use in this course is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science. Once you have installed it, loading the package is as we stated earlier.
 
 ```{r, eval=FALSE}
 install.packages("tidyverse")
 library(tidyverse)
 ```
 
+### What is the `tidyverse`?
 
+The tidyverse is a collection of packages, each having to do with data visualization and processing. The packages in the suite include:
 
+* `stringr` for manipulating string attributes
+* `readr` for reading data from data files
+* `tibble` for creating tables and making simple modifications
+* `dplyr` for data manipulation (e.g., filtering, reordering, etc.)
+* `tidyr` for tidying up data tables
+* `ggplot2` for visualization (e.g., creating graphs)
+* `purrr` for data mapping and processing nested data
 
-## Introduction to Tables {#introtables}
+The list seems quite long, but don't worry; we will introduce them gradually throughout the course and only as needed. Each package should be thought of as a "lego block" that works in unison with the other packages in the tidyverse. Together they can build a complex data science pipeline.  
 
-We can now apply R to analyze data.
-In R, we often use a type of structure looking like a table for data processing.
-We call the structure of the data "data frames".
-
-Tables are a fundamental way of representing data sets.
-We can view data horizontally and vertically.
-* Each vertical slice of the table (or column) represents a type of properties of the items appearing in the data set. We call these properties are *attributes* or *variables*.
-Each attribute has a name, which we call the column *label*.
-* Each horizontal slice sequence (or row) describes a set of attributes representing on item of data, which we call *observations* or *individuals*.
-
-We will use data frames with `tidyverse` in the following sections.
-Let us start with a few basics.
-
-First, let's load in the `tidyverse` package. 
-
-```{r}
-library(tidyverse)
-```
-
-The package comes with a number of data sets.
-The table `trees` is one of them.
-We can confirm its existence by typing the expression `trees`.
-
-```{r, eval=FALSE}
-trees
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  head(trees), booktabs = TRUE, caption="A table showing the first 10 rows of trees data")
-```
-
-The table `trees` provides measurements in felled black cherry trees. It has 31 rows. Each row corresponds to one tree.
-Each tree has 3 *attributes*: girth, height, and volume.
-We can inquire about the data using `?`.
-=
-```{r, eval=FALSE}
-?trees
-```
-
-The `?` sign inquires the R environment what it knows about the object whose name appears after the question mark.
-
-
-We operate on tables through functions. The call looks like 
-
-`function(table_name, arguments)`
-
-That is, the first argument of the argument series is the data frame you want to operate on.
-
-For example, if you want to see just the first two rows of a table, you can use the function `head()`.
-
-```{r}
-head(trees, n=2)
-```
-
-You can replace 2 by any number of rows. If you ask for more than 31, say `n=100`, you will only get 31, because `trees` only has 31 rows.
-
-__Choosing Sets of Columns__ 
-
-The method `select()` creates a new table consisting of data rows of your choice.
-If you place, the label of a column, the table you create consists only of the column.
-Below, we create a table consiting only of the `Height` column.
-
-```{r, eval=FALSE, warning=FALSE, results='hide'}
-select(trees, Height)
-```
-
-```{r, echo=FALSE, warning=FALSE, results="hide", message=FALSE}
-library(kableExtra)
-```
-
-```{r, echo=FALSE, warning=FALSE}
-knitr::kable(
-  head(select(trees, Height)), booktabs = TRUE) %>%
-  kable_styling(bootstrap_options = "striped", full_width = F)
-```
-
-This leaves the original table unchanged.
-
-```{r, eval=FALSE}
-trees
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  head(trees), booktabs = TRUE)
-```
-
-You can select more than one column, by providing a list of columns.
-The `c(...)` below allows you to create a list (of anything).
-In our specific case here, the elements of the list are two column labels `Height` and `Volume`.
-The syntax about using the `c` function is to have the elements list with a comma in between inside the parentheses.
-We will learn more about `c()` in later sections. 
-
-```{r, eval=FALSE}
-select(trees, c(Height, Volume))
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  head(select(trees, c(Height, Volume))), booktabs = TRUE)
-```
-
-You can also *drop* columns you do not want (in other words, "deselect"), using the `~` sign, which appears at the upper left corner on your keyboard.
-We can create the table by dropping the *Girth* column.
-
-```{r, eval=FALSE}
-select(trees, -Girth)
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  head(select(trees, -Girth)), booktabs = TRUE)
-```
-
-You can name this new table using an assignment.
-You can then look at it again without reproducing it.
-
-```{r, eval=FALSE}
-no_girth <- select(trees, -Girth)
-no_girth
-```
-
-```{r, echo=FALSE}
-no_girth <- select(trees, -Girth)
-knitr::kable(
-  head(no_girth), booktabs = TRUE)
-```
-
-An important feature of `select` is the original data set remains the same.
-It essentially shows a new database through a selection process.
-By directing its action with an assignment, you can preserve the result of selection.
-
-__Rearranging Rows of Data Table__
-
-The `arrange()` method creates a new table by arranging the rows of the original table in ascending order of the values in a column that an argument specifies.
-Let us sort the `trees` in ascending order of the heights of the trees.
-
-```{r, eval=FALSE}
-arrange(trees, Height)
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  head(arrange(trees, Height)), booktabs = TRUE)
-```
-
-To sort in descending order, you can wrap `Height` in a `desc()` function call. 
-
-```{r, eval=FALSE}
-arrange(trees, desc(Height))
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  head(arrange(trees, desc(Height))), booktabs = TRUE)
-```
-
-By default, `arrange()` sorts in increasing order of the values in the specified column. To sort in decreasing order, use the function `desc()` on the label of the column to be sorted. 
-
-Like `select()`, the `arrange()` function leaves the original table intact.
-
-__Selecting Rows that Satisfy a Condition__
-
-The `select()` function allows you to select columns.
-How about selecting rows?
-We can use the function `filter()`.
-The `filter()` function creates a new table consisting only of the rows that satisfy a given condition. In this section we will work with a very simple condition, which is that the value in a specified column must be equal to a value that we also specify.
-
-The code in the cell below creates a table consisting only of the rows corresponding to trees with heights greater than `80 ft`.
-
-```{r, eval=FALSE}
-filter(trees, Height > 80)
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  filter(trees, Height > 80), booktabs = TRUE)
-```
-
-The second argument, which we call a *condition*, gives the label of the column and a range of values we are looking for in that column (i.e., all heights *greater* than 80). The `filter()` function can also be used when the condition that the rows must satisfy is more complicated.
-We will look into conditions later in this book.
-
-Suppose we want to find all the trees whose height is exactly 83 feet.
-The way to specify "exactly equal to" is to put two equal signs with no gap.
-
-```{r, eval=FALSE}
-filter(trees, Height == 83)
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  filter(trees, Height == 83), booktabs = TRUE)
-```
-
-Note what happens if, instead, we ask for all trees with height `93 ft`.  
-
-```{r, eval=FALSE}
-filter(trees, Height == 93)
-```
-
-```{r, echo=FALSE}
-knitr::kable(
-  filter(trees, Height == 93), booktabs = TRUE)
-```
-
-The `filter()` finds no rows, which is correct because there are no trees that are `93 ft` tall in the table.
-What does this tell you?
-If you happened to type this mistakenly, when you really meant `83 ft`, the result may astound you.
-You have to be careful with the values you type.
-
-Like all the other table methods in this section, `filter()` leaves the original table unchanged.
-
-__Example: Fuel economy data for popular car models__
-
-The table `mpg` contains a subset of fuel economy data that the US Environmental Protection Agency makes [available online](http://fueleconomy.gov) on 38 popular models of car. Among the attributes in `mpg` are:
-
-* `displ`, a car’s engine size, in litres.
-
-* `hwy`, a car’s fuel efficiency on the highway, in miles per gallon (mpg). A car with a low fuel efficiency consumes more fuel than a car with a high fuel efficiency when they travel the same distance.
-
-To learn more about mpg, open its help page by running `?mpg`. 
-
-The first row contains information about a 1999 Audi a4. 
-
-```{r}
-mpg
-```
-
-We can create a new table called `jeeps` consisting of just the data for Jeep cars.
-
-```{r}
-jeeps <- filter(mpg, manufacturer == "jeep")
-jeeps
-```
-
-The double quotation marks surrounding `jeep` are to specify that the character sequence is not the name of an object or the name of a column.
-We call data specifying exact character sequences *string li\terals*.
-
-The rows of the `mpg` table appear in alphabetical order of the manufacturer.
-To see which cars have the best fuel efficiency on the highway, it will be useful to sort the data by `hwy`.
-Remember that by default, the sorting is in increasing order.  
-
-```{r}
-arrange(mpg, hwy)
-```
-
-These figures are somewhat difficult to compare; in fact, this gives us cars with the *worst* fuel efficiency! To identify those most-efficient cars, we can sort in descending order of `hwy` and look at the top few rows.
-The expression we use is `desc(hwy)`.
-
-```{r}
-arrange(mpg, desc(hwy))
-```
-
-The table with the rearrangement reveals that the most fuel efficient cars on the highway are Volkswagens. By examining visualization of data, you can quickly obtain insights on the data.
-
-### What Is tidyverse?
-
-As we mentioned earlier, tidyverse is a collection packages, each having to do with data visualization and processing.
-The packages in the suite include:
-
-* stringr for manipulating string attributes
-* readr for reading data from data files
-* tibble for creating tables and making simple modifications
-* dplyr for data manipulation (e.g., filtering, reordering, etc.)
-* tidyr for tidying up data tables
-* ggplot2 for visualization (e.g., creating graphs)
-* purrr for data mapping and processing nested data
-<!--* forcat for handling attributes with categories -->
-
-We will talk most of these packages in the next few sections.
-While these packages have specific focuses, once we have loaded the `tidyverse` package, we can call any functions from the individual packages.
-Thus, we can be ignorant about from which package the functions of `tidyverse` have come.
-
+Note that once we have loaded the tidyverse, we can call any of the functions from the individual packages. 
