@@ -1,4 +1,4 @@
-# (PART) Advanced Topic {-} 
+#(PART) Advanced Topic {-} 
 
 # Regression
 
@@ -8,7 +8,7 @@ We study specifically the concept of *regression*, which is a group of methods f
 We have seen something that resembles regression in the introduction for plotting, where we guessed by examination that the line explaining the highway mileage with the displacement.
 R has the functionality for doing the determination of the line automatically, which we call the *linear model*.
 
-## Linear Regression
+## Linear Model
 
 *Linear regression* is a method that estimates the value of a variable (which we call the *target*) against a collection of other variables (which we the *factors*) so we can express the value of the target as some combination of the factors, where each factor either adds to or subtracts from the target value estimation.
 The estimation takes the form
@@ -39,18 +39,20 @@ In other words, we use the following *squared residual*
 $$
 (t - (c + s_1 * f_1 + \cdots + s_k * f_k))^2
 $$
-and make the total squared residual as small as possible.
-There is a mathematical method for obtaining the parameter values that achieve the minimum total squared distance, but learning such methods is beyond the scope of this course.
+and make the total of the squared residual values as small as possible.
+There is a mathematical method for obtaining the setting to the parameter values that achieves the minimum *total squared distance* when there is only one factor, but learning such methods is beyond the scope of this course.
 
 ## Correlation
 
-To explain, how a linear regression estimator in R works, let us use an artifial data set.
+To explain how a linear regression estimator in R works, let us use an artificial data set.
 Recall that `tibble()` allows you to create a data set.
 The data set `dt` below has four attributes `xx`, `yy`, `zz`, and `ww`.
 The attribute `xx` ranges from 10 to 30 with an equal gap of $0.5$ between two values.
 The value for `yy` is 25 times `xx`.
 The value for `ww` is $0.3$ times the square of `xx` minus 10 times `sin(xx)`.
 The value for `ww` is the sum of `yy` and `zz`.
+
+As usual, we use `tidyverse`.
 
 ```{r message=FALSE}
 library(tidyverse)
@@ -75,7 +77,11 @@ The observation makes sense because we created `ww` by adding the small wavy `zz
 We thus can anticipate that the regression produces the line close to the function of `yy` as an estimate.
 
 Before getting into the use of regression, we present how in a case like this (one factor for one target), how likely it is the linear progression produces good estimates.
-The statistical concept we use for the investigation is *correlation*.
+The statistical concept we use for the investigation is *correlation coefficient*.
+The *correlation coefficient* measures the strength of the linear relationship between two variables.
+Graphically, it measures how clustered the scatter diagram is around a straight line.
+We usually say *correlation*, omitting the "coefficient*.
+
 Suppose we have some $n$ observations in which we see two attributes $sx$ and $y$.
 Let $\overline{x}$ and $\overline{y}$ denote the means of $x$ and $y$ values, respectively.
 Obtain from each value of $x$ a new value by subtracting $\overline{x}$ from it.
@@ -86,7 +92,9 @@ The definition of a correlation is as follows:
 \]
 where the average in the numerator uses division by $n-1$ instead of division by $n$. 
 
-R comes the function for computing the correlation. You have only two provide the two sources between which you need to compute the correlation.
+### Correlation Calculation in R
+
+R comes the function for computing the correlation. You have only two provide the two sources for which you need to compute the correlation.
 Let us obtain the correlations between `xx` and `yy`, `xx` and `ww`, and `zz`.
 
 ```{r}
@@ -98,13 +106,68 @@ cor(dt$xx,dt$ww)
 The range of correlation is between $-1$ and $1$, where $1$ is the perfect positive correlation (for example, a variable has the perfect positive correlation with itself), $-1$ is the perfect negative correlation (for example, a variable has the perfect positive correlation with itself when the opposite sign), and $0$ is no correlation at all.
 We see that the correlation of `xx` is high with `yy` and `zz` and almost nonexistent with `zz`.
 
-## Linear Regression
+### An artificial data set with random points
+
+Let us look at the calculation of correlation a little bit more.
+We will define a function `pop.sd` and our own version of `scale` called `pop.scale`, as `scale` makes use of `sd`.
+
+```{r}
+pop.sd <- function(x) { sd(x) * sqrt((length(x)-1) / length(x)) }
+pop.scale <- function(x) { (x - mean(x)) / pop.sd(x) }
+```
+
+The function `r_scatter` takes a value of $r$ as its argument and simulates a scatter plot with a correlation very close to $r$.
+Because of randomness in the simulation, the correlation is not expected to be exactly equal to  $r$.
+Let us try calling `r_scatter` with different values of $r$.
+
+```{r echo = FALSE}
+r_scatter <- function(r) {
+  # Generate a scatter plot with a correlation approximately r
+  x <- rnorm(10000)
+  z <- rnorm(10000)
+  y = r*x + (sqrt(1-r**2))*z
+  tibble(x = x, y = y) %>%
+    ggplot() + 
+    geom_point(aes(x = x, y = y), color = "darkcyan", alpha = 0.8) + 
+    xlab("") + 
+    ylab("")
+}
+```
+
+The scatter plot looks like an elipses that is perfectly linear and slopes upward.
+Below appear five call with $r = 0.95, 0.25, 0, -0.5$, and $-1$, respectively.
+
+Observe that when $r = 0$, the scatter plot is a formless cloud around the horizontal axis, and the variables are said to be *uncorrelated*.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+r_scatter(0.95)
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+r_scatter(0.25)
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+r_scatter(0)
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+r_scatter(-0.5)
+```
+
+```{r dpi=80, fig.align="center", message = FALSE}
+r_scatter(-1.0)
+```
+
+## Linear Regression example
 
 Now let us run the linear regression on R.
 The function is `lm()`, which is the short-hand for "linear model".
 Running the linear regression function requires two parameters.
 One parameter is the data set, which takes the form `data = DATA_SET_NAME`.
 The other is the target and the factors, which takes the form `TARGET ~ FACTOR_1 + \cdots + FACTOR_k`.
+
+Let us use the data set `dt` from the previous discussion.
 The regression we have at hand has only one factor, `xx`, and the target is `ww`, and so we call the function as `lm(data = dt, ww ~ xx)`.
 The function returns the result as a collection of tables and numbers.
 Below we store it in `fitted`.
@@ -121,41 +184,112 @@ summary(fitted)
 
 A key piece of information appears under the heading "Coefficients".
 The "Estimate" column of the segment shows the estimates of the coefficients.
-The function is
+Using the coefficients we obtain the linear function.
+
 $$
-2.0944 + 24.9283 xx
+f(xx) = 2.0944 + 24.9283 * xx
 $$
+
+
+
 This may be slightly off because the original had 0 intercept but the estimate has 2.0944.
 
 The components of the `summary` are accessible by attaching `$` and the attribute in question.
 
+The `call` attribute shows the arguments of `lm`.
+
 ```{r}
 summary(fitted)$call
-summary(fitted)$r.squared
+```
+The `coefficients` attribute shows the coefficients of the model.
+
+```{r}
 summary(fitted)$coefficients
+```
+
+These eight numbers appear as a single list in `coefficients`.
+They appear in the column-major order.
+values 
+```{r}
+summary(fitted)$coefficients[1]
+summary(fitted)$coefficients[2]
+summary(fitted)$coefficients[3]
+summary(fitted)$coefficients[4]
+summary(fitted)$coefficients[5]
+summary(fitted)$coefficients[6]
+summary(fitted)$coefficients[7]
+summary(fitted)$coefficients[8]
+```
+The `Std.error` shows the *standard error* (which we will not discuss in this course).
+The standard error is a representation of the variability of estimates.
+Its appearance here in the table informs that the function `lm` produces a model through sampling.
+We observe that the standard error is high for the intercept and low for the coefficient on `xx`.
+
+The `residuals` attribute shows the difference of the actual value and the estimate for all data points.
+In the present example, this is `ww` minus the function $f$ at `xx`.
+We observe that there are 41 difference values appearing in `residuals`.
+
+```{r}
 summary(fitted)$residuals
 ```
 
+Another important attribute is `r.squared`.
+```{r}
+summary(fitted)$r.squared
+```
+
+What is the `r.squared` attribute?
+It is the $R^2$ value of the regression, which we compute as follows:
+
+* Compute the residual for each observation.
+* Compute the difference of each `yy` from the the average of all `yy` values.
+* Compute the sum of the square of the residuals.
+* Compute the sum of the square of the difference values.
+* Compute the ratio of the first sum to the second sum.
+* Subtract from 1 the ratio.
+
+The result of the last subtraction is the $R^2$ value.
+
+$$
+1 - \frac{\mathrm{sum~of~the~square~of~the~residual}}{\mathrm{sum~of~the~square~of~the~distance~from~the~average}}
+$$
+
+Let us compute the $R^2$ value ourselves.
+Below, we obtain the parameters of the model as the values of `ccc` and `aaa`.
+
+```{r}
+ccc <- summary(fitted)$coefficients[1]
+aaa <- summary(fitted)$coefficients[2]
+ccc
+aaa
+dt %>% mutate(fit = ccc + aaa * xx) %>% mutate(res = ww - fit) %>% mutate(res2 = res * res) %>% mutate(diff = ww - mean(ww)) %>% mutate(diff2 = diff * diff) -> dt2
+r2 <- 1 - sum(dt2$res2) / sum(dt2$diff2)
+r2
+```
+
+We observed that the manual calculation matches the `r.squared` attribute.
+
+### Regression without intersept
 
 We can force the modeling function to keep the intercept to be 0 by adding `-1` to the formula when calling `lm`.
 
 
 ```{r}
-fitted <- lm(data = dt, ww ~ xx - 1)
-summary(fitted)
+fitted2 <- lm(data = dt, ww ~ xx - 1)
+summary(fitted2)
 ```
 We see that the "Intercept" row under "Coefficients" has disappeared.
 Thus, in the revised model, the estimate is `ww = 25.02464 xx`.
 This is very close to the original.
 
 ```{r}
-summary(fitted)$r.squared
-summary(fitted)$coefficients
-# summary(fit)$residuals
-summary(fitted)$correlation
-summary(fitted)$coefficients[1:2]
-
+summary(fitted2)$r.squared
+summary(fitted2)$coefficients
+summary(fitted2)$coefficients[1:2]
 ```
+We observe that the value of `r.squared` is higher than the previous one.
+
+## Height and weight relations
 
 [The UCLA SOCR Statistics](http://www.socr.ucla.edu/) is a great resource for statistical concepts and tools.
 [The MLB Height Weight Data Set](http://wiki.stat.ucla.edu/socr/index.php/SOCR_Data_MLB_HeightsWeights) is the data set of 1,034 Major League Baseball players.
@@ -175,37 +309,77 @@ unique(mlb$Team)
 Let us plot the weight against the height and draw the smoothed line.
 
 ```{r}
-ggplot(mlb, aes(x = Height, y = Weight)) + geom_point() + geom_smooth()
+ggplot(mlb, aes(x = Height, y = Weight)) + geom_point(color="darkcyan") + geom_smooth()
 ```
-The smoothed plot is the line that connects the mean for each weight value.
 
-Let us use R compute the regression.
-The way to use linear regression is `lm(data = DATA_NAME, TARGET ~ FORMULA)`, where `DATA_NAME` is the attribute as the target and `FORMULA` is the factors.
+The data has one missing value.
+We can compute the correlation with the missing value omitted.
+The option `use = "pairwise.complete.obs"` accomplishes this.
+
+```{r}
+cor(mlb$Height,mlb$Weight,use="pairwise.complete.obs")
+```
+
+Let us use R to compute the regression.
 In our case, there is only one factor, `Height`, so we state `Height` in the place for `FORMULA`.
 
 ```{r}
-fitted <- lm(data = mlb, Weight ~ Height)
+fitmlb <- lm(data = mlb, Weight ~ Height)
 ```
 
-We can generate information for the model using `summary()`.
+Let us look at the `r.squared` and `coeffients`.
 
 ```{r}
-summary(fitted)
+summary(fitmlb)$r.squared
+summary(fitmlb)$coefficients
 ```
 
-The call produces a variety of values.
+While the correlation was about $0.50$, if you run linear regression, the resulting $R^2$ value is only $0.2829", not very high.
+
+Let us compute the standard deviation of the residual values using `sd()` and then plot the estimated line along with two lines below and two lines above.
+The four lines are parallel to the estimated line with different intercept values.
+The lines immediate above and immediate below are with intercepts higher and lower by the standard deviation, respectively; the other two lines, the difference is two times the standard deviation.
+We will include the additional four estimates.
+It is possible to generate the five (estimate, two above, and two below) within `ggplot`, but here we compute them and add the values as columns.
 
 ```{r}
-cor(x = mlb$Height, mlb$Weight)
-summary(fitted)$r.squared
-summary(fitted)$coefficients
-summary(fitted)$residuals
+ssd <- sd(summary(fitmlb)$residual)
+ssd
+cmlb <- summary(fitmlb)$coefficients[1]
+amlb <- summary(fitmlb)$coefficients[2]
+mlb %>% mutate(est = cmlb + amlb * Height) %>% mutate(upper = est + ssd) %>% mutate(lower = est - ssd) %>% mutate(upper2 = upper + ssd) %>% mutate(lower2 = lower - ssd) -> mlb0
+head(mlb0)
 ```
 
+The standard deviation is $17.77$ (in pounds), which appears quite high.
+
+Here we plot the lines.
+
+```{r}
+ggplot(mlb0, aes(x = Height, y = Weight)) +
+  geom_point(color="darkcyan") +
+  geom_line(aes(y = est), color = "black") +
+  geom_line(aes(y = upper), color = "blue") +
+  geom_line(aes(y = lower), color = "red") +
+  geom_line(aes(y = upper2), color = "blue") +
+  geom_line(aes(y = lower2), color = "red")
+```
+
+It looks like the predicting weight from height is not so successful.
+
+Here is another plot, instead 
+
+```{r}
+rename(mlb0, observed = Weight, estimated = est, plus2xSD = upper2, minus2xSD = lower2) %>%  pivot_longer(c(observed, estimated, plus2xSD, minus2xSD), names_to = "measure", values_to = "Weight") -> mlb1
+
+ggplot(mlb1) + 
+  geom_point(aes(x = Height, y = Weight, color = measure), alpha = 0.5) + 
+  scale_color_manual(values = c("red", "purple", "darkcyan", "blue"))
+```
 
 ## Exploring the `mtcars`
 
-As usual, our exploration starts with loading the library `tidyverse`.
+Let us return to the `mtcars` data set, which is the collection of car specs.
 
 ```{r}
 library(tidyverse)
@@ -229,95 +403,131 @@ Here, for your convenience, the information of the eleven attributes.
 *	`carb	Number of carburetors`
 
 As you can see, all the attributes are numerical.
+
 By `glimpse(mtcars)` you can inspect the attributes.
 
 ```{r}
 glimpse(mtcars)
 ```
 
-```{r}
-ggplot(mtcars, aes(x = cyl, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = disp, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = hp, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = drat, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = qsec, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = vs, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = am, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = gear, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = carb, y = mpg)) + geom_point() + geom_smooth()
-```
-The last four, `vs`, `am`, `gear`, and `carb`, and `cyl` are categorical variables each with a small number of choices, and so we will ignore it.
-Let us create a new data set `mtcars1` without these variables, that is, `mpg` and the variables from `disp` to `qsec`.
+Let us compare the attributes with `mpg` concerning correlation.
+We can use `paste()` to add a prefix to the correlation value.
 
 ```{r}
-mtcars1 <- mtcars %>% select(mpg, disp:qsec)
+paste("cyl:  ", cor(mtcars$cyl,mtcars$mpg))
+paste("disp: ", cor(mtcars$disp,mtcars$mpg))
+paste("hp:   ", cor(mtcars$hp,mtcars$mpg))
+paste("drat: ", cor(mtcars$drat,mtcars$mpg))
+paste("wt:   ", cor(mtcars$wt,mtcars$mpg))
+paste("qsec:", cor(mtcars$qsec,mtcars$mpg))
+paste("vs:   ", cor(mtcars$vs,mtcars$mpg))
+paste("am:  ", cor(mtcars$am,mtcars$mpg))
+```
+
+It appears that "drat", "qsec", "vs", and "am" have low correlation values, so let us ignore these four to create a new data set.
+
+```{r}
+mtcars1 <- mtcars %>% select(mpg, cyl, disp, hp, wt)
 head(mtcars1)
 ```
-The *linear regression* is a method that estimates the value of a variable (which we call the *target*) against a collection of other variables (which we the *factors*) so we can express the value of the target as some combination of the factors, where each factor either adds to or subtracts from the target value estimation.
-The estimation takes the form
-\[
-\mathrm{target} \approx \mathrm{intersept} + \mathrm{scale}_1 * \mathrm{factor}_1 + \cdots + \mathrm{scale}_k * \mathrm{factor}_k
-\] 
-
 
 ```{r}
-ffitted <- lm(mpg ~ disp, data = mtcars1)
-summary(fitted)
-fitted <- lm(mpg ~ hp, data = mtcars1)
-summary(fitted)
-fitted <- lm(mpg ~ drat, data = mtcars1)
-summary(fitted)
-fitted <- lm(mpg ~ wt, data = mtcars1)
-summary(fitted)
-fitted <- lm(mpg ~ qsec, data = mtcars1)
-summary(fitted)
+ggplot(mtcars1, aes(x = cyl, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars1, aes(x = disp, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars1, aes(x = hp, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars1, aes(x = wt, y = mpg)) + geom_point() + geom_smooth()
 ```
 
+Let us use the five attributes to attempt to estimate `mpg.
 
 ```{r}
-fitted <- lm(mpg ~., data = mtcars1)
-summary(fitted)
-```
-
-
-```{r}
-ggplot(mtcars, aes(x = cyl, y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = log(disp), y =mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = log(hp), y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = log(drat), y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = log(wt), y = mpg)) + geom_point() + geom_smooth()
-ggplot(mtcars, aes(x = log(qsec), y = mpg)) + geom_point() + geom_smooth()
-```
-
-
-```{r}
-fitted <- lm(mpg ~., data = mtcars)
-summary(fitted)
+fitted_qsec <- lm(mpg ~ cyl, data = mtcars1)
+summary(fitted_qsec)$r.squared
+summary(fitted_qsec)$coefficients
 ```
 
 ```{r}
-ggplot(aes(x = wt, y = mpg), data = mtcars) +
-  geom_point() +
-  geom_line(aes(y = 12.30377 - 3.71530 * wt))
+fitted_disp <- lm(mpg ~ disp, data = mtcars1)
+summary(fitted_disp)$r.squared
+summary(fitted_disp)$coefficients
 ```
 
 ```{r}
-mtcars %>% mutate(mpg_fit = 12.30337 - 3.71530 * wt + 2.52023 * am + 0.78711 * drat + 0.82104 * qsec + 0.65541 * gear) -> mtcars2
+fitted_hp <- lm(mpg ~ hp, data = mtcars1)
+summary(fitted_hp)$r.squared
+summary(fitted_hp)$coefficients
 ```
-
 
 ```{r}
-fitted <- lm(mpg ~ mpg_fit, data = mtcars2)
-summary(fitted)
+fitted_wt <- lm(mpg ~ wt, data = mtcars1)
+summary(fitted_wt)$r.squared
+summary(fitted_wt)$coefficients
 ```
 
+Here is the one in which all five can be factors.
+The value of $R^2$ is much higher than any of the four individual ones.
 
 ```{r}
-fitted <- lm(mpg ~ wt, data = mtcars)
-summary(fitted)
+fitted_all <- lm(mpg ~., data = mtcars1)
+summary(fitted_all)$r.squared
+summary(fitted_all)$coefficients
 ```
 
+Let us remember the $R^2$ value as the best so far.
+
+```{r}
+r2best <- summary(fitted_all)$r.squared
+```
+
+Is it possible to account for the curves appearing in the smooth plots with `disp`, `hp`, and `wt`?
+Let us consider the inverse of the three quantities, which we can express as `1/disp`, `1/hp`, and `1/wt`.
+
+```{r}
+ggplot(mtcars1, aes(x = 1/disp, y =mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars1, aes(x = 1/hp, y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars1, aes(x = 1/wt, y = mpg)) + geom_point() + geom_smooth()
+```
+
+In addition, let us think of the logarithm function.
+The logatihm asks how many times you need to multiply 2 to produce the value at hand.
+We often use 10 in place of 2.
+For example, the logarithm of 2 base 2 is 1, the logarithm of 4 base 2 is 2, the logarithm of 8 base 2 is 3, etc.
+Let us consider `log(disp)`, `log(hp)`, and `log(wt)`.
+
+```{r}
+ggplot(mtcars1, aes(x = log(disp), y =mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars1, aes(x = log(hp), y = mpg)) + geom_point() + geom_smooth()
+ggplot(mtcars1, aes(x = log(wt), y = mpg)) + geom_point() + geom_smooth()
+```
+
+It looks like the six values have the effect of flattening the curve.
+Let us put all the six values as attributes to create a new data set and then run linear regression.
+
+```{r}
+mtcars1 %>% mutate(invdisp = 1/disp) %>% mutate(invwt = 1/wt) %>% mutate(logdisp = log(disp)) %>% mutate(logwt = log(wt)) -> mtcars2
+fitted2 <- lm(data = mtcars2, mpg ~ .)
+summary(fitted2)$r.squared
+summary(fitted2)$coefficients
+```
+
+The $R^2$ value is now over 0.90.
+Use these coefficients to define the line.
+We call it `est`.
+
+```{r}
+coeff <- summary(fitted2)$coefficients
+mtcars2 %>% mutate(est = coeff[1] + coeff[2] * cyl + coeff[3] * disp + coeff[4] * hp + coeff[5] * wt + coeff[6] * invdisp + coeff[7] * invwt + coeff[8] * logdisp + coeff[9] * logwt) -> mtcars3
+```
+
+Let us plot the `est` and `msg` together.
+The red line below is `msg` against `msg`.
+The blue line is `est`.
+
+```{r}
+ggplot(aes(y = est, x = mpg), data = mtcars3) +
+  geom_line(color = "blue") +
+  geom_line(aes(y = mpg), color = "red")
+```
 
 ```{r}
 ggplot(aes(x = wt, y = mpg), data = mtcars) +
@@ -326,43 +536,11 @@ ggplot(aes(x = wt, y = mpg), data = mtcars) +
 ```
 
 
+<!--
 
+# Predictive Analysis (OLD)
 
-
-Let us use the other car data set.
-
-```{r}
-glimpse(mpg)
-```
-
-```{r, fig.align="center", dpi=80}
-ggplot(data = mpg) +
-  geom_point(mapping = aes(x = displ, y = hwy))
-```
-Let us compute the correlation values first.
-
-```{r}
-cor(mpg$hwy, mpg$displ)
-cor(mpg$hwy, mpg$cyl)
-cor(mpg$hwy, mpg$year)
-```
-
-Let us now compute the regression.
-
-```{r}
-fit1 <- lm(hwy ~ displ + year + cyl, data = mpg)
-fit2 <- lm(cty ~ displ + year + cyl, data = mpg)
-```
-```{r}
-summary(fit1)
-```
-```{r}
-fitted <- lm(hwy~., data = mpg)
-summary(fitted)
-```
-<!-- # Predictive Analysis
-
-# Prediction
+# Prediction (OLD)
 
 An important aspect of data science is to find out what data can tell us about the future. What do data about climate and pollution say about temperatures a few decades from now? Based on a person's internet profile, which websites are likely to interest them? How can a patient's medical history be used to judge how well he or she will respond to a treatment?
 
@@ -423,11 +601,11 @@ ggplot(plot_df) +
 
 The prediction at a given midparent height lies roughly at the center of the vertical strip of points at the given height. This method of prediction is called *regression*. Later in this chapter we will see where this term came from. We will also see whether we can avoid our arbitrary definitions of "closeness" being "within 0.5 inches". But first we will develop a measure that can be used in many settings to decide how good one variable will be as a predictor of another.
 
-## Correlation
+## Correlation (OLD)
 
 In this section we will develop a measure of how tightly clustered a scatter diagram is about a straight line. Formally, this is called measuring *linear association*.
 
-### Prerequisites
+### Prerequisites (OLD0)
 
 We will make use of the tidyverse in this chapter, so let's load it in as usual.
 
@@ -443,7 +621,7 @@ pop.sd <- function(x) sd(x) * sqrt((length(x)-1) / length(x))
 pop.scale <- function(x) (x - mean(x)) / pop.sd(x)
 ```
 
-### The `hybrid` data frame 
+### The `hybrid` data frame (OLD)
 
 The data frame `hybrid` contains data on hybrid passenger cars sold in the United States from 1997 to 2013. The data were adapted from the online data archive of [Prof. Larry Winner](http://www.stat.ufl.edu/%7Ewinner/) of the University of Florida. The columns:
 
@@ -523,7 +701,7 @@ The associations that we see in these figures are the same as those we saw befor
 
 We will now define a measure that uses standard units to quantify the kinds of association that we have seen.
 
-### The correlation coefficient
+### The correlation coefficient (OLD)
 
 The *correlation coefficient* measures the strength of the linear relationship between two variables. Graphically, it measures how clustered the scatter diagram is around a straight line.
 
@@ -571,7 +749,7 @@ r_scatter(0)
 r_scatter(-0.55)
 ```
 
-### Calculating $r$
+### Calculating $r$ (OLD)
 
 The formula for $r$ is not apparent from our observations so far. It has a mathematical basis that is outside the scope of this class. However, as you will see, the calculation is straightforward and helps us understand several of the properties of $r$. Note how we are using `pop.scale` for these steps.
 
@@ -624,7 +802,7 @@ r
 
 As expected, $r$ is positive but not equal to 1.
 
-### Properties of $r$
+### Properties of $r$ (OLD)
 
 The calculation shows that:
 
@@ -637,7 +815,7 @@ ggplot(t) +
   geom_point(aes(x = y, y = x), color = "red")
 ```
 
-### The `cor` function 
+### The `cor` function (OLD)
 
 We are going to be calculating correlations repeatedly, so it will help to have a function that computes it by performing all the steps described above. That function might look like: 
 
@@ -675,11 +853,11 @@ These values confirm what we had observed:
 
 Correlation is a simple and powerful concept, but it is sometimes misused. Before using $r$, it is important to be aware of what correlation does and does not measure.
 
-### Association is not Causation
+### Association is not Causation (OLD)
 
 Correlation only measures association. Correlation does not imply causation. Though the correlation between the weight and the math ability of children in a school district may be positive, that does not mean that doing math makes children heavier or that putting on weight improves the children's math skills. Age is a confounding variable: older children are both heavier and better at math than younger children, on average.
 
-### Correlation Measures *Linear* Association
+### Correlation Measures *Linear* Association (OLD)
 
 Correlation measures only one kind of association – linear. Variables that have strong non-linear association might have very low correlation. Here is an example of variables that have a perfect quadratic relation $y = x^2$ but have correlation equal to 0.
 
@@ -695,7 +873,7 @@ ggplot(nonlinear) +
 cor(pull(nonlinear, x), pull(nonlinear, y))
 ```
 
-### Correlation is Affected by Outliers
+### Correlation is Affected by Outliers (OLD)
 
 Outliers can have a big effect on correlation. Here is an example where a scatter plot for which $r$ is equal to 1 is turned into a plot for which $r$ is equal to 0, by the addition of just one outlying point.
 
@@ -724,8 +902,12 @@ ggplot(outlier) +
 ```{r}
 cor(pull(outlier, x), pull(outlier, y))
 ```
+-->
 
-### Ecological Correlations Should be Interpreted with Care
+
+<!--
+
+### Ecological Correlations Should be Interpreted with Care (OLD)
 
 Correlations based on aggregated data can be misleading. As an example, here are data on the Critical Reading and Math SAT scores in 2014. There is one point for each of the 50 states and one for Washington, D.C. The column `Participation Rate` contains the percent of high school seniors who took the test. The next three columns show the average score in the state on each portion of the test, and the final column is the average of the total scores on the test.
 
@@ -753,7 +935,7 @@ The data consist of average scores in each state. But states don't take tests �
 
 Correlations based on aggregates and averages are called *ecological correlations* and are frequently reported. As we have just seen, they must be interpreted with care.
 
-### Serious or tongue-in-cheek? 
+### Serious or tongue-in-cheek? (OLD)
 
 In 2012, a [paper](http://www.biostat.jhsph.edu/courses/bio621/misc/Chocolate%20consumption%20cognitive%20function%20and%20nobel%20laurates%20%28NEJM%29.pdf) in the respected New England Journal of Medicine examined the relation between chocolate consumption and Nobel Prizes in a group of countries. The [Scientific American](http://blogs.scientificamerican.com/the-curious-wavefunction/chocolate-consumption-and-nobel-prizes-a-bizarre-juxtaposition-if-there-ever-was-one/) responded seriously whereas [others](http://www.reuters.com/article/2012/10/10/us-eat-chocolate-win-the-nobel-prize-idUSBRE8991MS20121010#vFdfFkbPVlilSjsB.97) were more relaxed. You are welcome to make your own decision! The following graph, provided in the paper, should motivate you to go and take a look.
 
@@ -762,11 +944,11 @@ knitr::include_graphics('images/Correlation_65_0.png')
 ```
 
 
-## The Regression Line
+## The Regression Line (OLD)
 
 The correlation coefficient $r$ doesn't just measure how clustered the points in a scatter plot are about a straight line. It also helps identify the straight line about which the points are clustered. In this section we will retrace the path that Galton and Pearson took to discover that line.
 
-### Prerequisites
+### Prerequisites (OLD1)
 
 We will make use of the tidyverse in this chapter, so let's load it in as usual.
 
@@ -810,7 +992,7 @@ ggplot(plot_df) +
   scale_color_manual(values = c("darkcyan", "salmon"))
 ```
 
-### Measuring in Standard Units
+### Measuring in Standard Units (OLD)
 
 Let's see if we can find a way to identify this line. First, notice that linear association doesn't depend on the units of measurement – we might as well measure both variables in standard units.
 
@@ -863,7 +1045,7 @@ ggplot(plot_df) +
 
 This plot looks exactly like the plot drawn on the original scale. Only the numbers on the axes have changed. This confirms that we can understand the prediction process by just working in standard units.
 
-### Identifying the Line in Standard Units
+### Identifying the Line in Standard Units (OLD)
 
 Galton's scatter plot has a *football* shape – that is, it is roughly oval like an American football. Not all scatter plots are football shaped, not even those that show linear association. But in this section we will pretend we are Galton and work only with football shaped scatter plots. In the next section, we will generalize our analysis to other shapes of plots.
 
@@ -927,7 +1109,7 @@ The slope of the 45 degree line is 1. So the slope of the yellow "graph of avera
 
 What value could that be? You've guessed it – it's $r$.
 
-### The Regression Line, in Standard Units
+### The Regression Line, in Standard Units (OLD)
 
 The yellow "graph of averages" line is called the *regression line*, for reasons we will explain shortly. But first, let's simulate some football shaped scatter plots with different values of $r$, and see how the line changes. In each case, the red 45 degree line has been drawn for comparison.
 
@@ -963,7 +1145,7 @@ regression_line(0.6)
 
 When $r$ is close to 1, the scatter plot, the 45 degree line, and the regression line are all very close to each other. But for more moderate values of $r$, the regression line is noticeably flatter.
 
-### The Regression Effect
+### The Regression Effect (OLD)
 
 In terms of prediction, this means that for a parent whose midparent height is at 1.5 standard units, our prediction of the child's height is somewhat *less* than 1.5 standard units. If the midparent height is 2 standard units, we predict that the child's height will be somewhat less than 2 standard units.
 
@@ -973,7 +1155,7 @@ This didn't please Sir Francis Galton. He had been hoping that exceptionally tal
 
 Galton also noticed that exceptionally short parents had children who were somewhat taller relative to their generation, on average. In general, individuals who are away from average on one variable are expected to be not quite as far away from average on the other. This is called the *regression effect*.
 
-### The Equation of the Regression Line
+### The Equation of the Regression Line (OLD)
 
 In regression, we use the value of one variable (which we will call $x$) to predict the value of another (which we will call $y$). When the variables $x$ and $y$ are measured in standard units, the regression line for predicting $y$ based on $x$ has slope $r$ and passes through the origin. Thus the equation of the regression line can be written as:
 
@@ -1020,7 +1202,7 @@ intercept <- function(t, label_x, label_y) {
 }
 ```
 
-### The Regression Line and Galton's Data
+### The Regression Line and Galton's Data (OLD)
 
 The correlation between midparent height and child's height is 0.32:
 
@@ -1078,7 +1260,7 @@ ggplot(plot_df) +
 
 The blue dots show the regression predictions, all on the regression line. Notice how the line is very close to the salmon pink graph of averages. For these data, the regression line does a good job of approximating the centers of the vertical strips.
 
-### Fitted Values
+### Fitted Values (OLD)
 
 The predictions all lie on the line and are known as the "fitted values". The function `fit` takes the name of the table and the labels of $x$ and $y$, and returns an array of fitted values, one fitted value for each point in the scatter plot.
 
@@ -1113,7 +1295,7 @@ ggplot(plot_df, aes(x = midparent, y = child)) +
   geom_smooth(method = "lm", color = "salmon")
 ```
 
-### Units of Measurement of the Slope
+### Units of Measurement of the Slope (OLD)
 
 The slope is a ratio, and it worth taking a moment to study the units in which it is measured. Our example comes from the familiar dataset about mothers who gave birth in a hospital system. The scatter plot of pregnancy weights versus heights looks like a football that has been used in one game too many, but it's close enough to a football that we can justify putting our fitted line through it. In later sections we will see how to make such justifications more formal.
 
@@ -1140,7 +1322,7 @@ pounds more than our prediction for the shorter woman.
 
 Notice that the successive vertical strips in the scatter plot are one inch apart, because the heights have been rounded to the nearest inch. Another way to think about the slope is to take any two consecutive strips (which are necessarily 1 inch apart), corresponding to two groups of women who are separated by 1 inch in height. The slope of 3.57 pounds per inch means that the average pregnancy weight of the taller group is about 3.57 pounds more than that of the shorter group.
 
-### Example
+### Example (OLD)
 
 Suppose that our goal is to use regression to estimate the height of a basset hound based on its weight, using a sample that looks consistent with the regression model. Suppose the observed correlation $r$ is 0.5, and that the summary statistics for the two variables are as in the table below: 
 
@@ -1174,11 +1356,11 @@ The slope of the line measures the increase in the estimated height per unit inc
 
 In general, the slope of the regression line can be interpreted as the average increase in $y$ per unit increase in $x$. Note that if the slope is negative, then for every unit increase in $x$, the average of $y$ decreases.
 
-### Endnote
+### Endnote (OLD)
 
 Even though we won't establish the mathematical basis for the regression equation, we can see that it gives pretty good predictions when the scatter plot is football shaped. It is a surprising mathematical fact that no matter what the shape of the scatter plot, the same equation gives the "best" among all straight lines. That's the topic of the next section.
 
-## The Method of Least Squares
+## The Method of Least Squares (OLD)
 
 We have retraced the steps that Galton and Pearson took to develop the equation of the regression line that runs through a football shaped scatter plot. But not all scatter plots are football shaped, not even linear ones. Does every scatter plot have a "best" line that goes through it? If so, can we still use the formulas for the slope and intercept developed in the previous section, or do we need new ones?
 
@@ -1186,7 +1368,7 @@ To address these questions, we need a reasonable definition of "best". Recall th
 
 In this section we will make this criterion precise and see if we can identify the best straight line under the criterion.
 
-### Prerequisites
+### Prerequisites (OLD2)
 
 We will make use of the tidyverse in this chapter, so let's load it in as usual.
 
@@ -1236,7 +1418,7 @@ cor(pull(little_women, Periods), pull(little_women, Characters))
 
 The scatter plot is remarkably close to linear, and the correlation is more than 0.92.
 
-### Error in Estimation
+### Error in Estimation (OLD)
 
 The graph below shows the scatter plot and line that we developed in the previous section. We don't yet know if that's the best among all lines. We first have to say precisely what "best" means.
 
@@ -1304,7 +1486,7 @@ little_women %>%
   plot_lw_errors(-100, 50000)
 ```
 
-### Root Mean Squared Error
+### Root Mean Squared Error (OLD)
 
 What we need now is one overall measure of the rough size of the errors. You will recognize the approach to creating this – it's exactly the way we developed the SD.
 
@@ -1312,7 +1494,7 @@ If you use any arbitrary line to calculate your estimates, then some of your err
 
 The mean squared error of estimation is a measure of roughly how big the squared errors are, but as we have noted earlier, its units are hard to interpret. Taking the square root yields the root mean square error (rmse), which is in the same units as the variable being predicted and therefore much easier to understand.
 
-### Minimizing the Root Mean Squared Error
+### Minimizing the Root Mean Squared Error (OLD)
 
 Our observations so far can be summarized as follows.
 
@@ -1361,7 +1543,7 @@ lw_rmse(lw_reg_slope, lw_reg_intercept)
 
 The proof of this statement requires abstract mathematics that is beyond the scope of this course. On the other hand, we do have a powerful tool – R – that performs large numerical computations with ease. So we can use R to confirm that the regression line minimizes the mean squared error.
 
-### Numerical Optimization
+### Numerical Optimization (OLD)
 
 First note that a line that minimizes the root mean squared error is also a line that minimizes the squared error. The square root makes no difference to the minimization. So we will save ourselves a step of computation and just minimize the mean squared error (mse).
 
@@ -1429,20 +1611,20 @@ paste("intercept from minimize: ", best$par[2])
 ```
 
 
-### The Least Squares Line
+### The Least Squares Line (OLD)
 
 Therefore, we have found not only that the regression line minimizes mean squared error, but also that minimizing mean squared error gives us the regression line. The regression line is the only line that minimizes mean squared error.
 
 That is why the regression line is sometimes called the "least squares line."
 
 
-## Least Squares Regression
+## Least Squares Regression (OLD)
 
 In an earlier section, we developed formulas for the slope and intercept of the regression line through a *football shaped* scatter diagram. It turns out that the slope and intercept of the least squares line have the same formulas as those we developed, *regardless of the shape of the scatter plot*.
 
 We saw this in the example about Little Women, but let's confirm it in an example where the scatter plot clearly isn't football shaped. For the data, we are once again indebted to the rich [data archive of Prof. Larry Winner](http://www.stat.ufl.edu/~winner/datasets.html) of the University of Florida. A [2013 study](http://digitalcommons.wku.edu/ijes/vol6/iss2/10/) in the International Journal of Exercise Science studied collegiate shot put athletes and examined the relation between strength and shot put distance. The population consists of 28 female collegiate athletes. Strength was measured by the biggest amount (in kilograms) that the athlete lifted in the "1RM power clean" in the pre-season. The distance (in meters) was the athlete's personal best.
 
-### Prerequisites
+### Prerequisites (OLD3)
 
 We will make use of the tidyverse in this chapter, so let's load it in as usual.
 
@@ -1472,7 +1654,7 @@ fit <- function(df, x, y) {
 }
 ```
 
-### The `shotput` data frame
+### The `shotput` data frame (OLD)
 
 ```{r message=FALSE}
 url <- "https://raw.githubusercontent.com/data-8/materials-su19/master/materials/su19/lec/shotput.csv"
@@ -1539,7 +1721,7 @@ ggplot(shotput_with_predictions) +
   geom_line(aes(x = `Weight Lifted`, y = fitted), color = "salmon")
 ```
 
-### Nonlinear Regression
+### Nonlinear Regression (OLD)
 
 The graph above reinforces our earlier observation that the scatter plot is a bit curved. So it is better to fit a curve than a straight line. The [study](http://digitalcommons.wku.edu/ijes/vol6/iss2/10/) postulated a quadratic relation between the weight lifted and the shot put distance. So let's use quadratic functions as our predictors and see if we can find the best one. 
 
@@ -1607,11 +1789,11 @@ ggplot(shotput_with_predictions) +
   geom_line(aes(x = `Weight Lifted`, y = fitted), color = "salmon")
 ```
 
-## Visual Diagnostics
+## Visual Diagnostics (OLD)
 
 Suppose a data scientist has decided to use linear regression to estimate values of one variable (called the response variable) based on another variable (called the predictor). To see how well this method of estimation performs, the data scientist must measure how far off the estimates are from the actual values. These differences are called *residuals*.
 
-### Prerequisites
+### Prerequisites (OLD4)
 
 We will make use of the tidyverse in this chapter, so let's load it in as usual.
 
@@ -1651,7 +1833,7 @@ galton <- read_csv(url) %>%
 galton
 ```
 
-### The residual 
+### The residual (OLD)
 
 $$
 \mbox{residual} ~=~ \mbox{observed value} ~-~ \mbox{regression estimate}
@@ -1717,7 +1899,7 @@ galton %>%
 
 The midparent heights are on the horizontal axis, as in the original scatter plot. But now the vertical axis shows the residuals. Notice that the plot appears to be centered around the horizontal line at the level 0 (shown in dark blue). Notice also that the plot shows no upward or downward trend. We will observe later that this is true of all regressions.
 
-### Regression Diagnostics
+### Regression Diagnostics (OLD)
 
 Residual plots help us make visual assessments of the quality of a linear regression analysis. Such assessments are called *diagnostics*. The function `regression_diagnostic_plots` draws the original scatter plot as well as the residual plot for ease of comparison.
 
@@ -1738,7 +1920,7 @@ In other words, the accuracy of the regression appears to be about the same acro
 
 > The residual plot of a good regression shows no pattern. The residuals look about the same, above and below the horizontal line at 0, across the range of the predictor variable.
 
-### Detecting Nonlinearity
+### Detecting Nonlinearity (OLD)
 
 Drawing the scatter plot of the data usually gives an indication of whether the relation between the two variables is non-linear. Often, however, it is easier to spot non-linearity in a residual plot than in the original scatter plot. This is usually because of the scales of the two plots: the residual plot allows us to zoom in on the errors and hence makes it easier to spot patterns.
 
@@ -1771,7 +1953,7 @@ At the low end of the lengths, the residuals are almost all positive; then they 
 
 > When a residual plot shows a pattern, there may be a non-linear relation between the variables.
 
-### Detecting Heteroscedasticity
+### Detecting Heteroscedasticity (OLD)
 
 *Heteroscedasticity* is a word that will surely be of interest to those who are preparing for Spelling Bees. For data scientists, its interest lies in its meaning, which is "uneven spread".
 
@@ -1793,5 +1975,5 @@ Notice how the residual plot flares out towards the low end of the accelerations
 
 
 
--->
 
+-->
