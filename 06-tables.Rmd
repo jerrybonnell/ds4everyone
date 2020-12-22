@@ -462,7 +462,7 @@ myc2 %>%
   myc4
 myc4
 ```
-Also, there is an option of which original attributes to keep after computing the new attributes.
+Also, there is an option of selecting which original attributes to keep after computing the new attributes.
 The way to specify the keep choice is to use `.keep=OPTION` where `OPTION` is one of "all", "used", "unused", and "none", which mean all, only those you used in mutation, only those you did not use in mutation, and none, respectively.
 The following mutation expression creates three new attributes, "which_make", "mpg_disp", and "hp_per_wt", put them after "make_model", and keep only those you used "make_model", "mpg", "disp", "hp" and "wt". 
 
