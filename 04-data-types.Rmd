@@ -15,7 +15,8 @@ We previously talked about mathematical expressions and data sets.
 Our data sets take the form of tables, where the column representing attributes with labels and the rows represent the data objects.
 What do you expect to see as the value for an attribute belonging to an individual?
 More precisely, what kind of information comprises the thing you see in a cell of a table?
-If you break down the information into pieces in the framework of R, upi get to one of the four types:
+If you break down the information into pieces in the framework of R, you get to one of the four types:
+
 * a whole number, which we call the *integer* type,
 * a real number, which we call the *double* type,
 * a truth value representing true or false, which R calls the *logical* type and we commonly call the *Boolean* type, and
@@ -43,7 +44,7 @@ $$
 $$
 which is equal to $1 + 4 + 8 + 16 = 29$.
 This means that there is a limit to how large a positive whole number or how small a negative whole number R can accurately represent.
-If a number should go out of the range of accurately-presentable whole numbers, R switches to a oduble number using some approximation.
+If a number should go out of the range of accurately-presentable whole numbers, R switches to a double number using some approximation.
 
 To represent a double number, computers split the number of bits it can use to three parts: the sign (1 bit), the *significand*, and the *exponent*.
 How R uses the significand and exponents in representing a real number will be too technical. 
@@ -284,8 +285,8 @@ While we can specify a Boolean value with a Boolean literal, we can use comparis
 In the case of numbers, we can compare the values of two mathematical expressions.
 There are six types of comparisons `==`, `!=`, `>` `>=`, `<`, and `<=`.
 They represent "is equal to", "is not equal to", "is greater than", "is greater than or equal to", "is smaller", and "is smaller than or equal to".
-For example, `1 + 4 > 7 - 4` asks if the value of `1 + 4` is strictly greater than the value of `1 - 7`.
-The former is 5 and the latter is -6, and so the answer to the comparison is in the affirmative.
+For example, `1 + 4 > 7 - 4` asks if the value of `1 + 4` is strictly greater than the value of `7 - 4`.
+The former is 5 and the latter is 3, and so the answer to the comparison is in the affirmative.
 Therefore, the value of the comparison expression is `TRUE`.
 
 With the numbers 5 and 4, the results of comparing the two values with the six comparison operators are as follows:
@@ -307,7 +308,7 @@ An expression can chain together multiple comparisons with the AND operator `&`,
 ```
 
 You may recall the functions `max` and `min` for obtaining the maximum and the minimum from a group of numbers, respectively.
-One thing to remember is that the minimum is greater than or equal to the average, and the maxim um is greater than or equal to the average.
+One thing to remember is that the minimum is greater than or equal to the average, and the maximum is greater than or equal to the average.
 The equality holds when the two numbers in the group are all identical.
 Let us set some numbers to variables `x` and `y` and see what the maximum and the minimum functions produce.
 
@@ -353,7 +354,7 @@ __Comparing Strings__
 R can compare strings for equality and non-equality using `==` and `!=`.
 R can also compare two to see if one is greater than the other and if one is smaller than the other.
 To compare two strings, R compares their characters position-wise, starting from the beginning.
-The position-wise continues until it reaches a position where either no comparison is possible because either at least one string has no characters remaining or the two strings showing non-identical pair of characters.
+The position-wise comparison continues until it reaches a position where no comparison is possible because either at least one string has no characters remaining or the two strings showing non-identical pair of characters.
 In the first case, if R has run out of characters on both sides, it asserts that the two strings are equal to each other, otherwise, the one that has just run out of characters is smaller than the other.
 In the second case, R examines the *character code* of the two characters.
 R (and any programming language) uses a table of characters where each character has a unique number.
@@ -767,6 +768,7 @@ One of the packages `tidyverse` contains is `stringr`, which offers a variety of
 Like numbers, a string is a vector of strings with just one string.
 So, applying a function to a string is the same as applying a function to a string vector.
 Depending on the roles, we can classify the functions in `stringr` roughly into the following categories:
+
 * Finding and locating matches of a pattern in each string in a string vector
 * Extracting subtrings and subvectors from a string vector matching a pattern
 * Inquiring about the lengths and padding/trimming the strings
@@ -823,6 +825,7 @@ str_detect(s, "[aeiou].[aeiou]")
 ```
 
 So, the syntax is:
+
 * use the square brackets to specify a list of characters
 * use the curly brackets to specify the number of repetitions
 * use the period to specify any character
@@ -860,6 +863,7 @@ We will present any additional detail wherever we use it.
 __Finding and locating matches__
 
 There are functions in this category.
+
 * `str_detect(STRING, PATTERN)`: As we have seen previously, the function returns a vector of Boolean representing whether the elements of `STRING` matching `PATTERN`.
 * `str_which(STRING, PATTERN)`: The function works like `str_detect` but instead of Boolean vector, returns the indexes at which the pattern appears; in other words, at which indexes, the value of `str_detect(STRING, PATTERN)` is true.
 * `str_count(STRING, PATTERN)`: The function returns for each element of `STRING`, at how many different positions the pattern aligns.
@@ -910,7 +914,7 @@ x[2,]
 ```
 
 
-There is an extension of `str_locate_all' which finds all the matches constructs a two-dimensional table for each element.
+There is an extension of `str_locate_all` which finds all the matches constructs a two-dimensional table for each element.
 What function returns is thus a three-dimensional table.
 
 ```{r}
@@ -921,6 +925,7 @@ str_locate_all(s, "[A-Za-z][aeiou]+")
 __Extracting subtrings and subvectors__
 
 Here are the functions in this category.
+
 * `str_sub(STRING, START, END)`: Creates a new vector consisting of the substrings of the elements of `STRING` with `START` and `END` as the staring and ending positions, respectively.
 * `str_subset(STRING, pattern)`: Creates a new vector keeping only those elements in `s` matching the pattern.
 * `str_extract(STRING, pattern)`: The same as `str_subset` concerning what to find, but the function returns a table not a one-dimensional vector.
@@ -940,6 +945,7 @@ Their names are `str_extract_all` and `str_match_all`.
 __Inquiring about the lengths and padding/trimming the strings__
 
 The following functions belong to this category.
+
 * `str_length(STRING)`: Returns the length of each element.
 * `str_pad(STRING, WIDTH, side=OPTION, pad=X)`:Appends the string `X` to both or either side of each element of `STRING` as many times as necessary so as to inflate the length of element to at least `WIDTH`. The `OPTION` is one of `"left"`, `"right"`, and `"both"` to indicate where the padding should occur. They respectively represent "the left side only", "the right side only", and "both sides so as to center the original". If the original has length greater than or equal to `WIDTH` no padding occurs. In the case of "both", if the number of necessary padding is an odd number to make the length equal to `WIDTH`, the right side receives one more than the left side. The padding sTring `X` must be a single character. You may omit the specification part `pad=` in `pad=X`.
 * `str_trunc(STRING, WIDTH, side=OPTION, ellipsis=E)`: This is in some sense at the opposite of `str_pad`. The function shrinks each string to length `WIDTH` with the single-character string `E` for replacement. The `side=` specification states where the replacement occurs and should be one of `"left"`, `"right"`, and `"center"`. You may omit the `ellipsis=` prefix.
@@ -995,6 +1001,7 @@ str_replace_all(s,"[0-9][0-9]", "##")
 ```
 
 There are three more string mutation functions.
+
 * `str_to_lower(STRING)`: This converts each uppercase letter to its corresponding lowercase letter.
 * `str_to_upper(STRING)`: This converts each lowercase letter to its corresponding uppercase letter.
 * `str_to_title(STRING)`: This converts each string to a title-like format.
@@ -1043,6 +1050,7 @@ str_c(t, collapse=":")
 __Sorting__
 
 There are two functions.
+
 * `str_sort(STRING,decreasing=X,na_last=Y,numeric=Z)`: Sorts the elements as the string. The arguments after the first one are optional. `X`, `Y`, and `Z` are Boolean. With `decreasing=TRUE` the ordering is reverse. The `na_last=FALSE`, all `NA` move to the start. With `numeric=TRUE`, the function treats numerical sequences as numbers; otherwise, it treats them as character sequences.
 * `str_order(...)`: The same arguments as `str_sort`, but instead of actually sorting, returns the sequence of indexes such that ordering the elements according to the index list produces the same result as `str_sort`.
 
