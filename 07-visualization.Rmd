@@ -3,401 +3,457 @@ output:
   html_document: default
   pdf_document: default
 ---
-# Data Visualization with ggplot
 
-As you develop familiarity in processing data, you learn how to develop intuition from the data at hand by glancing at its values.
-Unfortunately, there is only so much you can do with glancing at values.
-There is a substantial limitation to what you can obtain when the data at hand is so large.
-Visualization is a powerful tool in such cases.
-In this chapter we introduce the `ggplot2` package for visualization.
-The `ggplot2` package is part of `tidyverse`, and like other packages, loading `tidyverse` is sufficient.
+# Data Visualization
 
-## Visualizing with `ggplot2`
+As you develop familiarity with processing data, you learn how to develop intuition from the data at hand by glancing at its values. Unfortunately, there is only so much you can do with glancing at values. There is a substantial limitation to what you can obtain when the data at hand is so large.
 
-R provides many facilities for creating visualizations.
-The most sophisticated of all that are available is `ggplot2`.
-The structure of visualization with `ggplot2` is by way of *grammar of graphics*.
-Although the name of the package is `ggplot2` the function we call to specify the data is `ggplot()`.
-It is a bit confusing, but we will be loading the meta-package `tidyverse`, we can be totally oblivious to the name difference.
-You can consult this [cheatsheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) for quick referencing.
+Visualization is a powerful tool in such cases. In this chapter we introduce another key member of the tidyverse, the `ggplot2` package, for visualization.
 
-Let us begin by loading `tidyverse`.
+## Introduction to `ggplot2`
 
-```{r, message = FALSE, warning = FALSE}
+R provides many facilities for creating visualizations. The most sophisticated of them, and perhaps the most elegant, is `ggplot2`. In this section we introduce generating visualizations using `ggplot2`.   
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let’s load it in as usual.
+
+```{r message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-Let us use the `mpg` data set as our source.
-`mpg` is a data set by the US Environmental Protection Agency that shows information about 38 models of car between 1999 and 2008.
-We visited this data set earlier.
-The table `mpg` has 234 rows and 11 columns. Use `?mpg` open its help page. Let's have a look at a snapshot of the data again.  
+### The layered grammar of graphics 
+
+The structure of visualization with `ggplot2` is by way of something called the  *layered grammar of graphics* -- a name that will certainly impress your friends! 
+
+The name of the package `ggplot2` is a bit of a misnomer as the main function we call to visualize the data is `ggplot`. As with `dplyr` and `stringr`, the `ggplot2` [cheatsheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) is quite helpful for quick referencing.
+
+Each visualization with `ggplot` consists of some building blocks. We call these *layers*. There are three types of layers:
+
+* the __base layer__, which consists of the background and the coordinate system,
+* the __geom layers__, which consist of individual geoms, and
+* the __ornament layers__, which consists of titles, legends, labels, etc.
+
+We call the plot layers `geom` layers because each plot layer requires a call to a function with the name starting with `geom_`. There are many geoms available in `ggplot` and you can think of these as the buildings blocks that compose many of the diagrams you are already familiar with. For instance, *point* geoms are used to create scatter plots, *line* geoms for line graphs, *bar* geoms for bar charts, and *histogram* geoms for histograms -- check out the cheat sheet for many more! We will explore the main geoms in this chapter. 
+
+To specify the base layer, we use the function `ggplot()`. Using the function alone is rather unimpressive.  
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot()
+```
+
+All `ggplot2` has done so far is set up a blank canvas. To make this plot more interesting, we need to specify a dataset and a coordinate system to use. To build up the discussion, let us turn to our first geom: the *point* geom.  
+
+## Point geoms
+
+Let us begin our exploration with the *point* geom. As noted earlier, point geoms are useful in that they can be used to construct a *scatter plot*. 
+
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let us load it in as usual.
+
+```{r message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### The `mpg` tibble 
+
+We will use the `mpg` dataset as our source for this section. This dataset is collected by the US Environmental Protection Agency and shows information about 38 models of car between 1999 and 2008. We have visited this data in earlier sections. Use `?mpg` to open its help page for more information.
+
+The table `mpg` has 234 rows and 11 columns. Use  Let us have a look at a snapshot of the data again.  
 
 ```{r}
 mpg
 ```
 
-Another way to preview the data is by using `glimpse()`. 
+Another way to preview the data is using `glimpse`. 
 
-```{r}
+```{r eval=FALSE}
 glimpse(mpg)
 ```
 
-<!--
-__Terminology.__ As we introduced in the previous chapter,  *variable* is a synonym for attributes.
-The term variable emphasizes that the feature can have different values for different individuals – the numbers of movies that actors have been in varies across all the actors.
+### Your first visualization
 
-Variables that have numerical values, such as 'highway miles per gallon' or 'engine displacement' are called *quantitative* or *numerical* variables.
--->
+We first specify the base layer. Unlike before, this time we specify our intention to use the `mpg` dataset.  
 
-### The Building Blocks of `ggplot`
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(data = mpg)
+```
 
-Each visualization with `ggplot` consists of some building blocks.
-We call them *layers*.
-There are three types of layers:
+We are still presented with a profoundly useless plot. Let us amend our code a bit. 
 
-* the base layer, which consists of the background and the coordinate system,
-* the plot layers, which consist of individual plots, and
-* the ornament layers, which consists of titles, legends, labels, etc.
-
-We call the plot layers `geom` layers because each plot layer requires a call to a function with the name starting with `geom_`.
-There are many geoms available in `ggplot`.
-The most popular and the most intuitive to our senses are bar charts, line charts, scatter plots, and histograms.
-We cover all these types in this chapter.
-The geom types corresponding to these charts are *bar* geoms, *line* geoms, *point* geoms, and *histogram~ geoms, respectively.
-
-To specify the base layer, we use the function `ggplot()`.
-
-We quite specify the first two layers, (1) and (2), using two major arguments `data = ...` and `mapping = ...`.
-They are for specifying the data set and the coordinate system, respectively.
-Thus, the value that follows `data = ` must be a data frame, for example, `mpg`, and the value that follows `mapping = ` must be a specification of  *aesthetic*.
-Often, a plot uses two orthogonal axes with either axis represents an attribute of the data frame.
-In the case of orthogonal axes, an aesthetic speficatio takes the form `aes(x = AAA, y = BBB)` where `AAA` and `BBB` are attributes.
-We use `aes()` to specify the attributes to plot using the expression `mapping = aes(...)`.
-
-## Scatter Plots 
-
-Let's start our exploration with the __point__.
-
-A *scatter plot* is a plot that presents the relation between two numerical variables.
-In other words, a scatter plot of variables `A` and `B` draws data from a collection of pairs `(a,b)`, where each pair comes from a single observation in the data set.
-The number of pairs you plot can be one or more.
-There is no restriction on the frequencies we observe the same pair, the same `a`, and the same `b`.
-<!--You saw an example of a scatter plot in an early section where we looked at the number of periods and number of characters in two classic novels. -->
-We will use a scatter plot here to visualize the relationship between the highway fuel efficiency (`hwy`) and the displacement of its engine (`displ`).
-
-```{r, fig.align="center", dpi=80}
+```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(data = mpg) +
   geom_point(mapping = aes(x = displ, y = hwy))
 ```
-Each point on the plot is the pair of values of one car in the data set.
-Note that there are quite a few groups of points that align horizontally and quite a few groups of points that align vertically.
-The former are groups that share the same (close to the same) `hwy` values with each other, the latter are groups that share the same (close to the same) `displ` values with each other.
 
-We notice several things in the code:
+Ta-da, our first visualization! Let us unpack what we just did. 
 
-* There are one `ggplot` and one `geom_point.
+The first line of this code specifies the *base layer* with the argument `data = ` and the second line describes the *geom layer* where a point geom is to be used along with a mapping known as an *aesthetic*. More specifically, we designate the point geom by calling the function `geom_point` and a *coordinate system* by passing to the function an argument containing the *aesthetic* (the value that follows `mapping = `).
+
+An aesthetic *maps* information from a data frame or tibble to characteristics of a plot. A plot will often use [Cartesian coordinates](https://en.wikipedia.org/wiki/Cartesian_coordinate_system) where each axis represents an attribute of the data frame and we map variables on to the x and y axes, respectively. In the case of this plot, we map `displ` to the x-axis and `hwy` to the y-axis. 
+
+To round up the discussion, here are the key points from the code we have just written: 
+* There is one `ggplot` and one `geom_point`.
 * The `ggplot` call preceded the `geom_point` call.
-* The plus sign `+` connects between the two calls.
+* The plus sign `+` connects the two calls.
 * A `data` specification appears in the `ggplot` call.
 * A `mapping` specification appears in the `geom_point` call.
 
 The semantics of the code is as follows:
 
 * Instruct `ggplot` to get ready for creating plots using `mpg` as the data.
-* Instruct `geom_point` to create a plot using `displ` as the x-axis and `hwy` as the y-axis, where the two attributes are from the data frame `mpg`.
+* Instruct `geom_point` to create a plot using `displ` as the x-axis and `hwy` as the y-axis, where the two variables are from the data frame `mpg`.
 
-Once it receives the `aes` specification, `ggplot` places coordinates so it can plot any combination of `x` and `y`.
-To accomplish the placement, `ggplot` exams the values appearing in the two variables to find the maximum and the minimum appearing in the variables.
-Thus, the coordinate determination is possible without having to specify a geom; that is, it is possible to include the `mapping = aes(...)` as an argument in `ggplot`.
-The example exactly does this.
-By telling `ggplot` which data to use and which attributes of the data to use, you can generate a coordinate plot. 
+## Scatter plots 
 
-```{r, fig.align="center", dpi=80}
-ggplot(data = mpg, mapping = aes(x = `displ`, y = `hwy`))
-```
-Once `ggplot` has the data and the coordinate information, you do not have to state the mapping information any more - it suffices to tell you need a `geom_point`.
-`ggplot` then creates a scatter plot using the present specification of x and y.
+Our first visualization is an example of a scatter plot. A *scatter plot* is a plot that presents the relation between two numerical variables.
 
-```{r, fig.align="center", dpi=80}
-ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + geom_point()
+In other words, a scatter plot of variables `A` and `B` draws data from a collection of pairs `(a,b)`, where each pair comes from a single observation in the data set.
+The number of pairs you plot can be one or more. There is no restriction on the frequencies we observe the same pair, the same `a`, and the same `b`.
+
+We can use a scatter plot here to visualize the relationship between the highway fuel efficiency (`hwy`) and the displacement of its engine (`displ`).
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
 ```
 
-It is also possible to restate the data, the mapping, or both in the `geom_point` call.
-A convenient feature of `ggplot` is that once you have specified `data` or `aes`, you do not have to specify it again as long as you keep using the same setting.
-It means that you have a lot of freedom in saying where you want to state the data you plot about and which coordinates you use.
-The example again produces the same plot as the first.
-The difference this time is that the code specifies the `data` and `aes` both in the `ggplot` call and the `geom_point` call.
+Each point on the plot is the pair of values of one car model in the dataset.
+Note that there are quite a few groups of points that align horizontally and quite a few groups of points that align vertically. The former are groups that share the same (close to the same) `hwy` values with each other, the latter are groups that share the same (close to the same) `displ` values with each other. We can observe a graceful trend downward in the plot -- lower engine displacement is associated with more highway miles per gallon.   
 
-
-```{r, fig.align="center", dpi=80}
-ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
-  geom_point(data = mpg, mapping = aes(x = displ, y = hwy))
-```
-Also, we can omit the prefix `data = ` and `mapping =`.
+<!-- Also, we can omit the prefix `data = ` and `mapping =`.
 The example below again does the same.
 
-```{r, fig.align="center", dpi=80}
+```{r, eval = FALSE, fig.align="center", dpi=80}
 ggplot(mpg) +
   geom_point(aes(x = displ, y = hwy))
-```
+``` 
+--> 
 
-### Coloring Points
+### Adding color to your geoms
 
-Let us go back to the plot and see where the points are.
-It appears to us that the points are following some downward trend.
-We can imagine two parallel down slopes encompassing most of the points.
-`ggplot` can assign colors to its points.
-You can specify the attribute for `ggplot` to use to determine the colors.
-The plot below instructs `ggplot` to use the `class` attribute.
-You can make the specification in the `aes` of `geom_point`.
+It appears that the points are following some downward trend. Let us examine this more closely by using `ggplot` to assign colors to its points.
 
-```{r, fig.align="center", dpi=80}
+You can specify the attribute for `ggplot` to use to determine the colors, for instance, the `class` attribute. We make the specification in the `aes` of `geom_point`.
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(data = mpg) +
   geom_point(mapping = aes(x = displ, y = hwy, color = class))
 ```
 
-It looks like the points in the "2seater" class appear to the middle right,
-Let us get rid of them to create a neqw data set.
+This visualization allows us to make new observations about the data. Namely, it appears that there is a cluster of points from the "2seater" class that veer off to the right and seem to break the overall trend present in the data. Let us set aside these points to compose a new dataset.  
 
-```{r}
-mpg1 <- filter(mpg, class != "2seater")
-ggplot(data = mpg1) +
+```{r dpi=80,  fig.align="center", warning = FALSE}
+no_sports_cars <- filter(mpg, class != "2seater")
+ggplot(data = no_sports_cars) +
   geom_point(mapping = aes(x = displ, y = hwy, color = class))
 ```
 
 After the removal of the "2seater" class, the downward trend appears more vivid.
 
+### Categorical variables 
+
+Coloring points according to some attribute is useful when dealing with *categorical variables*, that is, variables whose values come from a fixed set of categories. For instance, a variable named `ice_cream_flavor` may have values that are from the categories *chocolate*, *vanilla*, or *strawberry*; in terms of the `mpg` data, `class` can have values that are from the categories *compact*, *midsize*, *pickup*, *subcompact*, or *suv*.   
+
+Can we develop more insights from categorical variables?
+
+Using the `mutate` function, we can create a new categorical variable `japanese_make`, which is either `TRUE` or `FALSE` depending on whether the manufacturer is one of Honda, Nissan, Subaru, or Toyota. We create a new dataset with the addition of this new variable. 
+
 ```{r}
-unique(mpg$manufacturer)
+no_sports_cars <- no_sports_cars %>% 
+  mutate(japanese_make = 
+           manufacturer %in% c("honda", "nissan", "subaru", "toyota"))
 ```
 
-Can we develop more insights using coloring?
-Using the `mutate` function, we can create a new attribute `japanee`, which gives whether the manufacturer is one of Honda, Nissan, Subaru, and Toyota.
-We create a new data set with the addition of `japanese`.
 
-```{r}
-mpg1 %>% mutate(japanese = ( manufacturer == "honda" | manufacturer == "nissan" | manufacturer == "subaru" | manufacturer == "toyota") ) -> mpg2
+Let us create a new plot using `japanese_make` as a coloring strategy. 
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(data = no_sports_cars) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = japanese_make))
 ```
 
-Now let us create two new plots, with two difference coloring strategies: one with `japanese` and the other with `cyl`.
+We can observe a downward trend in the data for cars with a Japanese manufacturer.
 
-```{r}
-ggplot(data = mpg2) +
-  geom_point(mapping = aes(x = displ, y = hwy, color = japanese))
-ggplot(data = mpg2) +
+Let us try a second categorical variable: `cyl`.
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(data = no_sports_cars) +
   geom_point(mapping = aes(x = displ, y = hwy, color = cyl))
 ```
 
-The plot with the `japanese` attribute as the coloring attribute is in a similar format as the one with the `class` attribute.
-For the other plot, the legend appearing to the right of the dots looks very different.
-Instead of dots showing the color specification, it uses a bar with gradation in blue.
-The reason is that `ggplot` thinks that the `cyl` attribute is `double`.
-We can resolve the issue by creating a string-type attribute representing the `cyl` value.
-Below, we create a new attribute `cylname` by way of `mutate`.
-The formula for `cylname` is `as.character(cyl)`, which converts numerals to characters.
+This one has a striking difference compared to our other visualizations. Can you spot the difference? Try to pick it out before reading on. 
 
-```{r}
-mpg2 %>% mutate(cylname = as.character(cyl)) -> mpg3
-ggplot(data = mpg3) +
-  geom_point(mapping = aes(x = displ, y = hwy, color = cylname))
+The legend appearing to the right of the dots looks very different. Instead of dots showing the color specification, it uses a bar with a blue gradient. The reason is that `ggplot` treats the `cyl` attribute as a *continuous variable* and needs to be able to select colors for values that are, say, *between* 4 and 5 cylinders or 7 and 8 cylinders. The appropriate way to do this is by means of a gradient.   
+
+This comes as a surprise to us -- there is no such thing as 4 and three quarters of a cylinder because `cyl` is a categorical variable. The only possible values are either 4, 5, 6, 7, or 8, and nothing in between. How to inform `ggplot` of this fact? 
+
+The solution is to treat `cyl` as a *factor*, which is synonymous with saying that a variable is categorical. The function to use is called `as.factor()`. Let us amend our original attempt to include the call. 
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(data = no_sports_cars) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = as.factor(cyl)))
 ```
 
-Given that `ggplot` plotted by treating `cyl` as continuous values, we can try using true continuous values for colors.
-The attribute `cty` is one such and represents the city fuel efficiency.
+This one bears a resemblance that we are already familiar with. 
 
-Let us try using it.
-```{r}
-ggplot(data = mpg2) +
-  geom_point(mapping = aes(x = displ, y = hwy, color = cty))
-```
+Run your eyes from left to right along the horizontal axis. Observe how for a given `hwy` value, say points around `hwy = 20`, there is a clear transition from cars with 4 cylinders (in red) to cars with 6 cylinders (in cyan) and finally to cars with 8 cylinders (in purple). In contrast, if we look at points at, say around `disp = 2`, and run our eyes along the vertical axis, we do not observe such a transition in color -- all the points still correspond to cars with 4 cylinders (in red).  
 
-Can we use a different color than blue?
-Yes, we append `scale_color_gradient(low = XXX, high = YYY)` at the end with two colors names of our choice.
-Here we pick two colors, "yellow3" and "blue".
+This tells us that there is a stronger association between the continuous variable `displ` and the categorical variable `cyl` than between `hwy` and `cyl`.   
+
+Here is one more plot. Let us plot `hwy` against `cty` when coloring according to `cyl`. We naturally assume that the higher a car model's highway miles per gallon is (`hwy`), the higher its city miles per gallon (`cty`) is as well, and vice versa.
 
 ```{r}
-ggplot(data = mpg2) +
-  geom_point(mapping = aes(x = displ, y = hwy, color = cty)) +
-  scale_color_gradient(low = "yellow3", high="blue")
-```
-Where do we get those color names?
-You can use the [reference here](https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pdf).
-
-<!--
-To wit, we can add the following two lines.
-There are two downward lines that encompass most points.
-```{r, fig.align="center", dpi=80}
-line1 <- function(x) { return(35 - 5.5 * x) } 
-line2 <- function(x) { return(50 - 5.5 * x) } 
-ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
-  geom_point() +
-  geom_line(data = mpg, aes(x = displ, y = line2(displ))) +
-  geom_line(data = filter(mpg,displ<= 4), aes(x = displ, y = line1(displ)))
+ggplot(no_sports_cars) + 
+  geom_point(aes(x = cty, y = hwy, color = as.factor(cyl)))
 ```
 
--->
+This one reveals a *positive association* in the data, as opposed to the *negative association* that we observed in the downward trend in the plot of `hwy` against `displ`. We can also see a greater transition in color as we move left to right in the plot, suggesting a stronger relationship between `cty`and `cyl`. 
 
-Here is one more plot.
-This we plot `hwy` against `cty` with the colors.
-We naturally assume that the higher the `hwy` value is, the higher the `cty` value is, vice versa.
-Plotting the data confirms our intuition about the *positive association*, as opposed to the *negative association* that we observed in the downward trend in the plot of `hwy` against `displ`.
-
+Observe that there are two points that seem to be very far off to the right and one point off to the left. We may call such data points *outliers* meaning that they do not appear to conform to the associations that other observations are following. Let us isolate these points using `filter`. 
 
 ```{r}
-ggplot(mpg3) + geom_point(aes(x = cty, y = hwy, color = cylname))
-```
-
-We observe two points to be very far to the right and one point to be very to the left.
-We may call such data points *outliers* meaning that they do appear conforming to the associations that other obversations are following.
-What are on earth these points?
-We can them using `filter()`.
-We also relocate `cty` after `year`.
-
-```{r}
-mpg %>% filter(cty < 10 | cty > 32.5) %>% relocate(cty, .after=year) %>%
-  relocate( hwy, .before = cyl)
+no_sports_cars %>% filter(cty < 10 | cty > 32.5) %>% 
+  relocate(cty, .after = year) %>%
+  relocate(hwy, .before = cyl)
 ```
 
 We see that the four Dodges and one Jeep are the far left points and two Volkswagens are the far right points.
 
+### Continuous variables 
+
+Given what we learned when experimenting with `cyl`, we might be curious as to what can be gleaned when we intend on coloring points according to a *continuous variable*. Let us try it with the attribute `cty`, which represents the city fuel efficiency.
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(data = no_sports_cars) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = cty))
+```
+
+The blue gradient makes it hard to see changes in the color. Can we use a different gradient other than blue?
+
+Yes! The solution is to add a layer `scale_color_gradient` at the end with two colors names of our choice. In the style of art deco, we pick two colors, `yellow3` and `blue`.
+
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(data = no_sports_cars) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = cty)) +
+  scale_color_gradient(low = "yellow3", high="blue")
+```
+
+Contrast this plot with the one we saw just before with `hwy` versus `displ` when coloring according to `cyl`. The situation is reversed here: as we run our eye up and down for some value of `displ`, we see a transition in color; the same is not true when moving along horizontally. Thus, it seems that `cty` is associated more with `hwy` than `displ`. 
+
+By the way, where do we get those color names? There's a [cheatsheet](https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pdf) for that! 
+
 ### Use Articulations Other Than Colors
 
-__Shapes__
+#### Facets
 
-Instead of using colors, you can use shapes and fill strengths to differentiate between points.
-The argument for the fill strength is `alpha = XXX` where `XXX` is the attribute.
+Instead of using color to annotate points, we can also use something called *facets* which splits the plots into several subplots, one for each category of the categorical variable. Let us use faceting for our last visualization.   
 
-```{r, fig.align="center", dpi=80, warning = FALSE}
-ggplot(mpg3) + geom_point(aes(x = cty, y = hwy, alpha = class))
+```{r dpi=80,  fig.align="center", warning = FALSE}
+ggplot(data = no_sports_cars) +
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ as.factor(cyl), nrow = 2)
 ```
 
-You can specify both `alpha` and `color`, even using different attributes.
-See an example below.
+This one makes it very clear that hardly any car models in the dataset have 5 cylinders! 
+
+#### Shapes
+
+You can use shapes and fill strengths to differentiate between points. The argument for the fill strength is `alpha = X` where `X` is the attribute.
 
 ```{r, fig.align="center", dpi=80, warning = FALSE}
-ggplot(mpg3) + geom_point(aes(x = cty, y = hwy, alpha = displ, color = class))
+ggplot(no_sports_cars) + 
+  geom_point(aes(x = cty, y = hwy, alpha = class))
 ```
 
-You can choose to use different shapes using the `shape = ` argument.
-Below, we use `shape` and `color` on the same attribute `class`.
-`ggplot` collpses the two legends into one.
+You can specify both `alpha` and `color`, even using different variables. See an example below.
 
 ```{r, fig.align="center", dpi=80, warning = FALSE}
-ggplot(mpg3) + geom_point(aes(x = cty, y = hwy, shape = class, color = class))
+ggplot(no_sports_cars) + 
+  geom_point(aes(x = cty, y = hwy, alpha = displ, shape = class))
 ```
 
-__Jittering__
+Welcome to your first 4-D visualization! Note how when we move up and down vertically for some fixed value of `cty`, the shapes do not grow more transparent; this is only observed as we move left and right at some fixed value of `hwy`, suggesting a stronger relationship between `cty` and `displ`. Put another way, we can say that `displ` varies more with `cty` than it does with `hwy`. We do not observe a strong effect with respect to the shapes in `class`. 
 
-You may notice that despite there are 234 entries in the data set, much fewer points (only 109 to be exact) appears in the initial (before filtering) scatter plot of `mpg`.
-This is because many points collide on the plot.
-We call the phenomenon __overplotting__, meaning one point appearing on another.
-It is possible to nudge points to a random direction in a small quantity.
-By making all directions possible, we can make complete overplotting a rare event.
-We call the random nudging arrangement *jittering*.
-To jitter, we add an argument `position = "jitter"` to `geom_point` (not inside `aes`).
+Note that by mapping both the `shape` and `color` aesthetics to the same attribute, say, `class`, the legends are collapsed into one.
+
+```{r, fig.align="center", dpi=80, warning = FALSE}
+ggplot(no_sports_cars) + 
+  geom_point(aes(x = cty, y = hwy, shape = class, color = class))
+```
+
+Can you say whether this visualization contains more or less information than our last one? How many dimensions are displayed here?  
+
+### Jittering
+
+You may notice that despite the fact that there are 234 entries in the data set, much fewer points (only 109 to be exact) appears in the initial (before filtering) scatter plot of `mpg`.
+
+This is because many points collide on the plot. We call the phenomenon __overplotting__, meaning one point appearing over another. It is possible to nudge points in a random direction in a small quantity. By making all directions possible, we can make complete overplotting a rare event. We call the random nudging arrangement *jittering*.
+
+To jitter, we add a positional argument `position = "jitter"` to `geom_point`. Note that this is not a part of the aesthetic specification (so is not inside `aes`).
 
 ```{r, fig.align="center", dpi=80}
-ggplot(mpg3) +
+ggplot(no_sports_cars) +
   geom_point(mapping = aes(x = cty, y = hwy, color = class), position = "jitter")
 ```
-In the first chart in this section, we plotted `hwy` against `displ`.
-In that plot, by substituting `cty` for `hwy`, we obtain a similar plot of `cty` against `displ`.
-What if we want to see now both `hwy` and `cty` against `displ`?
-Is it possible to merge the two plots into one?
-Yes, we do the merger easily using pivoting.
-Recall that `pivot_longer` combines multiple columns into one.
-We can create a new data frame that combines the values from `hwy` and `cty` under the name `efficiency` while specifying whether the value is from `hwy` or from `cty` under the name `eff_type`.
 
+### One more scatter plot
 
+In our first visualization of this section, we plotted `hwy` against `displ`.
+In that plot, by substituting `cty` for `hwy`, we obtain a similar plot of `cty` against `displ`. 
 
+What if we want to see now both `hwy` and `cty` against `displ`? Is it possible to merge the two plots into one?
 
+Yes, we can do the merge easily using pivoting. Recall that `pivot_longer` combines multiple columns into one. We can create a new data frame that combines the values from `hwy` and `cty` under the name `efficiency` while specifying whether the value is from `hwy` or from `cty` under the name `eff_type`.
 
 ```{r}
-mpg3 %>% pivot_longer(cols = c(hwy,cty), names_to = "eff_type", values_to = "efficiency") -> mpg4
+no_sports_cars_pivot <- no_sports_cars %>% 
+  pivot_longer(cols = c(hwy,cty), 
+               names_to = "eff_type", 
+               values_to = "efficiency") 
 ```
 
 Then we can plot `efficency` against `displ` by showing `eff_type` using the shape and `class` using the color.
 
-```{r}
-ggplot(mpg4) +
-  geom_point(aes(x = displ, y = efficiency, shape = eff_type, color = class), position = "jitter")
+```{r warning = FALSE, fig.align="center", dpi=80}
+ggplot(no_sports_cars_pivot) +
+  geom_point(aes(x = displ, y = efficiency, alpha = eff_type, shape = class), 
+             position = "jitter")
 ```
 
-The "jitter" option makes it a bit busy.
-Let us take it away.
+The "jitter" option makes the visualization quite busy. Let us take it away.
 
-```{r}
-ggplot(mpg4) +
-  geom_point(aes(x = displ, y = efficiency, shape = eff_type, color = class))
+```{r, warning=FALSE, fig.align="center", dpi=80}
+ggplot(no_sports_cars_pivot) +
+  geom_point(aes(x = displ, y = efficiency, alpha = eff_type, shape = class))
 ```
 
-## Line and Smooth Plots
+Note the pattern in the fill strength of points as dictated by `eff_type` -- the upper region of the plot is shaded more boldly and the lower region very lightly. We leave it as an exercise to the reader to come up with some explanations as to why such a visible pattern emerges. 
 
-Now we move on to line plotting.
-Recall that we can create a data set of values using `tibble`.
-The data frame `xyzw` has four attributes, `x`, `y`, `z`, and `w`.
-The range of `x` is [-2.5,2.5] with 0.25 as a step width.
-The functions for `y`, `z`, and `w` are $2x - x^2 + 20$, $3x - 10$, and $-x+\sin(x)$, respectively.
+<!-- you will waste more gallons in the city than highway because you are stopped at traffic signs and going from 0 to 40 many more times, which takes more gallons  --> 
 
-Let us learn how to print the three functions.
+## Line and Smooth Geoms
 
+In the last section we introduced scatter plots and how to interpret them using `ggplot` with the point geom. In this section we introduce two new geoms, the point and smooth geoms, to build another (hopefully familiar) visualization: the line chart.    
 
-```{r}
-xyzw <- tibble( x = seq(-2.5, 2.5, 0.25), y = 2 * x - x * x + 20, z = 3 * x - 10, w = -x + 10 * sin(x))
+### Prerequisites
+
+We will make use of the tidyverse in this chapter, so let us load it in as usual.
+
+```{r message = FALSE, warning = FALSE}
+library(tidyverse)
 ```
 
-We start with printing the function `y` against `x`.
-We can use the same strategy as `geom_point()` by simply substituting `geom_line` for `geom_point`.
-A curious phenomenon is the attributes `x` and `y` coincide with the argument names `x` and `y` inside the `aes`.
-So the meaning of `x` and `y` are different depending on which side of the equality sign they fall.
+We will study a data frame called `airmiles`, which contains data about passenger miles on commercial US airlines between 1937 and 1960.
 
-```{r}
-ggplot(xyzw, aes(x = x, y = y)) + geom_line()
-```
-The `y` appearing on the side of the plot refers to the attribute 
-
-We can add `w` to the plot using an additional `geom_line`.
-Since it uses `w`, we need to update `y` in the `aes` in the additional `geom_line`.
-
-```{r}
-ggplot(xyzw, aes(x = x, y = y)) + geom_line() + geom_line(aes(y = z))
-```
-Note that `ggplot` automatically extends the range of the `y` axis so that it can plot both the `y` and `w` functions.
-
-We can switch the order between the `y` line plot and the `z` line plot.
-To accomplish this, we will make the in-`ggplot` `aes` to specify `x` only and then the line plots specify their `y` attributes.
-The resulting plot is always the same, except that `w` appears in place of `y` to the side of the plot.
-
-```{r}
-ggplot(xyzw, aes(x = x)) + geom_line(aes(y = w)) + geom_line(aes(y = z))
-```
-You may notice that the sinusoidal curve is actually a concatenation of sraightline pieces.
-If we do not want to give in to either `y` or `w`, we can specify what the text says using `ylab(Y_LABEL_NAME)`, where `Y_LABEL_NAME` is the text you want to use.
-For much the same reason, you have `xlab`.
-We can change the line color using `color = `m, change the line width using `size = `, and the line type using `linetype = `.
-We have already covered the available color names in `tidyverse`, and you can pick any color from there.
-For size, its default value is 1.
-Available line types are "twodash", "solid", "longdash", "dotted", "dotdash", "dashed", and "blank".
-An example below assigns a label to each axis and selects color, size, and type for each line. 
-
-```{r}
-ggplot(xyzw, aes(x = x)) +
-  geom_line(aes(y = w), color = "pink", size = 2, linetype = "dotted") +
-  geom_line(aes(y = z), color = "forestgreen", size = 1, linetype = "dashed") +
-  ylab("y or z value") +
-  xlab("x value")
+```{r, echo = FALSE}
+df_airmiles <- data.frame(
+  miles = as.matrix(airmiles), date = time(airmiles))
+df_airmiles
 ```
 
+We will examine a toy dataset called `df` to use for visualization. Recall that we can create a dataset using `tibble`. 
+
 ```{r}
-ggplot(xyzw, aes(x = x, y  = y)) + geom_line(aes(color = "salmon pink"))
+df <- tibble(x = seq(-2.5, 2.5, 0.25), 
+             f1 = 2 * x - x * x + 20, 
+             f2 = 3 * x - 10, 
+             f3 = -x + 50 * sin(x))
+df
 ```
 
-Below is a trick perhaps a bit beyond of what we must learn in this course, but if you want to show the color specifications as a legend, you can `scale_color_manual`.
+### A toy data frame  
+
+`df` has four variables, `x`, `y`, `z`, and `w`. The range of `x` is [-2.5,2.5] with 0.25 as a step width. The functions for `y`, `z`, and `w` are $2x - x^2 + 20$, $3x - 10$, and $-x+\sin(x)$, respectively. 
+
+To visualize these three functions, we first need to *pivot* the data so that it becomes a long table. The reason for this step should become evident in a moment.  
+
+```{r}
+df_long <- df %>%
+  pivot_longer(c(f1, f2, f3), names_to = "type", values_to = "y") %>%
+  select(x, y, type)
+df_long
+```
+
+Note how we have two variables present, `x` and `y`, annotated by a third variable, `type`, designating which function the $(x, y)$ pair belongs to.
+
+### The line geom 
+
+We start with visualizing `y` against `x` for each of the three functions. We can use the same strategy as `geom_point` by simply substituting `geom_line` for `geom_point`. However, we will pass an additional argument `group` to the aesthetic to inform `ggplot` which function a point comes from.   
+
+```{r warning = FALSE, fig.align="center", dpi=80}
+ggplot(data = df_long) + 
+  geom_line(mapping = aes(x = x, y = y, group = type))
+```
+
+This plot is quite dull-looking and it can be hard to tell the lines apart from each other. How about we annotate each line with a color? To do this, we substitute the `group` argument for `color`. 
+
+```{r warning = FALSE, fig.align="center", dpi=80}
+ggplot(data = df_long) + 
+  geom_line(mapping = aes(x = x, y = y, color = type))
+```
+
+A curious phenomenon is the variables `x` and `y` coincide with the argument names `x` and `y` inside the `aes`. So the meaning of `x` and `y` are different depending on which side of the equality sign they fall. The `y` appearing on the side of the plot refers to the attribute.  
+
+If we are not content with the labels on the axes, we can specify an alternative using `xlab` or `ylab`. Moreover, we can further control how the line plot looks by specifying the shape, width, and type of line. The resulting effect depends on whether these arguments are passed to the *aesthetic*, as we did above with `color` and `group`, or to the `geom_line` function directly. Here is an example. 
+
+```{r warning = FALSE, fig.align="center", dpi=80}
+ggplot(data = df_long) + 
+  geom_line(mapping = aes(x = x, y = y, color = type), 
+            size = 2, linetype = "longdash") + 
+  xlab("x values") + 
+  ylab("y values")
+```
+
+Observe how the color is varied for each of the functions, but the size and type of the line is the same across all of the them. Can you tell why? If you think you got it, here is a follow-up question: what would you need to change to make *both* the color and line type different for each of the lines? 
+
+By the way, there are many line types offered by `ggplot`. Available line types are "twodash", "solid", "longdash", "dotted", "dotdash", "dashed", and "blank".
+
+### Combining `ggplot` calls with `dplyr`
+
+Let us turn our attention to the function `f3` and set aside the functions `f1` and `f2` for now. We know how to do this using `filter` from `dplyr`. 
+
+```{r}
+only_f3 <- df_long %>%
+  filter(type == "f3")
+```
+
+The object `only_f3` keeps only those points corresponding to the function `f3`. We could then generate the line plot as follows. 
+
+```{r eval = FALSE, warning = FALSE, fig.align="center", dpi=80}
+ggplot(data = only_f3) + 
+  geom_line(mapping = aes(x = x, y = y)) 
+```
+
+However, we have discussed before how naming objects, and keeping track of them, can be cumbersome. Moreover, `only_f3` is only useful as input for the visualization; for anything else, it is a useless object sitting in memory. 
+
+We have learned that the pipe operator (`%>%`) is useful for eliminating  redundancy with `dplyr` operations. We can use the pipe again here, this time to "pipe in" a filtered data frame to use as a data source for  visualization. Here is the re-worked code.    
+
+```{r warning = FALSE, fig.align="center", dpi=80}
+df_long %>%
+  filter(type == "f3") %>%
+  ggplot() + 
+  geom_line(mapping = aes(x = x, y = y)) 
+```
+
+There is something unfortunate about this code: the pipe operator cannot be used when specifying the `ggplot` layers, so we have a motley mix of `%>%` and `+` symbols in the code. Keep this in mind to keep the two straight in your head: use `%>%` when working with `dplyr` and use `+` when working with `ggplot`. 
+
+This curve bears the shape of the famous sinusoidal wave true to trigonometry. However, upon closer inspection, you may notice that the curve is actually a concatenation of many straight-line pieces stitched together. Here is another example using `df_airmiles`.
+
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+ggplot(data = df_airmiles) + 
+  geom_line(mapping = aes(x = date, y = miles))
+```
+
+Is it possible to draw something smoother? For this, we turn to our next geom: the *smooth* geom. 
+
+<!-- If you wish to show the color specifications as a legend, you can use  `scale_color_manual`.
 `scale_color_manual` is a variant of `scale_color_gradient`.
 You can specify a series of color names and a series of matching number of color labels and then use the color labels in `aes`.
 
-```{r}
-ggplot(xyzw, aes(x = x)) +
+```{r eval = FALSE}
+ggplot(df, aes(x = x)) +
   geom_line(aes(y = y, color = "y(x)"), size = 1, linetype = "solid") +
   geom_line(aes(y = z, color = "z(x)"), size = 1, linetype = "dashed") +
   geom_line(aes(y = w, color = "w(x)"), size = 2, linetype = "dotted") +
@@ -406,147 +462,126 @@ ggplot(xyzw, aes(x = x)) +
     values = c("blue", "forestgreen", "pink")) +
   xlab("x value") +
   ylab("y(x)|z(x)|w(x)")
+``` 
+--> 
+
+### Smoothers
+
+We observed in our last plots that while line geoms can be used to plot a line chart, the result may not be as smooth as we would like. An alternative to a line geom is the *smooth* geom, which can be used to generate a *smooth line plot*. 
+
+The way to use it is pretty much the same as `geom_line`. Here is an example using the toy data frame, where the only change made is substituting the geom. 
+
+The argument `se = FALSE` we pass to `geom_smooth` is to disable a feature that displays confidence ribbons around the line. While these are certainly useful, we will not study them in this course.  
+
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+ggplot(data = df_long) + 
+  geom_smooth(aes(x = x, y = y, color = type), 
+              se = FALSE)
 ```
 
-__Smooth Lines__
+Observe that the piece-wise straight line of the sine function now looks like a proper curved line.
 
-An alternative to the line plot is a *smooth line plot*.
-The way to use is pretty much the same as `geom_line`.
+It is possible to mix line and smooth geoms together in a single plot.
 
-```{r}
-ggplot(xyzw, aes(x = x, y = y)) + geom_smooth()
-```
-You may notice that the piece-wise straight line of `y` is now a curved line.
-
-It is possible to mix a line and a smooth line in one plot as we show below.
-The black line segments are from the piece-wise line segments resulting from `geom_line`.
-
-```{r}
-ggplot(mpg3, aes(x = hwy, y = cty)) +
-  geom_line() +
-  geom_smooth()
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+ggplot(data = df_long) + 
+  geom_smooth(mapping = aes(x = x, y = y, color = type), se = FALSE) + 
+  geom_line(mapping = aes(x = x, y = y, color = type))
 ```
 
-It is possible to specify colors and line types in `geom_smooth` as well.
+Notice the slight deviations along the sine curve. The effect is more apparent when we visualize `airmiles`.
 
-```{r}
-ggplot(mpg3, aes(x = hwy, y = cty)) +
-  geom_line(aes(color = "actual"), linetype = "dotted") +
-  geom_smooth(aes(color = "central")) +
-  scale_color_manual("", breaks = c("actual", "central"),
-    values = c("red", "blue"))
-```
-
-Notice a band of grey appearing surrounding the smooth line.
-`geom_smooth` uses a mathematical method to determine the smooth line.
-You can instruct `geom_smooth` to use a specific method, but what methods are available and how to state the selection is beyond the scope of this course.
-`geom_smooth` also produces a ribbon over the line.
-The ribbon is for showing the range of possibilities, meaning that all smooth lines that stay inside the ribbon are possibilities with the thick line in the center.
-
-Let us do one more plot using the combination of a line and a smooth, where we plot `hwy` against `displ`.
-
-```{r}
-ggplot(mpg3, aes(x = displ, y = cty)) +
-  geom_line(aes(color = "actual"), linetype = "dotted") +
-  geom_smooth(aes(color = "central")) +
-  scale_color_manual("", breaks = c("actual", "central"),
-    values = c("gold3", "aquamarine4"))
-```
-
-__Another Example__
-
-Let us pick another example.
-We can use a line graph to study `airmiles`, which contains data about passenger miles on commercial US airlines between 1937 and 1960. 
-
-```{r, echo = FALSE}
-df_airmiles <- data.frame(
-  miles = as.matrix(airmiles), date = time(airmiles))
-```
-
-```{r echo=FALSE, fig.align="default", message=FALSE, out.width="50%"}
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 ggplot(data = df_airmiles) + 
-  geom_line(mapping = aes(x = date, y = miles))
-ggplot(data = df_airmiles) + 
-  geom_smooth(mapping = aes(x = date, y = miles))
+  geom_point(mapping = aes(x = date, y = miles)) + 
+  geom_line(mapping = aes(x = date, y = miles)) + 
+  geom_smooth(mapping = aes(x = date, y = miles), 
+              se = FALSE)
 ```
 
-Notice that two charts appear as the result since we call `ggplot` twice.
 The line geom creates the familiar line graph we typically think of while the smooth geom "smooths" the line to aid the eye in seeing overall patterns; the line geom, in contrast, is much more "ridgy".
+
+`geom_smooth` uses statistical methods to determine the smoother. One of the methods that can be used is *linear regression*, which is a topic we will see study in detail towards the end of the course. Here is an example.
+
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+ggplot(data = df_airmiles) + 
+  geom_point(mapping = aes(x = date, y = miles)) + 
+  geom_line(mapping = aes(x = date, y = miles)) + 
+  geom_smooth(mapping = aes(x = date, y = miles), 
+              method = "lm", se = FALSE)
+```
+
+Let us close our discussion of line and smooth geoms using one more example of the smooth geom. 
+
+### Observing a negative trend 
 
 The smooth geom can be useful to confirm the negative trend we have observed in the `mpg` data frame.
 
-```{r, fig.align="center", dpi=80, message = FALSE, warning = FALSE, results = FALSE}
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 ggplot(data = mpg) + 
     geom_point(mapping = aes(x = displ, y = hwy, color = class)) + 
-    geom_smooth(mapping = aes(x = displ, y = hwy))
+    geom_smooth(mapping = aes(x = displ, y = hwy), 
+                se = FALSE)
 ```
 
-Here we have layered *two* geoms in the same graph: a point geom and a smooth geom.
-Note how the outlier points have influenced the overall shape of the curve to bend upward, muddying the claim that there is a strong negative trend present in the data.
+Here we have layered *two* geoms in the same graph: a point geom and a smooth geom. Note how the outlier points have influenced the overall shape of the curve to bend upward, muddying the claim that there is a strong negative trend present in the data.
+
 Armed with our understanding about sports cars, we can adjust the visualization by setting aside points with `class == "2seater"`.         
 
-```{r, fig.align="center", dpi=80, message = FALSE, warning = FALSE, results = FALSE}
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 no_sports_cars <- filter(mpg, class != "2seater")
 ggplot(data = no_sports_cars) + 
     geom_point(mapping = aes(x = displ, y = hwy, color = class)) + 
-    geom_smooth(mapping = aes(x = displ, y = hwy))
+    geom_smooth(mapping = aes(x = displ, y = hwy), 
+                se = FALSE)
 ```
 
 This plot shows a much more graceful trend downward.
 
-Before moving to the next topic, we point out some redundancy present in our plotting code.
-Namely, we have defined the same mapping for `x` and `y` in two different places.
+Before moving to the next topic, we point out some redundancy present in our plotting code. Namely, we have defined the same mapping for `x` and `y` in two different places.
+
 This could cause some unexpected surprises when writing code: imagine if we wanted to change the y-axis to `cty` instead of `hwy`, but we forgot to change both occurrences of `hwy`. This can be amended by moving the mapping to `ggplot()`.     
 
-```{r, eval = FALSE}
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 no_sports_cars <- filter(mpg, class != "2seater")
 ggplot(data = no_sports_cars, mapping = aes(x = displ, y = hwy)) + 
-    geom_point(mapping = aes(x = displ, y = cty, color = class)) + 
-    geom_smooth(aes(x = displ, y = cty)) +
-    geom_smooth(aes(x = displ, y = hwy))
-```
-
-We can extend this idea further to specify different `data` for each layer. Here, the smooth geom displays only a subset of the data, the sports cars.  
-
-```{r, eval = FALSE, fig.align="center", dpi=80, message = FALSE, warning = FALSE, results = FALSE}
-ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
     geom_point(mapping = aes(color = class)) + 
-    geom_smooth(data = filter(mpg, class != "2seater"))
+    geom_smooth(se = FALSE)
 ```
 
-We can also write this more concisely by omitting some keywords as below, and the result is the same.
+We can also write this more concisely by omitting some keywords as below, and the result would be the same.
 
-```{r, fig.align="center", dpi=80, message = FALSE, warning = FALSE, results = FALSE}
+```{r eval = FALSE, message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 ggplot(mpg, aes(x = displ, y = hwy)) + 
     geom_point(aes(color = class)) + 
-    geom_smooth(data = filter(mpg, class != "2seater"))
+    geom_smooth(data = filter(mpg, class == "2seater"), se = FALSE)
+```
+
+We can extend this idea further to specify different `data` for each layer. Here, the smooth geom gives a smoother for only a subset of the data, the sports cars.
+
+```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+ggplot(mpg, aes(x = displ, y = hwy)) + 
+    geom_point(aes(color = class)) + 
+    geom_smooth(data = filter(mpg, class == "2seater"), se = FALSE)
 ```
 
 
+## Visualizing Categorical Variables
 
-## Visualizing Categorical Attributes
+The point, line, and smooth plots are for viewing relations among numerical variables. As you are well aware, numerical variables are not the only type of variables in a data set. There are variables representing categories, and we call them *categorical variables*.
 
-The point, line, and smooth plots are for viewing relations among numerical attributes.
-As you are well aware, numerical attributes are not the only type of attributes in a data set.
-There are attributes representing categories, and we call them *categorical attributes*.
-A categorical attribute has a fixed, finite number of possible values, which we call *categories*.
-The categories of a categorical attribute are distinct from each other, but other are no other binary relationships than we can assert on them (such that a category is "greater than" another).
-A special categorical attribute is a *binary category*, where there are exactly two values.
-A binary category that we are probably the most familiar with is the *Boolean category*, which has "true" and "false" as its values.
-Because of the familiarity, we often identify a binary category as a Boolean category.
+A categorical attribute has a fixed, finite number of possible values, which we call *categories*. The categories of a categorical attribute are distinct from each other.
 
-In data sets, categories in a categorical attribute are strings.
-Some times, categories are whoe numbers 1, 2, ..., representing indexes.
-Such cases may require some attention when processing with R, because R may think if the attributes as numbers.
+A special categorical attribute is a *binary category*, where there are exactly two values. A binary category that we are probably the most familiar with is the *Boolean category*, which has "true" and "false" as its values. Because of the familiarity, we often identify a binary category as a Boolean category.
 
-We have seen examples of categorical attributes before.
-The `class` attribute in the `mpg` data set is one.
+In datasets, categories in a categorical attribute are sometimes called *levels* and we refer to such a categorical attribute as a *factor*. Sometimes, categories are whole numbers 1, 2, ..., representing indexes.
+Such cases may require some attention when processing with R, because R may think of the variables as numbers.
+
+We have seen examples of categorical variables before. The `class` attribute in the `mpg` data set is one.
 
 ### Prerequisites
 
-As before, let us load `tidyverse`.
-Moreover, we will make use of data sets that are not available in `tidyverse` but are available in the package `faraway`.
-So, we load the package too.
+As before, let us load `tidyverse`. Moreover, we will make use of datasets that are not available in `tidyverse` but are available in the package `faraway`. So, we load the package too.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
@@ -561,10 +596,7 @@ The table `happy` contains data on 39 students in a University of Chicago MBA cl
 happy
 ```
 
-Armed with what we have learned about `ggplot2`, we can begin answering questions about this data set using table manipulation and visualization techniques.
-For instance, which "happiness" scores are the most frequent among the students?
-Moreover, can we discover an association between feelings of belonging and higher scores of happiness?
-How about family income?  
+Armed with what we have learned about `ggplot2`, we can begin answering questions about this data set using data transformation and visualization techniques. For instance, which "happiness" scores are the most frequent among the students? Moreover, can we discover an association between feelings of belonging and higher scores of happiness? How about family income?  
 
 Before we inspect the `happy` data set any further, we will also consider another table `diamonds`, which contains data on almost 54,000 diamonds.   
 
@@ -572,46 +604,32 @@ Before we inspect the `happy` data set any further, we will also consider anothe
 diamonds
 ```
 
-The *values* of the categorical variable *cut* are "fair", "good", "very good", "ideal", and "premium".
-We can look at how many diamonds are in each category by using `group_by()` and `summarise()`.
+The *values* of the categorical variable *cut* are "fair", "good", "very good", "ideal", and "premium". We can look at how many diamonds are in each category by using `group_by()` and `summarize()`.
 
 ```{r, message = FALSE}
 diamonds %>%
   group_by(cut) %>%
-  summarise(count = n())
+  summarize(count = n())
 ```
 
-The table shows the number of diamonds of each cut.
-We call this a *distribution table*.
-A distribution shows all the values of a variable, along with the frequency of each one.
-Recall that the summary does not persist on the `diamonds` data set and so the data set remains the same after summarization.
+The table shows the number of diamonds of each cut. We call this a *distribution*. A distribution shows all the values of a variable, along with the frequency of each one. Recall that the summary does not persist on the `diamonds` data set and so the dataset remains the same after summarization.
 
 ### Bar Chart
 
 The bar chart is a familiar way of visualizing categorical distributions.
-Each category of a categorical attribute has a number it has an association with, and a bar chart presents the numbers for the categories using bars, where the height/width of the bars represent the numbers.
-Typically, the bars in a bar chart appear either all vertically or all horizontally with an equal space in between and with the same width/height (that is, the non-variable dimension of the bars).
+Each category of a categorical attribute has a number it has an association with, and a bar chart presents the numbers for the categories using bars, where the height of the bars represent the numbers.
+
+Typically, the bars in a bar chart appear either all vertically or all horizontally with an equal space in between and with the same height but expanding horizontally (that is, the non-variable dimension of the bars).
 
 ```{r, fig.align="center", dpi=80, warning = FALSE}
-ggplot(data = diamonds, mapping = aes(x = cut)) + 
+ggplot(diamonds, aes(x = cut)) + 
   geom_bar()
 ```
 
-The x-axis displays the values for the *cut* attribute while the y-axis says "count".
-The label "count" is the result of `geom_bar()` generating bars.
-Since the number of observations is greater than there are categories, `geom_bar()` decides to count the occurrences of each category.
+The x-axis displays the values for the *cut* attribute while the y-axis says "count". The label "count" is the result of `geom_bar()` generating bars. Since the number of observations is greater than there are categories, `geom_bar()` decides to count the occurrences of each category.
 The word "count" says that it is the result of counting.
-We often call the inner working of the `geom_bar()` (and other geom functions) for number generation __stat__.
 
-<!-- The algorithm used to compute the new values is called a statistical transformation, or __stat__. It works as follows.
-
-```{r, echo=FALSE, fig.align="center", fig.asp=1/2, fig.cap="Figure courtesy of *R for Data Science*, Grolemund and Wickham"}
-knitr::include_graphics('images/visualization-stat-bar.png')
-```
-
--->
-
-Thus, `ggplot2` transforms the raw table to a new dataset of categories with its corresponding counts. From this new table, the bar plot is constructed by mapping `cut` to the x-axis and `count` to the y-axis. 
+We often call the inner working of the `geom_bar()` (and other geom functions) for number generation __stat__. Thus, `ggplot2` transforms the raw table to a new dataset of categories with its corresponding counts. From this new table, the bar plot is constructed by mapping `cut` to the x-axis and `count` to the y-axis. 
 
 The default stat `geom_bar()` uses for counting is `stat_count()`, which counts the number of cases at each `x` position. If the counts are already present in the dataset and we would prefer to instead use these directly  for the heights of the bars, we can set `stat = "identity"`. For instance, consider this table about popular pies sold at a bakery. The "count" is already present in the `sold` variable. 
 
@@ -632,41 +650,47 @@ Note how we provide both `x` and `y` aesthetics when using the `identity` stat.
 
 ### Towards numerical variables 
 
-Let's turn to the `happy` data frame.
-We can consider the *categories* to be points on the 10-point scale, and the *individuals* the students in each interval.
-Let's determine this distribution table using `group_by` and `sumarize`.
-Below, we take the `happy` data set and execute grouping by `happy`.
-The category for the happy value is `happiness` in this new data set `happy_students`.
-We summarize in terms of the counts `n()` and we state the count as an attribute  `number`.
+Let us turn to the `happy` data frame. We can consider the *categories* to be points on the 10-point scale, and the *individuals* the students in each interval. Let us determine this distribution using `group_by` and `sumarrize`.
 
+Below, we take the `happy` data set and execute grouping by `happy`. The category for the happy value is `happiness` in this new dataset `happy_students`. We summarize in terms of the counts `n()` and we state the count as an attribute `number`.
 
 ```{r out.width = "50%", fig.align="default", message = FALSE}
 happy_students <- group_by(happy, happiness = happy) %>% 
   summarize(number = n())
 happy_students
 ```
+
 We can now use this table, along with the graphing skills that we acquired above, to draw a bar chart that shows which scores are most frequent among the 39 students.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy_students) + 
   geom_bar(aes(x = happiness, y = number), stat = "identity") +
-  xlab("Happy score") + ylab("Count")
+  xlab("Happy score") + 
+  ylab("Count")
 ```
-Here R treats the happy score as numerical values.
-That is the reason that we see 2.5, 5.0, 7.5, and 10.0 on the x-axis.
-Can we make the values string?
-We can treat the happy scores as strings, using `as.character()` function.
-Below, instead of simply saying `x = happiness`, the argument states `x = as.charac ter(happuness)`.
 
+Here R treats the happy score as numerical values. That is the reason that we see 2.5, 5.0, 7.5, and 10.0 on the x-axis. Let us inform R that these are indeed categories by treating `happiness` as a factor. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy_students) + 
-  geom_bar(aes(x = as.character(happiness), y = number), stat = "identity") +
-  xlab("Happy score") + ylab("Count")
+  geom_bar(aes(x = as.factor(happiness), y = number), stat = "identity") +
+  xlab("Happy score") + 
+  ylab("Count")
 ```
-This almost looks good, excpet that "10" appears at the start, instead of at the end.
-This is the result of treating the values as strings.
-There is an alternate treatment - treating the values as "factors".
+
+We can also reorder the bars in the descending order of `number`.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(happy_students) + 
+  geom_bar(aes(x = reorder(happiness, desc(number)), y = number), 
+           stat = "identity") +
+  xlab("Happy score") + 
+  ylab("Count")
+```
+
+There is something unsettling about this chart. Though it does answer the question of which "happy" scores appear most frequently among the students, it doesn't list the scores in chronological order.
+
+Let us return to the first plot.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy_students) + 
@@ -674,29 +698,9 @@ ggplot(happy_students) +
   xlab("Happy score") + ylab("Count")
 ```
 
-
-We can also reorder the bars in the descending order of `number.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(happy_students) + 
-  geom_bar(aes(x = reorder(happiness, desc(number)), y = number), stat = "identity") +
-  xlab("Happy score") + ylab("Count")
-```
-
-There is something unsettling about this chart.
-Though it does answer the question of which "happy" scores appear most frequently among the students, it doesn't list the scores in chronological order.
-So, let's return to the first map.
-
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(happy_students) + 
-  geom_bar(aes(x = happiness, y = number), stat = "identity") +
-  xlab("Happy score") + ylab("Count")
-```
-
 Now the scores are in increasing order.
-We can attempt an answer to our second question: is there an association between feelings of belonging and "happy" scores? Put another way, what relationship, if any, exists between `love` and `happy`? 
 
+We can attempt an answer to our second question: is there an association between feelings of belonging and "happy" scores? Put another way, what relationship, if any, exists between `love` and `happy`? For this, let us turn to positional adjustments in `ggplot`. 
 
 ### More on positional adjustments
 
@@ -709,23 +713,16 @@ ggplot(happy) +
   geom_bar(aes(x = happy, fill = as.factor(happy)))
 ```
 
-```{r echo = FALSE, out.width = "50%", fig.align="default", message = FALSE}
-ggplot(happy) +
-  geom_bar(aes(x = happy, color = as.factor(happy)))
-ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as.factor(happy)))
-```
-
-The legend that appears says "as.factor(happy)", because we used the value for coloring.
-We can change the title with the use of `labs(fill = ...)` ornamentation.
+The legend that appears says "as.factor(happy)", because we used the value for coloring. We can change the title with the use of `labs(fill = ...)` ornamentation.
 
 ```{r eval = FALSE}
 ggplot(happy) +
-  geom_bar(aes(x = happy, color = as.factor(happy))) + labs(fill="happy")
+  geom_bar(aes(x = happy, color = as.factor(happy))) + 
+  abs(fill="happy")
 ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as.factor(happy))) + labs(fill="happy")
+  geom_bar(aes(x = happy, fill = as.factor(happy))) + 
+  labs(fill="happy")
 ```
-
 
 To make this code work, note how the parameter passed to the `color` and `fill` aesthetic is converted to a factor, or categorical variable, via `as.factor()`. As discussed, the `happy` variable is *numerical*. However, `ggplot2` can only color or fill a bar chart based on a categorical variable.    
 
@@ -733,7 +730,8 @@ Something interesting happens when the fill aesthetic is mapped to another varia
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as.factor(love))) + labs(fill = "love")
+  geom_bar(aes(x = happy, fill = as.factor(love))) +
+  labs(fill = "love")
 ```
 
 This visualization produces a "stacked" bar chart! Each bar is a composite of both `happy` and `love`. It also reveals something else that is interesting: feelings of belonginess are associated with higher marks on the "happy" scale. While we must maintain caution about making any causative statements at this point, this visualization demonstrates that bar charts can be a useful aid when exploring a dataset for possible relationships.
@@ -755,8 +753,8 @@ ggplot(happy) +
   geom_bar(aes(x = happy, fill = as.factor(love)), position = "dodge")+
   labs(fill = "love")
 ```
-We can adjust the values of the x-axis to whole numbers using `as.factor` again.
-We can also the title "relation between happiness and love".
+
+We can adjust the values of the x-axis to whole numbers using `as.factor` again. We can also the title "relation between happiness and love".
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
@@ -765,11 +763,12 @@ ggplot(happy) +
   labs(fill = "love") +
   labs(title = "relation between happiness and love")
 ```
+
 Bar charts are intended as visualizations of categorical variables. When the variable is numerical, the numerical relations between its values have to be taken into account when we create visualizations. That is the topic of the next section. Before ending the discussion here, we turn to one more important piece of `ggplot2` magic.  
 
 ### Coordinate Systems 
 
-We noted earlier that one of the three motifs of any `ggplot2` plot is its coordinate system. In all of the `ggplot2` code we have seen so far, there has been no explicit mention as to the coordinate system to use. Why? If no coordinate system is specified, `ggplot2` will default to using the Cartesian (i.e., horizontal and vertical) coordinate system. In Cartesian coordinates, the `x` and `y` coordinates are used to define the location of every point in the dataset, as we have just seen. 
+We noted earlier that one of the motifs of any `ggplot2` plot is its coordinate system. In all of the `ggplot2` code we have seen so far, there has been no explicit mention as to the coordinate system to use. Why? If no coordinate system is specified, `ggplot2` will default to using the Cartesian (i.e., horizontal and vertical) coordinate system. In Cartesian coordinates, the `x` and `y` coordinates are used to define the location of every point in the dataset, as we have just seen. 
 
 This is not the only coordinate system offered by `ggplot2`, and learning about other coordinate systems that are available can help boost the overall quality of a visualization.
 
@@ -802,36 +801,30 @@ ggplot(happy) +
 This can also be a neat trick for eliminating the (awkward) gap between the bars and the x-axis :-)
 
 
-
-
-
-
-
-
 ## Visualizing Numerical Distributions 
 
-Many of the variables that data scientists study are *quantitative* or *numerical*, like the displacement and highway fuel efficiency, as we have seen before.
-Let us go back to the `mpg` data set and learn how to visualization its numerical values.
+Many of the variables that data scientists study are *quantitative* or *numerical*, like the displacement and highway fuel efficiency, as we have seen before. Let us go back to the `mpg` data set and learn how to visualize its numerical values.
 
-Let us start by loading `tidyverse`.
+### Prerequisites
 
-```{r}
-library(tidyverse)
+As before, let us load `tidyverse`. 
+
+```{r, message = FALSE, warning = FALSE}
+library(faraway)
 ```
 
-In this section we will draw graphs of the distribution of the numerical variable in the column `hwy`, which describes miles per gallon of car models on the highway. For simplicity, let's create a subset of the table that includes only the information we need.
-`slice` functions allow selection of rows.
-Let us use `slice_sample` to obtain 10 random samples.
+### A slice of `mpg`
+
+In this section we will draw graphs of the distribution of the numerical variable in the column `hwy`, which describes miles per gallon of car models on the highway. For simplicity, let us create a subset of the data frame that includes only the information we need.
 
 ```{r}
-mpg_sub <- select(mpg, manufacturer, model, hwy)
-slice_sample(mpg_sub, n = 10)
+mpg_sub <- select(mpg, manufacturer, model, hwy) 
+mpg_sub
 ```
 
 ### What is a Histogram?
 
-A *histogram* of a numerical data set looks very much like a bar chart, though it has some important differences that we will examine in this section.
-First, let's just draw a histogram of the highway miles per gallon.
+A *histogram* of a numerical dataset looks very much like a bar chart, though it has some important differences that we will examine in this section. First, let us just draw a histogram of the highway miles per gallon.
 
 The geom histogram generates a histogram of the values in a column.
 The histogram below shows the distribution of `hwy`. 
@@ -840,14 +833,14 @@ The `aes(y = ..density..)` call requests computation of "density" as the y-axis.
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(mpg_sub, aes(x = hwy)) +
-  geom_histogram(aes(y = ..density..))
+  geom_histogram()
 ```
 
-### The Horizontal Axis and the Bar-wodth
+### The Horizontal Axis and the Bar-width
 
 In a histogram plot, we group the amounts into groups of contiguous (and thus, non-overlapping) intervals called bins.
 The histogram function of `ggplot` use the _left-out, right-in_ convention in bin creation.
-What this mean is that the interval between a value $a$ and a value $b$, where $a<b$, includes $b$ but not $a$.
+What this means is that the interval between a value $a$ and a value $b$, where $a<b$, includes $b$ but not $a$.
 The convention does not apply the smallest bin, which has the left-end as well.
 Suppose we divide the interval from $0$ to $100$ into four bins of an equal size.
 The end points of the intervals are $0, 25, 50, 75$, and $100$.
@@ -855,20 +848,18 @@ Bin No.1 contains all the values between $0$ and $25,
 Bin No.2 contains all the values between $25$ and $50$ except the exact value of $25$,
 Bin No.3 contains all the values between $50$ and $75$ except the exact value of $25$, and
 Bin No.4 has all the values between $75$ and $100$, excluding the exact value of $75$.
-<!--[[[-->
+
 If you happen to be familiar with open and close intervals, the four intervals are: $[0,25], (25,50], (50,75]$, and $(75,100]$.
-<!-- ))) -->
+
 So, we have values $0.0, 4.7, 5.5, 25.0, 25.5, 49.9, 50.0, 70.0, 72.2, 73.1, 74.4, 75.0, 99.0$, then
 Bin No.1 has the four values, from $0.0$ to $25.0$, Bin No.2 has three values, from $25.5$ to $50.0$, Bin No.3 has five, from $70.0$ to $74.4$, and Bin No.4 has just $99.0$.
 
 Histograms are in some sense, an extended version of the bar plot where the number of bins are adjustable, where the height represent (in the case of vertical plots) the counts and the width is the same for all the bars.
 In the above histogram, we see that the leftmost and the rightmost bars encompass 30 bins (some of them are obviously empty).
 We can also see that no car models had less than 10 or greater than 50 highway miles per gallon.
-Like the `geom_bar()` function, the `geom_histogram()` computes the largest value and the smallest value appearing in the
+Like the `geom_bar()` function, the `geom_histogram()` computes the largest value and the smallest value appearing in the dataset.
 
-The end points of the bin-defining intervals are difficult to recognize just by looking at the chart.
-values that are defining the borders between to It is a little harder to see exactly where the ends of the bins are situated.
-For example, it is not easy to pinpoint exactly where the value 19 lies on the horizontal axis.
+The end points of the bin-defining intervals are difficult to recognize just by looking at the chart. It is a little harder to see exactly where the ends of the bins are situated. For example, it is not easy to pinpoint exactly where the value 19 lies on the horizontal axis.
 Is it in the interval for the bin that stands on the line 20 on the x-axis or the one immediately to the left of it?
 Hard to tell...
 
@@ -880,12 +871,12 @@ The sequence starts at 10 and ends at 10 with the gap of 1.
 Using the convention of end points in R, the sequence produces 40 intervals,
 from 10 to 11, from 11 to 12, ..., from 49 to 50, with the right end inclusive and the left end exclusive, except for the leftmost interval containing 10.
 
-
 ```{r dpi=80,  fig.align="center", message = FALSE}
 bins <- seq(10,50,1)
 ggplot(mpg, aes(x = hwy)) +
   geom_histogram(aes(y = ..density..), color = "gray", breaks = bins)
 ```
+
 <!--[-->
 The tallest histogram bar is the one immediately to the right of the 25 white line on the x-axis, so it corresponds to the bin $(25,26]$. <!--)-->
 
@@ -896,22 +887,12 @@ bins <- seq(10,50,5)
 ggplot(mpg, aes(x = hwy)) +
   geom_histogram(aes(y = ..density..), color = "gray", breaks = bins)
 ```
+
 <!--[[-->
 We observe two tall bars at (15,20] and at (25,30]. <!--))-->
 
 
 ### The Counts in the Bins 
-
-<!--
-```{r}
-xxx <- tribble(~A, ~B,
-               "I", 0, "II", 25.0, "III", 50.2, "IV", 74.9, "V", 100)
-binsXXX <- seq(0,100,25)
-ggplot(xxx, aes(x = B)) +
-  geom_histogram(aes(y = ..density..), color = "gray", breaks = binsXXX)
-```
-
--->
 
 We can record the count calculation that `geom_histogram` carries out using the `cut()` function.
 The function takes an attribute and the bin intervals as its arguments and generates a table of counts.
@@ -923,8 +904,9 @@ bins <- seq(10,50,1)
 binned <- mpg_sub %>%
   mutate(bin = cut(hwy, breaks = bins)) %>%
   count(bin, .drop = FALSE) %>%
-  print() # print(n = Inf)
+  print()
 ```
+
 Note that the label for 10 to 11 (appearing at the beginning) has the left parenthesis.
 
 If you want to ignore the empty bins, change the option of `.drop = FALSE` to `.drop = TRUE` or take the option away.
@@ -934,21 +916,23 @@ bins <- seq(10,50,1)
 binned <- mpg_sub %>%
   mutate(bin = cut(hwy, breaks = bins)) %>%
   count(bin, .drop = TRUE) %>%
-  print() # print(n = Inf)
+  print()
 ```
+
 We can try the alternate bin sequence, whose gap is 5.
+
 ```{r}
 bins2 <- seq(10,50,5)
 binned2 <- mpg_sub %>%
   mutate(bin = cut(hwy, breaks = bins2)) %>%
   count(bin, .drop = TRUE) %>%
-  print() # print(n = Inf)
+  print() 
 ```
 
 
-### The Vertical Axis as the Density Scale 
+### Density Scale 
 
-In a histogram that `ggplot` generates, what the horizontal axis represents and what the left and right borders of each bar represents are clear, except that depending on the choices of the bin sequence, the exact values the borders represent may be difficult to discern from the plot.
+In a histogram that `ggplot` generates, what the horizontal axis represents, and what the left and right borders of each bar represents, are clear, except that depending on the choices of the bin sequence, the exact values the borders represent may be difficult to discern from the plot.
 Then what exactly does the height of a bar "density" represents?
 
 The height of each bar is the percent of elements that fall into the corresponding bin, _relative to the width of the bin_.
@@ -959,10 +943,9 @@ Then we create a histogram with unit-size bins, divide the bars into consecutive
 
 More specifically, we execute the following steps.
 Using `bin_width` as a parameter, we create a sequence `bin2` of bin boundaries from 10 to 5.
-Like before, when we "cut" the `hwy` values using `bins` as break points (the `mutate()` call and its subsequent `count()` call), we get the bins and their counts under attributes `bin` and `n`, respectively.
+Like before, when we "cut" the `hwy` values using `bins` as break points (the `mutate()` call and its subsequent `count()` call), we get the bins and their counts under variables `bin` and `n`, respectively.
 We obtain the proportions of the counts in the entire cars appearing in the data set `mpg_sub` by dividing the counts by `nrow(mpg_sub)`.
 We then for each bin, split the proportion in the bin among the 5 units the bin contains (we use the division by `bin_width` instead by the division by `5`).
-
 
 
 ```{r}
@@ -983,36 +966,7 @@ We see that the density values we have calculated match the height of the bars.
 ggplot(mpg, aes(x = hwy)) +
   geom_histogram(aes(y = ..density..), color = "gray", breaks = bins2)
 ```
-<!--
-Let us compute the two quantities from the `binned` data frame.
-Recall that (a) `binned` has a count for each bin (which appears in the attribute `n`) and (b) he total of the counts  is the total number of rows in `mpg_sub`.
-So, by dividing the value in `n` by `nrow(mpg_sub)` and multiplying it by 100, we get the percentage of the count.
-We can verify that the total of the percentage values is 100 and the corresponding proportion amount sums to 1.
 
-```{r}
-binned %>%
-  mutate(percents = n / nrow(mpg_sub) * 100, 
-         height = percents / 100) -> binned2
-  print(binned2) # print(n = Inf)
-  sum(binned2$percents)
-  sum(binned2$height)
-```
-Since there are 234 rows in the data set, the (16, 17] bin contains 31 cars.
-That's 13.67% of all the cars:
-
-\[ Percent= \frac{31}{234} * 100 = 13.25 \]
-
-The width of the (16, 17] bin is  $26 - 25 = 1$. So 
-
-\[ Height = \frac{13.67}{100} = 0.1367 \]
-
-The code for calculating the heights used the facts that there are 234 cars in all and that the width of each bin is 1.
-
-This method of drawing histograms creates a vertical axis that is said to be *on the density scale*.
-We should remember that the height of bar is __not__ the percent of entries in the bin; it is the percent of entries in the bin relative to the amount of space in the bin. That is why the height measures crowdedness or *density*.
-
-Let's see why this matters.
--->
 
 ### Unequal Bins
 
@@ -1038,7 +992,7 @@ Although the ranges (10, 15] and (30, 45] have nearly identical counts, the bar 
 This is the effect of flattening we have explained previously; that is, we flatten the bar height over the units in each bin.
 
 
-### The Problem with Simply Plotting Counts 
+### Gotchas with Counts 
 
 It is possible to display counts directly in a chart, by omitting the `y = ..density..` in the `aes()`.
 The resulting chart has the same shape as a histogram when the bins all have equal widths, though the numbers on the vertical axis are different.
@@ -1067,23 +1021,9 @@ ggplot(mpg, aes(x = hwy)) +
                  breaks = uneven_bins, position = "identity")
 
 ```
-<!--
-Even though the geom used is a histogram, the figure above is __NOT A HISTOGRAM__. It misleadingly exaggerates the proportion of car models with `hwy` between 30 and 45 because the count of 10 to 15 is 17 and the count between 30 to 45 is 22. However, in the graph, the area of 10 to 15 is almost one-third of 30 to 45, which does not align with the true proportion. The height of each bar is simply plotted at the number of car models in the bin, without accounting for the difference in the widths of the bins.
-
-The picture becomes even more absurd if the last two bins are combined.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-very_uneven_bins <- c(10, 15, 45)
-ggplot(mpg, aes(x = hwy)) +
-  geom_histogram(color = "grey", breaks = very_uneven_bins, position = "identity")
-```
-
-In this count-based figure, the shape of the distribution of highway mileage per gallon is lost entirely.
-
--->
 
 
-__Breaking down Bars__
+### Histograms and positional adjustments 
 
 We can break down the bars in a histogram using another attribute.
 Below, we use bins of width 5 and then color the portions of the bars according to the classes.
@@ -1103,116 +1043,46 @@ bins = seq(10,50,5)
 ggplot(mpg, aes(x = hwy)) +
   geom_histogram(aes(fill = class), breaks = bins, position = "dodge")
 ```
-Here is another one, with the fuel type `fl` as the coloring attribute.
-The break down appears side by side.
 
-```{r dpi=80,  fig.align="center", message = FALSE}
-bins = seq(10,50,5)
-ggplot(mpg, aes(x = hwy)) +
-  geom_histogram(aes(fill = fl), breaks = bins, position = "dodge")
-```
+
+
 
 
 
 <!--
+Once it receives the `aes` specification, `ggplot` places coordinates so it can plot any combination of `x` and `y`.
+To accomplish the placement, `ggplot` examines the values appearing in the two variables to find the maximum and the minimum appearing in the variables.
+Thus, the coordinate determination is possible without having to specify a geom; that is, it is possible to include the `mapping = aes(...)` as an argument in `ggplot`.
+The example exactly does this.
 
-### The Histogram: General Principles and Calculation 
+By telling `ggplot` which data to use and which variables of the data to use, you can generate a coordinate plot. 
 
-The figure above shows that what the eye perceives as "big" is area, not just height. This observation becomes particularly important when the bins have different widths.
-That is why a histogram has two defining properties:
+```{r, eval = FALSE, fig.align="center", dpi=80}
+ggplot(data = mpg, mapping = aes(x = `displ`, y = `hwy`))
+```
+Once `ggplot` has the data and the coordinate information, you do not have to state the mapping information any more - it suffices to tell you need a `geom_point`.
+`ggplot` then creates a scatter plot using the present specification of x and y.
 
-1. The bins are drawn to scale and are contiguous (though some might be empty), because the values on the horizontal axis are numerical.
-
-2. The __area__ of each bar is proportional to the number of entries in the bin.
-
-Property 2 is the key to drawing a histogram, and is usually achieved as follows:
-
-\[ \text{area of bar} = \text{percent of entries in bin} \]
-
-The calculation of the heights just uses the fact that the bar is a rectangle:
-
-\[ \text{area of bar} = \text{height of bar} × \text{width of bin} \]
-
-and so
-
-\[ \text{height of bar} = 
-    \frac{\text{area of bar}}{\text{width of bin}} = 
-    \frac{\text{percent of entries in bin}}{\text{width of bin}} \]
-
-The units of height are "percent per unit on the horizontal axis."
-
-When drawn using this method, the histogram is said to be drawn on the density scale. On this scale:
-
-* The area of each bar is equal to the percent of data values that are in the corresponding bin.
-
-* The total area of all the bars in the histogram is 100%. Speaking in terms of proportions, we say that the areas of all the bars in a histogram "sum to 1".
-
-
-
-### Flat Tops and the Level of Detail 
-
-Even though the density scale correctly represents percents using area, some detail is lost by grouping values into bins.
-
-Take another look at the (10, 15] bin in the figure below. The flat top of the bar, at the density level 0.0145, hides the fact that the highway mileage is somewhat unevenly distributed across that bin.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(mpg, aes(x = hwy)) +
-  geom_histogram(aes(y = ..density..), 
-                 color = "grey",breaks = uneven_bins, position = "identity")
+```{r, eval = FALSE, fig.align="center", dpi=80}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + geom_point()
 ```
 
-To see this, let us split the (10, 15] bin into 4 narrower bins, each of width 1.
+It is also possible to restate the data, the mapping, or both in the `geom_point` call.
+A convenient feature of `ggplot` is that once you have specified `data` or `aes`, you do not have to specify it again as long as you keep using the same setting.
+It means that you have a lot of freedom in saying where you want to state the data you plot about and which coordinates you use.
+The example again produces the same plot as the first.
+The difference this time is that the code specifies the `data` and `aes` both in the `ggplot` call and the `geom_point` call.
 
-```{r dpi=80,  fig.align="center", message = FALSE}
-tiny_bins <- c(10, 11, 12, 13, 14, 15, 30, 45)
-ggplot(mpg, aes(x = hwy)) +
-  geom_histogram(aes(y = ..density..), color = "grey",
-                 breaks = tiny_bins, position = "identity")
+
+```{r, eval = FALSE, fig.align="center", dpi=80}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy))
 ```
 
-Some of the skinny bars are taller than 0.0145 and others are shorter; (10, 11] and  (12, 13] have heights of 0 because there is no data in these intervals. By putting a flat top at the level 0.0145 across the whole bin, we are deciding to ignore the finer detail and are using the flat level as a rough approximation. Often, though not always, this is sufficient for understanding the general shape of the distribution.
-
-__The height as a rough approximation.__ This observation gives us a different way of thinking about the height. Look again at the (10, 15] bin in the earlier histograms. As we have seen, the bin is 5 hwy wide and contains 7.3% of the data. Therefore the height of the corresponding bar is at density level 0.0145.
-
-Now think of the bin as consisting of 5 narrow bins that are each 1 wide. The bar's height of 0.0145 means that as a rough approximation, 1.45% of car models are in each of those 5 skinny bins of width 1 highway mile per gallon. 
-
-Notice that because we have the entire dataset that is being used to draw the histograms, we can draw the histograms to as fine a level of detail as the data and our patience will allow. However, if you are looking at a histogram in a book or on a website, and you don't have access to the underlying dataset, then it becomes important to have a clear understanding of the "rough approximation" created by the flat tops.
-
-### Histograms Q&A
-
-Let's draw the histogram again, this time with four bins, and check our understanding of the concepts.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-some_new_bins <- c(10, 15, 23, 45)
-ggplot(mpg, aes(x = hwy)) +
-  geom_histogram(aes(y = ..density..), color = "grey",
-                 breaks = some_new_bins, position = "identity")
+```{r, eval = FALSE, fig.align="center", dpi=80, warning = FALSE}
+ggplot(mpg2) + geom_boxplot(aes(x = as.factor(class), y = hwy))
 ```
 
-```{r}
-mpg_sub %>%
-  mutate(bin = cut(hwy, breaks = some_new_bins)) %>%
-  count(bin, .drop = FALSE) 
-```
-
-Look again at the histogram, and compare the (15, 23] bin with the (23, 45] bin.
-
-__Q__: Which has more car models in it?
-
-__A__: The (23, 45] bin. It has 129 cars, compared with 88 cars in the (15, 23] bin.
-
-__Q__: Then why is the (23, 45] bar shorter than the (15, 23] bar?
-
-__A__: Because height represents density per unit of space in the bin, not the number of car models in the bin. The (23, 45] bin does have more car models than the (15, 23] bin, but it is also a whole lot wider. So it is less crowded. The density of car models in it is much lower.
-
-### Differences Between Bar Charts and Histograms 
-
-* Bar charts display one quantity per category. They are often used to display the distributions of categorical variables. Histograms display the distributions of quantitative variables.
-
-* All the bars in a bar chart have the same width, and there is an equal amount of space between consecutive bars. The bars of a histogram can have different widths, and they are contiguous.
-
-* The lengths (or heights, if the bars are drawn vertically) of the bars in a bar chart are proportional to the value for each category. The heights of bars in a histogram measure densities; the areas of bars in a histogram are proportional to the numbers of entries in the bins.
-
+pickups and suv are particularly bad; the regions that are busy, we can see those are from classes that are competing for the same range; use box plot for continuous vs discrete 
 
 -->
-
