@@ -3,677 +3,673 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Data Frames
 
-In the previous chapter, we studied the `stringr` package, which is part of `tidyverse`.
-In this chapter, we go over more packages from `tidyverse`.
-There is no need for you to memorize where those packages come from and call up the individual packages as you need to use them.
-Data scientists often refer to the importance of data cleaning, stating that without data cleaning no data analysis results are meaningful.
-Some are even bolder to say that the most important process in data science is data cleaning because from their point of view, the analysis process after data cleaning is a routine to a great degree.
+# Data Transformation
 
-## Data Formats
+The work of data science begins with a dataset. These datasets can be so large that any manual inspection or review of them, say using editing software like TextEdit or Notepad++, becomes totally infeasible. To overcome this, data scientists rely on computational tools like R for working with datasets. Learning how to use these tools well lies at the heart of data science and what data scientists do daily at their desks. 
 
-The data sets that data scientists handle are quite often *rectangular* tables.
-In a rectangular table, the rows have an identical number of cells and the columns have an identical number of cells, thus allowing accessing any cell by specifying a row and a column together.
-A conventional structure of a rectangular data in R is as follows:
+A part of what makes these tools so powerful is that we often need to apply a series of actions to a dataset. Data scientists talk a lot about the importance of data cleaning, stating that without data cleaning no data analysis results are meaningful. Some go further to say that the most important step in the data science life cycle is data cleaning because, from their point of view, the analysis process following data cleaning is a routine to a great degree. As such, another important aspect of working with datasets is *transforming* data, i.e., rendering data suitable for analysis. When data is made into an analysis-ready form, we call such data *tidy data*. Transforming data to become tidy data is the focus of this chapter.    
 
-* The rows represent individual objects, whose information is available in the data set. We often call them *observations*.
-* The columns represent properties of the observations. We often call the properties *attributes* as well as *variables*.
-* The columns have unique names. We call then *attribute names* and *variable names*. If the names are unique, we use *attributes* and *variables* for attribute names and variable names, respectively.
-* The rows may have unique names. If they do, either there is an attribute specifically for the names or the table offers the row names as additional information.
+The tools we will cover in this chapter to accomplish this goal are also key members of the `tidyverse`. One is called `tibble`, which is a data structure for managing datasets, and another is called `dplyr`, which provides a grammar of data manipulation for acting upon datasets stored as tibbles. We will also learn about a third called `purrr` to help with the data manipulations, e.g., say when a column of data is in the wrong units.    
 
+## Datasets and tidy data 
 
-### Data Sets Readily Available in `tidyverse`
+Data scientists prefer working with data that is *tidy* because it facilitates data analysis. In this section we will introduce a vocabulary for working with datasets and describe what *tidy data* looks like. 
 
-The `tidyverse` package comes with scores of data sets.
+### Prerequisites
 
-```{r}
+As before, let us load `tidyverse`. 
+
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-By typing `data()` you can see a list of data sets available in the RStudio environment you are in.
-Quite a few data come with `tidyverse`.
-If your session has not yet loaded `tidyverse`, the list can be short.
+The `tidyverse` package comes with scores of datasets. By typing `data()` you can see a list of data sets available in the RStudio environment you are in. Quite a few data come with `tidyverse`. If your session has not yet loaded `tidyverse`, the list can be short.
 
-For each data set you see on the list, you can inquire for some details, if there is any information available.
-To see the information, you type the name of the data set with a single question mark in front of it.
+### A "hello world!" dataset 
 
-The _Motor Trend Car Road Test_ data set `mtcars` is one data set available through `tidyverse`.
+A dataset is a collection of *values*, which can be either a number or string. Let us begin by looking at our first dataset. We will examine the _Motor Trend Car Road Test_ dataset which is made available through `tidyverse`. It was extracted from the 1974 *Motor Trend* US magazine, and contains data about fuel consumption and aspects of automobile design for 32 car models. 
+
+We can inspect it simply by typing its name. 
 
 ```{r}
+mtcars
+```
+
+You can pull up more information about the dataset by typing the name of it with a single question mark in front of it.
+
+```{r eval = FALSE}
 ?mtcars
 ```
 
-Let us load the data set by executing a simple assignment.
-We call the data set by the name `myc`.
-We accomplish the naming with an assignment.
+Datasets like these are often called *rectangular* tables. In a rectangular table, the rows have an identical number of cells and the columns have an identical number of cells, thus allowing access to any cell by specifying a row and a column together.
 
-```{r}
-myc <- mtcars
-```
+A conventional structure of rectangular data is as follows:
 
-You can check the contents of `myc` by typing its name.
+* The rows represent individual objects, whose information is available in the data set. We often call these *observations*.
+* The columns represent properties of the observations. We often call these properties *variables* or *attributes*.
+* The columns have unique names. We call them *variables names* or *attribute names*. 
+* Every value in the table belongs to some *observation* and some *variable*.  
 
-```{r}
-myc
-```
+This dataset contains 352 values representing 11 variables and 32 observations. Note how it explicitly tells us the definition of an observation: a "car model" observation is defined as a combination of the variables that are present above, e.g., `mpg`, `cyl`, `disp`, etc. 
 
-The designation `<dbl>` appearing indicates that the column has only double values.
-The leftmost column in the table does not have the column header or the type designation.
-The strings appearing in the column are the row names.
+### In pursuit of tidy data
 
-*Data frame* is a term R uses to refer to data formats like the `mtcars` data set.
-In its simplest form, a data frame consists of single-dimensional vectors where each vector has a name.
-This data set has row names.
-We learn of the existence of row names when we see that R prints the data without a column name for the row names.
+We are now ready to provide a definition of tidy data. We defer to [Hadley Wickham](https://en.wikipedia.org/wiki/Hadley_Wickham), a main contributor and maintainer of many of the key packages that compose the `tidyverse`, for a definition. We say that data is tidy when it satisfies three conditions: 
 
-You can access an individual attribute (other than the row name information, which is not an attribute) by attaching the dollar sign to the name of the data frame and then the attribute name.
-For example, by typing `myc$cyl`, you get the entire sequence for the column `cyl`.
-Alternatively, if you know the position of the attribute in the data set, you can attach a pair square brackets with a comma and the position to get to the vector.
-The `cyl` is at position 2 of the data, so the following two produces the same results.
+1. Each *variable* forms a column. 
+2. Each *observation* forms a row. 
+3. Each type of observational unit forms a table. 
 
-```{r}
-myc$cyl
-myc[,2]
-```   
+Data that exists in any other arrangement is, consequently, *messy*. The goal of this chapter is to learn about methods for *transforming* messy data into tidy data, with some help from R and the tidyverse. 
 
-How do you access a row of the data set?
-Since the data set has row names, we can use a row name to access a row.
-The syntax is different from the one for column access, though.
-We use the square brackets instead of the dollar sign and inside the brackets place the row name and a comma.
+The `mtcars` dataset above is an example of tidy data, with one small exception we will return to later. Let us look at other examples of datasets that fulfill or violate these properties. 
 
-Let us see what appear as the row names of the data set.
-You can use `row.names(DATA_SET_NAME)` to obtain the listing of the row names.
+Suppose that you are keeping track of weekly sales of three different kinds of cookies at a local bakery. By instinct, you decide to keep track of the data in the following table.    
 
-```{r}
-row.names(myc)
-```
-
-Let us grab the row for "Datsun 710".
-
-```{r}
-myc["Datsun 710",]
-```
-Since the row is the third one, we can use `[3,]` instead.
-
-```{r}
-myc[3,]
-```
-
-How do we know how many rows and columns in the data as well as the names of the attributes?
-The following functions, `nrow`, `ncol`, and `colnames` answer those questions, respectively.
-
-```{r}
-nrow(myc)
-ncol(myc)
-colnames(myc)
-```
-
-In summary, to access the columns and the rows, here are the rules we should follow:
-
-* We use a pair `DATA_SET_NAME[X,Y]` to access a cell at row position `X` and column position `Y`, where `DATA_SET_NAME` is the name of the data set and `X` and `Y` are positive integers.
-* If we omit the X-part, like `DATA_SET_NAME[,Y]`, the expression specifies the entire column at position `Y`. If `S` is the name of the column, we can use an alternate expression `DATA_SET_NAME$S`.
-* If we omit the Y-part, like `DATA_SET_NAME[X,]`, the expression specifies the entire row at position `X`. If the data set has row names and `W` is the name of the row at position `X` (that is, it must be a string), we can substitute the index with the name as in `DATA_SET_NAME[W,]`.
-
-
-
-
-### Examining the Rows, Columns, Cells, and Row Names
-
-You can use the function `unique` to obtain the unique values.
-We find that there are three possibilities 4, 6, and 8.
-
-```{r}
-unique(myc$cyl)
-```
-
-We already know how to inquire about the maximum, minimum, and other properties of a vector.
-Let us check out the `mpg` attribute (which is Miles Per Gallon) in terms of the maximum, the minimum, and the listing in the increasing order.
-
-```{r}
-max(myc$mpg)
-min(myc$mpg)
-sort(myc$mpg)
+```{r echo = FALSE}
+bakery1 <- tribble(~week, ~gingerbread, ~`chocolate peppermint`, ~`macadamia nut`,
+                  1, 10, 23, 12,
+                  2, 16, 21, 16,
+                  3, 25, 20, 24,
+                  4, 12, 18, 20,
+                 )
 ```
 
 ```{r}
-filter(myc,mpg == 33.9)
+bakery1
 ```
 
-The function comes from a `tidyverse` package `dplyr`.
-We will study `dplyr` later in this chapter.
+Alternatively, you may decide to encode the information as follows. 
 
-
-
-### Building a data set from its components.
-
-Before moving on to `dplyr`, let us see how you can create a data set.
-The package `tibble` offers some useful tools when you are creating a data.
-
-Suppose you have tests scores in Chemistry and Spanish for four people, Gail, Henry, Irwin, and Joan.
-You can create three vectors, `names`, `Chemistry`, and `Spanish` each representing the names, the scores in Chemistry, and the scores in Spanish, and then assemble them into a data file using the function `data.frame`.
-The `data.frame` takes a series of columns as arguments.
-The columns appear in the data set as you specify them in the arguments.
-You can specify the names of the rows using an optional argument `row.names=`.
-
-Below, we show a small experiment with the database idea we have just described.
-We create two data sets, `ddd` and `dddX`.
-The former does not have the row name column specification, and the latter does not.
-
-
-```{r}
-names <- c("Gail", "Henry", "Irwin", "Joan")
-Chemistry <- c( 99, 98, 80, 92 )
-Spanish <- c(87, 85, 90, 88)
-ddd <- data.frame(names, Chemistry, Spanish)
-dddX <- data.frame(Chemistry, Spanish, row.names = names)
-ddd
-dddX
-```
-Notice the difference between the two appears in the handling of the "names" list.
-In the former, the names, "Gail", "Henry", "Irwin", and "Joan", appear as elements of the column with column name "names".
-The data type designation `<chr>` means "character" and so indicates that the column consists of strings.
-In the latter, the column lacks the name and type specification, and so represents the row names. 
-
-Let us see how we can access the data on the tiny data set `ddd`.
-
-```{r}
-ddd$Chemistry
-ddd$Spanish
-row.names(ddd)
-ddd["Henry",]
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+bakery2 <- as_tibble(t(bakery1), rownames = "week") %>%
+  slice(-1)
+colnames(bakery2) <- c("week", 1,2,3,4)
 ```
 
-
-
-
-__Write-in Data Set__
-
-The package `dplyr` brings some useful methods for creating data sets.
-The first method allows you to create a data set manually.
-You can use `dplyr` to write out the attributes and then data rows as they should appear in the table. For example, in the following:
-
 ```{r}
-tribble(~Name,~English,~Mathematics,
-               "Johnny",100,90,
-               "Katy",90,100,
-               "Lauren",89,94,
-               "Manuel",95,79,
-               "Nancy",80,80)
+bakery2
 ```
 
-__Systematic Creation__
+Do either of these tables fulfill the properties of tidy data? In `bakery1`, the variable we are trying to measure -- *sales* -- is actually split across three different columns and multiple observations appear in each row. In `bakery2`, the situation remains bad: both the *cookie type* and *sales* variables appear in each column and, still, multiple observations appear in each row. Therefore, neither of these datasets are *tidy*.    
 
-The package `tibble` brings a way for mechanical generation.
+A tidy version of the dataset appears as follows. Compare this with the tables from `bakery1` and `bakery2`. Do not worry about the syntax and the functions used; we will learn about what these mean and how to use them in a later section. 
 
 ```{r}
-tibble(x=1:10, y=x*x, z = 1.5*x - 0.2)
+bakery_tidy <- bakery1 %>%
+  pivot_longer(gingerbread:`macadamia nut`, names_to = "type", values_to = "sales")
+bakery_tidy
 ```
 
-The `seq` that is native of R allows you to create a sequence.
-The syntax is `seq(START,END,GAP)`, where the sequence starts from `START` and then adds `GAP` to the sequence until the value exceeds `END`.
-We can create the sequence with the name "x", and then add three other columns based on the value of "x".
+Observe how this dataset fulfills the three properties of tidy data; the third property is fulfilled simply because the observational unit we are measuring is the cookie, and we are measuring three variables per observational unit: `week`, `type`, and `sales`. 
 
-```{r}
-tibble(x = seq(1,10,0.5), y = sin(x), z = cos(x), w = x^3 - 10*x^2 + x - 2)
-```
+When a dataset is expressed in this manner, we say that it is in *long* format because the number of rows is comparatively larger compared to `bakery1` and `bakery2`. Admittedly, this form can make it harder to identify patterns or trends in the data by eye. However, in terms of computational analysis, tidy data makes things much more efficient.  
 
+In the next section we turn to the main data structures in R we will use for performing data transformations on datasets. 
 
-__Rotating Data__
+## Working with datasets 
 
-Sometimes we want to switch from the row-major view to the column-major by rotating the data.
-The rotation is very simple. You have only to use the function `t()`.
-Simply applying `t()` does not complete the task of transposition.
-Below, we rotate the `mtcars` data set.
+In this section we dive deeper into datasets and learn how to do basic tasks with datasets and query basic information from them.  
 
-```{r}
-t(mtcars)
-```
+### Prerequisites
 
+As before, let us load `tidyverse`. 
 
-It is imperative that the data you are rotating has row names.
-Let us take the following example of data we construct with `tribble`
-
-```{r}
-ddd <- tribble(~Name,~English,~Mathematics,
-               "Johnny",100,90,
-               "Katy",90,100,
-               "Lauren",89,94,
-               "Manuel",95,79,
-               "Nancy",80,80)
-ddd
-```
-
-The data does not have row names.
-The student names are the values of the attribute "Name".
-If we rotate the data using `t`, we get the following.
-
-```{r}
-dddT <- t(ddd)
-dddT
-```
-
-The three columns of `ddd` become rows and the rows of `ddd` appear as columns `[,1]` through `[,5]`.
-These are merely column index specifications.
-We can tell R to handle `dddT` as a data frame.
-
-```{r}
-ddd1 <- t(ddd)
-dddT <- as.data.frame(ddd1)
-dddT
-```
-The `[,`]` etc. now are now column names "V1" etc., but we still have "Name" as a row.
-We thus must turn "Name" as a column name and _then_ rotate.
-In the following, we process `ddd` with column conversion of "Name" to row names, then apply `t`.
-Voila!
-
-```{r}
-ddd1 <- column_to_rownames(ddd, "Name")
-dddT <- t(ddd1)
-dddT
-```
-
-__Creating a Row Name Attribute from Row Names or Row Index__
-
-Row names and row indexes are out of reach using the attachment of the dollar sign and the attribute name.
-The reason is that row names or indexes are not attributes.
-To be able to process data using row indexes or row names, it is convenient to be able to have a matching attribute.
-A great benefit of `tibble` is you have functions to accomplish this.
-
-Let us go back to the `mtcars` data set.
-We have loaded it to the variable `myc` earlier.
-Let us do that again.
-We convert the row names to an attribute using the function `rownames_to_column(DATA,NEW_NAME)`.
-In the syntax, `DATA` is the data set and `NEW_NAME` is the name of the attribute of the row names.
-The function produces a new data set, and so let us capture it in a new data set, `myc2`.
-
-Let us do this and examine the head of the original and the new version.
-
-```{r}
-myc <- mtcars
-myc2 <- rownames_to_column(myc,"name")
-head(myc)
-head(myc2)
-```
-
-___Moving Columns___
-
-When you want to change the order of columns by moving a column from the present location to another.
-We can relocate a column using the `relocate` function by specifying which column should go where.
-The syntax is `relocate(DATA_NAME,ATTRIBUTE,NEW_LOCATION)`.
-The specification for the new location is either by `.before=NAME` or by `.after=NAME`, where `NAME` is the name of a column.
-
-```{r}
-ddd %>% relocate(Name, .after=Mathematics)
-```
-
-__Reading Data from an External Source__
-
-Usually data scientists need to load data from files.
-The package `readr` of `tidyverse` offers ways for that.
-Let us start with loading `tidyverse`.
-
-```{r}
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-With the package `readr` can you read from, among others, comma-separated files (CSV files) and tab-delimited files (TAB files).
-To read files, we specify in a string the location of the file and then use the function for reading the file, `read_csv` if it is a CSV file and `read_tab` if it is a TAB file.
-Here is an example of reading from a URL of a file available on the internet.
+### The data frame 
+
+Let us recall the `mtcars` dataset we visited in the last section. 
 
 ```{r}
+mtcars
+```
+
+*Data frame* is a term R uses to refer to data formats like the `mtcars` data set.
+In its simplest form, a data frame consists of vectors lined up together where each vector has a name. The designation `<dbl>` appearing next to the columns indicates that the column has only double values.
+
+How do we know how many rows and columns in the data as well as the names of the variables? The following functions answer those questions, respectively.
+
+```{r}
+nrow(mtcars) # how many rows in the dataset?
+ncol(mtcars) # how many columns? 
+colnames(mtcars) # what are the names of the columns? 
+```
+
+We noted earlier that this dataset is tidy with one exception. Observe that the leftmost column in the table does not have the column header or the type designation. The strings appearing there are what we call *row names*; we learn of the existence of row names when we see that R prints the data without a column name for the row names.
+
+The problem with row names is that a variable, here the name of the car model, is treated as a special attribute. The objective of tidy data is to store data consistently and this special treatment is, according to tidyverse, a violation of the principle. 
+
+### Tibbles 
+
+An alternative to the data frame is the tibble which upholds best practices for working with data frames. It does not store row names as special columns like data frames do and the presentation of the table can be visually nicer to inspect than data frames when examining a dataset at the console. 
+
+To transform the `mtcars` data frame to a tibble is easy. We simply call the function `tibble`. 
+
+```{r}
+mtcars_tibble <- tibble(mtcars)
+mtcars_tibble
+```
+
+Observe that the names of the car models are no longer present. However, we may wish to keep the names of the models as it can bring useful information. `tibble` has thought of a solution to this problem for us: we can add a new column with the row name information. The required function is `rownames_to_column`.  
+
+```{r}
+mtcars_tibble <- rownames_to_column(mtcars, var = "model_name")
+mtcars_tibble
+```
+
+Throughout the course, we will store data using the `tibble` construct. However, because `tibbles` and data frames are close siblings, we may use the terms *tibble* and *data frame* interchangeably when talking about data that is stored in a rectangular format.       
+
+### Accessing columns and rows
+
+You can access an individual column in two ways: (1) by attaching the dollar sign to the name of the data frame and then the attribute name, and (2) using the function `pull`. We prefer to use the latter because of the `%>%` operator which we will see later. Here are some example usages. 
+
+```{r}
+mtcars_tibble$cyl
+```
+
+```{r}
+pull(mtcars_tibble, cyl)
+```
+
+The result returned is the entire sequence for the column `cyl`.
+
+If you know the position of a column in the dataset, you can attach a pair of square brackets with a comma and the position to get to the vector. The `cyl` is at position 2 of the data, so we obtain the following. 
+
+```{r}
+mtcars_tibble[,2]
+```   
+
+Similarly, if we know the position of a row in the dataset, we can use a similar syntax. The following will return all the associated information for the second row of the dataset. 
+
+```{r}
+mtcars_tibble[2,]
+```
+
+### Extracting basic information from a tibble
+
+You can use the function `unique` to obtain unique values in a column. Let us see the possible values for the number of cylinders. 
+
+```{r}
+unique(pull(mtcars_tibble, cyl))
+```
+
+We find that there are three possibilities: 4, 6, and 8 cylinders. 
+
+We already know how to inquire about the maximum, minimum, and other properties of a vector. Let us check out the `mpg` attribute (miles per gallon) in terms of the maximum, the minimum, and sorting the values in the increasing order.
+
+```{r}
+max(pull(mtcars_tibble, mpg))
+min(pull(mtcars_tibble, mpg))
+sort(pull(mtcars_tibble, mpg))
+```
+
+
+### Creating tibbles
+
+Before moving on to `dplyr`, let us see how we can create a dataset. The package `tibble` offers some useful tools when you are creating data.
+
+Suppose you have tests scores in Chemistry and Spanish for four students, Gail, Henry, Irwin, and Joan. You can create three vectors, `names`, `Chemistry`, and `Spanish` each representing the names, the scores in Chemistry, and the scores in Spanish. 
+
+```{r}
+students <- c("Gail", "Henry", "Irwin", "Joan")
+chemistry <- c( 99, 98, 80, 92 )
+spanish <- c(87, 85, 90, 88)
+```
+
+We can assemble them into a tibble using the function `tibble`. The function takes a series of columns, expressed as vectors, as arguments. 
+
+```{r}
+class <- tibble(students = students, 
+                chemistry_grades = chemistry, 
+                spanish_grades = spanish)
+class
+```
+
+The data type designation `<chr>` means "character" and so indicates that the column consists of strings.
+
+__Pop quiz:__ is the tibble `class` we just created an example of tidy data? Why or why not? If you are unsure, revisit the examples from the previous section and compare this tibble with those. 
+
+Let us see how we can query some basic information from this tibble. 
+
+```{r}
+pull(class, chemistry_grades) # retrieve all grades in chemistry
+min(pull(class, chemistry_grades))  # retrieve the minimum chemistry score
+```
+
+For small tables of data, we can also create a `tibble` using an easy row-by-row layout.  
+
+```{r}
+class <- tribble(~student,~chemistry_grades,~spanish_grades,
+        "Gail",   99, 87,
+        "Henry",  98, 85,
+        "Irwin",  80, 90,
+        "Joan",   92, 88)
+class
+```
+
+We can also form tibbles using sequences as follows. 
+
+```{r}
+tibble(x=1:10, 
+       y=x*x, 
+       z = 1.5*x - 0.2)
+```
+
+The `seq` that is native of R allows us to create a sequence. The syntax is `seq(START,END,GAP)`, where the sequence starts from `START` and then adds `GAP` to the sequence until the value exceeds `END`. We can create the sequence with the name "x", and then add three other columns based on the value of "x".
+
+Here is another example. 
+
+```{r}
+tibble(x = seq(1,10,0.5), 
+       y = sin(x), 
+       z = cos(x), 
+       w = x^3 - 10*x^2 + x - 2)
+```
+
+
+### Loading Data from an External Source
+
+Usually data scientists need to load data from files. The package `readr` of `tidyverse` offers ways for that.With the package `readr` you can read from, among others, comma-separated files (CSV files) and tab-separated files (TSV files).
+
+To read files, we specify a string the location of the file and then use the function for reading the file, `read_csv` if it is a CSV file and `read_tab` if it is a TSV file. If you have a file that uses another delimiter, a more general `read_delim` function exists as well.  
+
+Here is an example of reading a CSV file from a URL available on the internet.
+
+```{r message=FALSE, warning = FALSE}
 path <- "https://data.bloomington.in.gov/dataset/117733fb-31cb-480a-8b30-fbf425a690cd/resource/2b2a4280-964c-4845-b397-3105e227a1ae/download/pedestrian-and-bicyclist-counts.csv"
 bloom <- read_csv(path)
 ```
 
 The data set shows the traffic in the city of Bloomington, the hometown of the Indiana University at Bloomington, Indiana.
-You can change the head part of the data by the function `head`.
-The function call `head(DATA_SET_NAME)` produces some first rows of the data set `DATA_SET_NAME`.
+
+We can inspect the first few rows of the tibble using the function `head`.
 
 ```{r}
 head(bloom)
 ```
-Note that some attributes have space in them.
-To access the column corresponding of the attribute, you cannot simply type of the attribute because of the white space.
-You need to put the names in a matching pair of quotes (single quotation marks, double quotes, and backward single quotation marks will do).
 
-```{r}
-bloom$"N College and RR"
+Note that some columns have spaces in them. To access the column corresponding to the attribute, we cannot simply type the column because of the white space. To access these columns, we surround the attribute with backticks (`). 
+
+```{r eval = FALSE}
+pull(bloom, `N College and RR`)
 ```
 
-__Saving Data__
+### Writing Results to a File 
 
-Saving a data file is easy.
-You use `write_csv(DATA_NAME,PATH)` where `DATA_NAME` is the name of the data frame to save and `PATH` is the "path name" of the file.
-Below, the action is to store the data frame `bloom` as "data/bloom.csv"; that is the folder in which R is running R has a folder "data" and the target of saving is "bloom.csv" in the folder. 
+Saving a tibble to file is easy. You use `write_csv(DATA_NAME,PATH)` where `DATA_NAME` is the name of the data frame to save and `PATH` is the "path name" of the file. 
 
-```{r}
-write_csv(bloom, "data/bloom.csv")
+Below, the action is to store the tibble `bloom` as "bloom.csv" in the current working directory. 
+
+```{r eval=FALSE}
+write_csv(bloom, "bloom.csv")
 ```
 
+## The `dplyr` verbs
 
+The past section showed two basic data structures -- data frames and tibbles -- that can be used for loading, creating, and saving datasets. We also saw how to query basic information from these structures. In this section we turn to the topic of data *transformation*, that is, actions we can apply to a dataset to transform it into a new, and hopefully more useful, dataset. Recall that data transformation is the essence of achieving tidy data. 
 
+The `dplyr` packages provides a suite of functions for providing such transformations. Put another way, `dplyr` provides a *grammar* of data manipulation where each function can be thought of as the *verbs* that act upon the subject, the dataset (in tibble form). In this section we will study the main `dplyr` verbs. 
 
+### Prerequisites
 
+As before, let us load `tidyverse`. 
 
-
-## Data Preparation with `dplyr`
-
-As we mentioned earlier, preprocessing data is such an important aspect of data science that some experts dare to say that the step is the most important step,
-`dplyr` is a collection of useful functions for manipulating the data.
-The package `dplyr` offers five important functions for data manipulation plus some miscellaneous ones.
-
-* `mutate()` and `rename()`: for adding new attributes from existing attributes and for renaming rows
-* `select()`: for selecting or deselecting attributes
-* `filter()` and `slice()`: for selecting rows with criteria or by row numbers
-* `arrange()`: for reordering rows.
-* `group_by()` and `summarise()`: for grouping rows and summarizing them into single rows
-
-```{r}
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-Let us load `mtcars` as before and call it `myc`, and then as before, convert the row names to a real attribute.
-Call the new attribute "make_model".
+Let us load `mtcars` as before and call it `mtcars_tibble` and then, as before, convert the row names to a column. Call the new attribute "model_name".
 
 ```{r}
-myc <- mtcars
-myc2 <- rownames_to_column(myc,"make_model")
+mtcars_tibble <- rownames_to_column(mtcars, "model_name")
+mtcars_tibble
 ```
 
-__The function `mutate()`__
+### A fast overview of the verbs
 
-The function `mutate` creates a new attribute using the values of existing attributes.
-The syntax for `mutate` is
+The main important verbs from `dplyr` that we will cover are: 
 
-* `mutate(DATA_SET_NAME, NEW_NAME = EXPRESSION, OPTION)`
+* `select`, for selecting or deselecting columns 
+* `filter`, for filtering rows 
+* `arrange`, for reordering rows
+* `slice`, for selecting rows with criteria or by row numbers
+* `rename`, for renaming attributes
+* `relocate`, for adjusting the order of the columns 
+* `mutate` and `transmute`, for adding new columns 
+* `group_by` and `summarize`, for grouping rows together and summarizing information about the group 
 
-where the `NEW_NAME = EXPRESSION` specifies the name of the new attribute and how to compute it, and `OPTION` is an option to specify the location of the new attribute relative to the existing attributes.
-The position option is either of the form `.before=NUMBER` or of the form `.after=NUMBER` with `NUMBER` specifying the position of the column insertion and `.before` and `.after` specifying the insertion is before and after of the column  at position `NUMBER`, respectively.
-The `EXPRESSION` can be either a mathematical expression or a function call.
-Here is one example, where the new attribute is `which_make`.
-We derive the value of "make" from the value of `make_model` by taking the first word from `make model.
-The insertion position is before the second attribute, `mpg`.
-To execute the replacement, we use `str_replace` by matching the pattern `" .*"` (one white space and then any character sequence) with `""`.
-Note how we use the attribute name `make_model` in the expression.
-We told you earlier that string operations are applicable to individual strings or string vectors.
+We will also cover the `%>%` operator to coordinate multiple actions seamlessly. 
 
-The expression follows that rule.
+Be sure to bookmark the `dplyr` [cheatsheet](https://rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) which will come in handy. 
+
+### Selecting columns with `select`
+
+The selection of attributes occurs when you want to focus on a subset of the attributes of a dataset at hand. The function `select` allows the selection in multiple possible ways.
+
+In the simplest form of `select`, we list the attributes we wish to include in the data with a comma in between. For instance, we may only want to focus on the model name, miles per gallon, the number of cylinders, and the engine design. 
 
 ```{r}
-myc3 <- mutate(myc2, which_make = str_replace(make_model, " .*", ""), .before=2)
+select(mtcars_tibble, model_name, mpg, cyl, vs)
 ```
 
-The function adds the new column to the original `myc2` tentatively and returns the resultant data set.
-The original stays the same, as we see below.
+Alternatively, we may want the model name and all the columns that appear between `mpg` and `wt`. 
 
 ```{r}
-head(myc3)
+select(mtcars_tibble, model_name, mpg:wt)
 ```
+
+We can also provide something more complex. `select` can receive attribute matching options like `starts_with`, `ends_with`, and `contains`. The following example demonstrates the use of some of these. 
 
 ```{r}
-head(myc2)
+select(mtcars_tibble, cyl | !starts_with("m") & contains("a"))
 ```
 
-How many different values appear in the `which_make` attribute?
-We can use `unique` for removing duplicates to find out.
-We can even apply `sort` to the result that `unique` produces to make the list have its elements in the alphabetical order.
+The criterion for selection here: in addition to`mpg` and `cyl`, any attribute whose name starts with some character other than "m" and contains "a" somewhere.
+
+Going one step further, we can also supply a regular expression to do the matching. Recall that `^` and `$` are the start and end of a string, respectively, and `[a-z]{3,5}` means any lowercase alphabet sequence having length between 3 and 5. Have a look at the following example.
 
 ```{r}
-sort(unique(myc3$which_make))
+select(mtcars_tibble, matches("^[a-z]{3,5}$"))
 ```
 
-When we need to create multiple new attributes, we can repeat the above process as many times as we create new columns.
-That would be a little cumbersome because we do not need the intermediate products.
-Conveniently there is the concept of "piping" with which you can pass data from one function to another.
-The way to use piping is simple.
+The regular expression here means return any columns that have "lowercase name with length between 3 and 5".
 
-* You start by stating the initial database.
-* For each operation to form, you append `%>%` and then the operation, where you omit the data-set-name part.
-* If you need to save the result in a data set, you add `%-> THE_FINAL_NAME%` at the end.
+### Filtering rows with `filter`
 
-Here is a way to execute `mutate` twice on `myc2` where the first one is the same as before and the second one is for adding a new attribute representing the product of `mpg` and `disp`.
-We capture the resulting output in `myc4`.
+Let us turn our attention now to the rows. The function `filter` allows us to select rows using some criteria. The syntax is to provide a Boolean expression for what should be included in the filtered dataset. 
+
+We can select all car models with 8 cylinders. Note how `cyl == 8` is an expression that evalutes to either `TRUE` or `FALSE` depending on whether the the attribute `cyl` of the row has a value of `8`. 
 
 ```{r}
-myc2 %>% mutate(which_make = str_replace(make_model, " .*", ""), .before=2) %>% mutate(mpg_disp = mpg * disp, .after=2) -> myc4
+filter(mtcars_tibble, cyl == 8)
 ```
 
-The expression in the above has only two `mutate` calls.
-If you get to add more operations, the expression can ge very long.
-To make the expression easier to parse, you can think of folding it by entering the return key to make it easier to read.
-You enter expressions line by line in R, and so you should be mindful of where to break lines.
-If the expression looks complete, the R environment executes what you've entered.
-Typically, we end a line with a directive like `%>%` and `%->%` so the environment understands that the line is incomplete.
+We could be more picky and refine our search by including more attributes to filter by. 
 
 ```{r}
-myc2 %>%
-  mutate(which_make = str_replace(make_model, " .*", ""), .before=2) %>%
-  mutate(mpg_disp = mpg * disp, .after=2) ->
-  myc4
+filter(mtcars_tibble, cyl == 8, am == 1, hp > 300)
 ```
 
-It is possible to combine multiple `mutate` functions into one with a comma in between, but you can specify only one place for insertion.
-Also, you can use the attribute name for the column position.
+Here, we requested a new tibble that contains rows with 8 cylinders, a manual transmission, and a gross horsepower over 300.  
+
+We may be interested in fetching a particular row in the dataset, say, the information associated with the car model "Datsun 710". We can also use `filter` to achieve this task. 
 
 ```{r}
-myc2 %>%
-  mutate(which_make = str_replace(make_model, " .*", ""), mpg_disp = mpg * disp, hp_per_wt = hp / wt, .after=make_model) ->
-  myc4
-myc4
+filter(mtcars_tibble, model_name == "Datsun 710")
 ```
-Also, there is an option of selecting which original attributes to keep after computing the new attributes.
-The way to specify the keep choice is to use `.keep=OPTION` where `OPTION` is one of "all", "used", "unused", and "none", which mean all, only those you used in mutation, only those you did not use in mutation, and none, respectively.
-The following mutation expression creates three new attributes, "which_make", "mpg_disp", and "hp_per_wt", put them after "make_model", and keep only those you used "make_model", "mpg", "disp", "hp" and "wt". 
+
+### Re-arranging rows with `arrange`
+
+It may be necessary to rearrange the order of the rows to aid our understanding of the meaning of the dataset. The function `arrange` allows us to do just that.
+
+To arrange rows, we state a list of attributes in the order we want to use for re-arranging. For instance, we can rearrange the rows by gross horsepower (`hp`). 
 
 ```{r}
-myc2 %>%
-  mutate(which_make = str_replace(make_model, " .*", ""), mpg_disp = mpg * disp, hp_per_wt = hp / wt, .keep='used', .after = make_model) ->
-  myc4
-myc4
+arrange(mtcars_tibble, hp)
 ```
-__The function `transmute()`__
 
-The function `transmute()` is a variant of `mutate()` where you keep only new attributes you generate.
+By default, `arrange` will reorder in ascending order. If we wish to reorder in descending order, we put the attribute in a `desc` function call. While we are at it, let us break ties in `hp` and order by miles per gallon (`mpg`).
 
 ```{r}
-myc2 %>% transmute(which_make = str_replace(make_model, " .*", ""), mpg_disp = mpg * disp, hp_per_wt = hp / wt)
+arrange(mtcars_tibble, desc(hp), mpg)
 ```
 
-__The function `rename()`__
+### Selecting rows with `slice`
 
-The function allows you to rename a specific attribute.
-The syntax is `NEW_NAME = OLD_NAME`.
-Below, we replace the name `wt` with `weight` amd `cyl` with `cylinder`.
+The function is for selecting rows by specifying the rows position. You can specify one row with its row number, a range of rows with a number pair `A:B` where you can have an expression involving the function `n` to specify the number of rows in the data.
+
+The following use of `slice()` uses the range `(n()-10):(n()-2)` is the range starting from the tenth row from the last and ending at the second to last row. 
 
 ```{r}
-myc2 %>% rename(weight = wt, cylinder = cyl)
+slice(mtcars_tibble, (n()-10) : (n()-2))
 ```
 
-__The function `select()`__
-
-The selection of attributes occurs when you want to focus on a subset of the attributes of a data set at hand.
-The function `select()` allows the selection in multiple possible ways.
-
-In the simplest form of `select()`, we list the attributes we wish to include in the data with a comma in between.
-Here is the same `myc4` we used.
+We can also use `slice_head(n = NUMBER)` and `slice_tail(n = NUMBER)` to select the top `NUMBER` rows and the last `NUMBER` rows, respectively.
 
 ```{r}
-myc2 %>%
-  mutate(which_make = str_replace(make_model, " .*", ""), mpg_disp = mpg * disp, hp_per_wt = hp / wt, .after=make_model) ->
-  myc4
-myc4
+slice_head(mtcars_tibble, n = 2)
+slice_tail(mtcars_tibble, n = 2)
 ```
-We select four from this data.
+
+If we are interested in some particular row, we can use `slice` for that as well.
 
 ```{r}
-myc4 %>% select(make_model,which_make,mpg,cyl)
+slice(mtcars_tibble, 3)
 ```
-The listing can take `|` to mean "or", `&` to mean "and", and `!` to mean "not".
-To simplify a complex specification, `select` allows `c(...)` for a list.
-It also takes attribute matching options like `starts_with()`, `ends_with()`, and `contains()`, 
-The example below demonstrates the use of some of these.
-The criterion for selection is: in addition to`mpg` and `cyl`, any attribute whose name starts with some character other than "m" and contains "a" somewhere.
+
+### Renaming columns with `rename`
+
+This function allows you to rename a specific column. The syntax is `NEW_NAME = OLD_NAME`. Below, we replace the name `wt` with `weight` amd `cyl` with `cylinder`.
 
 ```{r}
-myc4 %>% select(mpg,cyl | !starts_with("m") & contains("a"))
+rename(mtcars_tibble, weight = wt, cylinder = cyl)
 ```
-Another selection expression is `matches(EXP)` where `EXP` is a regular expression.
-Recall that `^` and `$` are the start and end of a string, respectively, and `[a-z]{3,5}` means any lowercase alphabet sequence having length between 3 and 5.
-The regular expression below thus means any "lowercase name having length between 3 and 5".
+
+### Relocating column positions with `relocate`
+
+Sometimes you may want to change the order of columns by moving a column from the present location to another. We can relocate a column using the `relocate` function by specifying which column should go where. The syntax is `relocate(DATA_NAME,ATTRIBUTE,NEW_LOCATION)`.
+
+The specification for the new location is either by `.before=NAME` or by `.after=NAME`, where `NAME` is the name of a column.
 
 ```{r}
-myc4 %>% select(matches("^[a-z]{3,5}$"))
+relocate(mtcars_tibble, am, .before = mpg)
 ```
 
-__Handling Missing Values__
+Here we moved the column `am` to the front, just before `mpg`. 
 
-The filtering function is useful when data has holes, which R presents as NA meaning "not available".
-You can create a vector containing any number of NA.
-Below, the data set has four columns and six rows, in which NA appears in row 6.
+### Adding new columns using `mutate`
+
+The function `mutate` creates a new column using some function of the values of existing columns. Let us see an example before getting into the details.  
+
+Suppose we are interested in calculating the ratio between the numbers of cylinders and forward gears for each car model. We can do this by appending a new column with the calculated ratios using `mutate`. 
 
 ```{r}
-na_data <- tibble( name = c("Donny", "Ely", "Freddie", "Gaby", "Huey", "Ivy"), A = c(1, 2, 3, 4, 5, NA), B = c(100, 90, 80, 90, 70, NA), C = c(99, 89, 85, 70, 65, 67))
-na_data
+mtcars_with_ratio <- mutate(mtcars_tibble, cyl_gear_ratio = cyl / gear)
+mtcars_with_ratio
 ```
 
-If you need to get rid of all rows with NA, you can use `drop_na` which is part of `dplyr` (and thus, of tidyverse`).
+Unfortunately, the new column appears at the very end which may not be desirable. We can fix this with the following adjustment.  
 
 ```{r}
-na_data %>% drop_na() -> na_data2
-na_data2
+mtcars_with_ratio <- mutate(mtcars_tibble, 
+                            cyl_gear_ratio = cyl / gear,
+                            .before = mpg)
+mtcars_with_ratio
 ```
 
-Alternatively, you can use `replace_na` to give an instruction how to handle NA appearing in specific columns.
-The syntax for the instruction is simple.
-For each attribute you make a placement, state its name, add an equal sign, and then add the value you want to use for replacement.
-The replacement instructions must appear in a list, even if there is only one replacement instruction.
+By specifying an additional `.before` argument with the value `mpg`, we inform `dplyr` that the new column `cyl_gear_ratio` should appear before the column `mpg`, which is the first column in the dataset. 
 
-Below, we place any NA in "A" with 0, in "B" with 77, and in "C" with 66.
-You may state an instruction for an attribute with no occurrences of NA.
+Generally speaking, the syntax for `mutate` is: 
+
+> `mutate(DATA_SET_NAME, NEW_NAME = EXPRESSION, OPTION)`
+
+where:
+
+* The `NEW_NAME = EXPRESSION` specifies the name of the new attribute and how to compute it, and `OPTION` is an option to specify the location of the new attribute relative to the existing attributes.
+* The position option is either of the form `.before=VALUE` or of the form `.after=VALUE` with `VALUE` specifying the name of the column where the new column will appear before or after; it can also receive a number indicating the position for the newly inserted column.  
+* The `EXPRESSION` can be either a mathematical expression or a function call.
+
+Let us see another example. In addition to calculating the ratio from before, we will create another column containing the make of the car. We will do this by extracting the first word from `model_name` using a regular expression. Let us amend our `mutate` code from before to include the changes. 
 
 ```{r}
-na_data %>% replace_na(list(A = 0, B = 77, C = 66))
+mtcars_mutated <- mutate(mtcars_tibble, 
+                         cyl_gear_ratio = cyl / gear,
+                         make = str_replace(model_name, " .*", ""),
+                         .before = mpg)
+mtcars_mutated
 ```
 
-There is a way to fill missing values by dragging the non-NA value immediately above an NA to its position.
-In this manner, all NA's after the first non-NA will acquire a value.
-This works when the top row does not have an NA.
-In the case where the top row has an NA and the bottom row does not have an NA, you can drag the values upwards instead.
-You can combine the two actions in a bidirectional manner, either going down and then up or going up and then down.
-The directional specifications are: "up", "down", "updown", and "downup".
-You can use the option `.direction = DIRECTION` with one of the four in place of `DIRECTION`.
-The default direction is "down", and so you do not have state it.
+To form the `make` column, we use the function `str_replace`; we look for substrings that match the pattern `" .*"` (one white space and then any number of characters following it) and replace it with an empty string `""`, leaving only the first word, as desired. String operations are applicable to strings, which is what appears in the column `make`. 
 
-In the example below, we create a data set of three attributes with many NA's.
-The first column `name` has "James" in the top row and so you can fill downward to eliminate all the NA's.
-The second column `math` is the opposite. The top row has an NA and the bottom does not.
-You can fill upward.
-The last column `soc` has an NA in the top row and an NA in the bottom row, and so a single-directional filling would leave out the top or the bottom NA.
-We can fill using bidirectional replacement.
-You can see the difference between when you use "down" and when you use "downup" for the third column.
+Note that the original dataset, before mutation, remains unchanged in `mtcars_tibble`. 
 
 ```{r}
-name = c("James", NA, NA, "Karol", NA, NA, "Lindsay", NA, NA)
-math = c(NA, 8, NA, 7, 6, 5, 4, NA, 7)
-soc = c(NA, 6, 7, 8, NA, NA, 9, 8, NA)
-data0 <- tibble(name, math, soc)
-data0
-data0 %>% fill(name) %>% fill(math, .direction = "up") %>% fill(soc, .direction = "down")
-data0 %>% fill(name) %>% fill(math, .direction = "up") %>% fill(soc, .direction = "downup")
+mtcars_tibble
 ```
 
-If you want to make an across-the-board replacement of NA with a specific value, you can use `replace(is.na(.), X)`.
-Here `X` is a value whose data type matches all the NA's.
-In the case of `data0` in the above, "name" has strings and the other two have double values.
-You thus cannot use replace the NA's across the board with a single value.
-Rather, you need to split it into two steps, with the first step taking care of the NA's in "name" and then the second taking care of filling the remaining NA's with 0.
-
+How many different makes are there? We can use `unique` for removing duplicates to find out.
 
 ```{r}
-data0 %>% fill("name") %>% replace(is.na(.), 0)
+unique(pull(mtcars_mutated, make))
 ```
 
+### The function `transmute`
 
-__The function `filter()`__
-
-The function `filter` allows you to select rows using criteria.
-The syntax is to put an expression for the inclusion criterion.
-Below, we select only those rows whose value for "B" is less than or equal to 90.
-The filter function by default, removes all rows for which evaluating the criteria is not possible due to NA.
+The function `transmute` is a variant of `mutate` where we keep only the new columns generated.
 
 ```{r}
-na_data %>% filter(B <= 90)
+only_the_new_stuff <- transmute(mtcars_tibble, 
+                                cyl_gear_ratio = cyl / gear,
+                                make = str_replace(model_name, " .*", ""))
+only_the_new_stuff
 ```
 
-If you have multiple criteria you want to apply conjunctively (meaning all of them have to be true), you can connect the individual criteria with a comma in between.
+### The pair `group_by` and `summarize`
+
+Suppose you are interested in exploring the relationship between the number of cylinders in a car model and the miles per gallon it has. One way to examine this is to look at some summary statistic, say the *average*, of the miles per gallon for car models with 6 cylinders, car models with 7 cylinders, and car models with 8 cylinders.
+
+When thinking about the problem in this way, we have effectively divided up all of the rows in the dataset into three groups, where the group a car model will belong to is determined by the number of cylinders it has. 
+
+`dplyr` accomplishes this using the function `group_by`. The syntax for `group_by` is simple: simply list the attributes with which you want to build groups. Let us give an example on how to use it. 
 
 ```{r}
-na_data %>% filter(B <= 90, B >= 80)
+grouped_by_cl <- group_by(mtcars_tibble, cyl)
+grouped_by_cl
 ```
 
-The filtering function has something clever, you can compute some values on the fly using some attributes and feed them into the filtering criterion.
-Recall that `min` computes the minimum among the values in a vector.
-You can use the function to compute the minimum in "B" ignoring the NA in the attribute.
-The filtering function below takes the minimum and then keeps only those rows whose "B" value is less than or equal to the minimum.
+Unfortunately, the result is not that interesting. To make something out of this, we need to *summarize* some piece of information using these groups, e.g. the average `mpg` per group as is needed for our task. 
+
+The summary function is called `summarize`. Let us amend our above grouping code to include the summary.  
+
+```{r message = FALSE}
+grouped_by_cl <- group_by(mtcars_tibble, cyl)
+summarized <- summarize(grouped_by_cl, 
+          count = n(),
+          avg_mpg = mean(mpg))
+summarized
+```
+
+This table looks more like what we would expect. Our `summary` calculates two summaries, each reflected in a column in the above table:
+
+* `count`, the number of car models belonging to the group 
+* `avg_mpg`, the average miles per gallon of car models in the group
+
+The summary results make sense. More cylinders translates to more power, but it also means more moving parts which can hurt efficiency. Therefore, it seems an association exists where the more cylinders a car has, the lower its miles per gallon.   
+
+These functions come handy when you want to examine data by grouping rows and summarize some information with respect to each group.
+
+<!-- More cylinders potentially means more power, but it also means more moving parts. More moving parts means there's more friction to overcome, impacting efficiency.  --> 
+ 
+<!-- Generally speaking, the higher an engine’s displacement the more power it can create, while the lower the displacement the less fuel it can consume. --> 
+ 
+### Coordinating multiple actions using the pipe  
+
+Let us revise a bit our previous study. Curious about the joint effect of the numbers of cylinders and the transmission of the car, you decide to group by both `cyl` and `am`. After summarizing the groups, you calculate the counts in each group and the average `mpg`. Finally, after the summary is done, you would like to remove any groups from the summary that have less than 2 cars. 
+
+Your analysis pipeline, then, would be composed of three steps: 
+
+1. Group rows by `cyl` and `am`, the number of cylinders. 
+2. Summarize to calculate the average miles per gallon per group. 
+3. Filter out rows that are below the average miles per gallon. 
+
+A first solution for this task might look like the following. 
+
+```{r message = FALSE}
+# step 1
+grouped_by_cl <- group_by(mtcars_tibble, cyl, am)
+# step 2
+summarized <- summarize(grouped_by_cl, 
+          count = n(),
+          avg_mpg = mean(mpg))
+# step 3
+avg_mpg_counts <- filter(summarized, count > 2)
+avg_mpg_counts
+```
+
+Observe how the code we have just written is quite cumbersome. It introduces several intermediate products that we do not need, namely, the objects `grouped_by_cl` and `summarized`. It can also be difficult to come up with good names for objects. 
+
+Conveniently, there is a construct called the "pipe" which allows us to pass the results from one function as input to another. The way to use piping is simple.
+
+* You start by stating the initial dataset. 
+* For each operation to form, you append `%>%` and then the operation, where you omit the dataset name part.
+* If you need to save the result in a data set, you use the assignment operator `<-` at the beginning as usual.
+
+Thus, we can rewrite our first solution as follows. 
+
+```{r message = FALSE}
+avg_mpg_counts <- mtcars %>%
+  group_by(cyl, am) %>%
+  summarize(count = n(), 
+            avg_mpg = mean(mpg)) %>%
+  filter(count > 2)
+```
+
+This solution is much easier to read than our first; we can clearly identify the transformations being performed on the data. It is good to read `%>%` as "then". 
+
+Note that there is not much mystery with `%>%`. All the pipe operator does is place an object into the first argument of a function. So, when we say `mtcars %>% group_by(cyl, am)`, the pipe changes this to `group_by(mtcars, cyl, am)`. Or, more generally, if we have `x %>% func(y)`, this is changed to `func(x, y)`.   
+
+Here is another use of the pipe, using our `mtcars_mutated` tibble from earlier. 
 
 ```{r}
-na_data %>% filter(C <= min(B, na.rm = TRUE))
+mtcars_mutated %>%
+  pull(make) %>%
+  unique()
 ```
 
-__The function `arrange()`__
+Neat! This one demonstrates some of the usefulness of `pull` over the traditional `$` for accessing column data. 
 
-The function `arrange` allows you to reorder rows.
-To arrange rows, you state a list of attributes in the order you want to use in arranging.
-For each attribute you want to reder in the descending order, you put the attribute name in `desc`.
-Below, we arrange data in the increasing order of `cyl` and then for each group of rows having a common `cyl` value, arrange them in the descending order of `mpg`.
+### Practice makes perfect! 
 
+This section has covered a lot of `dplyr` functions for transforming datasets and, despite our best efforts, understanding what these functions are doing can quickly become overwhelming. The only way to truly understand these functions -- and which ones should be used when confronted with a situation -- is to practice using them. 
+
+Begin with the `mtcars` dataset from this section and run through each of the functions and the examples discussed here on your own. Observe what the dataset looks like before and after the transformation and try to understand what the transformation is.
+
+Once you develop enough familiarity with these functions, try making small changes to our examples and coming up with your own transformations to apply. Be sure to include the `%>%` operator whenever possible. 
+
+You may also wish to look at some of the datasets available to you when running the command `data()`. 
+
+## Advanced Transformations 
+
+In this section we look to two more transformation techniques that are essential for achieving tidy data. 
+
+### Prerequisites
+
+As before, let us load `tidyverse`. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### Pulling Data from Multiple Sources
+
+The third principle of tidy data stated that an observational unit should form a table. However, often times the observational unit we are measuring will be split across multiple tables.  
+
+Let us suppose we are measuring student scores in a classroom. The data is given to us in the form of two tables, one for exams and the other for assignments. We load the scores into our R environment with tibble. 
 
 ```{r}
-myc2 %>% arrange(cyl,desc(mpg))
+exams <- tibble(name = c("Adriana", "Beth", "Candy", "Emily"), 
+                midterm = c(90, 80, 95, 87), 
+                final = c(99, 50, 70, 78))
+assignments <- tibble(name = c("Adriana", "Beth", "Candy", "Florence"), 
+                assign1 = c(80, 88, 93, 88), 
+                assign2 = c(91, 61, 73, 83))
+exams
+assignments
 ```
 
+If our observational unit is the *grade*, then it should be clear that the current arrangement of data is not tidy. The data should be kept together in a single table.  
 
-__The function `slice()`__
+You can combine two tibbles using a common attribute as the key for combining; that is, finding values appearing in both tibbles and then connecting rows having the names in common. In general, if there are multiple matches between the two tibbles concerning the attribute, each possible row matches will appear.
 
-The function is for selecting rows by specifying the rows position.
-You can specify one row with its row number, a range of rows with a number pair `A:B` where you can you an expression involving `n()` to specify the number of rows in the data.
-The following use of `slice()` uses the range `(n()-10):(n()-2)` is the range starting from the tenth line above the last line and ending at the second line above the last line.
+The construct for stitching together two tibbles together in this manner is called the *join*.  The general syntax is: 
 
+> `JOIN_METHOD_NAME(DATA1, DATA2, by="NAME")`.
 
-```{r}
-myc2 %>% slice((n()-10):(n()-2))
-```
-
-YOu can use `slice_head(n = NUMBER)` and `slice_tail(n = NUMBER)` to select the top `NUMBER` rows and the last `NUMBER` rows, respectively.
-
-```{r}
-myc2 %>% slice_head(n = 10)
-myc2 %>% slice_tail(n = 11)
-```
-
-
-__The functions `group_by()` and `summarize()`__
-
-These functions come handy when you want to examine data by grouping rows and obtaining some summary numbers within each group.
-The syntax for `group_by` is simple. You list the attributes with which you want to build groups.
-The syntax for `summarize()` is to add `SUMMARY = EXP` where t`SUMMARY` is the name of the summary column and `EXP` is the expression for the summary.
-The example below uses `gear` and `cyl` for grouping, computes the averages of `mpg` and `disp`, and saves it in `myc4`.
-
-
-```{r}
-mtcars %>% rownames_to_column("make_model") %>%
-  group_by(gear,cyl) %>% summarize(avgmpg = mean(mpg), avgdisp = mean(disp)) -> myc4
-```
-
-## Adding More Attribute
-
-You can combine two data frames using a common attribute as the key for combining; that is, finding values in appearing in both data frames and then connecting rows have the names in common.
-In general, if there multiple matches between the two data frames concerning the attribute, each possible row matches will appear.
-The general syntax is `JOIN_METHOD_NAME(DATA1, DATA2, by="NAME")`.
-Here `DATA1' and `DATA2` are the names of the data frames and `NAME` is the name of the key attributes.
-There are four join functions.
-The differences among them are in how they treat non-matching values.
+Here `DATA1` and `DATA2` are the names of the tibbles and `NAME` is the name of the key attributes. There are four types of join functions. The differences among them are in how they treat non-matching values.
 
 * `left_join`: Exclude any rows in `DATA2` with no matching values in `DATA1`.
 * `right_join`; Exclude any rows in `DATA1` with no matching values in `DATA2`.
@@ -683,108 +679,391 @@ The differences among them are in how they treat non-matching values.
 The example below shows the results of four join operations.
 
 ```{r}
-testA <- tibble( name = c("Adriana", "Beth", "Candy", "Emily"), Chem110 = c(90, 80, 95, 87), Spa101 = c(99, 50, 70, 78))
-testB <- tibble( name = c("Adriana", "Beth", "Candy", "Florence"), MTH161 = c(80, 88, 93, 88), Bio110 = c(91, 61, 73, 83))
-testA
-testB
+scores_left <- left_join(assignments, exams, by="name")
+scores_left
+scores_right <- right_join(assignments, exams, by="name")
+scores_right
+scores_inner <- inner_join(assignments, exams, by = "name")
+scores_inner
+scores_full <- full_join(assignments, exams, by="name")
+scores_full
 ```
+
+The results of the join reveal some anomalies in our data. Namely, we see that Emily does not have any assignment scores nor does Florence have any exam scores. Hence, in the left, right, and full joins, we see values labeled `NA` appear where they would have those values. We call these missing values, which can be thought of as "holes" in the data. We will return to missing values in a later section. 
+
+An alternative to the join is to stack up the rows using `bind_rows`. 
 
 ```{r}
-ljoined = left_join(testA, testB, by="name")
-ljoined
-rjoined = right_join(testA, testB, by="name")
-rjoined
-ijoined = inner_join(testA, testB, by = "name")
-ijoined
-fjoined = full_join(testA, testB, by="name")
-fjoined
+bind_rows(assignments, exams)
 ```
 
-You can stack up rows using `bind_rows`.
+Observe how this one does not join values where possible, and so there is redundancy in the rows that appear, e.g., Adriana appears twice. As a result, many missing values appear in the resulting table. 
+
+### Pivoting
+
+Let us return to the resulting table after the inner join. 
 
 ```{r}
-testC <- tibble( name = c("Gail", "Helen", "Iman", "Jackie"), Chem110 = c(87, 88, 90, 79), Spa101 = c(77, 74, 94, 84))
-bind_rows(testA, testC)
+scores_inner
 ```
 
-## Pivoting Tables
+The third property of tidy data is fulfilled now that the observational unit forms a single table. However, the joined table is still messy. The grades are split across four different columns and, therefore, multiple observations occur at each row. 
 
-Sometimes you encounter a situation in which you need to incorporate attributes as rows.
-Look at the following simple data set with four scores for three people.
+To remedy this, we use *pivot* and, in terms of R, the function `pivot_longer`. The syntax for `pivot_longer` can be complex, and so we do not go over it in detail. Here is how we can use it.   
 
 ```{r}
-library(tidyverse)
+scores_long <- scores_inner %>%
+  pivot_longer(c(assign1, assign2, midterm, final), 
+               names_to = "assessment", values_to = "score")
+scores_long
 ```
 
+The usage above takes `scores_inner`, merges all the assessment columns, creates a new column with name `assessment`, and presents the corresponding values under the column `score`. Observe how we can easily read off the three variables from this table: `name`, `assessment`, and `score`. We can be confident in knowing that this is tidy data.
 
-```{r}
-toyexam <- tibble( name = c("Robert", "Susan", "Teresa"), exam1 = c(10, 9, 8), exam2 = c(8, 7, 9), exam3 = c(9.5, 10, 8.2), final = c(7, 7.5, 6.5))
-```
-
-```{r}
-toyexam
-```
-
-What if we want to find the relationship between individual exam scores and the final (we will see such explorations of relations in the next chapter on)?
-To make such comparisons, it is convenient that the three exam scores appear in just one column pair, with one column representing which exam score it is and the other representing the score, like:
-
-```{r}
-tibble( name = c("Robert", "Robert", "Robert", "Susan", "Susan", "Susan", "Teresa", "Teresa", "Teresa"), final = c(7.0, 7.0, 7.0, 7.5, 7.5, 7.5, 6.5, 6.5, 6.5), exams = c("1", "2", "3", "1", "2", "3", "1", "2", "3"), score = c(10, 8, 9.5, 9, 7, 10.0, 8, 9, 8.2))
-```
-
-You can use `pivot_longer` to accomplish the task.
-The syntax for `pivot_longer` is very complex, and so we do not go over it in detail.
-The one below takes the `toyexam`, merges all the columns whose names start with "exam" (the `starts_with` from `stringr` does the job), creates the new column with name "exams" from the collection, designates the prefix "exam" in the column names for removable, and presents the corresponding values under the column "score".
-
-
-```{r}
-toyexam %>% pivot_longer(cols = starts_with("exam"), names_to = "exams", names_prefix = "exam", values_to = "score") -> toyexam_longer
-toyexam_longer
-```
-
-In contrast with `pivot_longer`, `pivot_wider` does the action to reverse the `pivot_longer`.
-The function `pivot_wider` grabs a pair of columns and spreads the pair into a series of columns.
-One column of the pair serves as the source for the new column names after spreading.
-For each value appearing in the source column, the function creates a new column by the name.
+If we wish to go in the other direction, say for readability, we can use `pivot_wider`. The function `pivot_wider` grabs a pair of columns and spreads the pair into a series of columns. One column of the pair serves as the source for the new column names after spreading. For each value appearing in the source column, the function creates a new column by the name.
 The value appearing opposite to the source value appears as the value for the column corresponding to the source.
 
-Below, we create a new data frame from `toyexam_longer` using the pair ("names", "score").
-To specify the selection, we use a pair of arguments `names_from = exams` and `values_from = score`.
-
 ```{r}
-toyexam_longer %>% pivot_wider(names_from = exams, values_from = score)
-```
-Since the values appearing in the "exams" column are simply numbers, the resultant column names with spreading are those numbers. If we want to add a prefix to those numbers, we can specify the prefix with an argument `names_prefix = PREFIX`, where `PREFIX` is a string serving as the prefix.
-In the example below, we use "EX" as the prefix.
-
-```{r}
-toyexam_longer %>% pivot_wider(names_from = exams, values_from = score, names_prefix = "EX")
+scores_long %>%
+  pivot_wider(names_from = assessment, values_from = score)
 ```
 
-### A Case Study
+Note how this simply undoes what we have done, returning us to the original `scores_inner` table. We can also prefix each of the new columns with `assess_`. 
 
 ```{r}
+scores_long %>%
+  pivot_wider(names_from = assessment, values_from = score, names_prefix = "assess_")
+```
+
+## Applying Functions to Columns 
+
+Situations can arise where we need to apply some function to a column. In this section we learn how to apply functions to columns using a construct called the `map`. 
+
+### Prerequisites
+
+As before, let us load `tidyverse`. 
+
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
-Here is a data ser representing various scores from a course in Computer Science.
+We will use the `mtcars` tibble again in this section so let us prepare the tibble by migrating the row names to a dedicated column. Note how the pipe operator can be used to help with the work. 
 
 ```{r}
-read_csv("data/csc_course.csv")
+mtcars_tibble <- mtcars %>%
+  rownames_to_column("model_name") 
 ```
 
-The "number" column shows q unique number of each student.
-There are ten "labXX" attributes, eleven "hwXX" attributes, and three "qzXX" scores.
-Suppose we want compute for each index between 1 and 10, the difference of the "hw" value at the index fomr the "lab" value at the previous, that is, `hw10 - lab10`, `hw09 - lab09`, and so.
+
+### What is a `function` anyway? 
+
+We have used several times by now the word "function". Here are some basic rules about functions.
+
+* _A function is a block of code with a name that allows execution from other codes._ This mean that you can take any part of a working (i.e., all parentheses and brackets in the part have matching counterparts in the same part) and specify it to be a function.
+* _If the function is active in the present run of R, each time a code call the function, the code of the function runs._ This means that R suspends the execution of the present code and processes the execution of the code of the function. When it finishes running the code of the function, it returns to the execution of the one it has suspended.
+* _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return()` at the end so as to specify the value it has computed.
+* _If a function has the role of returning a value, the call itself represents the value it computes._ So you store the value the function computes in a variable using an assignment.
+* _A function may require some number of values to use in its calculation._ We call them *arguments*. When using a function that requires, the arguments must appear in the call.
+
+### A Very Simple Function
+
+Here is a very simple function, `one_to_ten`, which prints the sequence of integers from 1 to 10. The definition of the function takes the form `one_ten <- function() { ... }`.
+
+```{r, error = TRUE}
+one_to_ten <- function() { 
+  print(1:10) 
+}
+```
+
+Here is what happens when you call the function.
+
+```{r}
+one_to_ten()
+```
+
+Note that the call stands alone, i.e., you can use it without anything else but its name and a pair of parentheses. By replacing the code appearing inside the curly brackets, you can define a different function with the same name `one_to_ten`. 
+
+Let us reverse the order in which the numbers appear.
+
+```{r, error = TRUE}
+one_to_ten <- function() { 
+  print(10:1) 
+}
+```
+
+Here is what happens when you call the function.
+
+```{r}
+one_to_ten()
+```
+
+The new behavior of `one_to_ten()` substitutes the old one, and you cannot replay the behavior of the previous version (until, of course, you modify the function again). 
+
+### Functions That Compute a Value
+
+To make a function compute a value, you add a line `return(VALUE)` at the end of the code in the brackets. The function `my_family()` returns a list of names for persons. 
+
+Remember the `c()` function? The function creates a vector with 19 names as strings and returns the vector.
+
+```{r}
+my_family <- function() {
+  return(c("Amy", "Billie", "Casey", "Debbie", "Eddie", "Freddie", "Gary",
+           "Hary", "Ivy", "Jackie", "Lily", "Mikey", "Nellie", "Odie",
+           "Paulie", "Quincy", "Ruby", "Stacey", "Tiffany"))
+}
+```
+
+The call for the function produces the list that the function returns.
+
+```{r}
+a <- my_family()
+a
+```
+
+Now whenever you need the 19-name list, you can either call the function or refer to the variable `a` that holds the list.
+
+### Functions That Take Arguments
+
+To write a function that takes arguments, you determine how many arguments you need and determine the names you want to use for the arguments during the execution of the code for the function.
+
+The `function()` declaration now has the names of the arguments. You put them in the order you want to use with a comma in between. Below, we define a function that computes the max between 100 and the argument received. The function returns the argument so long as it is larger than 100. 
+
+```{r}
+passes_100 <- function(x) {
+  return(max(100, x))
+}
+```
+
+Here is a demonstration of how the function works.
+
+```{r}
+passes_100(50)  # a value smaller than 100
+passes_100(2021)  # a value larger than 100
+```
+
+
+### Maps and functions 
+
+Let us now return to the discussion of how we can *apply* functions to a column. The meaning of apply is particular. What we mean by this is that we wish to run some function (which can receive an argument and return a value) to each row of a column. This can be especially useful if some column is given in the wrong units or if we wish to cut off the values in a column at some point.  
+
+We can accomplish this using a suite of functions thoughtfully prepared by the package [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf). 
+
+```{r, echo=FALSE, fig.align="center", out.width='20%'}
+knitr::include_graphics('images/purr_logo.png')
+```
+
+The main construct we will be using from `purrr` is something called the *map*. A map applies a function, say the `cutoff` function we wrote earlier, to each element of a vector or list. 
+
+`purrr` offers many flavors of map, depending on what the output vector should look like:  
+
+* `map_lgl()` outputs a logical vector.
+* `map_int()` outputs an integer vector.
+* `map_dbl()` outputs a double vector.
+* `map_chr()` outputs a character vector.
+* `map()` outputs a list.
+
+Here are some more examples of using map. Let us apply the `passes_100` to an input vector containing a sequence of values from 95 to 105. 
+
+```{r}
+map_dbl(95:105, passes_100)
+```
+
+Observe how the first five values are less than `100` and, therefore, a run of `100`'s composes the first few values of the returned vector.  
+
+We can also define functions and pass it in on the spot. We call these *anonymous functions*. The following is an *identity function*: it simply outputs what it takes in. 
+
+```{r}
+map_int(1:5, function(x) x)
+```
+
+> A catch here is that the code after the comma, i.e., `function(x) x` specifies *in place* the function to apply to each element of the series preceding the comma `1:5`. The function in question `function(x) x` specifies that the function will receive a value named `x` and *returns* the value of `x` without modification. Thus we call it an identity function. The external function `map_int` states that the result of applying the identify function thus specified with `function(x) x` to each element of the sequence `1:5` will be presented as an integer.
+
+The next one is perhaps more useful than the identify function. It computes the square of each element, i.e., $x^2$. 
+
+```{r}
+map_dbl(1:5, function(x) x ** 2)
+```
+
+> __Why use map_dbl() instead of map_int()?__ By default, R treats numbers as doubles. While `1:5` is a vector of integers, each element is subject to the expression `x ** 2`, where `x` is an integer and `2` is a double. To make this operation compatible, R will "promote" `x` to a double, making the output of this expression a double as well.  
+
+The next one will always return a vector of 5's, regardless of the input. Can you see why? Do you also see why there are six elements, unlike five elements in the previous examples?
+
+```{r}
+map_dbl(1:6, function(x) 5)
+```
+
+By now we have seen enough examples of how to use `map` with a vector. Let us finally learn how to apply `map` to a column of a tibble. 
+
+### Applying a function to a tibble 
+
+Recall the tidied tibble `mtcars_tibble`. 
+
+```{r}
+mtcars_tibble
+```
+
+We can spot two areas that require transformation: 
+
+1. Convert the `wt` column from pounds to kilograms.  
+2. Cut off the values in `displ` so that no car model has a value larger than `400`.
+
+We can address the first one simply using an anonymous function that multiples each value by the conversion factor for kilograms. Let us test it out first with a simple vector.
+
+```{r}
+map_dbl(100:105, function(x) x * 0.454)
+```
+
+To incorporate this into a tibble, we encase our `map` inside a call to `mutate`, which modifies the column `wt`. 
+
+```{r}
+mtcars_transformed <- mtcars_tibble %>%
+  mutate(wt = map_dbl(wt, function(x) x * 0.454))
+mtcars_transformed
+```
+
+We have successfully applied a function a column in a tibble! Let us turn to the second task. For this, we define a function that computes the minimum between the argument and the value `400`. 
+
+```{r}
+cutoff_400 <- function(x) {
+  return(min(400, x))
+}
+```
+
+We can apply the function to the column `disp` using a similar approach as before.
+
+```{r}
+mtcars_transformed <- mtcars_tibble %>%
+  mutate(disp = map_dbl(disp, cutoff_400))
+mtcars_transformed
+```
+
+We can inspect visually to see if any values in `disp` are larger than 400 -- they shouldn't be! 
+
+__Pop quiz:__ In our two examples of applying a function to `wt` and `disp`, the new tibble (stored in `mtcars_transformed`) lost information about the values of `wt` and `disp` before the transformation. How could we amend our examples to still preserve the old information in case we would like to make comparisons between the before and after?  
+
+## Handling Missing Values
+
+In the section on joining tables together we saw a special value called `NA` crop up when rows did not align during the matching. We call these special quantities, as you might expect, *missing values* since they are "holes" in the data. In this section we dive more into missing values and how to address them in your datasets.  
+
+### Prerequisites
+
+As before, let us load the `tidyverse`. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### A dataset with missing values 
+
+The tibble `trouble_temps` contains temperatures from four cities across three consecutive weeks in the summer.
+
+```{r}
+trouble_temps <- tibble(city = c("Miami", "Boston", "Seattle", "Arlington"),
+                        week1 = c(89, 88, 87, NA), 
+                        week2 = c(91, NA, 86, 75), 
+                        week3 = c(88, 85, 88, NA))
+trouble_temps
+```
+
+As you might expect, this tibble contains missing values. We can see that Boston is missing a value from `week2` and Arlington is missing values from both `week1` and `week3`, possibly due to some faulty equipment. 
+
+### Eliminating rows with missing values 
+
+If you need to get rid of all rows with `NA`, you can use `drop_na` which is part of `dplyr`.
+
+```{r}
+temps_clean <- trouble_temps %>% 
+  drop_na()
+temps_clean
+```
+
+### Filling values by looking at neighbors  
+
+Alternatively, you can use `replace_na` to give an instruction how to handle NA appearing in specific columns. 
+
+The syntax for the instruction is simple. For each attribute you make a placement, state its name, add an equal sign, and then add the value you want to use for replacement. The replacement instructions must appear in a list, even if there is only one replacement instruction.
+
+Below, we fill any `NA` in `week1` with 0, in `week2` with 77, and in `week3` with 66.
+
+```{r}
+trouble_temps %>% 
+  replace_na(list(week1 = 89, week2 = 91, week3 = 88))
+```
+
+There is a way to fill missing values by dragging the non-`NA` value immediately below an NA to its position. In this manner, all `NA`'s after the first non-`NA` will acquire a value. This works when the bottom row does not have an `NA`. 
+
+Let us fill the values using this setting.
+
+```{r}
+trouble_temps %>%
+  fill(week1:week3, .direction = "up")
+```
+
+Note how the temperatures for Arlington remain unfilled.  
+
+In the case where the bottom row has an `NA` and the top row does not have an `NA`, you can drag the values upwards instead.
+
+We can also combine the two actions in a bidirectional manner, either going down and then up or going up and then down.
+
+```{r}
+trouble_temps %>%
+  fill(week1:week3, .direction = "updown")
+```
+
+The directional specifications are: "up", "down", "updown", and "downup". The default direction is "down", and so you do not have state it.
+
+### Filling values according to a global constant 
+
+If you want to make an across-the-board replacement of NA with a specific value, you can use `replace(is.na(.), X)`. Here `X` is the value to substitute the missing value with. 
+
+```{r}
+trouble_temps %>%
+  replace(is.na(.), 70)
+```
+
+Note that if your dataset contains a mixture of strings and numbers, then a straightforward application like this will not work. Instead, you will need to split the process into two steps: first taking care of missing values in the strings columns and then, afterwards, taking care of the missing values in the numeric columns.  
+
+
+## Case Study: A Course in Computer Science
+
+Before we end this chapter, we present a worked example of a real-life dataset and apply the transformations that are necessary to bring it into tidy data. The goal of this exercise is to demonstrate how all the transformations we have learned in this chapter are not tools meant to be used in isolation, but work best when used together to fulfill a complex goal.  
+
+### Prerequisites
+
+As always, we will need the `tidyverse` to accomplish our task.  
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+### The `csc_course` tibble
+
+We will examine a dataset containing scores from a course in Computer Science.
+
+```{r message = FALSE, warning = FALSE}
+csc_course <- read_csv("data/csc_course.csv")
+csc_course
+```
+
+Following is some information about the dataset:
+
+* The `number` column gives a unique number of each student enrolled in the course.
+* There are ten "labXX" attributes (for labs), eleven "hwXX" attributes (for homeworks), and three "qzXX" scores (for quizzes).
+* The data abounds with missing values. The missing values in this dataset have a clear explanation: some students did not turn in all of the labs and/or assignments.  
+
+
+Suppose we want to compute for each index between 1 and 10, the difference of the "hw" value at the index fomr the "lab" value at the previous, that is, `hw10 - lab10`, `hw09 - lab09`, and so.
 We make the following plan.
 
-* Read the data and substitute each NA with 0.
-* Create a data subset consisting of "number" and the ten "lab" scores.
-* Pivot using the "lab" scores, extract the two characters following the prefix "lab", attach them after "number" to create a temporary ID.
-* Repeat the same concerning the homework scores.
-* The temporary ID is common between the two data subsets. Unite the two data sets using the common ID.
-* Using the "lab" and "hw" scores, compute the difference.
-* From the new merged version, remove the temporary ID.
+1. Read the data and substitute each NA with 0.
+2. Create a data subset consisting of "number" and the ten "lab" scores.
+3. Pivot using the "lab" scores, extract the two characters following the prefix "lab", attach them after "number" to create a temporary ID.
+4. Repeat the same concerning the homework scores.
+5. The temporary ID is common between the two data subsets. Unite the two data sets using the common ID.
+6. Using the "lab" and "hw" scores, compute the difference.
+7. From the new merged version, remove the temporary ID.
+
+### First steps 
 
 The code below has descriptions of each transformation.
 
@@ -827,127 +1106,98 @@ full_join(csc_lab, csc_hw, name = temp_id) %>% mutate(diff = hw_score - lab_scor
 csc_new
 ```
 
-## Writing Functions
-
-We have used several times by now, the word "function".
-Here are some basic rules about functions.
-
-* _A function is a block of chord with a name that allows execution from other codes._ This mean that you can take any part of a working (i.e., all parentheses and brackets in the part have matching counterparts in the same part) and specify it to be a function.
-* _If the function is active in the present run of R, each time a code call the function, the code of the function runs._ This means that R suspends the execution of the present code and processes the execution of the code of the function. When it finishes running the code of the function, it returns to the execution of the one it has suspended.
-* _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return()` at the end so as to specify the value it has computed.
-* _If a function has the role of returning a value, the call itself represents the value it computes._ So you store the value the function computes in a variable using an assignment.
-* _A function may require some number of values to use in its calculation._ We call them *arguments*. When using a function that requires, the arguments must appear in the call.
-
-### A Very Simple Function
-
-Here is a very simple function, `one_Ten`, which prints the sequence of integers from 1 to 10.
-The definition of the function takes the form `one_ten <- function() { ... }`.
-
-```{r, error = TRUE}
-one_ten <- function() { print(1:10) }
-```
-Here is what happens when you call the function.
-```{r}
-one_ten()
-```
-Note that the call stands alone, i.e., you can use it without anything else but its name and a pair of parentheses.
-By replacing the code appearing inside the curly brackets, you can define a different function with the same name `one_ten()`.
-Let us reverse the order in which the numbers appear,
-
-```{r, error = TRUE}
-one_ten <- function() { print(10:1) }
-```
-Here is what happens when you call the function.
-```{r}
-one_ten()
-```
-
-The new behavior of `one_tne()` substitues the old one, and you cannot replay the behavior of the previous version.
-
-### Functions That Compute a Value
-
-To make a function compute a value, you add a line `return(VALUE)` at the end of the code in the brackets.
-The function `my_family()` returns a list of names for persons.
-Remember the `c()` function?
-The function creates a new list with 19 names and returns the list.
-
-```{r}
-my_family <- function() {
-  return(c("Amy", "Billie", "Casey", "Debbie", "Eddie", "Freddie", "Gary",
-           "Hary", "Ivy", "Jackie", "Lily", "Mikey", "Nellie", "Odie",
-           "Paulie", "Quincy", "Ruby", "Stacey", "Tiffany"))
-}
-```
-
-The call for the function produces the list that the function returns.
 
 
-```{r}
-a <- my_family()
-a
-```
+<!---
+In summary, to access the columns and the rows, here are the rules we should follow:
 
-Now whenever you need the 19-name list, you can either call the function or refer to the variable `a` that holds the list.
+* We use a pair `DATA_SET_NAME[X,Y]` to access a cell at row position `X` and column position `Y`, where `DATA_SET_NAME` is the name of the data set and `X` and `Y` are positive integers.
+* If we omit the X-part, like `DATA_SET_NAME[,Y]`, the expression specifies the entire column at position `Y`. If `S` is the name of the column, we can use an alternate expression `DATA_SET_NAME$S`.
+* If we omit the Y-part, like `DATA_SET_NAME[X,]`, the expression specifies the entire row at position `X`. If the data set has row names and `W` is the name of the row at position `X` (that is, it must be a string), we can substitute the index with the name as in `DATA_SET_NAME[W,]`. 
 
-### Functions That Take Arguments
+### Rotating Data
 
-To write a function that takes arguments, you determine how many arguments you need and determine the names you want to use for the arguments during the execution of the code for the function.
-The `functionn()` declaration now has the names of the arguments.
-You put them in the order you want to use with a comma in between.
-Below, we define a function for computing the maximum of two numbers with a feature that if both numbers are smaller than 0, the maximum is not the maximum of the two negative numbers, but 0.
-Note that we use the pairwise maximum twice in the code:
-first for computing the maximum between the two arguments `x` and `y`, and then computing the maximum between the maximum and 0.
-In that manner, if the first maximum is negative, the function returns 0 instead.
+Sometimes we want to switch from the row-major view to the column-major by rotating the data.
+The rotation is very simple. You have only to use the function `t()`.
+Simply applying `t()` does not complete the task of transposition.
+Below, we rotate the `mtcars` data set.
 
-```{r, error = TRUE}
-max0 <- function(x, y) { return(max(0, max(x, y))) }
-```
-
-Here is the demonstration of how the function works.
-
-```{r}
-max0(-10, 2)
-max0(-10, -13)
+```{r eval = FALSE}
+t(mtcars)
 ```
 
 
-### Practical Examples
+It is imperative that the data you are rotating has row names.
+Let us take the following example of data we construct with `tribble`
 
-
-Recall the data set `mtcars`.
-We introduce a function that returns the country of origin of a make.
-We follow the previous procedure for migrating the row names to an attribute and taking the prefix of the row names to the `which_make` attribute.
-There are 22 makes that appear in the attribute.
-We get to it by applying the function `unique()` to the `which_make` attribute.
-We create a 22-element list of the country of origin corresponding to the `make` list.
-Now the `car_origin()` function takes a string representing a make, finds its position in the `makes` list using the `match` function, and then returns the element of the country of origin list at the position.
-
-
-```{r}
-library(tidyverse)
+```{r eval = FALSE}
+ddd <- tribble(~Name,~English,~Mathematics,
+               "Johnny",100,90,
+               "Katy",90,100,
+               "Lauren",89,94,
+               "Manuel",95,79,
+               "Nancy",80,80)
+ddd
 ```
 
-```{r}
-myc <- mtcars
-myc2 <- rownames_to_column(myc,"make_model")
-myc3 <- mutate(myc2, which_make = str_replace(make_model, " .*", ""), .before=2)
-makes <- unique(myc3$which_make)
-makes
-countries <- c("Japan", "Japan", "USA", "USA", "USA", "USA", "USA", "USA",
-             "USA", "Italy", "Japan", "Japan", "USA", "USA", "USA", "USA",
-             "France", "Italy", "USA", "Italy", "Italy", "Sweden")
-countries[match("AMC",makes)]
-```
-```{r}
-car_origin <- function(x) {
-  return(countries[match(x,makes)])
-}
-car_origin("Toyota")
+The data does not have row names.
+The student names are the values of the attribute "Name".
+If we rotate the data using `t`, we get the following.
+
+```{r eval = FALSE}
+dddT <- t(ddd)
+dddT
 ```
 
-Now we can furnish the `myc3` data set by creating a new column `country` as the result of applying the function `car_origin()` to the attribute `which_make`.
+The three columns of `ddd` become rows and the rows of `ddd` appear as columns `[,1]` through `[,5]`.
+These are merely column index specifications.
+We can tell R to handle `dddT` as a data frame.
 
-
-```{r}
-myc3 %>% mutate(country = car_origin(which_make), .after = 2) 
+```{r eval = FALSE}
+ddd1 <- t(ddd)
+dddT <- as.data.frame(ddd1)
+dddT
 ```
+The `[,`]` etc. now are now column names "V1" etc., but we still have "Name" as a row.
+We thus must turn "Name" as a column name and _then_ rotate.
+In the following, we process `ddd` with column conversion of "Name" to row names, then apply `t`.
+Voila!
+
+```{r eval = FALSE}
+ddd1 <- column_to_rownames(ddd, "Name")
+dddT <- t(ddd1)
+dddT
+```
+
+### Missing values and `dplyr` verbs
+
+those rows whose value for "B" is less than or equal to 90.
+The filter function by default, removes all rows for which evaluating the criteria is not possible due to NA.
+
+```{r eval = FALSE}
+na_data %>% filter(B <= 90)
+```
+
+If you have multiple criteria you want to apply conjunctively (meaning all of them have to be true), you can connect the individual criteria with a comma in between.
+
+```{r eval = FALSE}
+na_data %>% filter(B <= 90, B >= 80)
+```
+
+The filtering function has something clever, you can compute some values on the fly using some attributes and feed them into the filtering criterion.
+Recall that `min` computes the minimum among the values in a vector.
+You can use the function to compute the minimum in "B" ignoring the NA in the attribute.
+The filtering function below takes the minimum and then keeps only those rows whose "B" value is less than or equal to the minimum.
+
+```{r eval = FALSE}
+na_data %>% filter(C <= min(B, na.rm = TRUE))
+```
+
+
+
+-->
+
+
+
+
+
