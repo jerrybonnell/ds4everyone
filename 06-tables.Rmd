@@ -1038,75 +1038,174 @@ library(tidyverse)
 
 ### The `csc_course` tibble
 
-We will examine a dataset containing scores from a course in Computer Science.
+We will examine a dataset containing scores from a course in Computer Science. 
 
 ```{r message = FALSE, warning = FALSE}
-csc_course <- read_csv("data/csc_course.csv")
-csc_course
+csc_course_lab <- read_csv("data/csc_course_lab.csv")
+csc_course_hw <- read_csv("data/csc_course_hw.csv")
+csc_course_qz <- read_csv("data/csc_course_qz.csv")
+csc_course_lab
+csc_course_hw
+csc_course_qz
 ```
 
 Following is some information about the dataset:
 
 * The `number` column gives a unique number of each student enrolled in the course.
-* There are ten "labXX" attributes (for labs), eleven "hwXX" attributes (for homeworks), and three "qzXX" scores (for quizzes).
+* There are ten `labXX` attributes (for labs), eleven `hwXX` attributes (for homeworks), and three `qzXX` scores (for quizzes).
+* The dataset is split across three different tables as CSV files: one for lab scores, a second for homework scores, and a third for quiz scores. 
 * The data abounds with missing values. The missing values in this dataset have a clear explanation: some students did not turn in all of the labs and/or assignments.  
 
+We can tell the variables that are being measured in this dataset. 
 
-Suppose we want to compute for each index between 1 and 10, the difference of the "hw" value at the index fomr the "lab" value at the previous, that is, `hw10 - lab10`, `hw09 - lab09`, and so.
-We make the following plan.
+* *number*, the unique number of each student 
+* *assessment*, the kind of assessment, e.g., lab01, hw01, qz01 
+* *score*, the received score on the assessment 
 
-1. Read the data and substitute each NA with 0.
-2. Create a data subset consisting of "number" and the ten "lab" scores.
-3. Pivot using the "lab" scores, extract the two characters following the prefix "lab", attach them after "number" to create a temporary ID.
-4. Repeat the same concerning the homework scores.
-5. The temporary ID is common between the two data subsets. Unite the two data sets using the common ID.
-6. Using the "lab" and "hw" scores, compute the difference.
-7. From the new merged version, remove the temporary ID.
+It should hopefully be clear that the current format of the dataset violates all three principles of tidy data. Those problems being: 
 
-### First steps 
+1. The observational unit is the *student* which is spread across three different tables.
+2. There is missing data present which, by definition, is not tidy.
+3. We would like to keep the scale of the scores the same for each assessment, i.e., labs, homeworks, and quizzes should all be on a 100 point scale. 
+4. Both the student *number* and *score* appears in each column and multiple observations appear in each row. 
 
-The code below has descriptions of each transformation.
+Once we have tided the data, we would like to answer the following questions:  
+
+1. What is average lab, homework, and quiz score for each of the students? What are the overall averages for the class? 
+2. Which students are performing below the average? 
+
+We will address each of these in turn. 
+
+### Joining like data together 
+
+To resolve the first problem, we should merge the data from each of the three tibbles into one single tibble. We know how to do this using the *join* operation.
+
+We are quite fortunate because each table shares a common attribute which we can use as a key in the join: `number`. We will coordinate the join by first merging the homework and lab tibbles together, and then merging the resulting tibble with the quiz tibble.  
 
 ```{r}
-# Load data and replace all NA's with 0
-# Save it as `csc0`
-read_csv("data/csc_course.csv") %>%
-  replace(is.na(.), 0) -> csc0
-# Create a lab part `csc_lab` by:
-# (a) selecting "number" and the ten lab scores,
-# (b) pivoting the lab scores into an attribute pair (lab_index,lab_score)
-#     while removing "lab" from the attribute names,
-#     where selection of the columns for pivoting is by way of specifying all the columns other than "number",
-# (c) creating a new attribute "temp_id" by connecting the value appearing in "number",
-#     an underscore, and the value appearing in "lab_index"
-csc0 %>% select(number, lab01:lab10) %>%
-  pivot_longer(cols = !number, names_to = "lab_index", values_to = "lab_score", names_prefix="lab" ) %>%
-  mutate(temp_id = str_c(number, "_", lab_index)) -> csc_lab
-# Create a homework part `hw_lab` by:
-# (a) selecting "number" and the first ten homework scores,
-# (b) pivoting the homework scores into an attribute pair (hw_index,hw_score)
-#     while removing "hw" from the attribute names,
-#     where selection of the columns for pivoting is by way of specifying all the columns other than "number",
-# (c) creating a new attribute "temp_id" by connecting the value appearing in "number",
-#     an underscore, and the value appearing in "hw_index"
-csc0 %>% select(number, hw01:hw10) %>%
-  pivot_longer(cols = !number, names_to = "hw_index", values_to = "hw_score", names_prefix="hw" ) %>%
-  mutate(temp_id = str_c(number, "_", hw_index)) -> csc_hw
-# check the two sub parts
-csc_lab
-csc_hw
-# Create a merger `csc_new` by:
-# (a) call `full_join` using "temp_id" as the attribute for connecting
-# (b) compute the difference as a new attribute "diff"
-# (c) create a new attribute "index" whose values are identical to those of "lab_index"
-# (d) select five columns "number", "index", "lab_socre", "hw_score", and "diff" in this order.
-full_join(csc_lab, csc_hw, name = temp_id) %>% mutate(diff = hw_score - lab_score) %>%
-  mutate(index = lab_index) %>%
-  select(number,index,lab_score,hw_score,diff) -> csc_new
-csc_new
+csc_course_merged <- csc_course_hw %>%
+  inner_join(csc_course_lab, by = "number") %>%
+  inner_join(csc_course_qz, by = "number")
+csc_course_merged
 ```
 
+Note that even though we used `inner_join` here, the resulting tibble would have been the same if we had used any of the other styles of join. Why might that be? 
 
+### Addressing missing data 
+
+Now that we have the data in a single table, we can address the problem of missing data. As we noted earlier, the missing values have a meaning in the dataset: the student did not turn in the associated assessment. The appropriate way to handle this is to substitute each missing value with a 0 -- sorry folks!  
+
+We can accomplish this using the `is.na` function. 
+
+```{r}
+csc_course_merged <- csc_course_merged %>%
+  replace(is.na(.), 0)
+csc_course_merged
+```
+
+Missing values, begone! 
+
+### Scaling scores to the same point scale 
+
+Next, we turn to scaling the points so that everything is on the 100 point scale. To accomplish this, we need to convert all of the labs and homeworks column from a 10 point to a 100 point scale. 
+
+To do this, we will apply a function to each of the labs and homeworks columns. Here is the function we will apply. 
+
+```{r}
+convert_to_100_points <- function(x) {
+  return((x / 10) * 100)
+}
+```
+
+We could use `map_dbl` for each of the eleven homeworks and twelve labs, but this can be quite cumbersome to type. The function `across` is equivalent to `map`, but allows us to apply a function to multiple columns at once. Then, as before, we include the incantation inside a call to `mutate`. Here is how we can put everything together. 
+
+```{r}
+csc_course_merged <- csc_course_merged %>%
+  mutate(across(matches("lab"), convert_to_100_points),
+         across(matches("hw"), convert_to_100_points))
+csc_course_merged
+```
+
+Note that the function `matches("lab")` looks for all columns that have the name `"lab"` in it, which will return the twelve lab columns. Ditto `matches("hw")` and the homework columns. 
+
+### Pivoting 
+
+We will now resolve our fourth stated problem. To overcome this, we can use the *pivot* transformation so that the three variables become apparent in the table: `number`, `assessment`, and `score`. 
+
+```{r}
+csc_course_merged <- csc_course_merged %>%
+  pivot_longer(starts_with("hw") | starts_with("lab") | starts_with("qz"), 
+               names_to = "assessment", values_to = "score")
+csc_course_merged
+```
+
+The one bit of machinery we added here is the Boolean expression `starts_with("hw") | starts_with("lab") | starts_with("qz")` so that we are able to select all of the homework, lab, and quiz columns at once. The meaning of this expression should be straightforward. 
+
+This data is just about tidied. The difference between the individual assessments, e.g., "hw01" versus "hw03", does not concern us for this analysis, so let us tidy the values in the `assessment` column so that only three values appear: `hw`, `lab`, and `qz`.   
+
+We can use a regular expression in a call to `str_replace` to do the work for us. Here is an example of the regular expression in action. 
+
+```{r message=FALSE}
+str_view_all("hw05", "[0-9]+")
+```
+
+Once we have matched any of the numerical characters, we can replace them with an empty string `""`. For instance: 
+
+```{r}
+str_replace("hw05", "[0-9]+", "")
+```
+
+We can now pull everything together using a call to `mutate`.  
+
+```{r}
+csc_course_merged <- csc_course_merged %>%
+  mutate(assessment = str_replace(assessment, "[0-9]+", ""))
+csc_course_merged
+```
+
+Looks great! Let us finish by answering some questions about the data. 
+
+### The good stuff: summarizing information  
+
+We are now ready to answer some of the questions we proposed at the outset of this section. Our first question: what is average lab, homework, and quiz score for each of the students; what are the overall averages for the class? 
+
+We can answer this using a combination of the `group_by` and `summarize` verbs. We will group by the variables `number` and `assessment` and then summarize the grouped means for each group.  
+
+```{r message=FALSE, warning=FALSE}
+csc_course_merged %>%
+  group_by(number, assessment) %>%
+  summarize(mean_score = mean(score))
+```
+
+Compare this table with the previous and note how there is only one `hw`, `lab`, and `qz` assessment for each student. The reported value that you see is the *mean* score for all of the assessments in that category for the student, e.g., the first row shows their average homework score over the eleven homeworks. 
+
+Let us go further and report the overall assessment averages. 
+
+```{r message=FALSE, warning=FALSE}
+csc_course_merged %>% 
+  group_by(assessment) %>%
+  summarize(mean_score = mean(score))
+```
+
+Neat! Users of Excel or spreadsheet software might find a result like this familiar. 
+
+Assuming that each assessment is weighted equally, let us find the mean score for each of the students. 
+
+```{r message=FALSE, warning=FALSE}
+csc_summary <- csc_course_merged %>% 
+  group_by(number) %>%
+  summarize(mean_overall_score = mean(score))
+csc_summary
+```
+
+Now let us zoom in on those that are performing less than a 70. 
+
+```{r message=FALSE, warning=FALSE}
+csc_summary %>%
+  filter(mean_overall_score < 70)
+```
+
+You can imagine how such an analysis could be useful when used mid-semester -- we should check in with those students to see what is going on. 
 
 <!---
 In summary, to access the columns and the rows, here are the rules we should follow:
@@ -1193,7 +1292,44 @@ The filtering function below takes the minimum and then keeps only those rows wh
 na_data %>% filter(C <= min(B, na.rm = TRUE))
 ```
 
-
+```{r eval = FALSE}
+# Load data and replace all NA's with 0
+# Save it as `csc0`
+read_csv("data/csc_course.csv") %>%
+  replace(is.na(.), 0) -> csc0
+# Create a lab part `csc_lab` by:
+# (a) selecting "number" and the ten lab scores,
+# (b) pivoting the lab scores into an attribute pair (lab_index,lab_score)
+#     while removing "lab" from the attribute names,
+#     where selection of the columns for pivoting is by way of specifying all the columns other than "number",
+# (c) creating a new attribute "temp_id" by connecting the value appearing in "number",
+#     an underscore, and the value appearing in "lab_index"
+csc0 %>% select(number, lab01:lab10) %>%
+  pivot_longer(cols = !number, names_to = "lab_index", values_to = "lab_score", names_prefix="lab" ) %>%
+  mutate(temp_id = str_c(number, "_", lab_index)) -> csc_lab
+# Create a homework part `hw_lab` by:
+# (a) selecting "number" and the first ten homework scores,
+# (b) pivoting the homework scores into an attribute pair (hw_index,hw_score)
+#     while removing "hw" from the attribute names,
+#     where selection of the columns for pivoting is by way of specifying all the columns other than "number",
+# (c) creating a new attribute "temp_id" by connecting the value appearing in "number",
+#     an underscore, and the value appearing in "hw_index"
+csc0 %>% select(number, hw01:hw10) %>%
+  pivot_longer(cols = !number, names_to = "hw_index", values_to = "hw_score", names_prefix="hw" ) %>%
+  mutate(temp_id = str_c(number, "_", hw_index)) -> csc_hw
+# check the two sub parts
+csc_lab
+csc_hw
+# Create a merger `csc_new` by:
+# (a) call `full_join` using "temp_id" as the attribute for connecting
+# (b) compute the difference as a new attribute "diff"
+# (c) create a new attribute "index" whose values are identical to those of "lab_index"
+# (d) select five columns "number", "index", "lab_socre", "hw_score", and "diff" in this order.
+full_join(csc_lab, csc_hw, name = temp_id) %>% mutate(diff = hw_score - lab_score) %>%
+  mutate(index = lab_index) %>%
+  select(number,index,lab_score,hw_score,diff) -> csc_new
+csc_new
+```
 
 -->
 
