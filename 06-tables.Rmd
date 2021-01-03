@@ -1072,7 +1072,7 @@ It should hopefully be clear that the current format of the dataset violates all
 Once we have tided the data, we would like to answer the following questions:  
 
 1. What is average lab, homework, and quiz score for each of the students? What are the overall averages for the class? 
-2. Which students are performing below the average? 
+2. Which students performed poorly in the course? 
 
 We will address each of these in turn. 
 
@@ -1198,7 +1198,7 @@ csc_summary <- csc_course_merged %>%
 csc_summary
 ```
 
-Now let us zoom in on those that are performing less than a 70. 
+Now let us zoom in on those that are performing less than, say, 70.  
 
 ```{r message=FALSE, warning=FALSE}
 csc_summary %>%

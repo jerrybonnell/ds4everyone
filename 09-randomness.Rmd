@@ -356,7 +356,7 @@ Now let us expand this and develop a multi-round betting game.
 Previously, we split the game into two actions: a function `one_flip` computing the gain/loss and a `sample` call simulating one round of the game using the gain/loss function. We now combine these two into one.
 
 ```{r}
-betting_one_round <- function(x) {
+betting_one_round <- function() {
   # Net gain on one bet
   x <- sample(c("heads","tails"), size = 1) # flip a fair coin once and record the side
   if (x == "heads") {
@@ -453,162 +453,18 @@ outcomes
 
 This will do the job. The body of this `for` loop contains two actions: (1) run the betting function `betting_one_round()`, and (2) store the result into `i`th slot of the `outcomes` vector. Both actions are executed for each item in the sequence `1:rounds`.
 
-You may have noticed how stepping through the `outcomes` vector this way, individually assigning each element the result of one bet, can be cumbersome to write. If so, you would be in good company. The philosophy of R prefers to operate on vectors in whole, rather than in pieces as in the code we saw just above. In this way, we can eliminate the need for many common `for` loops. To demonstrate this, we introduce the idea of *maps* and *functionals*. 
+You may have noticed how stepping through the `outcomes` vector this way, individually assigning each element the result of one bet, can be cumbersome to write. If so, you would be in good company. The philosophy of R, and especially the tidyverse, prefers to eliminate the need to write many common `for` loops. We saw one example of this already when we used *map* from the `purrr` package to apply a function to a column of data. Here, we will use the function `replicate` to repeat a simulation many times.    
 
-### Maps and Functionals
-
-Let's consider a rather glum situation: *your midterm asks you to write R code to capitalize the elements in a character vector.* 
-
-```{r}
-some_characters <- c("b", "a", "N", "a", "N", "A", "!")
-```
-
-How can we do this with R? We know that the `toupper()` function can be used to capitalize a character (actually, it can do all of the work for us but let's not spoil the fun). We can try solving the problem using this function... 
-
-```{r}
-capitalized <- vector("character", length(some_characters))
-capitalized[1] <- toupper(some_characters[1])
-capitalized[2] <- toupper(some_characters[2])
-capitalized[3] <- toupper(some_characters[3])
-capitalized[4] <- toupper(some_characters[4])
-capitalized[5] <- toupper(some_characters[5])
-capitalized[6] <- toupper(some_characters[6])
-capitalized[7] <- toupper(some_characters[7])
-capitalized
-```
-
-This would earn full marks. But what if the vector given was bigger? There wouldn't be any time left to work on the other problems! One way out of this jam is to observe the repetition in the code we have just written. We just learned that `for` loops are useful for performing the same action multiple times. In a ray of brilliance, the following revised code is produced.
-
-```{r}
-my_upper_function <- function(x) {
-  capitalized <- vector("character", length(x))
-  for (i in 1:length(x)) {
-    capitalized[i] <- toupper(x[i])
-  }
-  return(capitalized)
-}
-my_upper_function(some_characters)
-``` 
-
-Much better! Moving on, you realize the next question asks you to convert the characters in the vector to *lowercase*. Another dilemma -- the function we wrote only works for capitalization! We need another for converting to lowercase. In a haste, you come up with the following.  
-
-```{r}
-my_lower_function <- function(x) {
-  lowered <- vector("character", length(x))
-  for (i in 1:length(x)) {
-    lowered[i] <- tolower(x[i])
-  }
-  return(lowered)
-}
-my_lower_function(some_characters)
-``` 
-
-Does this do the job? Yes. Full marks? No way! We did not learn our lesson from last time: there is repetition in the code again! Besides name changes, a brand new function was written to make only one change: adjust the `toupper()` function call to `tolower()`. Moreover, there is ample room for introducing mistakes. If you were writing this on a computer and copy-and-pasting your capitalization code, it is all too easy to forget changing `toupper()` to `tolower()`, especially if we needed to call these functions more than once.       
-
-The better approach here is to leverage the power of R and make use of *functionals*. Instead of writing two separate functions, recycle one function and pass it an additional *functional* argument. That is, 
-
-```{r}
-my_map_function <- function(x, func) {
-  transformed <- vector("character", length(x))
-  for (i in 1:length(x)) {
-    transformed[i] <- func(x[i])
-  }
-  return(transformed)
-}
-```
-
-We can call this new function by passing in the same vector `some_characters` and a functional argument `func` that will be either `tolower()` or `toupper()`. 
-
-```{r}
-my_map_function(some_characters, toupper)
-my_map_function(some_characters, tolower)
-```
-
-By passing in different functional arguments, we are effectively transforming this *generalized* function into the lower and uppercase versions in our first draft. The grader is sure to be content with this solution (as well as the R gurus :-). 
-
-The idea of passing a function to another function is an extremely powerful idea. However, the careful reader would beg to differ: how can this be used to *eliminate* writing `for` statements?  
-
-To this end, we will make use of the [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf) package available in tidyverse, which provides many functions that can be used to replace common `for` loops. 
-
-```{r, echo=FALSE, fig.align="center", out.width='20%'}
-knitr::include_graphics('images/purr_logo.png')
-```
-
-The goal of using `purrr` functions is to break up common list manipulation challenges into smaller pieces by solving first the problem for a single element in the vector. From this, we can build up solutions to more complex problems. Let's first load in the tidyverse package. 
-
-```{r warning=FALSE, message=FALSE}
-library(tidyverse)
-```
-
-The main construct we will be using from `purrr` is the *map*. The `my_map_function()` we just wrote is one such example of a map: it applies a function (in this case, `toupper()` or `tolower()`) to each element of a vector or list. `purrr` offers many flavors of map, depending on what the output vector should look like: 
-
-* `map_lgl()` outputs a logical vector.
-* `map_int()` outputs an integer vector.
-* `map_dbl()` outputs a double vector.
-* `map_chr()` outputs a character vector.
-* `map()` outputs a list.
-
-We could easily have replaced our `my_map_function()` with a `purrr` version. 
-
-```{r}
-map_chr(some_characters, toupper)
-map_chr(some_characters, tolower)
-```
-
-Here are some more examples of using map. Note how we can define a function and pass it in on the spot. We call these *anonymous functions*. The following is an *identity function*: it simply outputs what it takes in. 
-
-```{r}
-map_int(1:5, function(x) x)
-```
-
-> A catch here is that the code after the comma, i.e., `function(x) x` specifies *in place* the function to apply to each element of the series preceding the comma `1:5`. The function in question `function(x) x` specifies that the function will receive a value named `x` and *returns* the value of `x` without modification. Thus we call it an identity function. The external function `map_int` states that the result of applying the identify function thus specified with `function(x) x` to each element of the sequence `1:5` will be presented as an integer.
-
-The next one is perhaps more useful than the identify function. It computes the square of each element, i.e., $x^2$. 
-
-```{r}
-map_dbl(1:5, function(x) x ** 2)
-```
-
-> __Why use map_dbl() instead of map_int()?__ By default, R treats numbers as doubles. While `1:5` is a vector of integers, each element is subject to the expression `x ** 2`, where `x` is an integer and `2` is a double. To make this operation compatible, R will "promote" `x` to a double, making the output of this expression a double as well.  
-
-The next one will always return a vector of 5's, regardless of the input. Can you see why? Do you also see why there are six elements, unlike five elements in the previous examples?
-
-```{r}
-map_dbl(1:6, function(x) 5)
-```
-
-While map eliminates the need to write `for` loops in common situations, keep in mind that R internally must still perform a `for` loop, i.e., the code for map contains a `for` loop and it is not directly visible to those who use map. Therefore, the chief benefit of using constructs like map is not for its speed, but clarity: it is much easier to read and write (once you wrap your head around it :-).
-
-If you are still not convinced, we defer to a prominent data scientist and one of the leading contributors to the tidyverse for an explanation. 
-
-> Of course, someone has to write loops. It doesn’t have to be you. — Jenny Bryan
-
-We now have all the pieces we need to take on the betting simulation. 
-
-### Example: Betting on 10 Coin Tosses (revisited)
-
-Let's recall the code we wrote earlier to perform the simulation.
+Here is how we can rewrite our simulation using just two lines of code. 
 
 ```{r}
 rounds <- 10
-outcomes <- vector("integer", rounds)  # create a vector with length rounds
-for (i in 1:rounds) {
-  outcomes[i] <- betting_one_round()
-}
-```
-
-Using what we have learned about map, we can rewrite this simulation to just two lines. 
-
-```{r}
-rounds <- 10
-outcomes <- map_dbl(1:rounds, betting_one_round)
+outcomes <- replicate(n = 10, betting_one_round())
 ```
 
 ```{r}
 outcomes
 ```
-
-Note how the input vector `1:num_rounds` serves as a placeholder here. Meaning, the values in this vector do not matter as they will be overwritten with the results from the bet; only the length of the vector is important. 
 
 We can use `sum()` to count the number of times money changed hands.
 
@@ -618,13 +474,20 @@ sum(outcomes)
 
 Looks like we made some money! 
 
+Note that while `replicate` eliminates the need to write `for` loops in common situations, R internally must still perform a `for` loop, i.e., the code for `replicate` contains a `for` loop and it is not directly visible to us as the programmer who wrote the code. Therefore, the chief benefit of using constructs like `replicate` and map is not for its speed, but clarity: it is much easier to read and write (once you wrap your head around it :-).
+
+If you are still not convinced, we defer to a prominent data scientist and one of the leading contributors to the tidyverse for an explanation. 
+
+> Of course, someone has to write loops. It doesn’t have to be you. — Jenny Bryan
+
+
 ### Example: Betting on 1,000 Tosses
 
-Iteration using maps is a powerful technique. For example, we can see the variation in the results of 1,000 bets by running exactly the same code for 1,000 bets instead of ten.
+Iteration using `replicate` is a handy technique. For example, we can see the variation in the results of 1,000 bets by running exactly the same code for 1,000 bets instead of ten.
 
 ```{r}
 rounds <- 1000
-outcomes <- map_dbl(1:rounds, betting_one_round)
+outcomes <- replicate(n = rounds, betting_one_round())
 ```
 
 The vector `outcomes` contains the results of all 1000 bets.
@@ -649,7 +512,6 @@ ggplot(outcome_df, aes(x = outcomes)) +
 ```
 
 As we would expect, each of the two outcomes 2 and -1 appeared about 500 of the 1000 times, give or take. And, because we bet an extra dollar for every heads we get, we come out on top. Not bad!  
-
 We will examine the "give or take" amounts more closely in later chapters.
 
 ## Simulation
@@ -673,15 +535,14 @@ The fourth step is to run the simulation and develop insights from the result, o
 
 Note that we have followed these same steps in the betting experiment from the previous section. We can write the steps more generally here:
 
-* Create a "repetitions sequence," that is, a sequence whose length is the number of repetitions you specified in Step 3. For n repetitions we will almost always use the sequence `1:n`.
+* Create a "rounds" variable, that is, an integer containing the number of desired repetitions. 
 
 * Create an "experiment" function to simulate one value based on the code we developed.
 
-* Create a `map` where the first argument is the repetition sequence and the 
-second argument is the experiment function to simulate one value. 
-  * Choose the correct map function depending on the resulting data type.
+* Call the function `replicate` to replicate the experiment function a great number of times. 
   * Store the resulting to a variable. We call this the "outcomes" vector.
-  * A general format takes the form: `outcomes <- map_*(1:n, experiment_func)`
+  * A general format takes the form: `outcomes <- replicate(n = rounds, experiment_func())`
+
 
 Done! Once you have carried out the steps above, your simulation is done. The outcomes vector contains all the simulated values.
 
@@ -739,7 +600,7 @@ num_heads
 Play with the code a few times to see how close the number gets to the expected one half, 150.
 
 ```{r}
-one_trial <- function(x) {
+one_trial <- function() {
   outcomes <- sample(sides, size = 100, replace = TRUE)
   num_heads <- sum(outcomes == "heads")
   return(num_heads)
@@ -749,7 +610,7 @@ one_trial <- function(x) {
 You can simply call this function to generate an outcome of one experiment.
 
 ```{r}
-one_trial(x)
+one_trial()
 ```
 
 ### Step 3: Run and visualize!
@@ -766,7 +627,7 @@ To do that, we use the map.
 num_repetitions <- 10000
 
 # simulate the experiment!
-heads <- map_dbl(1:num_repetitions, one_trial)
+heads <- replicate(n = num_repetitions, one_trial())
 ```
 
 By executing `heads` after this produces all elements of `heads `.
@@ -899,10 +760,10 @@ grains_on_day <- function(day) {
 }
 ```
 
-One trial of our simulation then is summing up the number of grains the minister received from day 1 to day 10. 
+One trial of our simulation then is summing up the number of grains the minister received from day 1 to day 10. Note the call we make to the *map* function `map_dbl` to accomplish this work. 
 
 ```{r}
-one_trial <- function(x) {
+one_trial <- function() {
   grains_per_day <- map_dbl(1:10, grains_on_day)
   return(sum(grains_per_day))
 } 
@@ -923,7 +784,7 @@ We will use 100,000 repetitions of the simulation this time to get a good sense 
 num_repetitions <- 100000
 
 # simulate the experiment!
-grains <- map_dbl(1:num_repetitions, one_trial)
+grains <- replicate(n = num_repetitions, one_trial())
 ```
 
 As before, we collect our results into a tibble. 
@@ -1029,7 +890,7 @@ sum(duplicated(chosen_birthdays))
 Let's pull these pieces together into a function we can use. The function returns `TRUE` if there are any duplicates in the class; `FALSE` otherwise. 
 
 ```{r}
-any_duplicates_in_class <- function(x) {
+any_duplicates_in_class <- function() {
   chosen_bdays <- sample(1:365, size=23, replace=TRUE)
   num_duplicates <- sum(duplicated(chosen_bdays))
   if (num_duplicates > 0) {
@@ -1047,9 +908,9 @@ any_duplicates_in_class()
 We now imagine multiple classrooms that each have 23 students. We will survey each of the classes for any birthday duplicates in the class. Luckily, we can use `any_duplicates_in_class` to help us with the surveying work. Once the surveying is done, we will calculate the *proportion* of duplicates among all the classrooms we surveyed. Let's assume there are 100 classrooms in the school. 
 
 ```{r}
-one_birthday_trial <- function(x) {
+one_birthday_trial <- function() {
   classrooms <- 100
-  num_duplicates <- map_dbl(1:classrooms, any_duplicates_in_class)
+  num_duplicates <- replicate(n = classrooms, any_duplicates_in_class())
   return(sum(num_duplicates) / classrooms)
 }
 ```
@@ -1072,7 +933,7 @@ Since the value `one_birthday_trial` returns is a nonnegative integer, we create
 num_repetitions <- 10000
 
 # simulate the experiment!
-bday_proportions <- map_dbl(1:num_repetitions, one_birthday_trial)
+bday_proportions <- replicate(n = num_repetitions, one_birthday_trial())
 
 # and done!
 ```

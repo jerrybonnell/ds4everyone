@@ -119,18 +119,22 @@ sum(abs(sample_vector - fair_die_probs)) / 2
 Let's wrap this up into a function we can call. 
 
 ```{r}
-one_simulated_tvd <- function(x) {
+one_simulated_tvd <- function() {
   fair_die_probs <- rep(1/6, 6)
   sample_vector <- rmultinom(n = 1, size = 10000, prob = fair_die_probs) / 10000
   return(sum(abs(sample_vector - fair_die_probs)) / 2)
 }
 ```
 
-Next, we create a vector `sample_tvds` containing 10,000 simulated TVD values. As before, we will use `map_dbl()` to do the work. 
+Next, we create a vector `sample_tvds` containing 10,000 simulated TVD values. As before, we will use `replicate` to do the work. 
+
+```{r echo=FALSE}
+set.seed(1)
+```
 
 ```{r}
 num_repetitions <- 10000
-sample_tvds <- map_dbl(1:num_repetitions, one_simulated_tvd)
+sample_tvds <- replicate(n = num_repetitions, one_simulated_tvd())
 ```
 
 ```{r}
@@ -162,7 +166,7 @@ sum(sample_tvds >= observed_tvd) / length(sample_tvds)
 ```
 
 
-The value we get is 0.0659, or about 6.6%. <!-- how do we adjust according to the outcome? -->
+The value we get is 0.0638, or about 6.4%. <!-- how do we adjust according to the outcome? -->
 We interpret the value as stating the *chance* the difference achieves 0.0659 is no more than 6.6%. We can thus conclude that the chances that the die at hand is a fair one is no more than 6.6%. This value, computed through simulation, is what we call a *p-value*.
 
 To compute a p-value, we take the following steps:
@@ -273,7 +277,7 @@ compute_tvd(sample_vector, pull(class_props, Almanac))
 We wrap our work into a function.  
 
 ```{r}
-one_simulated_class <- function(x, props) {
+one_simulated_class <- function(props) {
   sample_vector <- rmultinom(n=1, size=2015, prob = pull(props, Almanac)) / 2015
   return(compute_tvd(sample_vector, pull(props, Almanac)))
 }
@@ -283,7 +287,7 @@ Let us simulate what 10,000 classes could look like. This will be contained in a
 
 ```{r}
 num_repetitions <- 10000
-sample_class_tvds <- map_dbl(1:num_repetitions, one_simulated_class, props = class_props)
+sample_class_tvds <- replicate(n = num_repetitions, one_simulated_class(class_props))
 ```
 
 We can now visualize the result. 
@@ -337,7 +341,7 @@ Re-running the simulation is easy. Note that instead of passing `class_props` as
 
 ```{r}
 num_repetitions <- 10000
-sample_class_tvds <- map_dbl(1:num_repetitions, one_simulated_class, props = class_props_asian)
+sample_class_tvds <- replicate(n = num_repetitions, one_simulated_class(class_props_asian))
 ```
 
 
@@ -438,7 +442,7 @@ mean(pull(random_sample, midterm))
 Now that we know how to simulate one value, we can wrap this into a function. 
 
 ```{r}
-one_simulated_mean <- function(x) {
+one_simulated_mean <- function() {
   random_sample <- csc %>%
     select(midterm) %>%
     slice_sample(n = 9, replace = FALSE)
@@ -450,7 +454,7 @@ We will simulate the "section H lab" 10,000 times. Let us run the simulation!
 
 ```{r}
 num_repetitions <- 10000
-sample_means <- map_dbl(1:num_repetitions, one_simulated_mean)
+sample_means <- replicate(n = num_repetitions, one_simulated_mean())
 ```
 
 As before, we visualize the resulting distribution of grades.  
