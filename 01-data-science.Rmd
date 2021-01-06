@@ -214,3 +214,126 @@ Our two introductory examples have hopefully shown you a glimpse of what data sc
 
 We hope that you will find the journey interesting.
 
+## Setting up a workflow 
+
+In this course we will be using RStudio. RStudio is an integrated development environment (also known as an IDE) popularly used among data scientists for writing R code. It is a powerful tool that can be used to write and debug code, view visualizations, pull up documentation, write "notebooks", and much more which we will probably not get to see! In this section we will go over setting up RStudio on your machine, and discuss how we will use it in this course.
+
+### Some prerequisites
+
+First, you will need to install R and RStudio Desktop from the web. They can be found at the following links. 
+
+* R: https://cloud.r-project.org
+* RStudio: https://rstudio.com/products/rstudio/download/#download
+
+### Meet RStudio 
+
+Assuming you have successfully installed both, launch RStudio. There may be some "getting started" help guides that you are presented with, which you can ignore for now. Your next step will be to create a __R project__ for this course by going to: `File > New Project...`. 
+
+```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
+knitr::include_graphics('images/project_wizard.png')
+```
+
+From the options that are presented, select `New Directory > New Project`. This should bring up the following screen. 
+
+```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
+knitr::include_graphics('images/project_wizard2.png')
+```
+
+In the input box that asks for a "Directory name", you can name it whatever you like; however, you should use something informative -- like "CSC100" -- which we will name ours for this example. The default directory for this project is fine, but do make a note of it; also, do not worry about any of the check boxes and leave those unchecked. 
+
+When you are ready, go ahead and select `Create Project`. This should present you with what will be our editing environment for the semester.   
+
+```{r, echo=FALSE, fig.align="center", out.width='80%', fig.asp=1/2}
+knitr::include_graphics('images/rstudio_environment.png')
+```
+
+Let us go over each of the labeled parts. 
+
+* __Console.__ This is a great place to get started coding in R! It isn't fully featured like a R markdown notebook is (which we will see in a moment) and you wouldn't want to put anything important here as it will be lost as soon as you exit RStudio. However, it can be useful for checking small things, e.g. as a built-in calculator. Try out `2 + 2` and see what you get! You can also check the current "working directory" by typing `getwd()`. This will pull up the directory/folder on your machine where you created this project. Ours says: `"/Users/jerrybonnell/Documents/csc100"`. 
+
+* __Environment.__ This is where RStudio keeps track of "objects" that R has created during your session. We haven't learned what these are yet, but you can revisit this part of the notes again to make sense of what is going on here. 
+
+To demonstrate this, let us create an object `my_value` that holds the value 5. The benefit of the environment view is that it reminds us of the current value held by the object. Run this cell in the "Console" area of RStudio and then glance over at the "Environment" view.   
+
+```{r}
+my_value <- 5
+```
+
+Note what happens in the environment view if we were to change the value. As before, copy the following line of code into your console. 
+
+```{r}
+my_value <- "hello data science!"
+```
+
+
+* __File Explorer/Plots/Help.__ This area is actually a "three-in-one". At the moment, it presents you the files and folders that currently exist inside your project -- which is practically nothing at the moment. We will create some directories in just a moment. 
+
+The __plots view__ reveals itself when you have created a visualization on the console. Here is an example. You need not understand what this code does; simply copy and paste into the console, and run. 
+
+```{r eval = FALSE}
+plot(cyl ~ mpg, mtcars)
+```
+
+Let us navigate to the __help tab__, which should be one or two tabs down from the "Plots" tab. Here, we can look up documentation about functions or datasets we would like to learn more about. For instance, in the search bar, we can type `plot` to look up information for the function `plot` we just used earlier. 
+
+An equivalent, and perhaps more straightforward, way of looking up documentation is right from the console. Just type in `?plot`, hit enter, and on you go.  
+
+### Organizing Your Work 
+
+Let us create some folders in our project to organize our work for the semester. We recommend the following structure. You can use the `New Folder` button in the file explorer view to create these directories. 
+
+```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
+knitr::include_graphics('images/file_directory.png')
+```
+
+The folder names should be self-explanatory, but here is a brief explanation: 
+
+* `labs`, for working on lab assignments. 
+* `hw`, for working on homework assignments.
+* `notes`, for your own notes, say, from lecture. 
+* `project`, for working on the project. 
+
+What files will we be writing in each of these folders? Let us turn to the next section and find out!  
+
+### R Markdown Notebooks 
+
+All of the assignments in this course will be distributed as *R markdown notebooks*, which allows users to intersperse code with prose in an intuitive manner; this is great to use in practice for sharing and communicating your work to peers.
+
+We can try playing with an example notebook that RStudio automatically generates when creating a notebook. Let us try it. 
+
+Navigate to `File > New File > R Notebook`. Save this notebook somewhere appropriate, say, in your `notes` directory. Here is what you should be seeing: 
+
+```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
+knitr::include_graphics('images/notebook_example.png')
+```
+
+Let us go over the parts.  
+
+* __Markdown.__ Here you can type text as you would normally in text processing software like Notepad++, TextEdit, or Word. The cool feature is that the text can be marked up using a language called *markdown*. [Here is a cheat sheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) that you can use as reference.
+
+* __Code__. Here is where we will be writing most of our R code. We may also call these code "cells" or "blocks". When you are ready to run a code block, you can press the green "play" button that appears toward the top right of the block. Observe how it produces output in-line just below the code -- neat, right?     
+
+* __Option Pane__. There are some features here you may wish to explore like the `Run` button which allows you to run all the code blocks in a notebook at once, etc. The feature we would like to draw your attention to is something called *knitting*, which can be found after pressing the downward arrow next to `Preview`. This should show several options, one of which is `Knit to PDF`. Go ahead and select it. 
+
+If you navigate to the `notes` directory in the File Explorer (or wherever you created this notebook), you should see a PDF file that has been generated. Clicking on it in the File Explorer should present you with a PDF version of the notebook. 
+
+What RStudio did was take our R markdown file and convert it to a PDF using [LaTeX](https://en.wikipedia.org/wiki/LaTeX). Beneath each code block is the corresponding output, interspersed neatly with the surrounding prose -- all formatting taken care of for you :-) 
+
+When you are done with weekly labs and assignments, you will *knit* your notebook to a LaTeX PDF file and submit that to Blackboard. 
+
+### Final touches 
+
+Before we end this tutorial, we need to set two RStudio settings. This will help to  avoid any heartache throughout the course. 
+
+Open up `Preferences` in RStudio. Do the following in the `General` tab:
+
+* Uncheck the box that says "Restore .RData into workspace at startup"
+* Following the text that says "Save workspace data to .RData on exit:", select `Never`. 
+
+We are done with our setup!
+
+
+
+
+
+
