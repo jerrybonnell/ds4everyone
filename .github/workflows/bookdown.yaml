@@ -21,6 +21,7 @@ jobs:
       - name: Install pandoc
         run: |
           brew install pandoc
+          brew install cairo
 
       - name: Cache Renv packages
         uses: actions/cache@v2
