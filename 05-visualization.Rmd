@@ -44,7 +44,7 @@ ggplot()
 
 All `ggplot2` has done so far is set up a blank canvas. To make this plot more interesting, we need to specify a dataset and a coordinate system to use. To build up the discussion, let us turn to our first geom: the *point* geom.  
 
-## Point geoms
+## Point Geoms
 
 Let us begin our exploration with the *point* geom. As noted earlier, point geoms are useful in that they can be used to construct a *scatter plot*. 
 
@@ -244,7 +244,7 @@ Contrast this plot with the one we saw just before with `hwy` versus `displ` whe
 
 By the way, where do we get those color names? There's a [cheatsheet](https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pdf) for that! 
 
-### Use Articulations Other Than Colors
+### Other articulations
 
 #### Facets
 
@@ -566,7 +566,7 @@ ggplot(mpg, aes(x = displ, y = hwy)) +
 ```
 
 
-## Visualizing Categorical Variables
+## Categorical Variables
 
 The point, line, and smooth plots are for viewing relations among numerical variables. As you are well aware, numerical variables are not the only type of variables in a data set. There are variables representing categories, and we call them *categorical variables*.
 
@@ -614,7 +614,7 @@ diamonds %>%
 
 The table shows the number of diamonds of each cut. We call this a *distribution*. A distribution shows all the values of a variable, along with the frequency of each one. Recall that the summary does not persist on the `diamonds` data set and so the dataset remains the same after summarization.
 
-### Bar Chart
+### Bar charts
 
 The bar chart is a familiar way of visualizing categorical distributions.
 Each category of a categorical attribute has a number it has an association with, and a bar chart presents the numbers for the categories using bars, where the height of the bars represent the numbers.
@@ -766,7 +766,7 @@ ggplot(happy) +
 
 Bar charts are intended as visualizations of categorical variables. When the variable is numerical, the numerical relations between its values have to be taken into account when we create visualizations. That is the topic of the next section. Before ending the discussion here, we turn to one more important piece of `ggplot2` magic.  
 
-### Coordinate Systems 
+### Coordinate systems 
 
 We noted earlier that one of the motifs of any `ggplot2` plot is its coordinate system. In all of the `ggplot2` code we have seen so far, there has been no explicit mention as to the coordinate system to use. Why? If no coordinate system is specified, `ggplot2` will default to using the Cartesian (i.e., horizontal and vertical) coordinate system. In Cartesian coordinates, the `x` and `y` coordinates are used to define the location of every point in the dataset, as we have just seen. 
 
@@ -801,7 +801,7 @@ ggplot(happy) +
 This can also be a neat trick for eliminating the (awkward) gap between the bars and the x-axis :-)
 
 
-## Visualizing Numerical Distributions 
+## Numerical Variables 
 
 Many of the variables that data scientists study are *quantitative* or *numerical*, like the displacement and highway fuel efficiency, as we have seen before. Let us go back to the `mpg` data set and learn how to visualize its numerical values.
 
@@ -822,7 +822,7 @@ mpg_sub <- select(mpg, manufacturer, model, hwy)
 mpg_sub
 ```
 
-### What is a Histogram?
+### What is a histogram?
 
 A *histogram* of a numerical dataset looks very much like a bar chart, though it has some important differences that we will examine in this section. First, let us just draw a histogram of the highway miles per gallon.
 
@@ -835,7 +835,7 @@ ggplot(mpg_sub, aes(x = hwy)) +
 
 Note that, like bar charts, the mapping for the y-axis in the aesthetic is absent. In its place, `ggplot` computes a count for each "bin" in the histogram.  
 
-### The Horizontal Axis and Bar Width
+### The horizontal axis and bar width
 
 In a histogram plot, we group the amounts into groups of contiguous (and thus, non-overlapping) intervals called bins. The histogram function of `ggplot` use the _left-out, right-in_ convention in bin creation. What this means is that the interval between a value $a$ and a value $b$, where $a<b$, includes $b$ but not $a$. The convention does not apply the smallest bin, which has the left-end as well. Let us see an example. 
 
@@ -883,7 +883,7 @@ ggplot(mpg, aes(x = hwy)) +
 We observe two tall bars at (15,20] and at (25,30]. <!--))-->
 
 
-### The Counts in the Bins 
+### The counts in the bins 
 
 We can record the count calculation that `geom_histogram` carries out using the `cut()` function. The function takes an attribute and the bin intervals as its arguments and generates a table of counts.
 
@@ -895,8 +895,8 @@ Below, we create a new attribute `bin` that shows the bin name as its value usin
 bins <- seq(10,50,1)
 binned <- mpg_sub %>%
   mutate(bin = cut(hwy, breaks = bins)) %>%
-  count(bin, .drop = FALSE) %>%
-  print()
+  count(bin, .drop = FALSE)
+binned
 ```
 
 Note that the label for 10 to 11 (appearing at the beginning) has the left parenthesis.
@@ -907,8 +907,8 @@ If you want to ignore the empty bins, change the option of `.drop = FALSE` to `.
 bins <- seq(10,50,1)
 binned <- mpg_sub %>%
   mutate(bin = cut(hwy, breaks = bins)) %>%
-  count(bin, .drop = TRUE) %>%
-  print()
+  count(bin, .drop = TRUE)
+binned
 ```
 
 We can try the alternate bin sequence, whose step size is 5.
@@ -917,12 +917,12 @@ We can try the alternate bin sequence, whose step size is 5.
 bins2 <- seq(10,50,5)
 binned2 <- mpg_sub %>%
   mutate(bin = cut(hwy, breaks = bins2)) %>%
-  count(bin, .drop = TRUE) %>%
-  print() 
+  count(bin, .drop = TRUE)
+binned2
 ```
 
 
-### Density Scale 
+### Density scale 
 
 In the histogram that `ggplot` generates, what the horizontal axis represents, and what the left and right borders of each bar represents, are clear, except that depending on the choices of the bin sequence, the exact values the borders represent may be difficult to discern from the plot. 
 
@@ -946,8 +946,8 @@ binned2 <- mpg_sub %>%
   mutate(bin = cut(hwy, breaks = bins2)) %>%
   count(bin, .drop = TRUE) %>%
   mutate(proportion = n/nrow(mpg_sub)) %>%
-  mutate(density = proportion/bin_width) %>%
-  print()
+  mutate(density = proportion/bin_width)
+binned2
 ```
 
 Now let us recall the plot using the bins.
@@ -961,7 +961,7 @@ ggplot(mpg, aes(x = hwy)) +
 
 The `aes(y = ..density..)` call requests computation of "density" as the y-axis.
 
-### Unequal Bins
+### Unequal bins
 
 An advantage of the histogram over a bar chart is that a histogram can contain bins of unequal width. Below, the values in the `hwy` column are binned into three uneven categories.
 
@@ -970,7 +970,6 @@ uneven_bins <- c(10, 15, 30, 45)
 ggplot(mpg, aes(x = hwy)) +
   geom_histogram(aes(y = ..density..), fill = "darkcyan", color = "grey", 
                  breaks = uneven_bins, position = "identity")
-
 ```
 
 Here are the counts in the three bins.
@@ -983,7 +982,7 @@ mpg_sub %>%
 
 Although the ranges (10, 15] and (30, 45] have nearly identical counts, the bar over the former is twice as tall as the latter because it is only half as wide. This is the effect of flattening we have explained previously; that is, we flatten the bar height over the units in each bin.
 
-### Gotchas with Count Scale
+### Gotchas with count scale
 
 There are some discrepancies to note between a histogram in density scale and a histogram with count scale. While the count scale may be easier to digest visually than density scale, the count scale can be misleading when using bins with different widths. The problem: the height of each bar does *not* account for the difference in the widths of the bins.  
 

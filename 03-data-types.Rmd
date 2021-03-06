@@ -27,7 +27,7 @@ We will also study two important structures for *storing* data known as the *vec
 
 In this section, we turn to our first two principal data types: the *integer* and the *double*.
 
-### A Primer in Computer Architecture
+### A primer in computer architecture
 
 The vacuum tubes we mentioned earlier as one of the principal ideas in the early modern computers had the role of regulating flow of electricity.
 The architects of the machines used two conditions, the existence of current and the non-existence of current, for information coding.
@@ -46,11 +46,14 @@ For example,
 
 $$
 0 \cdots 0 1 1 1 0 1
-$$ in the representation is to represent by reading the bits from right to left,
+$$ 
+in the representation is to represent by reading the bits from right to left,
 
 $$
 1 \cdot 2^0 + 0 \cdot 2^1 + 1 \cdot 2^2 + 1 \cdot 2^3 + 1 \cdot 2^4
-$$ which is equal to $1 + 4 + 8 + 16 = 29$.
+$$ 
+
+which is equal to $1 + 4 + 8 + 16 = 29$.
 
 This implies that there is a limit to how large a positive whole number or how small a negative whole number R can accurately represent.
 If a number should go out of the range of accurately-presentable whole numbers, R switches to a double number using some approximation.
@@ -69,7 +72,7 @@ Like integer, the double type thus has a range of numbers it can record an appro
 
 If you are interested in learning more about digital representations of numbers, sign up for a course in computer organization and architecture!
 
-### Specifiying Integers and Doubles in R
+### Specifiying integers and doubles in R
 
 Our brief dive into how integers and doubles are represented boils down to two basic ideas:
 
@@ -151,7 +154,7 @@ typeof(4L + 1)
 typeof(4L + 1L)
 ```
 
-### Finding the Size Limit
+### Finding the size limit
 
 How big numbers (or negative with big absolute value) can a double represent?
 To specify a double number with a large absolute value, we can use the `e` expression.
@@ -223,7 +226,7 @@ We can inspect these types as well.
 typeof("We love R!")
 ```
 
-### Conversions to and from Numbers
+### Conversions to and from numbers
 
 First of all, characters are not compatible with numbers.
 You cannot apply mathematical operations to strings even if their character contents are interpret-able as numbers.
@@ -246,7 +249,7 @@ as.character(3.14159265)
 as.character(-465)
 ```
 
-### Length of Strings
+### Length of strings
 
 If you know the contents of the string, you can count the characters in the sequence to obtain its length.
 However, if you do not know or if the string is very long, you can rely on R to do the counting for you using `nchar`.
@@ -320,9 +323,9 @@ paste(str1, str2, str3)
 
 ## Logical Data
 
-As we stated before, Boolean is the data type for logical values, true and false.
+As we stated before, boolean is the data type for logical values, true and false.
 `TRUE` is the value representing true and `FALSE` is the one representing false.
-When you use a number where R is expecting to see a Boolean, it interprets 0 as `FALSE` and any non-zero as `TRUE`.
+When you use a number where R is expecting to see a boolean, it interprets 0 as `FALSE` and any non-zero as `TRUE`.
 Here are the two values.
 
 ```{r}
@@ -332,26 +335,29 @@ FALSE
 
 ### Comparisons
 
-While we can specify a Boolean value with a Boolean literal, we can use comparisons to generate Boolean values.
-In the case of numbers, we can compare the values of two mathematical expressions.
-There are six types of comparisons `==`, `!=`, `>` `>=`, `<`, and `<=`.
+While we can specify a boolean value with a boolean literal, we can use comparisons to generate boolean values. In the case of numbers, we can compare the values of two mathematical expressions. Here is an example. 
+
+```{r}
+1 + 4 > 7 - 4
+```
+
+This asks if the value of `1 + 4` is strictly greater than the value of `7 - 4`. The former is 5 and the latter is 3, and so the answer to the comparison is in the affirmative. Therefore, the value of the comparison expression is `TRUE`.
+
 They represent "is equal to", "is not equal to", "is greater than", "is greater than or equal to", "is smaller", and "is smaller than or equal to".
-For example, `1 + 4 > 7 - 4` asks if the value of `1 + 4` is strictly greater than the value of `7 - 4`.
-The former is 5 and the latter is 3, and so the answer to the comparison is in the affirmative.
-Therefore, the value of the comparison expression is `TRUE`.
 
-With the numbers 6 and 3, the results of comparing the two values with the six comparison operators are as follows:
+There are six possible types of comparisons. We will define these in the following table using an example with the numbers `6` and `3`. Before looking, can you try to guess them all? Compare your guesses against the table.  
 
-| Comparison               | Operator | True example | False Example |
+| Operator               | Meaning | True example | False Example |
 |--------------------------|----------|--------------|---------------|
-| Smaller than             | \<       | 3 \< 6       | 6 \< 3        |
-| Greater than             | \>       | 6 \> 3       | 3 \> 3        |
-| Smaller than or equal to | \<=      | 3 \<= 3      | 6 \<= 3       |
-| Greater than or equal to | \>=      | 6 \>= 6      | 3 \>= 6       |
-| Equal to                 | ==       | 3 == 3       | 6 == 3        |
-| Not equal to             | !=       | 6 != 3       | 3 != 3        |
+|     \<          |  Smaller than     | 3 \< 6       | 6 \< 3        |
+|     \>          |  Greater than      | 6 \> 3       | 3 \> 3        |
+|     \<=         |  Smaller than or equal to   | 3 \<= 3      | 6 \<= 3       |
+|     \>=         |  Greater than or equal to    | 6 \>= 6      | 3 \>= 6       |
+|      ==         |  Equal to       | 3 == 3       | 6 == 3        |
+|      !=         |  Not equal to     | 6 != 3       | 3 != 3        |
 
 An expression can chain together multiple comparisons with the AND operator `&`, and they all must hold in order for the whole expression to be `True`.
+
 For example, we can express that `1+1` is between `1` and `3` using the following expression.
 
 ```{r}
@@ -380,14 +386,14 @@ min(x, y) == (x + y)/2
 max(x, y) == (x + y)/2
 ```
 
-### Boolean Operations
+### Boolean operations
 
-There are three fundamental Boolean operations.
+There are three fundamental boolean operations.
 They are *negation*, *disjunction*, and *conjunction*.
-Negation flips the value of a Boolean.
-Disjunction tests if at least one of Boolean values appearing on a list is true and conjunction tests if all values appearing on a list are.
+Negation flips the value of a boolean.
+Disjunction tests if at least one of boolean values appearing on a list is true and conjunction tests if all values appearing on a list are.
 R uses symbols `!`, `|`, and `&` for them.
-Here are some examples of using the Boolean operations.
+Here are some examples of using the boolean operations.
 
 ```{r}
 a <- TRUE
@@ -400,18 +406,29 @@ a & b & c
 
 The roles these operations play are analogous to the roles $-$, $+$, and $*$ play in the numbers.
 
-### Comparing Strings
+### Comparing strings
 
 R can compare strings for equality and non-equality using `==` and `!=`.
 R can also compare two to see if one is greater than the other and if one is smaller than the other.
 To compare two strings, R compares their characters position-wise, starting from the beginning.
 The position-wise comparison continues until it reaches a position where no comparison is possible because either at least one string has no characters remaining or the two strings showing non-identical pair of characters.
-In the first case, if R has run out of characters on both sides, it asserts that the two strings are equal to each other, otherwise, the one that has just run out of characters is smaller than the other.
-In the second case, R examines the *character code* of the two characters.
+
+* In the first case, if R has run out of characters on both sides, it asserts that the two strings are equal to each other, otherwise, the one that has just run out of characters is smaller than the other.
+* In the second case, R examines the *character code* of the two characters.
+
 R (and any programming language) uses a table of characters where each character has a unique number.
 The result of comparing two characters is that if the two characters are not equal to each other, then the character with at a lower position than the other is smaller than the other as character.
 
 ```{r}
+print("Bach" > "Back")
+print("Darth Vader" > "Dark Chocolate")
+print("09:00 AM" > "Nine in the morning")
+print("data science" > "Data Science")
+print("abc" > "ABC" )
+```
+
+<!---
+```{r eval=FALSE}
 a <- "Jason"
 b <- "Bourne"
 c <- "Matt"
@@ -421,8 +438,9 @@ a > b & c > d
 a > b | d < c
 !(a < b)
 ```
+---> 
 
-The examples below show how R interprets numbers to Boolean values.
+The examples below show how R interprets numbers to boolean values.
 
 ```{r}
 3.0 == TRUE
@@ -550,7 +568,7 @@ my_vec2[-2:-4]
 my_vec2[-4:-2]
 ```
 
-### The Combine Function
+### The `c`ombine function
 
 We can create sequences with element specification.
 The creation of this uses the function `c`, which means to "combine".
@@ -573,7 +591,7 @@ my_vec2[c(4,4,3,3,5,3,5,3)]
 
 R retrieves the elements individually, and whether the numbers repeat or whether the numbers are in order do not matter.
 
-### Element-wise Operations
+### Element-wise operations
 
 Let us look at the combine function more closely.
 We can define two sequences having the same lengths using the combine function.
@@ -650,23 +668,39 @@ You can connect more than two elements.
 c(79, a, 17)
 ```
 
-### Booleans and Element-wise Operations
+### Booleans and element-wise operations
 
-Not only can we apply mathematical operations but also we can apply comparison.
+Not only can we apply mathematical operations but also we can apply comparisons.
 
 ```{r}
 a > b
 a >= 3
 ```
 
-Once you have a sequence of Boolean whose length is equal to the vector at hand, you can use that Boolean sequence (or vector) to select elements to generate subvectors.
+Once you have a sequence of boolean whose length is equal to the vector at hand, you can use that boolean sequence (or vector) to select elements to generate subvectors.
 
 ```{r}
 a[a > b]
 a[a >= 3]
 ```
 
-### Functions on Vectors
+We can also use element-wise comparisons to count the number of occurrences of a certain element in a vector. For instance, consider this vector of greetings. 
+
+```{r}
+greetings <- c("hello", "goodbye", "hello", "hello", "goodbye")
+```
+
+We can count the number of `hello`'s that occur as follows. 
+
+```{r}
+greetings == "hello"
+```
+
+```{r}
+sum(greetings == "hello")
+```
+
+### Functions on vectors
 
 R provides programmers with convenient and powerful functions for creating and manipulating vectors.
 
@@ -817,7 +851,7 @@ omg <- list(list(1,1), list(2,2,2), "hello world")
 str(omg)
 ```
 
-### Working with Lists
+### Working with lists
 
 Let's examine the `mixed2` list more closely.
 
@@ -983,12 +1017,12 @@ str_detect(s, "[^a-zA-Z]")
 str_detect(s, "[0-9]")
 ```
 
-### Detect Matches 
+### Detect matches 
 
 There are functions in this category.
 
--   `str_detect(STRING, PATTERN)`: As we have seen previously, the function returns a vector of Boolean representing whether the elements of `STRING` matching `PATTERN`.
--   `str_which(STRING, PATTERN)`: The function works like `str_detect` but instead of Boolean vector, returns the indexes at which the pattern appears; in other words, at which indexes, the value of `str_detect(STRING, PATTERN)` is true.
+-   `str_detect(STRING, PATTERN)`: As we have seen previously, the function returns a vector of boolean representing whether the elements of `STRING` matching `PATTERN`.
+-   `str_which(STRING, PATTERN)`: The function works like `str_detect` but instead of boolean vector, returns the indexes at which the pattern appears; in other words, at which indexes, the value of `str_detect(STRING, PATTERN)` is true.
 -   `str_count(STRING, PATTERN)`: The function returns for each element of `STRING`, at how many different positions the pattern aligns.
 -   `str_locate(STRING, PATTERN)`: The function finds for each element of `STRING`, the first (or the closest to the start of string) match of the pattern and provides the start and end character positions of the first match as a pair of integers (that is, a length-2 vector of integers). If there are no matches for an element of `STRING`, the function returns a pair of `NA`.
 
@@ -1047,7 +1081,7 @@ str_locate_all(s, "[A-Za-z][aeiou]+")
 ```
 --> 
 
-### Subset Strings
+### Subset strings
 
 Here are the functions in this category.
 
@@ -1064,7 +1098,7 @@ str_match(s, "[a-zA-Z][^a-zA-Z]+[a-zA-Z]")
 
 Both `str_extract` and `str_match` have their version for "apply to all matches", like `str_locate_all`. Their names are `str_extract_all` and `str_match_all`.
 
-### Manage Lengths
+### Manage lengths
 
 The following functions belong to this category.
 
@@ -1083,7 +1117,7 @@ str_trim("   abc    ", side="right")
 str_trim("   abc    ", side="both")
 ```
 
-### Mutate Strings
+### Mutate strings
 
 The first three functions execute substitutions to parts of each string.
 
@@ -1139,7 +1173,7 @@ t <- s
 str_to_title(s)
 ```
 
-### Join and Split
+### Join and split
 
 We only show two functions in this category.
 
@@ -1164,7 +1198,7 @@ str_c(t, collapse=":")
 
 There are two functions.
 
--   `str_sort(STRING,decreasing=X,na_last=Y,numeric=Z)`: Sorts the elements as the string. The arguments after the first one are optional. `X`, `Y`, and `Z` are Boolean. With `decreasing=TRUE` the ordering is reverse. The `na_last=FALSE`, all `NA` move to the start. With `numeric=TRUE`, the function treats numerical sequences as numbers; otherwise, it treats them as character sequences.
+-   `str_sort(STRING,decreasing=X,na_last=Y,numeric=Z)`: Sorts the elements as the string. The arguments after the first one are optional. `X`, `Y`, and `Z` are boolean. With `decreasing=TRUE` the ordering is reverse. The `na_last=FALSE`, all `NA` move to the start. With `numeric=TRUE`, the function treats numerical sequences as numbers; otherwise, it treats them as character sequences.
 -   `str_order(...)`: The same arguments as `str_sort`, but instead of actually sorting, returns the sequence of indexes such that ordering the elements according to the index list produces the same result as `str_sort`.
 
 ```{r}

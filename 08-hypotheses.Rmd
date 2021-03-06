@@ -18,7 +18,7 @@ Here are examples of the two situations.
 
 For both situations, an important consideration for you to make is in terms of what you compare the differences.
 
-## Evaluating a Model
+## Testing a Model
 
 Suppose 10,000 throws of a die generate the following counts for the faces 1 through 6:
 
@@ -141,9 +141,9 @@ sample_tvds <- replicate(n = num_repetitions, one_simulated_tvd())
 max(sample_tvds)
 ```
 
-### The Prediction
+### Chance of the observed value occurring
 
-To interpret the results of our simulation, we start by visualizing the results using an empirical histogram.
+To interpret the results of our simulation, we start by visualizing the results using a  histogram of the samples.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(sample_tvds)) +
@@ -197,7 +197,7 @@ Using simulations we learn that the Null Hypothesis has a p-value of 6.6% (or 0.
 
 ## Case Study: Entering Harvard
 
-Harvard University is one of the most, if not the most, prestigious universities in the United States. A recent lawsuit by [Students for Fair Admissions (SFFA)](https://studentsforfairadmissions.org/) led by Edward Blum against Harvard University alleges that Harvard has used soft racial quota to keep the numbers of Asian-Americans low.
+Harvard University is one of the most prestigious universities in the United States. A recent lawsuit by [Students for Fair Admissions (SFFA)](https://studentsforfairadmissions.org/) led by Edward Blum against Harvard University alleges that Harvard has used soft racial quotas to keep the numbers of Asian-Americans low.
 Put differently, the allegation claims that, from the pool of Harvard-admissible American applicants, Harvard uses a racial discriminatory score that allows the college to choose disproportionately less Asian-Americans. As of this writing, the lawsuit has been appealed and is to appear before the Supreme Court.
 
 This section examines the "Harvard model" to assess, at a basic level, the claim put forward by the lawsuit.  
@@ -309,10 +309,9 @@ ggplot(tibble(sample_class_tvds)) +
 
 The orange dot shows the distance value of the Harvard value from the Almanac value. What we see is that the proportion of the races at Harvard is nothing like the national proportion.
 
+### Proportion of Asian American students
 
-### Asian Students Versus Others
-
-The prior experiment looked at the proportion of all races. However, the claim given by the lawsuit is specifically about Harvard-admissible students who are Asian. We can now address this by refining our model to include only Asian students and non-Asian students. 
+The prior experiment looked at the proportion of all races. However, the claim given by the lawsuit is specifically about Harvard-admissible students who are Asian American. We can now address this by refining our model to include only Asian American students and non-Asian American students. 
 
 ```{r}
 class_props_asian <- tribble(~Race, ~Harvard, ~Almanac,
@@ -330,7 +329,7 @@ class_props_asian <- class_props_asian %>%
 class_props_asian
 ```
 
-The proportion of Asian in private non-profit 4-year colleges is just 8.1% while the race occupies 24.4% of the Harvard freshman class. Let's recompute our observed TVD value. 
+The proportion of Asian American in private non-profit 4-year colleges is just 8.1% while the race occupies 24.4% of the Harvard freshman class. Let's recompute our observed TVD value. 
 
 ```{r}
 harvard_diff <- compute_tvd(pull(class_props_asian, Harvard), pull(class_props_asian, Almanac))
@@ -343,7 +342,6 @@ Re-running the simulation is easy. Note that instead of passing `class_props` as
 num_repetitions <- 10000
 sample_class_tvds <- replicate(n = num_repetitions, one_simulated_class(class_props_asian))
 ```
-
 
 We again visualize the result. 
 
@@ -362,10 +360,12 @@ ggplot(tibble(sample_class_tvds)) +
   geom_point(aes(x = harvard_diff, y = 0), size = 3, color = "salmon")
 ```
 
-We find that the result is the same; the Harvard proportion of Asian students is not at all like the national value. We can state, with great confidence, that Harvard enrolls much more Asian students than the national average. However, the reader should be cautioned not to accept these results as direct evidence against the suit's case. As noted at the outset of this section, we do not know the proportion of Harvard-admissible students and must instead rely on a national Almanac for reference. The base population of students can be very much different which is, in fact, something we anticipated.
+We find that the result is the same; the Harvard proportion of Asian American students is not at all like the national value. We can state, with great confidence, that Harvard enrolls much more Asian students than the national average. 
+
+__Important note:__ The reader should be cautioned not to accept these results as direct evidence against the suit's case. As noted at the outset of this section, we do not know the proportion of Harvard-admissible students and must instead rely on a national Almanac for reference. The base population of students can be very much different which is, in fact, something we anticipated.
 
 
-## Significance Level
+## Significance Levels
 
 So far we have evaluated models by comparing some observation to a prediction made by a model. For instance, we compared:
 
@@ -638,7 +638,7 @@ mean_diff(finalsB, finalsA)
 
 To predict the statistic under the null hypothesis, we defer to an idea called the *permutation test*. 
 
-### The Permutation Test 
+### A permutation test 
 
 Suppose that we are given the following vector of integers. 
 
@@ -686,7 +686,7 @@ We are now ready to perform a permutation test for the tutoring program example.
 differences <- replicate(n = 10000, one_difference(finalsA, finalsB, mean_diff))
 ```
 
-### Conclusion of the Test
+### Conclusion
 
 Let's visualize the results. 
 
@@ -711,7 +711,7 @@ If we were to demand a higher significance level, say 95%, our observed statisti
 
 The problem here is a lack of evidence. A lack of evidence does not prove that something *does not* exist, e.g., the tutoring program is *not* effective; it very well could be, but our study missed it. Indeed, our permutation test only evaluated one criteria -- that is, difference in final exam scores -- as a measure for improvement. There are other criteria we could have considered, like class participation, which may have benefited from the program. It would be up to the judgment of the department on how to use these results in deciding the merit of the tutoring program. 
 
-### Another Permutation Test: NFL and NCAA players 
+### Another permutation test: NFL and NCAA players 
 
 We end this section with one more example of a permutation test: comparing the yardage of NFL and NCAA players. We load in both datasets and select out the column containing year and yardage information. We also add a new column to each tibble containing which league (NFL or NCAA) the yardage pertains to, so we can refer to it later. 
 
@@ -779,7 +779,7 @@ mean_abs_diff <- function(a, b) {
 }
 ```
 
-### The Test 
+### The test 
 
 We form two vectors `ncaa_yardage` and `nfl_yardage` that contain the yardage information with respect to the league. 
 
@@ -801,7 +801,7 @@ We are now ready to perform the permutation test. As before, let us simulate the
 differences <- replicate(n = 10000, one_difference(ncaa_yardage, nfl_yardage, mean_abs_diff))
 ```
 
-### Conclusion of the Test
+### Conclusion
 
 We are ready to visualize the results. 
 

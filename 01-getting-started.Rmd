@@ -1,8 +1,11 @@
 # (PART) Introduction {-} 
 
-# What Is Data Science?
+# Getting Started
 
 Data science is a field of science that aims at discovering patterns and extracting knowledge through analysis of data and developing methods to support such investigation. The field is rooted in mathematics, statistics, computer science, and vision science and has contributed to a wide array of disciplines, e.g.,  biology, chemistry, economics, literary studies, medicine, physical sciences, and psychology. 
+
+
+## Game of the Name 
 
 What does data science look like? Here is a short list of some examples, followed by a discipline that appears most relevant to the problem. 
 
@@ -42,7 +45,7 @@ Type the above in the console, and press "Enter" to run it. R will download the 
 
 Let us see an example of how to plot some data using the `tidyverse`. 
 
-### The World's Telephones
+### The world's telephones
 
 R ships with a number of off-the-shelf data sets you can play with. One of them is `WordPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
 
@@ -109,7 +112,7 @@ Can you spot some more differences between the two plots, especially in regards 
 
 Here is another example where we play with a textual dataset. As before, do not pay attention to the details of the code and what it is doing. Rather, familiarize yourself with the output of each code "block" and observe how it builds up toward accomplishing the goal. 
 
-### The Classics: Herman Melville's Moby Dick  
+### The classics: Herman Melville's Moby Dick  
 
 [The Gutenberg Project](http://www.gutenberg.org/) is an international project to provide literary texts in a variety of formats for public use. One of the main literary works the site offers is "Moby Dick" by Herman Melville. You can download from the website by providing its link.
 
@@ -167,7 +170,7 @@ knitr::kable(
 ```
 
 
-### Plotting Word Relationships 
+### Plotting word relationships 
 
 Now that we have the main text stored in tabular form, we are ready to do some analysis. Let us look at some associations between words in the text, for instance, between "ship" and "sea", and between "god" and "sea".
 
@@ -203,7 +206,7 @@ We see a strong association between "sea" and "ship" since chapters that mention
 
 Indeed, word counts can only take us so far. But they are a first step in the interpretative process. For instance, why does it seem that there is no relationship between the sea, where most of the action takes place, and religion, as exemplified by the occurrences of the word "god"? Machine-assisted analysis of texts in this manner, which extends well beyond word counts, has become so popular that an interdisciplinary field called [Digital Humanities](https://en.wikipedia.org/wiki/Digital_humanities)  has become dedicated to its study. 
 
-### A Rough Outline
+### A rough outline
 
 Our two introductory examples have hopefully shown you a glimpse of what data science looks like. Here is the plan for the course. 
 
@@ -214,7 +217,7 @@ Our two introductory examples have hopefully shown you a glimpse of what data sc
 
 We hope that you will find the journey interesting.
 
-## Setting up a workflow 
+## Setting Up a Workflow 
 
 In this course we will be using RStudio. RStudio is an integrated development environment (also known as an IDE) popularly used among data scientists for writing R code. It is a powerful tool that can be used to write and debug code, view visualizations, pull up documentation, write "notebooks", and much more which we will probably not get to see! In this section we will go over setting up RStudio on your machine, and discuss how we will use it in this course.
 
@@ -278,7 +281,7 @@ Let us navigate to the __help tab__, which should be one or two tabs down from t
 
 An equivalent, and perhaps more straightforward, way of looking up documentation is right from the console. Just type in `?plot`, hit enter, and on you go.  
 
-### Organizing Your Work 
+### Organizing your work 
 
 Let us create some folders in our project to organize our work for the semester. We recommend the following structure. You can use the `New Folder` button in the file explorer view to create these directories. 
 
@@ -295,7 +298,7 @@ The folder names should be self-explanatory, but here is a brief explanation:
 
 What files will we be writing in each of these folders? Let us turn to the next section and find out!  
 
-### R Markdown Notebooks 
+### R markdown notebooks 
 
 All of the assignments in this course will be distributed as *R markdown notebooks*, which allows users to intersperse code with prose in an intuitive manner; this is great to use in practice for sharing and communicating your work to peers.
 

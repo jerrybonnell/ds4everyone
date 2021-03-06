@@ -32,7 +32,7 @@ We will continue to make use of the tidyverse in this section so let us load it 
 library(tidyverse)
 ```
 
-### Definition of Standard Deviation
+### Definition of standard deviation
 
 Suppose we have some number, say $N$, of samples and for each sample, we have its measurement. Let us say $x_1, \ldots, x_N$ are the measurements.
 The mean of the samples is the total of $x_1, \ldots, x_N$ divided by the number of samples $N$, that is
@@ -54,7 +54,7 @@ To make the two units comparable to each other, we take the square root of the v
 \]
 We call the quantity $\sigma$ the *standard deviation*.
 
-### Example: Exam Scores 
+### Example: exam scores 
 
 Suppose we have drawn ten sample exam scores.
 
@@ -140,7 +140,7 @@ tibble(sample_scores2) %>%
 Observe that the scores are much closer together compared to the first histogram. 
 
 
-### Sample Standard Deviation
+### Sample standard deviation
 
 Often in the calculation of standard deviation, instead of dividing by $N$, we divide by $N-1$. We call the versions of $\sigma^2$ and $\sigma$ with division by $N$ the *population variance* and the *population standard deviation*, respectively. The versions that use division by $N-1$ are the *sample variance* and *sample standard deviation*.
 
@@ -304,7 +304,7 @@ As before, note that the standard units are much less than 3 SDs (in general, th
 
 Scaling is often used in data analysis as it allows us to put data in a comparable format. Let us visit another example to see why.
 
-### Example: Judging a Contest 
+### Example: Judging a contest 
 
 Suppose three eccentric judges evaluated eight contestants at a contest. They evaluate each contestant on the scale of 1 to 10. Enter the judges. 
 
@@ -413,7 +413,7 @@ We will continue to make use of the tidyverse so let us load it in.
 library(tidyverse)
 ```
 
-### The Standard Normal Curve
+### The standard normal curve
 
 The standard normal curve has a rather complicated formula: 
 
@@ -429,7 +429,7 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < ∞") +
+  ggtitle("N(μ = 0, σ = 1) -∞ < z < ∞") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
@@ -448,13 +448,13 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < ∞") +
+  ggtitle("N(μ = 0, σ = 1) -∞ < z < ∞") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
 Observe how the curve looks like a salad bowl in the regions $(-\infty, -1)$, and $(1, \infty)$ and in the region $(-1, 1)$ the bowl is flipped upside down! 
 
-### Area Under the Curve
+### Area under the curve
 
 We can find the area under the standard normal curve with the function `pnorm`. Let us use this function to find the amount of area to the left of $z = -1$. 
 
@@ -466,7 +466,7 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -∞ < z < -1") +
+  ggtitle("N(μ = 0, σ = 1) -∞ < z < -1") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
@@ -484,7 +484,7 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -1 < z < ∞") +
+  ggtitle("N(μ = 0, σ = 1) -1 < z < ∞") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
@@ -506,7 +506,7 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -1 < z < 1") +
+  ggtitle("N(μ = 0, σ = 1) -1 < z < 1") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
@@ -528,7 +528,7 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
   scale_x_continuous(breaks = seq(-3, 3, 1)) +
   ylab("ɸ(z)") +
   xlab("z") +
-  ggtitle("Normal curve ~ (μ = 0, σ = 1) -2 < z < 2") +
+  ggtitle("N(μ = 0, σ = 1) -2 < z < 2") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
@@ -550,7 +550,7 @@ Therefore, for a standard normal curve, we can calculate the probability of wher
 * a sample that falls within $\pm 2$ SDs is about __95%__.
 * a sample that falls between $\pm 3$ is about __99.73%__.
 
-### Exam Scores and the `dnorm` function
+### Exam scores and the `dnorm` function
 
 A frequent -- and perhaps even cliched -- reference point to the bell curve occurs in the analysis of test scores.
 
@@ -660,7 +660,7 @@ nfl <- read_csv("data/nfl_receiving0.csv")
 ncaa <- read_csv("data/ncaa-receivers-2005-2011.csv")
 ```
 
-### Net Allotments from a Clumsy Clerk 
+### Example: Net allotments from a clumsy clerk 
 
 Recall that in an earlier section, we simulated the story of a minister and the doubling grains. In that story, the amount of grains a minister receives doubles each day; by the end of the 64th day, he expects to receive an impressive total of $2^{64}-1$ grains. 
 
@@ -756,7 +756,7 @@ The "identically and independently distributed" condition, often abbreviated sim
 
 The Central Limit Theorem is a powerful concept because it becomes possible to make inferences about unknown populations with very little knowledge. And, the larger the sample size becomes, the stronger the resemblance. 
 
-### Receiver Yardage in the NFL and NCAA 
+### Receiver yardage in the NFL and NCAA 
 
 The Central Limit Theorem says that the sum of IID samples follows a distribution that resembles a normal distribution. Let us turn to the receiver data in the NFL and NCAA. In a large sample of football receivers, what is the sample average for yardage? According to the theorem, we expect the distribution to be roughly normal. 
 

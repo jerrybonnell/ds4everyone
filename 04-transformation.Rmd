@@ -12,7 +12,7 @@ A part of what makes these tools so powerful is that we often need to apply a se
 
 The tools we will cover in this chapter to accomplish this goal are also key members of the `tidyverse`. One is called `tibble`, which is a data structure for managing datasets, and another is called `dplyr`, which provides a grammar of data manipulation for acting upon datasets stored as tibbles. We will also learn about a third called `purrr` to help with the data manipulations, e.g., say when a column of data is in the wrong units.    
 
-## Datasets and tidy data 
+## Datasets and Tidy Data 
 
 Data scientists prefer working with data that is *tidy* because it facilitates data analysis. In this section we will introduce a vocabulary for working with datasets and describe what *tidy data* looks like. 
 
@@ -108,7 +108,7 @@ When a dataset is expressed in this manner, we say that it is in *long* format b
 
 In the next section we turn to the main data structures in R we will use for performing data transformations on datasets. 
 
-## Working with datasets 
+## Working with Datasets 
 
 In this section we dive deeper into datasets and learn how to do basic tasks with datasets and query basic information from them.  
 
@@ -308,7 +308,7 @@ Below, the action is to store the tibble `bloom` as "bloom.csv" in the current w
 write_csv(bloom, "bloom.csv")
 ```
 
-## The `dplyr` verbs
+## `dplyr` Verbs
 
 The past section showed two basic data structures -- data frames and tibbles -- that can be used for loading, creating, and saving datasets. We also saw how to query basic information from these structures. In this section we turn to the topic of data *transformation*, that is, actions we can apply to a dataset to transform it into a new, and hopefully more useful, dataset. Recall that data transformation is the essence of achieving tidy data. 
 
@@ -644,7 +644,7 @@ As before, let us load `tidyverse`.
 library(tidyverse)
 ```
 
-### Pulling Data from Multiple Sources
+### Pulling data from multiple sources
 
 The third principle of tidy data stated that an observational unit should form a table. However, often times the observational unit we are measuring will be split across multiple tables.  
 
@@ -765,7 +765,7 @@ We have used several times by now the word "function". Here are some basic rules
 * _If a function has the role of returning a value, the call itself represents the value it computes._ So you store the value the function computes in a variable using an assignment.
 * _A function may require some number of values to use in its calculation._ We call them *arguments*. When using a function that requires, the arguments must appear in the call.
 
-### A Very Simple Function
+### A very simple function
 
 Here is a very simple function, `one_to_ten`, which prints the sequence of integers from 1 to 10. The definition of the function takes the form `one_ten <- function() { ... }`.
 
@@ -799,7 +799,7 @@ one_to_ten()
 
 The new behavior of `one_to_ten()` substitutes the old one, and you cannot replay the behavior of the previous version (until, of course, you modify the function again). 
 
-### Functions That Compute a Value
+### Functions that compute a value
 
 To make a function compute a value, you add a line `return(VALUE)` at the end of the code in the brackets. The function `my_family()` returns a list of names for persons. 
 
@@ -822,7 +822,7 @@ a
 
 Now whenever you need the 19-name list, you can either call the function or refer to the variable `a` that holds the list.
 
-### Functions That Take Arguments
+### Functions that take arguments
 
 To write a function that takes arguments, you determine how many arguments you need and determine the names you want to use for the arguments during the execution of the code for the function.
 
@@ -1024,7 +1024,7 @@ trouble_temps %>%
 Note that if your dataset contains a mixture of strings and numbers, then a straightforward application like this will not work. Instead, you will need to split the process into two steps: first taking care of missing values in the strings columns and then, afterwards, taking care of the missing values in the numeric columns.  
 
 
-## Case Study: A Course in Computer Science
+## Case Study: A Computer Science Course
 
 Before we end this chapter, we present a worked example of a real-life dataset and apply the transformations that are necessary to bring it into tidy data. The goal of this exercise is to demonstrate how all the transformations we have learned in this chapter are not tools meant to be used in isolation, but work best when used together to fulfill a complex goal.  
 

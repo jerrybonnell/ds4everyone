@@ -3,17 +3,18 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Bootstrapping
 
-The previous chapters have developed ways to show how to use data to decide between competing questions about the world. For instance, does Harvard enroll proportionately less Asian-Americans than other private universities in the United States; are the exam grades in one lab section of a course too low when compared to other lab sections; can an experimental drug bring an improvement to patients recovering from brain trauma? We evaluated questions like these by means of an *hypothesis test* where we put forward two hypotheses: a *null* hypothesis and an *alternative* hypothesis.  
+# Quantifying Uncertainty
 
-Often times we are interested in what a value might look like. For instance, airlines might be interested in the median flight delay of their flights to preserve customer satisfaction; political candidates may look to the percentage of voters favoring them to gauge how aggressive their campaigning should be. 
+So far we have developed ways to show how to use data to decide between competing questions about the world. For instance, does Harvard enroll proportionately less Asian Americans than other private universities in the United States; are the exam grades in one lab section of a course too low when compared to other lab sections; can an experimental drug bring an improvement to patients recovering from brain trauma? We evaluated questions like these by means of an *hypothesis test* where we put forward two hypotheses: a *null* hypothesis and an *alternative* hypothesis.  
 
-Put in the language of statistics, we are interested in *estimating* some unknown *parameter* about a population. If we had all the data available to us, we could compute the parameter with ease. However, we often do not have access to the full population (as is the case with polling voters) or there may be too much data to work with that it becomes computationally prohibitive (as is the case with flights).  
+Often we are just interested in what a value looks like. For instance, airlines might be interested in the median flight delay of their flights to preserve customer satisfaction; political candidates may look to the percentage of voters favoring them to gauge how aggressive their campaigning should be. 
 
-We have seen before that empirical distributions can provide reliable approximations to the true (and usually unknown) distribution and that, likewise, a statistic computed from it can provide a reliable estimate of the parameter in question. However, the value of a statistic can turn out *differently* depending on the random samples that are drawn to compose a empirical distribution. How much can the value of a statistic vary? Could we quantify this uncertainty?  
+Put in the language of statistics, we are interested in *estimating* some unknown *parameter* about a population. If all the data has been made available to us, we could compute the parameter directly with ease. However, we often do not have access to the full population (as is the case with polling voters) or there may be too much data to work with that it becomes computationally prohibitive (as is the case with flights).  
 
-This chapter develops a way to answer this question using an important technique in data science called the *bootstrap*. We begin by introducing order statistics and percentiles. This will provide us the tools needed to develop the bootstrap to produce distributions from a sample, in which we apply order statistics to the generated distributions to obtain something called the *confidence interval*.
+We have seen before that sampling distributions can provide reliable approximations to the true (and usually unknown) distribution and that, likewise, a statistic computed from it can provide a reliable estimate of the parameter in question. However, the value of a statistic can turn out *differently* depending on the random samples that are drawn to compose a sampling distribution. How much can the value of a statistic vary? Could we quantify this uncertainty?  
+
+This chapter develops a way to answer this question using an important technique in data science called *resampling*. We begin by introducing order statistics and percentiles. This will provide us the tools needed to develop the resampling method to produce distributions from a sample, in which we apply order statistics to the generated distributions to obtain something called the *confidence interval*.
 
 ## Order Statistics 
 
@@ -242,11 +243,11 @@ Let's return to the example of final exam scores. Suppose that one offering of t
 Since top 10 is 20% of 50 students, there is a 20% chance for a student to be among the top 10, while the chances decrease to 5% for the class of 200. That is, if we specify a top group with its size, the significance being in the top group varies depending on the size of the population and so we must to specify the size of the underlying group, e.g., "top 10 in a group of 4000 students". Percentiles are nice in that they are not sensitive to these changes.
 
 
-## Bootstrapping
+## Resampling
 
 It is usually the case that a data scientist will receive a collection of samples from an underlying population to which she has no access. If she had access to the underlying population, she could calculate the parameter value directly. Since that is impossible, is there a way for her to deal with the sample collection at hand to generate a range of values for the statistic?
 
-Yes! This is a technique we call *resampling*, which is more popularly known as *bootstrapping*. In bootstrapping, we treat the dataset at hand as the true population and generate samples from it. But there is a catch. Each sample data set that we generate should be equal in size to the original. This necessarily means that our sampling plan be done *with* replacement, rather than without. 
+Yes! This is a technique we call *resampling*, which is also known as the *bootstrap*. In bootstrapping, we treat the dataset at hand as the true population and generate samples from it. But there is a catch. Each sample data set that we generate should be equal in size to the original. This necessarily means that our sampling plan be done *with* replacement, rather than without. 
 
 Since the samples have the same size as the original with the use of replacement, duplicates and omissions can arise. That is, there are items that will appear multiple times as well as items that are missing. Because randomness is involved, the discrepancy varies.
 
@@ -328,7 +329,7 @@ sample_mean
 
 It is quite different from the population median. Nevertheless, this subset of flights will serve as the dataset from which we will bootstrap our samples. Put another way, __we will treat this sample as if it were the population.__  
 
-### Bootstrapping the Sample Mean
+### Resampling the sample mean
 
 To perform a bootstrap, we will draw from the sample, at random __with replacement__, the same number of times as the size of the sample dataset. 
 
@@ -385,7 +386,7 @@ one_sample_value(flights_sample, air_time, mean)
 
 > Q: What's the deal with those (ugly) double curly braces (`{{`) ? To make R programming more enjoyable, the tidyverse allows us to write out column names, e.g. `air_time`, just like we would variable names. The catch is that when we try to use such syntax sugar from inside a function, R has no idea what we mean. In other words, when we say `pull(label)` R thinks that we want to extract a vector from a column called `label`, despite the fact we passed in `air_time` as an argument. To lead R in the right direction, we surround `label` with `{{` so that R knows to interpret `label` as, indeed, `air_time`. 
 
-### Empirical Distribution of the Sample Mean
+### Distribution of the sample mean
 
 We now have all the pieces in place to perform the bootstrap. We will replicate this process many times so that we can compose an empirical distribution of all the bootstrapped sample means. Let's repeat the process 10,000 times. 
 
@@ -401,7 +402,7 @@ ggplot(df, aes(x = bstrap_means, y = ..density..)) +
   geom_histogram(col="grey", fill = "darkcyan", bins = 8)
 ```
 
-### Did it Capture the Parameter?
+### Did it capture the parameter?
 
 How often does the population mean fall somewhere in the empirical histogram? Does it reside 
 "somewhere at the center" or at the fringes where the tails are? Let us be more specific by what we mean when we say "somewhere at the center": the middle 95% of bootstrapped means containing the population mean.  
@@ -463,7 +464,7 @@ We observe that the sample mean is also much closer to the population mean, unli
 
 Let us now repeat the bootstrap. Recall that we will treat this sample as if it were the population. 
 
-### Empirical Distribution of the Sample Mean (revisited)
+### Distribution of the sample mean (revisited)
 
 We have done all the hard work already in setting up the bootstrap. To redo the process, we need only to pass in the random sample contained in `flights_sample`. As before, let us repeat the process 10,000 times. 
 
@@ -567,7 +568,7 @@ ggplot(interval_df) +
 
 We expect about 95 of the 100 intervals to cross the vertical line; meaning, it contains the parameter. We would label such intervals as "good". If an interval does not, oh well -- that's the nature of chance. Fortunately, these do not occur often. In fact, they should occur about 5 times among 100 trials, or 95%. The strength of statistics lies not in clairvoyance, but in the ability to quantify our uncertainty. 
 
-### Bootstrap round-up 
+### Resampling round-up 
 
 Before we close this section, we end with a quick summary on how to perform a bootstrap. 
 
@@ -631,7 +632,7 @@ We can inspect the resulting table. Note that there are 1,000 rows in the tibble
 ncaa
 ```
 
-### Estimating a Population Median 
+### Estimating a population median 
 
 We will apply bootstrapping to the `ncaa` tibble to estimate an unknown parameter: the ratio of yards per catch. Let us first form a subset of the tibble with the relevant data. 
 
@@ -699,7 +700,7 @@ This looks a lot like what we saw in the previous section, with one key differen
 Statistics is not clairvoyance. It is a means to quantify uncertainty. What we have obtained is a 95% confidence interval of estimates, which means that about 95% of the time we will get it right. But that also leaves a 5% chance where we are totally off. Can we control the amount of uncertainty in our results? 
 
 
-### Levels of Uncertainty: 80% and 99% Confidence Intervals
+### Levels of uncertainty: 80% and 99% confidence intervals
 
 So far we have examined the 95% confidence interval. Let us see what happens to the interval of estimates when we increase our level confidence. We will examine a 99% confidence interval.
 
@@ -738,7 +739,7 @@ ggplot(df, aes(x = bstrap_medians, y = ..density..)) +
 This interval is *much* narrower than the 99% interval and only goes from 11 to 11.4 yards per catch. This is a much tighter set of estimates, but we traded a narrower interval for lower confidence. This interval has a chance of missing 20% of the time. 
 
 
-### Confidence Intervals as an Hypothesis Test
+### Confidence intervals as an hypothesis test
 
 Confidence intervals can be used for more than trying to estimate a population parameter. One popular use case for the confidence interval is something we saw in the previous chapter: the hypothesis test. 
 
@@ -756,13 +757,14 @@ If we were to lower our confidence (to say 90% or 80%), we may not have rejected
 
 The basis for using confidence intervals as a hypothesis test is rooted in statistical theory. In practice, we simply check whether the value supplied by the null hypothesis sits on the confidence interval or not.  
 
-### Final remarks: Use Bootstrap with Care 
+### Final remarks: resample with care 
 
-We end this section with some points to keep in mind when applying bootstrapping. 
+We end this section with some points to keep in mind when applying resampling. 
 
-* Avoid introducing bias into the sample that is used as input for bootstrapping. The sampling plan of simple random sampling will usually work best.    
+* Avoid introducing bias into the sample that is used as input for resampling. The sampling plan of simple random sampling will usually work best.    
 * When the size of a random sample is moderately sized enough, the chance of the bootstrapped sample being identical to it is extremely rare. Therefore, you should aim to work with large random samples. 
-* TBA
+* Resampling does not work well when estimating extreme values, for instance, estimating the minimum or maximum value of a population.
+* The distribution of the statistic should look roughly "bell" shaped. 
 
 
 <!--
