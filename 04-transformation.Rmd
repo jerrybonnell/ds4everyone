@@ -271,7 +271,7 @@ tibble(x = seq(1,10,0.5),
 ```
 
 
-### Loading Data from an External Source
+### Loading data from an external source
 
 Usually data scientists need to load data from files. The package `readr` of `tidyverse` offers ways for that.With the package `readr` you can read from, among others, comma-separated files (CSV files) and tab-separated files (TSV files).
 
@@ -298,7 +298,7 @@ Note that some columns have spaces in them. To access the column corresponding t
 pull(bloom, `N College and RR`)
 ```
 
-### Writing Results to a File 
+### Writing results to a file 
 
 Saving a tibble to file is easy. You use `write_csv(DATA_NAME,PATH)` where `DATA_NAME` is the name of the data frame to save and `PATH` is the "path name" of the file. 
 

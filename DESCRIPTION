@@ -10,6 +10,7 @@ Imports:
   stringr,
   dplyr,
   faraway,
+  downlit,
   nycflights13,
   htmlwidgets,
   datasauRus,
@@ -17,4 +18,10 @@ Imports:
   ggplot2,
   tidyverse,
   svglite
-Remotes: rstudio/bookdown
+Suggests:
+  bslib,
+  downlit,
+  xml2
+Remotes: 
+  rstudio/bookdown, 
+  rstudio/bslib
