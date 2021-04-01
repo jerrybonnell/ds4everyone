@@ -2,7 +2,7 @@
 
 # Regression
 
-In this chapter we turn to making guesses, or *predictions*, about the future. There are many examples in which you or an employer would want to make claims about the future -- that are accurate! For instance: 
+In this chapter we turn to making guesses, or *predictions*, about the future. There are many examples in which you, your adviser, or an employer would want to make claims about the future -- that are accurate! For instance: 
 
 * Can we predict the miles per gallon of a brand new car model using aspects of its design and performance?
 * Can we predict the price of suburban homes in a city using information collected from towns in the city, e.g. crime levels, demographics, median income, and distance to closest employment center? 
@@ -10,13 +10,13 @@ In this chapter we turn to making guesses, or *predictions*, about the future. T
 
 To answer these questions, we need a framework or *model* for understanding how the world works. Fortunately, data science has offered up many such models for addressing the above proposed questions. This chapter turns to an important one known as *regression*, which is actually a family of methods designed for modeling the value of a *response* variable given some number of *predictor* variables.
 
-We have already seen something that resembles regression in the introduction to visualization, where we guessed by examination the line explaining the highway mileage using displacement. We build upon that intuition to examine more formally what regression is and how to use it appropriately in data science tasks. 
+We have already seen something that resembles regression in the introduction to visualization, where we guessed by examination the line explaining the highway mileage using what we know about a car model's displacement. We build upon that intuition to examine more formally what regression is and how to use it appropriately in data science tasks. 
 
 ## Correlation
 
 Linear regression is closely related to a statistic called the *correlation*, which refers to how tightly clustered points are about a straight line with respect to two variables. If we observe such clustering, we say that the two variables are *correlated*; otherwise, we say that there is no correlation or, put differently, that there is no association between the variables. 
 
-In this section, we build up an understanding of what correlation is. 
+In this section, we build an understanding of what correlation is. 
 
 ### Prerequisites
 
