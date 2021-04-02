@@ -25,7 +25,6 @@ Imports:
   tidyverse,
   svglite
 Suggests:
-  bslib,
   downlit,
   xml2
 Remotes: 
