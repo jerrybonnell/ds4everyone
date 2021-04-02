@@ -16,6 +16,7 @@ Imports:
   gutenbergr,
   tidytext,
   tm,
+  reshape2,
   quanteda,
   topicmodels,
   datasauRus,
