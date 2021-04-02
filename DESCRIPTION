@@ -17,6 +17,7 @@ Imports:
   gutenbergr,
   tidytext,
   tm,
+  downlit,
   quanteda,
   topicmodels,
   datasauRus,
@@ -25,6 +26,7 @@ Imports:
   tidyverse,
   svglite
 Suggests:
+  bslib,
   downlit,
   xml2
 Remotes: 
