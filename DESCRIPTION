@@ -2,22 +2,20 @@ Package: placeholder
 Type: Book
 Title: Does not matter.
 Version: 0.0.1
+Depends: 
+    R (>= 3.1.0)
 Imports: 
-  bookdown,
   pdftools,
   kableExtra,
   readtext,
   stringr,
   dplyr,
   faraway,
-  downlit,
-  bslib,
   nycflights13,
   htmlwidgets,
   gutenbergr,
   tidytext,
   tm,
-  downlit,
   quanteda,
   topicmodels,
   datasauRus,
@@ -26,8 +24,10 @@ Imports:
   tidyverse,
   svglite
 Suggests:
+  bookdown,
   bslib,
   downlit,
+  jsonlite,
   xml2
 Remotes: 
   rstudio/bookdown, 
