@@ -11,6 +11,7 @@ Imports:
   dplyr,
   faraway,
   downlit,
+  bslib,
   nycflights13,
   htmlwidgets,
   gutenbergr,
