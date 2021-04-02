@@ -1,6 +1,7 @@
 bookdown::bs4_book:
   theme:
     primary: "#637238"
+  repo: https://github.com/jerrybonnell/ds4everyone
 bookdown::gitbook:
   css: css/style.css
   split_by: section

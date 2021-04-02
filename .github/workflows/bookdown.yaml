@@ -21,44 +21,39 @@ jobs:
       - name: Install pandoc
         uses: r-lib/actions/setup-pandoc@master
         
-      - name: Install system dependencies
+      - name: Get R version
+        id: get-r-version
         run: |
-          brew install --cask xquartz
-          brew install pkg-config cairo
-          brew install gsl
-          brew install libxml2
-
-      - name: Query dependencies
-        run: |
-          install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
+          echo "::set-output name=version::$(Rscript -e 'cat(as.character(getRversion()))')"
+        shell: bash
         
       - name: Cache R packages
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-2-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-2-
-
+          key: ${{ runner.os }}-${{ steps.get-r-version.outputs.version }}-3-
+          
+      - name: Install pak
+        run: |
+          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
+        shell: Rscript {0}
+        
+      - name: Install dependencies
+        run: |
+          pak::local_install_dev_deps()
+        shell: Rscript {0}
+        
       - name: Cache bookdown results
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: _bookdown_files
-          key: bookdown-2-${{ hashFiles('**/*Rmd') }}
-          restore-keys: bookdown-2-
-
-      - name: Install packages
-        run: |
-          R -e 'remotes::install_deps(dependencies = TRUE)'
-          R -e 'remotes::install_cran("rcmdcheck")'
-
+          key: bookdown-3-${{ hashFiles('**/*Rmd') }}
+          restore-keys: bookdown-3-
+          
       - name: Build site
-        run: Rscript -e 'bookdown::render_book("index.Rmd", quiet = TRUE)'
-
-      - name: Install npm
-        uses: actions/setup-node@v1
+        run: |
+          bookdown::render_book("index.Rmd")
+        shell: Rscript {0}
 
       - name: Deploy to Netlify
         # NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID added in the repo's secrets
