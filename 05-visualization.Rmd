@@ -706,7 +706,7 @@ We can attempt an answer to our second question: is there an association between
 
 With point geoms we saw the usefulness of the "jitter" position adjustment to overcome the problem of overplotting. Bar geoms similarly benefit from positional adjustments. For instance, we can set the `color` or `fill` of a bar plot.
 
-```{r eval = FALSE}
+```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
   geom_bar(aes(x = happy, color = as.factor(happy)))
 ggplot(happy) +
@@ -715,16 +715,16 @@ ggplot(happy) +
 
 The legend that appears says "as.factor(happy)", because we used the value for coloring. We can change the title with the use of `labs(fill = ...)` ornamentation.
 
-```{r eval = FALSE}
+```{r eval=FALSE}
 ggplot(happy) +
   geom_bar(aes(x = happy, color = as.factor(happy))) + 
-  abs(fill="happy")
+  labs(color="happy")
 ggplot(happy) +
   geom_bar(aes(x = happy, fill = as.factor(happy))) + 
   labs(fill="happy")
 ```
 
-To make this code work, note how the parameter passed to the `color` and `fill` aesthetic is converted to a factor, or categorical variable, via `as.factor()`. As discussed, the `happy` variable is *numerical*. However, `ggplot2` can only color or fill a bar chart based on a categorical variable.    
+To make this code work, note how the parameter passed to the `color` and `fill` aesthetic is converted to a *factor*, i.e., a categorical variable, via `as.factor()`. As discussed, the `happy` variable is treated as numerical by R even though it is meant as a categorical variable in reality. `ggplot2` can only color or fill a bar chart based on a categorical variable.    
 
 Something interesting happens when the fill aesthetic is mapped to another variable other than `happy`, e.g., `love`.
 
@@ -824,7 +824,7 @@ mpg_sub
 
 ### What is a histogram?
 
-A *histogram* of a numerical dataset looks very much like a bar chart, though it has some important differences that we will examine in this section. First, let us just draw a histogram of the highway miles per gallon.
+A *histogram* of a numerical variable looks very much like a bar chart, though it has some important differences that we will examine in this section. First, let us just draw a histogram of the highway miles per gallon.
 
 The geom histogram generates a histogram of the values in a column. The histogram below shows the distribution of `hwy`. 
 
@@ -833,34 +833,41 @@ ggplot(mpg_sub, aes(x = hwy)) +
   geom_histogram(fill = "darkcyan", color = "gray")
 ```
 
-Note that, like bar charts, the mapping for the y-axis in the aesthetic is absent. In its place, `ggplot` computes a count for each "bin" in the histogram.  
+Note that, like bar charts, the mapping for the y-axis in the aesthetic is absent. This time, instead of internally computing a stat *count*, `ggplot` computes a stat *bin* called `stat_bin()`. 
 
 ### The horizontal axis and bar width
 
 In a histogram plot, we group the amounts into groups of contiguous (and thus, non-overlapping) intervals called bins. The histogram function of `ggplot` use the _left-out, right-in_ convention in bin creation. What this means is that the interval between a value $a$ and a value $b$, where $a<b$, includes $b$ but not $a$. The convention does not apply the smallest bin, which has the left-end as well. Let us see an example. 
 
-Suppose we divide the interval from $0$ to $100$ into four bins of an equal size. The end points of the intervals are $0, 25, 50, 75$, and $100$.
+Suppose we divide the interval from $0$ to $100$ into four bins of an equal size. The end points of the intervals are $0, 25, 50, 75$, and $100$. The following diagram demonstrates the situation: 
 
-* Bin No.1 contains all the values between $0$ and $25,
-* Bin No.2 contains all the values between $25$ and $50$ except the exact value of $25$,
-* Bin No.3 contains all the values between $50$ and $75$ except the exact value of $25$, and
-* Bin No.4 has all the values between $75$ and $100$, excluding the exact value of $75$.
+```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
+knitr::include_graphics('images/bins-1.png')
+```
 
-If you happen to be familiar with open and close intervals, the four intervals are: $[0,25], (25,50], (50,75]$, and $(75,100]$.
+We can write these intervals more concisely using open/close interval notion as: $[0,25], (25,50], (50,75]$, and $(75,100]$.
 
-So, we have values $0.0, 4.7, 5.5, 25.0, 25.5, 49.9, 50.0, 70.0, 72.2, 73.1, 74.4, 75.0, 99.0$, then Bin No.1 has the four values, from $0.0$ to $25.0$, Bin No.2 has three values, from $25.5$ to $50.0$, Bin No.3 has five, from $70.0$ to $74.4$, and Bin No. 4 has just $99.0$.
+Suppose now that we are handed the following values:
 
-Histograms are in some sense, an extended version of the bar plot where the number of bins are adjustable, where the height represent (in the case of vertical plots) the counts and the width is the same for all the bars.
+\[ \{0.0, 4.7, 5.5, 25.0, 25.5, 49.9, 50.0, 70.0, 72.2, 73.1, 74.4, 75.0, 99.0\} \]
 
-In the above histogram, we see that the leftmost and the rightmost bars encompass 30 bins (some of them are obviously empty). We can also see that no car models had less than 10 or greater than 50 highway miles per gallon. Like the `geom_bar()` function, the `geom_histogram()` computes the largest value and the smallest value appearing in the dataset.
+If we filled in the bins with these values, the above diagram would look something like this: 
 
-The end points of the bin-defining intervals are difficult to recognize just by looking at the chart. It is a little harder to see exactly where the ends of the bins are situated. For example, it is not easy to pinpoint exactly where the value 19 lies on the horizontal axis. Is it in the interval for the bin that stands on the line 20 on the x-axis or the one immediately to the left of it? Hard to tell...
+```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
+knitr::include_graphics('images/bins-2.png')
+```
 
-We can use, for a better visual assessment, our custom set of intervals as the bins. The specification of the bin set is by way of stating `breaks = BINS` as an argument in the call for `geom_histogram()`, where `BINS` is a sequence of breaking points. 
+Histograms are, in some sense, an extended version of the bar plot where the number of bins are adjustable. The heights represent *counts* (or *densities*, which we will see soon) and the widths are either the same or vary for each bar. 
+
+<!--In the above histogram, we see that the leftmost and the rightmost bars encompass 30 bins (some of them are obviously empty). We can also see that no car models had less than 10 or greater than 50 highway miles per gallon. Like the `geom_bar()` function, the `geom_histogram()` computes the largest value and the smallest value appearing in the dataset. --> 
+
+The end points of the bin-defining intervals are difficult to recognize just by looking at the chart. It is a little harder to see exactly where the ends of the bins are situated. For example, it is not easy to pinpoint exactly where the value 19 lies on the horizontal axis. Is it in the interval for the bin that stands on the line 20 on the x-axis or the one immediately to the left of it? 
+
+We can use, for a better visual assessment, a custom set of intervals as the bins. The specification of the bin set is by way of stating `breaks = BINS` as an argument in the call for `geom_histogram()`, where `BINS` is a sequence of breaking points. 
 
 Recall that we can define a numerical series from a number to another with fixed gap amount using function `seq()`. Below, we create a numerical series using `seq()` and then specify to use the sequence in the break points.
 
-The sequence starts at 10 and ends at 10 with the gap of 1. Using the convention of end points in R, the sequence produces 40 intervals, from 10 to 11, from 11 to 12, ..., from 49 to 50, with the right end inclusive and the left end exclusive, except for the leftmost interval containing 10.
+The sequence starts at 10 and ends at 50 with the gap of 1. Using the convention of end points in R, the sequence produces 40 intervals, from 10 to 11, from 11 to 12, ..., from 49 to 50, with the right end inclusive and the left end exclusive, except for the leftmost interval containing 10.
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 bins <- seq(10,50,1)
@@ -924,55 +931,85 @@ binned2
 
 ### Density scale 
 
-In the histogram that `ggplot` generates, what the horizontal axis represents, and what the left and right borders of each bar represents, are clear, except that depending on the choices of the bin sequence, the exact values the borders represent may be difficult to discern from the plot. 
+<!--In the histogram that `ggplot` generates, what the horizontal axis represents, and what the left and right borders of each bar represents, are clear, except that depending on the choices of the bin sequence, the exact values the borders represent may be difficult to discern from the plot. --> 
 
 So far, the height of the bar has been the count, or the number of elements that are found in some bin. However, it can be useful to instead look at the *density* of points that are contained by some bin. When we plot a histogram in this manner, we say that it is in *density scale*. 
 
 In density scale, the height of each bar is the percent of elements that fall into the corresponding bin, _relative to the width of the bin_. Let us explain this using the following calculation.
 
-We use the bin width of 5, which we will refer to using `bin_width`. The meaning of assigning 5 to the bin width is that each bin covers 5 consecutive units of the `hwy` value. Then we create a histogram with unit-size bins, divide the bars into consecutive groups of 5, and then even out the heights of the bars in each group.
+Let the bin width be 5, which we will refer to as `bin_width`. 
+
+```{r}
+bin_width <- 5
+```
+
+The meaning of assigning 5 to the bin width is that each bin covers 5 consecutive units of the `hwy` value. Then we create a histogram with unit-size bins, divide the bars into consecutive groups of 5, and then even out the heights of the bars in each group.
 
 More specifically, we execute the following steps.
 
-* Using `bin_width` as a parameter, we create a sequence `bin2` of bin boundaries from 10 to 5.
-* Like before, when we "cut" the `hwy` values using `bins` as break points (the `mutate()` call and its subsequent `count()` call), we get the bins and their counts under variables `bin` and `n`, respectively.
-* We obtain the proportions of the counts in the entire cars appearing in the data set `mpg_sub` by dividing the counts by `nrow(mpg_sub)`.
-* We then for each bin, split the proportion in the bin among the 5 units the bin contains (we use the division by `bin_width` instead by the division by `5`).
+1. Using `bin_width` as a parameter, we create a sequence `bins` of bin boundaries from 10 to 50.
 
 ```{r}
-bin_width = 5
-bins2 <- seq(10,50,bin_width)
-binned2 <- mpg_sub %>%
-  mutate(bin = cut(hwy, breaks = bins2)) %>%
-  count(bin, .drop = TRUE) %>%
-  mutate(proportion = n/nrow(mpg_sub)) %>%
-  mutate(density = proportion/bin_width)
-binned2
+bins <- seq(10, 50, bin_width)
 ```
 
-Now let us recall the plot using the bins.
-We see that the density values we have calculated match the height of the bars.
+2. Like before, when we "cut" the `hwy` values using `bins` as break points, we get the bins and their counts under variables `bin` and `n`, respectively.
+
+```{r}
+binned <- mpg_sub %>%
+  mutate(bin = cut(hwy, breaks = bins)) %>%
+  count(bin, .drop = TRUE)
+binned
+```
+
+3. We obtain the proportions of the counts in the entire cars appearing in the tibble `mpg_sub` by dividing the counts by `nrow(mpg_sub)`.
+
+```{r}
+binned <- binned %>%
+  mutate(proportion = n/nrow(mpg_sub)) 
+binned
+```
+
+4. For each bin, split the proportion in the bin among the 5 units the bin contains.
+
+```{r}
+binned <- binned %>%
+  mutate(density = proportion/bin_width) 
+binned
+```
+
+5. Plot `density` against `bin`, and done! 
+
+```{r dpi=80,  fig.align="center", warning=FALSE, message = FALSE}
+ggplot(binned, aes(x = bin, y = density)) +
+  geom_histogram(fill = "darkcyan", color = "gray", 
+                 stat = "identity")
+```
+
+That was a lot of work and, fortunately, `ggplot` can take care of all that for us. The following code is a rewriting of the above where we omit the `identity` stat and instead map `y` onto `..density..`, a special variable computed by the stat (called `stat_bin()`) geom histograms use. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(mpg, aes(x = hwy)) +
   geom_histogram(aes(y = ..density..), 
-                 fill = "darkcyan", color = "gray", breaks = bins2)
+                 fill = "darkcyan", color = "gray", breaks = bins)
 ```
 
-The `aes(y = ..density..)` call requests computation of "density" as the y-axis.
+Compare this with our density plot crafted by hand. Observe that the density values we have calculated match the height of the bars.
 
-### Unequal bins
+### Why bother with density scale? 
 
-An advantage of the histogram over a bar chart is that a histogram can contain bins of unequal width. Below, the values in the `hwy` column are binned into three uneven categories.
+There are some discrepancies to note between a histogram in density scale and a histogram with count scale. While the count scale may be easier to digest visually than density scale, the count scale can be misleading when using bins with different widths. The problem: the height of each bar does *not* account for the difference in the widths of the bins.  
 
-```{r dpi=80,  fig.align="center", message = FALSE}
+Suppose the values in `hwy` are binned into three uneven categories. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
 uneven_bins <- c(10, 15, 30, 45)
 ggplot(mpg, aes(x = hwy)) +
   geom_histogram(aes(y = ..density..), fill = "darkcyan", color = "grey", 
                  breaks = uneven_bins, position = "identity")
 ```
 
-Here are the counts in the three bins.
+Here are the counts in the three bins. Observe that the first and last bins have roughly the same number of elements.  
 
 ```{r}
 mpg_sub %>%
@@ -980,13 +1017,9 @@ mpg_sub %>%
   count(bin, .drop = FALSE)
 ```
 
-Although the ranges (10, 15] and (30, 45] have nearly identical counts, the bar over the former is twice as tall as the latter because it is only half as wide. This is the effect of flattening we have explained previously; that is, we flatten the bar height over the units in each bin.
+<!--Although the ranges (10, 15] and (30, 45] have nearly identical counts, the bar over the former is twice as tall as the latter because it is only half as wide. This is the effect of flattening we have explained previously; that is, we flatten the bar height over the units in each bin. --> 
 
-### Gotchas with count scale
-
-There are some discrepancies to note between a histogram in density scale and a histogram with count scale. While the count scale may be easier to digest visually than density scale, the count scale can be misleading when using bins with different widths. The problem: the height of each bar does *not* account for the difference in the widths of the bins.  
-
-Let us compare the following two histograms that use uneven bins. 
+Let us compare the following two histograms that use `uneven_bins`. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(mpg, aes(x = hwy)) +
