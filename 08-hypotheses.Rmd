@@ -164,9 +164,7 @@ sum(sample_tvds >= observed_tvd) / length(sample_tvds)
 
 
 The value we get is 0.0638, or about 6.4%. <!-- how do we adjust according to the outcome? -->
-We interpret the value as stating the *chance* the TVD achieves a value *at least as extreme* as 0.0137 or more is 6.4%. We can conclude that a fair dice would yield the observed test statistic value we found (or greater) 6.4% of the time. This value, computed through simulation, is what we call a *p-value*.
-
-An alternative interpretation of the *p-value* is that it signals an *error probability*. That is, if we were to assert that a fair dice is actually *unfair*, such a false accusation would occur at -- you guessed it -- 6.4% of the time.    
+We interpret the value as stating the *chance* the TVD achieves a value, under the null hypothesis, *at least as extreme* as 0.0137 or more is 6.4%. We can conclude that a fair dice would yield the observed test statistic value we found (or greater) 6.4% of the time. This value, computed through simulation, is what we call a *p-value*.
 
 To compute a *p-value*, we take the following steps:
 
@@ -189,8 +187,10 @@ The area covered by the orange bars is formally called the "area in the tail." T
 
 When we compute a p-value, we have in mind two possible interpretations. We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
 
-* __Null Hypothesis (NH):__ The hypothesis we use to create the model for simulation. For example, we assume that the die we have is a fair die. 
-* __Alternative Hypothesis (AH):__ The opposite, or counterpart, of the Null Hypothesis. For example, the AH states that the die we have is not fair.  
+* __Null Hypothesis (NH):__ The hypothesis we use to create the model for simulation. For example, we assume that the die we have is a fair die, about 16% equal chance to see any face. Any variation from what we expect is because of chance variation.
+* __Alternative Hypothesis (AH):__ The opposite, or counterpart, of the Null Hypothesis. For example, the AH states that the die we have is not fair - the chances are not equal. The differences are caused by something other than randomness. 
+
+It is important that your null hypothesis acknowledges differences in the data. For example, if the null hypothesis states that the die is fair, why did you not get any `3`'s when rolling the die 6 times? 
 
 We can provide one more definition of the p-value in the language of these hypotheses:
 
@@ -517,13 +517,21 @@ ggplot(tibble(sample_means)) +
 
 This time, the chance of a mean midterm score *at least* as low as about 61 occurring is 5%.   
 
-We say that the threshold point 63 is at the 90% *significance level* and the threshold point 61 is at the 95% significance level. If we prefer an even higher level of significance, we could also look at the 99% significance level or even the 99.9% level; these are commonly referred to in the area of physics which rely on high significance to prove something axiomatic. It is important to note that these cut-off points are conventional only and do not have a strong theoretical backing. They were first established by the statistician Ronald Fisher in his seminal work [*Statistical Methods for Research Workers*](https://en.wikipedia.org/wiki/Statistical_Methods_for_Research_Workers). 
+We say that the threshold point 63 is at the 90% *significance level* and the threshold point 61 is at the 95% significance level.
 
-Therefore, declaring an observed statistic as being "too low" or "too high" is a matter of judgment. 
-In any statistical-based research, you should always provide the observed test statistic and the 
-p-value used in addition to explaining your decision; this way your readers can decide for 
-themselves whether or not the results are indeed significant. 
+### The significance level is an error probability
 
+The last figure shows that, although rare, a lab section with a "TA teaching in good faith" can still produce mean midterm scores that are as low as 61 or less. How often does that occur? The figure tells us the answer for that as well: it does so with about 5% chance. 
+
+Therefore, if the TA is *teaching in good faith* and our test uses a 95% significance level for deciding whether or not the TA is guilty, then there is about a 5% chance that the test will wrongly conclude that the mean midterm scores are too low and, consequently, the TA is at fault. This example points to a general fact about significance levels: 
+
+> If you use a $p$% significance level for the p-value, and the null hypothesis happens to be true, there is about a $1-p$% chance that the test will incorrectly conclude the alternative hypothesis. 
+
+Statistics is about quantifying uncertainty. This means we can control the chance of wrongly convicting the TA by choosing a higher significance level. We could look at the 99% significance level or even the 99.9% and 99.99% levels; these are commonly referred to in the area of physics which rely on enormous evidence to prove something axiomatic. 
+
+It is important to note that these cut-off points are conventional only and do not have a strong theoretical backing. They were first established by the statistician Ronald Fisher in his seminal work [*Statistical Methods for Research Workers*](https://en.wikipedia.org/wiki/Statistical_Methods_for_Research_Workers). 
+
+Therefore, declaring an observed statistic as being "too low" or "too high" is a matter of judgment. In any statistical-based research, you should always provide the observed test statistic and the p-value used in addition to explaining your decision; this way your readers can decide for themselves whether or not the results are indeed significant. 
 
 ### The verdict: is the TA guilty? 
 
@@ -546,8 +554,7 @@ We see that the point does not fall within this region. We can check numerically
 sum(sample_means <= observed_statistic) / num_repetitions
 ```
 
-We can conclude the TA's defense holds up pretty well: the average lab section H scores are not
-any different from those generated by chance. It may be wise to check in with the TA to get their take on the story.   
+We can conclude the TA's defense holds up pretty well: the average lab section H scores are not any different from those generated by chance. It may be wise to check in with the TA to get their take on the story.   
 
 ## Permutation Testing
 
