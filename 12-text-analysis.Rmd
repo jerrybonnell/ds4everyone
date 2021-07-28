@@ -54,7 +54,7 @@ gutenberg_works(title == "Moby Dick")
 Using its ID `15`, we can proceed with retrieving the text into a variable called `moby_dick`. Observe how the data returned is in the form of a tibble -- a format we are well familiar with -- with one row per each line of the text.  
 
 ```{r message=FALSE}
-moby_dick <- gutenberg_download(gutenberg_id = 15)
+moby_dick <- gutenberg_download(gutenberg_id = 15, mirror = "http://mirrors.xmission.com/gutenberg/")
 moby_dick
 ```
 
@@ -239,7 +239,7 @@ library(gutenbergr)
 We will study Herman Melville's works again in this section. However, unlike before, we will include many more texts from his oeuvre of prose. We will collect: *Moby Dick*, *Bartleby, the Scrivener: A Story of Wall-Street*, *White Jacket*, and *Typee: A Romance of the South Seas*. 
 
 ```{r message=FALSE}
-melville <- gutenberg_download(c(11231, 15, 10712, 1900))
+melville <- gutenberg_download(c(11231, 15, 10712, 1900), mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 We will tidy it up as before and filter the text for stopwords. We will also add one more step to the preprocessing where we extract words that are strictly alphabetical. This is accomplished with a `mutate` call using `str_extract` and the regular expression `[a-z]+`.  
@@ -380,7 +380,7 @@ library(topicmodels)
 We will continue with our running example of Herman Melville's *Moby Dick*. Let us load it in. 
 
 ```{r message=FALSE}
-melville <- gutenberg_download(15)
+melville <- gutenberg_download(15, mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 We will tidy the text as usual and, this time, partition the text into chapters. 
@@ -404,7 +404,7 @@ We begin as always: loading the texts, tidying them, splitting according to chap
 
 ```{r}
 whitman <- gutenberg_works(title == "Leaves of Grass") %>%
-  gutenberg_download(meta_fields = "title")
+  gutenberg_download(meta_fields = "title", mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 ```{r}
@@ -421,7 +421,7 @@ On to Hawthorne's *The Scarlet Letter*.
 
 ```{r}
 hawthorne <- gutenberg_works(title == "The Scarlet Letter") %>%
-  gutenberg_download(meta_fields = "title")
+  gutenberg_download(meta_fields = "title", mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 ```{r}

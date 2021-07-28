@@ -16,7 +16,8 @@ Here are examples of the two situations.
 * A company making dice is testing the fairness of a die. Using some machine, the company throws the die 100,000 times. They record the face that turns up. By examining the record of the 100,000 throws, can you tell how likely it is that the die is fair?
 * You are evaluating the performance data of National Football League (NFL) players. Are the receivers in 2019 better than those in 2017?
 
-For both situations, an important consideration for you to make is in terms of what you compare the differences.
+For both situations, an important consideration to make is in terms of how to compare the differences and
+figuring out how a sample at hand was generated. 
 
 ## Testing a Model
 
@@ -30,38 +31,38 @@ face_counts
 By dividing each number by 10,000, we get the *proportion* of the occurrence of each face.
 
 ```{r}
-empirical <- face_counts / 10000
-empirical
+face_props <- face_counts / 10000
+face_props
 ```
 
-The six values comprise the empirical distribution representing the behavior of the die. We notice that the values are not very close to the ideal 0.1667 (= 1/6). How far away is that from what we know about the true distribution?
+The six values comprise the sampling distribution representing the behavior of the die. We notice that the values are not exactly 0.1667 (= 1/6). How far away is that from what we know about the true distribution?
 
 We know that the probability of each face is $1/6$. By subtracting $1/6$ from each and obtaining the absolute difference values from them by removing any negative sign we have: 
 
 ```{r}
-abs(empirical - 1/6)
+abs(face_props - 1/6)
 ```
 
 We then compute the sum and take one half of this value. We will call this the *observed value*. 
 
 ```{r}
-observed_tvd <- sum(abs(empirical - 1/6)) * 1/2
+observed_tvd <- sum(abs(face_props - 1/6)) * 1/2
 observed_tvd
 ```
 
-In statistics, this value has a special name: the *total variation distance* (or, for short, TVD).  The total variation distance serves as the measure for the difference between two distributions, namely, the difference between a true and empirical distribution. 
+In statistics, this value has a special name: the *total variation distance* (or, for short, TVD).  The total variation distance serves as the measure for the difference between two distributions, namely, the difference between the true and a sampling distribution. 
 
 Now that we have the technical term referring to the difference, we can state the question as follows:
 
-> Is the total variation distance 0.0446 big or small?
+> Is the total variation distance 0.0137 too big or too small?
 
 It is hard to tell without knowing the differences we get by chance.
 
-Let us conduct some simulation to obtain an empirical distribution of the absolute difference of a fair dice. As mentioned earlier, the proportion that each face turns up is not constant, even for a fair die. So by simulating throws of a fair dice, we must expect to see a range of absolute differences.
+Let us conduct some simulation to obtain a sampling distribution of the absolute difference of a fair dice. As mentioned earlier, the proportion that each face turns up is not constant, even for a fair die. So by simulating throws of a fair dice, we must expect to see a range of absolute differences.
 
 ### Prerequisites
 
-Before starting, let's load the `tidyverse` as usual.
+Before starting, let us load the `tidyverse` as usual.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
@@ -70,11 +71,11 @@ library(tidyverse)
 
 ### The `rmultinom` function
 
-We saw before that we can generate an empirical distribution by putting in place some sampling strategy. Perhaps the most straightforward is simple random sampling with replacement. This will be the approach we continue to make use of here, as well as throughout the rest of the course.  
+We saw before that we can generate a sampling distribution by putting in place some sampling strategy. Perhaps the most straightforward is simple random sampling with replacement. This will be the approach we continue to make use of here, as well as throughout the rest of the course.  
 
-We also learned about two different ways to sample with replacement. `sample` samples items from a *vector*, which we used when simulating the number of expected heads in 100 coin tosses or the expected amount of grains a minister receives after some number of days. `slice_sample` functions identically, but instead samples from rows of a *data frame* or tibble. To generate the empirical distribution for this experiment, we could just use `sample` again. But there is a quicker way, using a function called `rmultinom`, which is tailored for sampling at random from categorical distributions. We introduce it here and will use it several times this chapter.
+We also learned about two different ways to sample with replacement. `sample` samples items from a *vector*, which we used when simulating the number of expected heads in 100 coin tosses or the expected amount of grains a minister receives after some number of days. `slice_sample` functions identically, but instead samples from rows of a *data frame* or tibble. To generate a sampling distribution for this experiment, we could just use `sample` again. But there is a quicker way, using a function called `rmultinom`, which is tailored for sampling at random from categorical distributions. We introduce it here and will use it several times this chapter.
 
-Here is how we can use it to generate an empirical distribution of 100 tosses of a fair coin.
+Here is how we can use it to generate a sampling distribution of 100 tosses of a fair coin.
 
 ```{r}
 fair_coin <- c(1/2, 1/2)
@@ -82,7 +83,7 @@ sample_vector <- rmultinom(n = 1, size = 100, prob = fair_coin)
 sample_vector
 ```
 
-For an empirical distribution, we are more interested in the *proportion* of resulting heads and tails. Thus, we should divide by the number of tosses. Note how the probability of heads and tails is about equal. 
+For a sampling distribution, we are more interested in the *proportion* of resulting heads and tails. Thus, we should divide by the number of tosses. Note how the probability of heads and tails is about equal. 
 
 ```{r}
 sample_vector / 100
@@ -102,7 +103,7 @@ Let us see how we can use it to assess the model for 10,000 throws of dice.
 
 ### A model for 10,000 die throws 
 
-Generating an empirical distribution for the dice throw is an extension of the coin toss we saw just earlier. As before, note how the probability of each face is about equal. 
+Generating a sampling distribution for the dice throw is an extension of the coin toss we saw just earlier. As before, note how the probability of each face is about equal. 
 
 ```{r}
 fair_die_probs <- rep(1/6, 6)
@@ -137,10 +138,6 @@ num_repetitions <- 10000
 sample_tvds <- replicate(n = num_repetitions, one_simulated_tvd())
 ```
 
-```{r}
-max(sample_tvds)
-```
-
 ### Chance of the observed value occurring
 
 To interpret the results of our simulation, we start by visualizing the results using a  histogram of the samples.
@@ -159,7 +156,7 @@ ggplot(tibble(sample_tvds)) +
 ```
 
 
-Let us look at the proportion of the elements in the list `sample_tvds` that are at least the observed TVD value 0.01376, whose value we have stored in `observed_tvd`. We simply count the elements matching the requirement and then divide the count by the length of the vector.
+Let us look at the proportion of the elements in the list `sample_tvds` that are at least the observed TVD value 0.01376 or more extreme, whose value we have stored in `observed_tvd`. We simply count the elements matching the requirement and then divide the count by the length of the vector.
 
 ```{r}
 sum(sample_tvds >= observed_tvd) / length(sample_tvds)
@@ -167,9 +164,9 @@ sum(sample_tvds >= observed_tvd) / length(sample_tvds)
 
 
 The value we get is 0.0638, or about 6.4%. <!-- how do we adjust according to the outcome? -->
-We interpret the value as stating the *chance* the difference achieves 0.0659 is no more than 6.6%. We can thus conclude that the chances that the die at hand is a fair one is no more than 6.6%. This value, computed through simulation, is what we call a *p-value*.
+We interpret the value as stating the *chance* the TVD achieves a value, under the null hypothesis, *at least as extreme* as 0.0137 or more is 6.4%. We can conclude that a fair dice would yield the observed test statistic value we found (or greater) 6.4% of the time. This value, computed through simulation, is what we call a *p-value*.
 
-To compute a p-value, we take the following steps:
+To compute a *p-value*, we take the following steps:
 
 1. Establish some model that is possibly describing a quantifiable phenomenon (e.g., the absolute distance from the ideal distribution).
 2. Run a simulation to obtain a histogram of the quantifiable phenomenon under the model.
@@ -185,15 +182,19 @@ ggplot(tibble(sample_tvds)) +
   geom_point(aes(x = observed_tvd, y = 0), size = 3, color = "red")
 ```
 
-The closer these two portions are in size, i.e. the number of cyan and orange bars, the higher the likelihood of the observation. Conversely, the farther the two portions are in size, the lower the likelihood of the observation. We usually take the smaller of the two portions and designate the smaller portion a special name: __the p-value__.
+The more orange bars that are visible in the histogram, the higher the likelihood of the observation. Conversely, the less orange bars there are, the lower the likelihood of seeing such an observation.
+The area covered by the orange bars is formally called the "area in the tail." The area in the tail is also designated a special name:  __the p-value__. 
 
-Also, when we compute a p-value, we have in mind two possible interpretations.
-We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
+When we compute a p-value, we have in mind two possible interpretations. We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
 
-* __Null Hypothesis (NH):__ The hypothesis we use to create the model for simulation. For example, we assume that the die we have is a fair die. 
-* __Alternative Hypothesis (AH):__ The opposite, or counterpart, of the Null Hypothesis. For example, the AH states that the die we have is not fair.  
+* __Null Hypothesis (NH):__ The hypothesis we use to create the model for simulation. For example, we assume that the die we have is a fair die, about 16% equal chance to see any face. Any variation from what we expect is because of chance variation.
+* __Alternative Hypothesis (AH):__ The opposite, or counterpart, of the Null Hypothesis. For example, the AH states that the die we have is not fair - the chances are not equal. The differences are caused by something other than randomness. 
 
-Using simulations we learn that the Null Hypothesis has a p-value of 6.6% (or 0.0659) using the absolute distance between distributions as the distance measure.
+It is important that your null hypothesis acknowledges differences in the data. For example, if the null hypothesis states that the die is fair, why did you not get any `3`'s when rolling the die 6 times? 
+
+We can provide one more definition of the p-value in the language of these hypotheses:
+
+> The chance, under the *null hypothesis*, of getting a test statistic equal to the observed test statistic or more extreme in the direction of the *alternative hypothesis*.
 
 ## Case Study: Entering Harvard
 
@@ -229,9 +230,10 @@ class_props <- tribble(~Race, ~Harvard, ~Almanac,
                              "Other", 2.1, 4.5)
 class_props
 ```
+
 The distributions may look quite different from each other. Of course, the demographics from the Almanac includes students who did not apply to Harvard, those who might not have got into Harvard, those applied and did not get in, and international students. Moreover, the Almanac data covers all full-time students in 2018 but not students who entered college in 2020.
 
-Notwithstanding these differences, let us conduct an experiment to see how the demographics from Harvard look different from those given by the Almanac in terms of an empirical distribution.
+Notwithstanding these differences, let us conduct an experiment to see how the demographics from Harvard look different from those given by the Almanac in terms of a sampling distribution.
 
 As we will be handling proportions, let us scale the numbers down (by dividing each element by 100) so that they are expressed as percentages.
 
@@ -257,7 +259,7 @@ harvard_diff <- compute_tvd(pull(class_props, Harvard), pull(class_props, Almana
 harvard_diff
 ```
 
-The Harvard class of 2024 has 2015 students. We can think of the process of sampling 2015 people to fill the "Harvard class" from those who "were attending" a four-year non-profit college in Fall 2018 and then examining their racial distribution. Of course, we cannot reach out to those individuals specifically; but we know the distribution of the entire population from which we want to sample. Therefore, we can simulate a great number of times what this "Harvard class" and compare it with what we know about the true Harvard class distribution, available in `harvard_diff`. 
+The Harvard class of 2024 has 2015 students. We can think of the process of sampling 2015 people to fill the "Harvard class" from those who "were attending" a four-year non-profit college in Fall 2018 and then examining their racial distribution. Of course, we cannot reach out to those individuals specifically; but we know the distribution of the entire population from which we want to sample. Therefore, we can simulate a great number of times what this "Harvard class" looks like and compare it with what we know about the true Harvard class distribution, available in `harvard_diff`. 
 
 Our sampling plan can be framed as a "boxes and marbles" problem, as we saw in the previous section. There are five "boxes" to choose from, where each corresponds to a race: White, Black, Hispanic, Asian, and Other. The goal is to place marbles (which correspond to students) in each of the boxes, where the probability of ending up in any of the boxes is given by the Almanac. 
 
@@ -374,7 +376,7 @@ So far we have evaluated models by comparing some observation to a prediction ma
 
 Sometimes the observed statistic, e.g. the sample total variation distance (TVD), ended up close to the predictions; sometimes it ended up very far away. But how do we define what "close" or "far" is? And at what point does an observed statistic transition from being "close" to "far"? 
 
-This section examines the *significance* of an observed statistic. To set up the discussion, we introduce another example still on the topic of academics: midterm scores in a computer science course at the University of Miami. 
+This section examines the *significance* of an observed statistic. To set up the discussion, we introduce another example still on the topic of academics: midterm scores in a Computer Science course at the University of Miami. 
 
 ### Prerequisites
 
@@ -391,21 +393,21 @@ set.seed(1)
 
 ### A midterm grumble? 
 
-A Computer Science course at the University of Miami had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads the section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following a exam?
+A Computer Science course at the University of Miami had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads each section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following a exam?
 
 If we were to fill that lab section with randomly selected students from the class, it is possible that their average midterm grade will look a lot like the score the grumbling students are unhappy about. It turns out that what we have stated here is a chance model that we can simulate. 
 
 Let's have a look at the data from each (anonymized) student in the course. The following tibble `csc_labs` contains midterm and final scores, and the lab section the student is enrolled in. 
 
 ```{r message = FALSE, warning = FALSE}
-csc <- read_csv("data/csc_labs.csv")
-csc
+csc_labs <- read_csv("data/csc_labs.csv")
+csc_labs
 ```
 
 We can use the dplyr verb `group_by` to examine the mean midterm grade as well as the number of students in each section. 
 
 ```{r message = FALSE}
-lab_stats <- csc %>%
+lab_stats <- csc_labs %>%
   group_by(section) %>%
   summarize(midterm_avg = mean(midterm),
             count = n())
@@ -427,7 +429,7 @@ __Alternative Hypothesis:__ The section H midterm grades are too low.
 To form a random sample, we will need to sample *without* replacement 9 students from the course to fill up the theoretical "lab section H".  
 
 ```{r}
-random_sample <- csc %>%
+random_sample <- csc_labs %>%
   select(midterm) %>%
   slice_sample(n = 9, replace = FALSE)
 random_sample
@@ -443,7 +445,7 @@ Now that we know how to simulate one value, we can wrap this into a function.
 
 ```{r}
 one_simulated_mean <- function() {
-  random_sample <- csc %>%
+  random_sample <- csc_labs %>%
     select(midterm) %>%
     slice_sample(n = 9, replace = FALSE)
   return(mean(pull(random_sample, midterm)))
@@ -485,7 +487,7 @@ sorted_samples <- sort(sample_means)
 sorted_samples[length(sorted_samples)*0.1]
 ```
 
-We will plot this value on our empirical histogram, as well as the area to the left of it. 
+We will plot this value on our sampling histogram, as well as the area to the left of it. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 colors <- c(rep("salmon",6), rep("darkcyan",9))
@@ -496,9 +498,9 @@ ggplot(tibble(sample_means)) +
   geom_point(aes(x = sorted_samples[length(sorted_samples)*0.1], y = 0), size = 3, color = "red")
 ```
 
-This means that in our simulation the mean midterm score is as low as about 63 90% of the time. Put differently, the chance of a midterm score *lower* than 63 occurring is 10%. 
+This means that our simulated mean midterm score is less than 63 10% of the time. Put differently, the chance of a an average midterm score *lower* than 63 occurring, under the assumption of a TA teaching in good faith, is around 10%. 
 
-The situation is not much different if we look at the value 5% from the bottom, which we find to be about 61. We redraw the situation in on our empirical histogram. 
+The situation is not much different if we look at the value 5% from the bottom, which we find to be about 61. We redraw the situation in on our sampling histogram. 
 
 ```{r}
 sorted_samples[length(sorted_samples)*0.05]
@@ -513,17 +515,29 @@ ggplot(tibble(sample_means)) +
   geom_point(aes(x = sorted_samples[length(sorted_samples)*0.05], y = 0), size = 3, color = "red")
 ```
 
-This time, the chance of a mean midterm score at least as low as about 61 occurring is 5%.   
+This time, the chance of a mean midterm score *at least* as low as about 61 occurring is 5%.   
 
-We say that the threshold point 63 is the 90% *significance level* and the threshold point 61 is at the 95% significance level. If we prefer an even higher level of significance, we could also look at the 99% significance level or even the 99.9% level; these are commonly referred to in the area of physics which rely on high significance to prove something axiomatic. It is important to note that these cut-off points are conventional only and do not have a strong theoretical backing. They were first established by the statistician Ronald Fisher in his seminal work [*Statistical Methods for Research Workers*](https://en.wikipedia.org/wiki/Statistical_Methods_for_Research_Workers). 
+We say that the threshold point 63 is at the 90% *significance level* and the threshold point 61 is at the 95% significance level.
 
-Regardless of the cut-off point, a significance level states that if an observed statistic remains above it the discovery is not significant. The same holds true for the flip-side, i.e., if we are looking for too large a value.   
+### The significance level is an error probability
+
+The last figure shows that, although rare, a lab section with a "TA teaching in good faith" can still produce mean midterm scores that are as low as 61 or less. How often does that occur? The figure tells us the answer for that as well: it does so with about 5% chance. 
+
+Therefore, if the TA is *teaching in good faith* and our test uses a 95% significance level for deciding whether or not the TA is guilty, then there is about a 5% chance that the test will wrongly conclude that the mean midterm scores are too low and, consequently, the TA is at fault. This example points to a general fact about significance levels: 
+
+> If you use a $p$% significance level for the p-value, and the null hypothesis happens to be true, there is about a $1-p$% chance that the test will incorrectly conclude the alternative hypothesis. 
+
+Statistics is about quantifying uncertainty. This means we can control the chance of wrongly convicting the TA by choosing a higher significance level. We could look at the 99% significance level or even the 99.9% and 99.99% levels; these are commonly referred to in the area of physics which rely on enormous evidence to prove something axiomatic. 
+
+It is important to note that these cut-off points are conventional only and do not have a strong theoretical backing. They were first established by the statistician Ronald Fisher in his seminal work [*Statistical Methods for Research Workers*](https://en.wikipedia.org/wiki/Statistical_Methods_for_Research_Workers). 
+
+Therefore, declaring an observed statistic as being "too low" or "too high" is a matter of judgment. In any statistical-based research, you should always provide the observed test statistic and the p-value used in addition to explaining your decision; this way your readers can decide for themselves whether or not the results are indeed significant. 
 
 ### The verdict: is the TA guilty? 
 
-We can set a modest significance level at 95% for the course case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level if so. 
+We can set a modest significance level at 95% for the course case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level to be fully convinced.  
 
-We overlay the observed statistic on the empirical histogram. As before, the orange bars show the 95% significance region.
+We overlay the observed statistic on the sampling histogram. As before, the orange bars show the 95% significance region.
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 colors <- c(rep("salmon",6), rep("darkcyan",9))
@@ -540,8 +554,7 @@ We see that the point does not fall within this region. We can check numerically
 sum(sample_means <= observed_statistic) / num_repetitions
 ```
 
-Therefore, we conclude that the resulting low grades are likely not due to the TA's teaching. It may be wise to check in with the TA to get his take on the story.   
-
+We can conclude the TA's defense holds up pretty well: the average lab section H scores are not any different from those generated by chance. It may be wise to check in with the TA to get their take on the story.   
 
 ## Permutation Testing
 
@@ -570,6 +583,9 @@ Let's first load the dataset.
 
 ```{r message = FALSE, echo = FALSE}
 finals <- read_csv("data/final_exams.csv")
+```
+
+```{r message = FALSE}
 finals
 ```
 
@@ -590,7 +606,7 @@ ggplot(finals) +
                  alpha = 0.7, position = "identity")
 ```
 
-By observation alone, it seems that the final scores of students in the offering where the tutoring program was available (`B`) is slightly to the right of the distribution corresponding to scores when the program did not exist (`B`). Could this be chalked up to chance?
+By observation alone, it seems that the final scores of students in the offering where the tutoring program was available (`B`) is slightly to the right of the distribution corresponding to scores when the program did not exist (`A`). Could this be chalked up to chance?
 
 As we have done throughout this chapter, we can address this question by means of a hypothesis test. We will state a null and alternative hypothesis that arise from the problem. 
 
@@ -699,7 +715,7 @@ ggplot(tibble(differences)) +
 
 First observe how the distribution is centered around 0. Under the assumption of the null hypothesis, there is no difference between the final exam averages in the two course offerings and, therefore, the difference clusters around 0. 
 
-Also observe that the observed test statistic is quite far from the center. To get a better sense of how far, we compute the P-value. 
+Also observe that the observed test statistic is quite far from the center. To get a better sense of how far, we compute the p-value. 
 
 ```{r}
 sum(differences >= observed_statistic) / 10000

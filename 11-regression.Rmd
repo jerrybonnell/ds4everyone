@@ -29,7 +29,7 @@ library(datasauRus)
 
 To build some intuition, we will compose a tibble called `toy_df` that contains several artificial datasets. Don't worry about the internal details of how the data is generated; in fact, it would be better to think of it as real data! 
 
-```{r}
+```{r echo=FALSE}
 set.seed(1)
 ```
 
@@ -157,7 +157,8 @@ So the correlation of  `y` and `x` is about $0.94$ which implies a strong positi
 Thankfully, R comes with a function for computing the correlation so we need not repeat this work every time we wish to explore the correlation between two variables. The function is called `cor` and receives two vectors as input. 
 
 ```{r}
-cor(pull(linear_df_standard, x), pull(linear_df_standard, y))
+linear_df_standard %>%
+  summarize(r = cor(x, y))
 ```
 
 Note that there may be some discrepancy between the two values. This is due to the $n - 1$ correction that R provides when calculating quantities like `sd`.  
@@ -236,10 +237,14 @@ library(tidyverse)
 
 ### The `trees` data frame
 
+```{r echo=FALSE}
+trees <- tibble(trees)
+```
+
 The `trees` data frame contains data on the diameter, height, and volume of 31 felled black cherry trees. Note that the diameter is erroneously labeled as `Girth`. 
 
 ```{r}
-head(trees)
+slice_head(trees, n=5)
 ```
 
 Let us visualize the relationship between `Girth` and `Height`.  
@@ -279,7 +284,8 @@ We have noted before that there exists a close relationship between correlation 
 We begin our analysis by noting the correlation between the two variables. 
 
 ```{r}
-cor(pull(trees, Girth), pull(trees, Height))
+trees %>%
+  summarize(r = cor(Girth, Height))
 ```
 
 This confirms the positive linear trend we saw earlier. Recall that the correlation coefficient is a dimensionless quantity. Let us standardize `Girth` and `Height` so that they are in standard units and are also dimensionless.  
@@ -344,8 +350,8 @@ line_rss <- function(params) {
   slope <- params[1]
   intercept <- params[2]
   
-  x = pull(girth_height_su, Height_su)
-  y = pull(girth_height_su, Girth_su)
+  x <- pull(girth_height_su, Height_su)
+  y <- pull(girth_height_su, Girth_su)
   fitted <- slope * x + intercept
   return(sum((y - fitted) ** 2))
 }
@@ -400,7 +406,7 @@ ggplot(girth_height_su) +
                    xend = Height_su, yend = 1 * Height_su + 0), color = "blue", alpha = 0)
 ```
 
-Compare the line we have just found (in orange) with the line $y = x$. For trees with heights that are *less* than 0 $SD$s away from the mean, the orange line predicts a *larger* girth than the $y = x$ line. And, for trees with heights that are *more* than 1 $SD$ away from the mean, the orange line predicts a *smaller* girth than the $y = x$ line. The effect should become clearer in the following plot. 
+Compare the line we have just found (in orange) with the line $y = x$. For trees with heights that are *less* than 0 $SD$s away from the mean, the orange line predicts a *larger* girth than the $y = x$ line. And, for trees with heights that are *more* than 0 $SD$ away from the mean, the orange line predicts a *smaller* girth than the $y = x$ line. The effect should become clearer in the following plot. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(girth_height_su) + 
@@ -427,10 +433,11 @@ Observe the position of the orange line relative to $y = x$ at each vertical blu
 Also recall the value of the correlation coefficient we calculated earlier.  
 
 ```{r}
-cor(pull(trees, Girth), pull(trees, Height))
+trees %>%
+  summarize(r = cor(Girth, Height))
 ```
 
-This is the same value as the slope of the line. Thus, we discover a connection: 
+This is the same value as the slope of the line! Thus, we discover a connection: 
 
 > When $x$ and $y$ are scaled to standard units, the slope of the regression of $y$ on $x$ equals the correlation coefficient $r$ and the line passes through the origin $(0,0)$. 
 
@@ -592,7 +599,7 @@ middle <- quantile(bstrap_predictions, 0.5 + (desired_area / 2) * c(-1, 1), type
 middle
 ```
 
-Let us plot an empirical histogram of the predictions and annotate the confidence interval on this histogram.
+Let us plot an sampling histogram of the predictions and annotate the confidence interval on this histogram.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 df <- tibble(bstrap_predictions)
@@ -653,7 +660,7 @@ middle <- quantile(bstrap_slopes, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle
 ```
 
-Following is the empirical histogram of the bootstrapped slopes with the annotated confidence interval. We also plot a red dot representing the original slope, which we found to be $4.841$.   
+Following is the sampling histogram of the bootstrapped slopes with the annotated confidence interval. We also plot a red dot representing the original slope, which we found to be $4.841$.   
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 df <- tibble(bstrap_slopes)
@@ -734,20 +741,8 @@ We use `dplyr` to help us accomplish the task.
 
 ```{r}
 diagnostic_examples %>%
-  filter(dataset == "cone") %>%
-  summarize(cor(x, y))
-```
-
-```{r}
-diagnostic_examples %>%
-  filter(dataset == "linear") %>%
-  summarize(cor(x, y))
-```
-
-```{r}
-diagnostic_examples %>%
-  filter(dataset == "quadratic") %>%
-  summarize(cor(x, y))
+  group_by(dataset) %>%
+  summarize(r = cor(x, y))
 ```
 
 Even without computing the correlation, it should be clear that something is very wrong with the `quadratic` dataset. We are trying to fit a line to something that follows a curve -- a clear violation of our assumptions! The correlation coefficient also confirms that `x` and `y` do not have a linear relationship in that dataset. 

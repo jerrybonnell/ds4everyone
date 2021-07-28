@@ -55,17 +55,18 @@ This dataset contains 352 values representing 11 variables and 32 observations. 
 
 ### In pursuit of tidy data
 
-We are now ready to provide a definition of tidy data. We defer to [Hadley Wickham](https://en.wikipedia.org/wiki/Hadley_Wickham), a main contributor and maintainer of many of the key packages that compose the `tidyverse`, for a definition. We say that data is tidy when it satisfies three conditions: 
+We are now ready to provide a definition of tidy data. We defer to [Hadley Wickham (2014)](https://vita.had.co.nz/papers/tidy-data.pdf) for a definition. We say that data is tidy when it satisfies four conditions: 
 
 1. Each *variable* forms a column. 
 2. Each *observation* forms a row. 
-3. Each type of observational unit forms a table. 
+3. Each value must have its own cell.
+4. Each type of observational unit forms a table. 
 
 Data that exists in any other arrangement is, consequently, *messy*. The goal of this chapter is to learn about methods for *transforming* messy data into tidy data, with some help from R and the tidyverse. 
 
 The `mtcars` dataset above is an example of tidy data, with one small exception we will return to later. Let us look at other examples of datasets that fulfill or violate these properties. 
 
-Suppose that you are keeping track of weekly sales of three different kinds of cookies at a local bakery. By instinct, you decide to keep track of the data in the following table.    
+Suppose that you are keeping track of weekly sales of three different kinds of cookies at a local Miami bakery in 2021. By instinct, you decide to keep track of the data in the following table.    
 
 ```{r echo = FALSE}
 bakery1 <- tribble(~week, ~gingerbread, ~`chocolate peppermint`, ~`macadamia nut`,
@@ -102,9 +103,20 @@ bakery_tidy <- bakery1 %>%
 bakery_tidy
 ```
 
-Observe how this dataset fulfills the three properties of tidy data; the third property is fulfilled simply because the observational unit we are measuring is the cookie, and we are measuring three variables per observational unit: `week`, `type`, and `sales`. 
+When a dataset is expressed in this manner, we say that it is in *long* format because the number of rows is comparatively larger compared to `bakery1` and `bakery2`. Admittedly, this form can make it harder to identify patterns or trends in the data by eye. However, tidy data opens the door to more efficient data science so that you can rely on existing tools to do the things you need to do. Without a standardized means of representing data, such tools would need to be developed from scratch each time you begin work on a new dataset.   
 
-When a dataset is expressed in this manner, we say that it is in *long* format because the number of rows is comparatively larger compared to `bakery1` and `bakery2`. Admittedly, this form can make it harder to identify patterns or trends in the data by eye. However, in terms of computational analysis, tidy data makes things much more efficient.  
+Observe how this dataset fulfills the four properties of tidy data. The fourth property is fulfilled because the observational unit we are measuring is a weekly cookie sale, and we are measuring three variables -- `week`, `type`, and `sales` -- per observational unit. These variables do not refer to measurements on a sale or bakery store; they refer to measurements on a given weekly cookie sale from a local Miami bakery in 2021. 
+
+Violations of the third property are peculiar and can be rare. A possible violating scenario could occur if the bakery decides to record sale *ranges*, e.g., in the case of making a forecast on future sales. 
+
+```{r echo=FALSE}
+forecast_sales <- tibble(
+  week          = c(1, 2, 3),
+  forecast = c("200-300", "300-400", "200-500")
+) %>% 
+  print()
+```
+
 
 In the next section we turn to the main data structures in R we will use for performing data transformations on datasets. 
 
@@ -129,7 +141,7 @@ mtcars
 ```
 
 *Data frame* is a term R uses to refer to data formats like the `mtcars` data set.
-In its simplest form, a data frame consists of vectors lined up together where each vector has a name. The designation `<dbl>` appearing next to the columns indicates that the column has only double values.
+In its simplest form, a data frame consists of vectors lined up together where each vector has a name. 
 
 How do we know how many rows and columns in the data as well as the names of the variables? The following functions answer those questions, respectively.
 
@@ -154,10 +166,10 @@ mtcars_tibble <- tibble(mtcars)
 mtcars_tibble
 ```
 
-Observe that the names of the car models are no longer present. However, we may wish to keep the names of the models as it can bring useful information. `tibble` has thought of a solution to this problem for us: we can add a new column with the row name information. The required function is `rownames_to_column`.  
+The designation `<dbl>` appearing next to the columns indicates that the column has only double values. Observe that the names of the car models are no longer present. However, we may wish to keep the names of the models as it can bring useful information. `tibble` has thought of a solution to this problem for us: we can add a new column with the row name information. The required function is `rownames_to_column`.  
 
 ```{r}
-mtcars_tibble <- rownames_to_column(mtcars, var = "model_name")
+mtcars_tibble <- tibble(rownames_to_column(mtcars, var = "model_name"))
 mtcars_tibble
 ```
 
@@ -177,16 +189,16 @@ pull(mtcars_tibble, cyl)
 
 The result returned is the entire sequence for the column `cyl`.
 
-If you know the position of a column in the dataset, you can attach a pair of square brackets with a comma and the position to get to the vector. The `cyl` is at position 2 of the data, so we obtain the following. 
+If you know the position of a column in the dataset, you can use the function `select()` to get to the vector. The `cyl` is at position 3 of the data, so we obtain the following. 
 
 ```{r}
-mtcars_tibble[,2]
-```   
+select(mtcars_tibble, 3)
+```
 
-Similarly, if we know the position of a row in the dataset, we can use a similar syntax. The following will return all the associated information for the second row of the dataset. 
+Similarly, if we know the position of a row in the dataset, we can use `slice()`. The following will return all the associated information for the second row of the dataset. 
 
 ```{r}
-mtcars_tibble[2,]
+slice(mtcars_tibble, 2)
 ```
 
 ### Extracting basic information from a tibble
@@ -325,7 +337,7 @@ library(tidyverse)
 Let us load `mtcars` as before and call it `mtcars_tibble` and then, as before, convert the row names to a column. Call the new attribute "model_name".
 
 ```{r}
-mtcars_tibble <- rownames_to_column(mtcars, "model_name")
+mtcars_tibble <- tibble(rownames_to_column(mtcars, "model_name"))
 mtcars_tibble
 ```
 
@@ -534,16 +546,16 @@ Suppose you are interested in exploring the relationship between the number of c
 
 When thinking about the problem in this way, we have effectively divided up all of the rows in the dataset into three groups, where the group a car model will belong to is determined by the number of cylinders it has. 
 
-`dplyr` accomplishes this using the function `group_by`. The syntax for `group_by` is simple: simply list the attributes with which you want to build groups. Let us give an example on how to use it. 
+`dplyr` accomplishes this using the function `group_by()`. The syntax for `group_by()` is simple: simply list the attributes with which you want to build groups. Let us give an example on how to use it. 
 
 ```{r}
 grouped_by_cl <- group_by(mtcars_tibble, cyl)
-grouped_by_cl
+slice_head(grouped_by_cl, n=2) # show 2 rows per group
 ```
 
-Unfortunately, the result is not that interesting. To make something out of this, we need to *summarize* some piece of information using these groups, e.g. the average `mpg` per group as is needed for our task. 
+We can spot two rows shown per each `cyl` group. `group_by()` alone is often not useful. To make something out of this, we need to *summarize* some piece of information using these groups, e.g. the average `mpg` per group as is needed for our task. 
 
-The summary function is called `summarize`. Let us amend our above grouping code to include the summary.  
+The summary function is called `summarize()`. Let us amend our above grouping code to include the summary.  
 
 ```{r message = FALSE}
 grouped_by_cl <- group_by(mtcars_tibble, cyl)
@@ -646,7 +658,7 @@ library(tidyverse)
 
 ### Pulling data from multiple sources
 
-The third principle of tidy data stated that an observational unit should form a table. However, often times the observational unit we are measuring will be split across multiple tables.  
+The fourth principle of tidy data stated that an observational unit should form a table. However, often times the observational unit we are measuring will be split across multiple tables.  
 
 Let us suppose we are measuring student scores in a classroom. The data is given to us in the form of two tables, one for exams and the other for assignments. We load the scores into our R environment with tibble. 
 
@@ -735,6 +747,24 @@ scores_long %>%
   pivot_wider(names_from = assessment, values_from = score, names_prefix = "assess_")
 ```
 
+There are two details to note when working with the pivot functions. 
+
+* `pivot_wider()` should not be thought of as an "undo" operation. Like `pivot_longer()` its primary purpose is also to make data tidy. Consider the following table and observe how each observation is scattered across two rows. The appropriate means to bring this data into tidiness is through an application of `pivot_wider()`.   
+
+```{r}
+head(table2)
+```
+
+* `pivot_longer()` and `pivot_wider()` are not perfectly symmetrical operations. That is, there are cases where applying `pivot_wider()`, followed by `pivot_longer()`, will not reproduce the exact same dataset. Consider such an application on the following dataset. Keep in mind the column names and how the column data types change at each pivot step.
+
+```{r}
+sales <- tibble(
+  year     = c(2020, 2021, 2020, 2021),
+  quarter  = c(1, 2, 1, 2),
+  sale     = c(70, 80, 62, 100)
+)
+```
+
 ## Applying Functions to Columns 
 
 Situations can arise where we need to apply some function to a column. In this section we learn how to apply functions to columns using a construct called the `map`. 
@@ -763,7 +793,7 @@ We have used several times by now the word "function". Here are some basic rules
 * _If the function is active in the present run of R, each time a code call the function, the code of the function runs._ This means that R suspends the execution of the present code and processes the execution of the code of the function. When it finishes running the code of the function, it returns to the execution of the one it has suspended.
 * _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return()` at the end so as to specify the value it has computed.
 * _If a function has the role of returning a value, the call itself represents the value it computes._ So you store the value the function computes in a variable using an assignment.
-* _A function may require some number of values to use in its calculation._ We call them *arguments*. When using a function that requires, the arguments must appear in the call.
+* _A function may require some number of values to use in its calculation._ We call them *arguments*. When using a function that requires arguments, the arguments must appear in the call.
 
 ### A very simple function
 
@@ -852,7 +882,7 @@ We can accomplish this using a suite of functions thoughtfully prepared by the p
 knitr::include_graphics('images/purr_logo.png')
 ```
 
-The main construct we will be using from `purrr` is something called the *map*. A map applies a function, say the `cutoff` function we wrote earlier, to each element of a vector or list. 
+The main construct we will be using from `purrr` is something called the *map*. A map applies a function, say the `passes_100()` function we wrote earlier, to each element of a vector or list. 
 
 `purrr` offers many flavors of map, depending on what the output vector should look like:  
 
@@ -979,17 +1009,6 @@ temps_clean
 
 ### Filling values by looking at neighbors  
 
-Alternatively, you can use `replace_na` to give an instruction how to handle NA appearing in specific columns. 
-
-The syntax for the instruction is simple. For each attribute you make a placement, state its name, add an equal sign, and then add the value you want to use for replacement. The replacement instructions must appear in a list, even if there is only one replacement instruction.
-
-Below, we fill any `NA` in `week1` with 0, in `week2` with 77, and in `week3` with 66.
-
-```{r}
-trouble_temps %>% 
-  replace_na(list(week1 = 89, week2 = 91, week3 = 88))
-```
-
 There is a way to fill missing values by dragging the non-`NA` value immediately below an NA to its position. In this manner, all `NA`'s after the first non-`NA` will acquire a value. This works when the bottom row does not have an `NA`. 
 
 Let us fill the values using this setting.
@@ -1022,6 +1041,17 @@ trouble_temps %>%
 ```
 
 Note that if your dataset contains a mixture of strings and numbers, then a straightforward application like this will not work. Instead, you will need to split the process into two steps: first taking care of missing values in the strings columns and then, afterwards, taking care of the missing values in the numeric columns.  
+
+Alternatively, you can use `replace_na` to give an instruction how to handle NA appearing in specific columns. 
+
+The syntax for the instruction is simple. For each attribute you make a placement, state its name, add an equal sign, and then add the value you want to use for replacement. The replacement instructions must appear in a list, even if there is only one replacement instruction.
+
+Below, we fill any `NA` in `week1` with 89, in `week2` with 91, and in `week3` with 88. 
+
+```{r}
+trouble_temps %>% 
+  replace_na(list(week1 = 89, week2 = 91, week3 = 88))
+```
 
 
 ## Case Study: A Computer Science Course
