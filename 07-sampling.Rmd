@@ -231,10 +231,10 @@ A critical requirement for the law of averages to be applicable is that the samp
 
 The careful reader may have noticed that in the calls to `slice_sample` in this section, the `replace` argument has been set to `TRUE`, i.e. the sampling is done with replacement. Why not sample without? 
 
-You may have already guessed at an answer: if we sample without replacement, we would not be able to make more than 6 draws since we would have run out of faces on the die to choose from! Here is what happens when trying to sample 10 times without replacement.  
+You may have already guessed at an answer: if we sample without replacement, we would not be able to make more than 6 draws since we would have run out of faces on the die to choose from! Here is what happens when trying to sample 6 times without replacement.  
 
 ```{r}
-slice_sample(die, n = 10, replace = FALSE)
+slice_sample(die, n = 6, replace = FALSE)
 ```
 
 We simply get back the 6-sided die! So sampling with replacement is a requirement for the dice roll example. But, there is another problem when sampling without replacement. Let's look at the true distribution again. 
