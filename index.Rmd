@@ -3,10 +3,15 @@ title: "Data Science for the World"
 author: "Jerry Bonnell and Mitsunori Ogihara"
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
-documentclass: book
+documentclass: krantz
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike
 link-citations: yes
+colorlinks: yes
+github-repo: jerrybonnell/ds4everyone
+lot: yes
+lof: yes
+graphics: yes
 output:
   bookdown::gitbook:
     df_print: paged
