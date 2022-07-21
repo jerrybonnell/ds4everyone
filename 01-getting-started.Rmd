@@ -330,8 +330,6 @@ If you navigate to the `notes` directory in the File Explorer (or wherever you c
 
 What RStudio did was take our R markdown file and convert it to a PDF using [LaTeX](https://en.wikipedia.org/wiki/LaTeX). Beneath each code block is the corresponding output, interspersed neatly with the surrounding prose -- all formatting taken care of for you :-) 
 
-When you are done with weekly labs and assignments, you will *knit* your notebook to a LaTeX PDF file and submit that to Blackboard. 
-
 ### Final touches 
 
 Before we end this tutorial, we need to set two RStudio settings. This will help to  avoid any heartache throughout the course. 
