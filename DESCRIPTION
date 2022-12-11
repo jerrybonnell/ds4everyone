@@ -2,7 +2,10 @@ Package: placeholder
 Type: Book
 Title: Does not matter.
 Version: 0.0.1
-Imports: 
+Authors@R: 
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Imports:
   tidyverse,
   svglite,
   pdftools,
@@ -14,6 +17,7 @@ Imports:
   nycflights13,
   htmlwidgets,
   tidytext,
+  mapview,
   tm,
   gridExtra,
   reshape2,
@@ -28,8 +32,8 @@ Suggests:
   downlit,
   jsonlite,
   xml2,
-Remotes: 
-  rstudio/bookdown, 
+Remotes:
+  rstudio/bookdown,
   rstudio/bslib,
   jerrybonnell/edsdata,
   ropensci/gutenbergr
