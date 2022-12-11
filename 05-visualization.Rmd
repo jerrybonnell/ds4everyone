@@ -1315,7 +1315,8 @@ In a *choropleth* map, regions on a map are colored according to some quantity a
 The tibble `pres_election` contains county presidential election returns from 2000-2020. Let us filter the data to the 2020 election returns in Florida and, to see how the election map has changed over time, also collect the returns from the 2008 election. 
 
 ```{r}
-fl_election_returns <- read_csv("../csc100-assets/supplement/data/pres_elections/countypres_2000-2020.csv") %>%
+library(edsdata)
+fl_election_returns <- election %>%
   filter(year %in% c(2008, 2020), state_po == "FL") 
 fl_election_returns
 ```
