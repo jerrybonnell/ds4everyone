@@ -81,7 +81,7 @@ If we draw the choice-inducing boolean value from random generation, say using `
 
 ### The `if` statement
 
-A program unit in a conditional execution is a *conditional statement*. A *conditional statement* is one that allows selection of an action from multiple possibilities. In R and in many other languages, we usually write a conditional statement as a multi-line statement. It is entirely possible to put everything in one, but such style is confusing and prone to errors. Therefore, it is strictly forbidden in CSC100 :-) 
+A program unit in a conditional execution is a *conditional statement*. A *conditional statement* is one that allows selection of an action from multiple possibilities. In R and in many other languages, we usually write a conditional statement as a multi-line statement. It is entirely possible to put everything in one, but such style is confusing and prone to errors.
 
 Conditional statements usually reside inside a function. This allows us to express alternative behavior depending on argument values. 
 
@@ -760,6 +760,10 @@ ggplot(results) +
 ```
 
 We observe that the number of grains cluster around 1023, as expected (see the orange dot). Note how in some simulations of the story the minister ends up receiving little to no grains at the end of the 10th day! 
+
+### Simulation round-up 
+
+table for map, replicate, and accumulate
 
 ## The Birthday Paradox
 

@@ -68,6 +68,7 @@ by_chapter <- moby_dick %>%
          chapter = cumsum(str_detect(text, regex('^CHAPTER '))))
 by_chapter
 ```
+
 There is a lot going on in this `mutate` call. Let us unpack the important parts:  
 
 * The `str_detect` checks if the pattern `CHAPTER` occurs at the beginning of the line, which returns `TRUE` if found and `FALSE` otherwise. This is done using the regular expression `^CHAPTER ` (note the white space at the end). To understand this expression, compare the following examples and try to explain why only the first example (a proper line signaling the start of a new chapter) yields a match. 
@@ -239,7 +240,8 @@ library(gutenbergr)
 We will study Herman Melville's works again in this section. However, unlike before, we will include many more texts from his oeuvre of prose. We will collect: *Moby Dick*, *Bartleby, the Scrivener: A Story of Wall-Street*, *White Jacket*, and *Typee: A Romance of the South Seas*. 
 
 ```{r message=FALSE}
-melville <- gutenberg_download(c(11231, 15, 10712, 1900), mirror = "http://mirrors.xmission.com/gutenberg/")
+melville <- gutenberg_download(c(11231, 15, 10712, 1900), 
+                               mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 We will tidy it up as before and filter the text for stopwords. We will also add one more step to the preprocessing where we extract words that are strictly alphabetical. This is accomplished with a `mutate` call using `str_extract` and the regular expression `[a-z]+`.  
@@ -355,7 +357,8 @@ Now, the plot. Note that the `factor` in the `y` aesthetic mapping allows us to 
 ```{r}
 ggplot(top_moby_words_other_texts) + 
   geom_bar(aes(x=proportion, 
-               y=factor(word, level=pull(top_moby, word)), fill=title), 
+               y=factor(word, level=pull(top_moby, word)), 
+               fill=title), 
            position="dodge",stat="identity") +
   labs(y="word")
 ```
@@ -380,7 +383,8 @@ library(topicmodels)
 We will continue with our running example of Herman Melville's *Moby Dick*. Let us load it in. 
 
 ```{r message=FALSE}
-melville <- gutenberg_download(15, mirror = "http://mirrors.xmission.com/gutenberg/")
+melville <- gutenberg_download(15, 
+                               mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 We will tidy the text as usual and, this time, partition the text into chapters. 
@@ -428,7 +432,7 @@ hawthorne <- gutenberg_works(title == "The Scarlet Letter") %>%
 hawthorne <- hawthorne %>%
   select(-gutenberg_id) %>%
   mutate(linenumber = row_number(),
-         chapter = cumsum(str_detect(text, regex('^[XIV]+\\. ')))) %>%
+         chapter = cumsum(str_detect(text, regex('^[XIV]+\\.')))) %>%
   filter(chapter > 0)
 ```
 
@@ -491,7 +495,7 @@ We are now ready to create the topic model. Ours is a three-topic model since we
 The best part about this step: we can create the model in just one line!  
 
 ```{r}
-lda_model <- LDA(chapters_dtm, k = 3, control = list(seed = 4111))
+lda_model <- LDA(chapters_dtm, k = 3, control = list(seed = 50))
 ```
 
 Note that the `k` argument given is the desired number of clusters. 

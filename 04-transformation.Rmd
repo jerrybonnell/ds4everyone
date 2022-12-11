@@ -107,7 +107,7 @@ When a dataset is expressed in this manner, we say that it is in *long* format b
 
 Observe how this dataset fulfills the four properties of tidy data. The fourth property is fulfilled because the observational unit we are measuring is a weekly cookie sale, and we are measuring three variables -- `week`, `type`, and `sales` -- per observational unit. These variables do not refer to measurements on a sale or bakery store; they refer to measurements on a given weekly cookie sale from a local Miami bakery in 2021. 
 
-Violations of the third property are peculiar and can be rare. A possible violating scenario could occur if the bakery decides to record sale *ranges*, e.g., in the case of making a forecast on future sales. 
+A possible scenario in violation the third property might look like the following: the bakery decides to record sale *ranges* instead of a single estimate, e.g., in the case of making a forecast on future sales. 
 
 ```{r echo=FALSE}
 forecast_sales <- tibble(
@@ -122,7 +122,7 @@ In the next section we turn to the main data structures in R we will use for per
 
 ## Working with Datasets 
 
-In this section we dive deeper into datasets and learn how to do basic tasks with datasets and query basic information from them.  
+In this section we dive deeper into datasets and learn how to do basic tasks with datasets and query information from them.  
 
 ### Prerequisites
 
@@ -288,7 +288,6 @@ tibble(x = seq(1,10,0.5),
 Usually data scientists need to load data from files. The package `readr` of `tidyverse` offers ways for that.With the package `readr` you can read from, among others, comma-separated files (CSV files) and tab-separated files (TSV files).
 
 To read files, we specify a string the location of the file and then use the function for reading the file, `read_csv` if it is a CSV file and `read_tab` if it is a TSV file. If you have a file that uses another delimiter, a more general `read_delim` function exists as well.  
-
 Here is an example of reading a CSV file from a URL available on the internet.
 
 ```{r message=FALSE, warning = FALSE}
@@ -324,7 +323,7 @@ write_csv(bloom, "bloom.csv")
 
 The past section showed two basic data structures -- data frames and tibbles -- that can be used for loading, creating, and saving datasets. We also saw how to query basic information from these structures. In this section we turn to the topic of data *transformation*, that is, actions we can apply to a dataset to transform it into a new, and hopefully more useful, dataset. Recall that data transformation is the essence of achieving tidy data. 
 
-The `dplyr` packages provides a suite of functions for providing such transformations. Put another way, `dplyr` provides a *grammar* of data manipulation where each function can be thought of as the *verbs* that act upon the subject, the dataset (in tibble form). In this section we will study the main `dplyr` verbs. 
+The `dplyr` packages provides a suite of functions for providing such transformations. Put another way, `dplyr` provides a *grammar* of data manipulation where each function can be thought of as the *verbs* that act upon the subject, the dataset (in tibble form). In this section we study the main `dplyr` verbs. 
 
 ### Prerequisites
 
@@ -343,7 +342,13 @@ mtcars_tibble
 
 ### A fast overview of the verbs
 
-The main important verbs from `dplyr` that we will cover are: 
+The main important verbs from `dplyr` that we will cover are shown in the following figure.
+
+```{r, echo=FALSE, fig.align="center", out.width='40%', fig.asp=1/2}
+knitr::include_graphics('images/dplyr_verbs.svg')
+```
+
+This section will cover the following:
 
 * `select`, for selecting or deselecting columns 
 * `filter`, for filtering rows 
@@ -354,9 +359,9 @@ The main important verbs from `dplyr` that we will cover are:
 * `mutate` and `transmute`, for adding new columns 
 * `group_by` and `summarize`, for grouping rows together and summarizing information about the group 
 
-We will also cover the `%>%` operator to coordinate multiple actions seamlessly. 
+We will also discuss the `%>%` operator to coordinate multiple actions seamlessly. 
 
-Be sure to bookmark the `dplyr` [cheatsheet](https://rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) which will come in handy. 
+Be sure to bookmark the `dplyr` [cheatsheet](https://rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) which will come in handy and useful for exploring more verbs available. 
 
 ### Selecting columns with `select`
 
@@ -475,12 +480,13 @@ Here we moved the column `am` to the front, just before `mpg`.
 
 ### Adding new columns using `mutate`
 
-The function `mutate` creates a new column using some function of the values of existing columns. Let us see an example before getting into the details.  
+The function `mutate` can be used for modification or creation of a new column using some function of the values of existing columns. Let us see an example before getting into the details.  
 
 Suppose we are interested in calculating the ratio between the numbers of cylinders and forward gears for each car model. We can do this by appending a new column with the calculated ratios using `mutate`. 
 
 ```{r}
-mtcars_with_ratio <- mutate(mtcars_tibble, cyl_gear_ratio = cyl / gear)
+mtcars_with_ratio <- mutate(mtcars_tibble, 
+                            cyl_gear_ratio = cyl / gear)
 mtcars_with_ratio
 ```
 
@@ -527,6 +533,19 @@ How many different makes are there? We can use `unique` for removing duplicates 
 
 ```{r}
 unique(pull(mtcars_mutated, make))
+```
+
+When an existing column is given in the specification, no new column is created and the existing column is modified instead. For instance, the following rounds `wt` to the nearest integer value. 
+
+```{r}
+mutate(mtcars_tibble, wt = round(wt))
+```
+
+We can also modify multiple columns in a single pass, say, `wt`, `mpg`, and `qsec` should all be rounded to the nearest integer. We can accomplish this using a combination of `mutate` with the helper `dplyr` verb `across`.
+
+```{r}
+mutate(mtcars_tibble, 
+       across(c(mpg, wt, qsec), round))
 ```
 
 ### The function `transmute`
@@ -578,7 +597,7 @@ These functions come handy when you want to examine data by grouping rows and su
  
 <!-- Generally speaking, the higher an engine’s displacement the more power it can create, while the lower the displacement the less fuel it can consume. --> 
  
-### Coordinating multiple actions using the pipe  
+### Coordinating multiple actions using `%>%`
 
 Let us revise a bit our previous study. Curious about the joint effect of the numbers of cylinders and the transmission of the car, you decide to group by both `cyl` and `am`. After summarizing the groups, you calculate the counts in each group and the average `mpg`. Finally, after the summary is done, you would like to remove any groups from the summary that have less than 2 cars. 
 
@@ -602,7 +621,7 @@ avg_mpg_counts <- filter(summarized, count > 2)
 avg_mpg_counts
 ```
 
-Observe how the code we have just written is quite cumbersome. It introduces several intermediate products that we do not need, namely, the objects `grouped_by_cl` and `summarized`. It can also be difficult to come up with good names for objects. 
+Observe how the code we have just written is quite cumbersome. It introduces several intermediate products that we do not need, namely, the names `grouped_by_cl` and `summarized`. It can also be difficult to come up with descriptive names.  
 
 Conveniently, there is a construct called the "pipe" which allows us to pass the results from one function as input to another. The way to use piping is simple.
 
@@ -644,9 +663,9 @@ Once you develop enough familiarity with these functions, try making small chang
 
 You may also wish to look at some of the datasets available to you when running the command `data()`. 
 
-## Advanced Transformations 
+## Tidy Transformations 
 
-In this section we look to two more transformation techniques that are essential for achieving tidy data. 
+In this section we turn to transformation techniques that are essential for achieving tidy data. 
 
 ### Prerequisites
 
@@ -655,6 +674,46 @@ As before, let us load `tidyverse`.
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
+
+### Uniting and separating columns 
+
+The third tidy data guideline states that each value must have its own cell. Sometimes this value may be split across multiple columns or merged in a single column. 
+
+In the case of the Miami bakery example, we saw that when the bakery records sale forecasts, the lower and upper bounds of the range are fused in a single cell. This makes extraction and analysis of these values difficult, especially when R treats the `forecast` column as a character sequence. 
+
+```{r}
+forecast_sales <- tibble(
+  week          = c(1, 2, 3),
+  forecast = c("200-300", "300-400", "200-500")
+)
+forecast_sales
+```
+
+A solution would be to *split* `forecast` into multiple columns, one giving the lower bound and the other the upper bound. The `tidyr` function `separate` accomplishes the work. 
+
+```{r}
+forecast_sales %>%
+  separate(forecast, c("low", "high"), "-", convert = TRUE)
+```
+
+We separate the columns based on the presence of the `"-"` character. The `convert` argument is set so that the lower and upper values can be treated as proper integers. 
+
+The tibble `table5` displays the number of TB cases documented by the World Health Organization in Afghanistan, Brazil, and China between 1999 and 2000. The "year", however, is a single value that has been split across a `century` and `year` column.
+
+```{r}
+table5
+```
+
+The `unite` function can be used to merge a split value. Its functionality is similar to `separate`.  
+
+```{r}
+table5 %>%
+  unite("year", century:year, sep="")
+```
+
+We specify an empty string (`""`) in the `sep` argument to indicate no character delimiter should be used when merging the values. 
+
+Note also that the `rate` column needs tidying. We leave the tidying of this column as an exercise for the reader. 
 
 ### Pulling data from multiple sources
 
@@ -791,7 +850,7 @@ We have used several times by now the word "function". Here are some basic rules
 
 * _A function is a block of code with a name that allows execution from other codes._ This mean that you can take any part of a working (i.e., all parentheses and brackets in the part have matching counterparts in the same part) and specify it to be a function.
 * _If the function is active in the present run of R, each time a code call the function, the code of the function runs._ This means that R suspends the execution of the present code and processes the execution of the code of the function. When it finishes running the code of the function, it returns to the execution of the one it has suspended.
-* _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return()` at the end so as to specify the value it has computed.
+* _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return` at the end so as to specify the value it has computed. Note that the use of `return` is __optional__ and, by default, R always returns the last line of computation performed in the function. 
 * _If a function has the role of returning a value, the call itself represents the value it computes._ So you store the value the function computes in a variable using an assignment.
 * _A function may require some number of values to use in its calculation._ We call them *arguments*. When using a function that requires arguments, the arguments must appear in the call.
 
@@ -837,9 +896,9 @@ Remember the `c()` function? The function creates a vector with 19 names as stri
 
 ```{r}
 my_family <- function() {
-  return(c("Amy", "Billie", "Casey", "Debbie", "Eddie", "Freddie", "Gary",
-           "Hary", "Ivy", "Jackie", "Lily", "Mikey", "Nellie", "Odie",
-           "Paulie", "Quincy", "Ruby", "Stacey", "Tiffany"))
+  c("Amy", "Billie", "Casey", "Debbie", "Eddie", "Freddie", "Gary",
+    "Hary", "Ivy", "Jackie", "Lily", "Mikey", "Nellie", "Odie",
+    "Paulie", "Quincy", "Ruby", "Stacey", "Tiffany")
 }
 ```
 
@@ -856,11 +915,11 @@ Now whenever you need the 19-name list, you can either call the function or refe
 
 To write a function that takes arguments, you determine how many arguments you need and determine the names you want to use for the arguments during the execution of the code for the function.
 
-The `function()` declaration now has the names of the arguments. You put them in the order you want to use with a comma in between. Below, we define a function that computes the max between 100 and the argument received. The function returns the argument so long as it is larger than 100. 
+The `function` declaration now has the names of the arguments. You put them in the order you want to use with a comma in between. Below, we define a function that computes the max between 100 and the argument received. The function returns the argument so long as it is larger than 100. 
 
 ```{r}
 passes_100 <- function(x) {
-  return(max(100, x))
+  max(100, x)
 }
 ```
 
@@ -872,61 +931,16 @@ passes_100(2021)  # a value larger than 100
 ```
 
 
-### Maps and functions 
+### Applying functions using `mutate`
 
-Let us now return to the discussion of how we can *apply* functions to a column. The meaning of apply is particular. What we mean by this is that we wish to run some function (which can receive an argument and return a value) to each row of a column. This can be especially useful if some column is given in the wrong units or if we wish to cut off the values in a column at some point.  
-
-We can accomplish this using a suite of functions thoughtfully prepared by the package [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf). 
-
-```{r, echo=FALSE, fig.align="center", out.width='20%'}
-knitr::include_graphics('images/purr_logo.png')
-```
-
-The main construct we will be using from `purrr` is something called the *map*. A map applies a function, say the `passes_100()` function we wrote earlier, to each element of a vector or list. 
-
-`purrr` offers many flavors of map, depending on what the output vector should look like:  
-
-* `map_lgl()` outputs a logical vector.
-* `map_int()` outputs an integer vector.
-* `map_dbl()` outputs a double vector.
-* `map_chr()` outputs a character vector.
-* `map()` outputs a list.
-
-Here are some more examples of using map. Let us apply the `passes_100` to an input vector containing a sequence of values from 95 to 105. 
-
-```{r}
-map_dbl(95:105, passes_100)
-```
-
-Observe how the first five values are less than `100` and, therefore, a run of `100`'s composes the first few values of the returned vector.  
-
-We can also define functions and pass it in on the spot. We call these *anonymous functions*. The following is an *identity function*: it simply outputs what it takes in. 
-
-```{r}
-map_int(1:5, function(x) x)
-```
-
-> A catch here is that the code after the comma, i.e., `function(x) x` specifies *in place* the function to apply to each element of the series preceding the comma `1:5`. The function in question `function(x) x` specifies that the function will receive a value named `x` and *returns* the value of `x` without modification. Thus we call it an identity function. The external function `map_int` states that the result of applying the identify function thus specified with `function(x) x` to each element of the sequence `1:5` will be presented as an integer.
-
-The next one is perhaps more useful than the identify function. It computes the square of each element, i.e., $x^2$. 
-
-```{r}
-map_dbl(1:5, function(x) x ** 2)
-```
-
-> __Why use map_dbl() instead of map_int()?__ By default, R treats numbers as doubles. While `1:5` is a vector of integers, each element is subject to the expression `x ** 2`, where `x` is an integer and `2` is a double. To make this operation compatible, R will "promote" `x` to a double, making the output of this expression a double as well.  
-
-The next one will always return a vector of 5's, regardless of the input. Can you see why? Do you also see why there are six elements, unlike five elements in the previous examples?
-
-```{r}
-map_dbl(1:6, function(x) 5)
-```
-
-By now we have seen enough examples of how to use `map` with a vector. Let us finally learn how to apply `map` to a column of a tibble. 
-
-### Applying a function to a tibble 
+Let us now return to the discussion of how we can *apply* functions to a column. The meaning of apply is particular. What we mean by this is that we wish to run some function (which can receive an argument and return a value) to each row of a column. This can be useful if, say, some column is given in the wrong units or if the values in a column should be "cut off" at some threshold point.  
 
 Recall the tidied tibble `mtcars_tibble`. 
+
+```{r echo=FALSE}
+mtcars_tibble <- mtcars %>%
+  as_tibble()
+```
 
 ```{r}
 mtcars_tibble
@@ -937,29 +951,119 @@ We can spot two areas that require transformation:
 1. Convert the `wt` column from pounds to kilograms.  
 2. Cut off the values in `displ` so that no car model has a value larger than `400`.
 
-We can address the first one simply using an anonymous function that multiples each value by the conversion factor for kilograms. Let us test it out first with a simple vector.
+We can address the first one by writing a function that multiples each value in the argument received by the conversion factor for kilograms. Let us test it out first with a simple vector.
 
 ```{r}
-map_dbl(100:105, function(x) x * 0.454)
+wt_conversion <- function(x) {
+  x * 0.454
+}
+
+wt_conversion(100:105)
 ```
 
-To incorporate this into a tibble, we encase our `map` inside a call to `mutate`, which modifies the column `wt`. 
+To incorporate this into the tibble, we make a call to `mutate` using our function `wt_conversion`, which *modifies* the column `wt`. 
 
 ```{r}
 mtcars_transformed <- mtcars_tibble %>%
-  mutate(wt = map_dbl(wt, function(x) x * 0.454))
+  mutate(wt = wt_conversion(wt))
 mtcars_transformed
 ```
 
-We have successfully applied a function a column in a tibble! Let us turn to the second task. For this, we define a function that computes the minimum between the argument and the value `400`. 
+We have successfully applied a function we wrote to a column in a tibble! 
+
+The second task is peculiar. As with the first example, we can define a function that computes the minimum between the argument and the value `400`. 
 
 ```{r}
 cutoff_400 <- function(x) {
-  return(min(400, x))
+  min(400, x)
 }
 ```
 
-We can apply the function to the column `disp` using a similar approach as before.
+We could then apply the function to the column `disp` using a similar approach.
+
+```{r}
+mtcars_transformed <- mtcars_tibble %>%
+  mutate(disp = cutoff_400(disp))
+mtcars_transformed
+```
+
+That didn't work out so well. The new `disp` column contains the same value `71.1` for every row in the tibble! Did `dplyr` make a mistake? Is the function we wrote just totally wrong? 
+
+The error, actually, is not in anything we wrote *per se*, but in how R *processes* the function `cutoff_400` during the mutate call. We expect to pass one number to the function `cutoff_400` so that we can compare it against 400, but our function instead receives a *vector* of values when used inside a `mutate` verb. That is, the entire `disp` column of values is passed as an argument to the function `cutoff_400`.   
+
+While this was no problem for the `wt_conversion` function, `cutoff_400` is not capable of handling a *vector* as an argument *and* returning a *vector* back. 
+
+To clarify the point, compare the result of these two functions after receiving the vector `395:410`. 
+
+```{r}
+wt_conversion(399:405)
+```
+
+```{r}
+cutoff_400(398:405)
+```
+
+`wt_conversion` performs an element-wise operation to each element of the sequence and, therefore, the first example works as intended. In the second, `cutoff_400` computes the minimum of the vector (398) and returns the result of just that computation; no element-wise comparison is made. 
+
+To make `cutoff_400` work as intended, we turn to a new programming construct called the *map*, prepared by the package [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf). 
+
+### `purrr` maps
+
+The main construct we will be using from `purrr` is called the *map*. A map applies a function, say the `cutoff_400` function we just wrote, to __each element__ of a vector or list. 
+
+```{r, echo=FALSE, fig.align="center", out.width='20%'}
+knitr::include_graphics('images/purr_logo.png')
+```
+
+`purrr` offers many flavors of map, depending on what the output vector should look like:  
+
+* `map_lgl()` outputs a logical vector.
+* `map_int()` outputs an integer vector.
+* `map_dbl()` outputs a double vector.
+* `map_chr()` outputs a character vector.
+* `map()` outputs a list.
+
+Here are some more examples of using map. Let us apply the `wt_conversion` to an input vector containing a sequence of values from 95 to 105. 
+
+```{r}
+map_dbl(399:405, wt_conversion)
+```
+
+Observe how this resulting vector is the same one we obtained when applying `wt_conversion` without a map. 
+
+We can also define functions and pass it in on the spot. We call these *anonymous functions*. The following is an *identity function*: it simply outputs what it takes in. 
+
+```{r}
+map_int(1:5, function(x) x)
+```
+
+> A catch here is that the code after the comma, i.e., `function(x) x` specifies *in place* the function to apply to each element of the series preceding the comma `1:5`. The function in question `function(x) x` specifies that the function will receive a value named `x` and *returns* the value of `x` without modification. Thus we call it an identity function. The external function `map_int` states that the result of applying the identify function thus specified with `function(x) x` to each element of the sequence `1:5` will be presented as an integer.
+
+We could write the above anonymous function more compactly using a `purrr`-style "formula". 
+
+```{r}
+map_int(1:5, ~ .x)
+```
+
+The next one is perhaps more useful than the identify function. It computes the square of each element, i.e., $x^2$. 
+
+```{r}
+map_dbl(1:5, ~ .x ** 2)
+```
+
+> __Why use map_dbl() instead of map_int()?__ By default, R treats numbers as doubles. While `1:5` is a vector of integers, each element is subject to the expression `x ** 2`, where `x` is an integer and `2` is a double. To make this operation compatible, R will "promote" `x` to a double, making the output of this expression a double as well.  
+
+The next one will always return a vector of 5's, regardless of the input. Can you see why? Do you also see why there are six elements, unlike five elements in the previous examples?
+
+```{r}
+map_dbl(1:6, ~ 5)
+```
+
+### `purrr` with `mutate`
+
+By now we have seen enough examples of how to use `map` with a vector. Let us return to the issue of applying the function `cutoff_400` to the `disp` variable. 
+
+To incorporate this into a tibble, we encase our `map` inside a call to `mutate`, which modifies the column `disp`. 
 
 ```{r}
 mtcars_transformed <- mtcars_tibble %>%
@@ -967,7 +1071,15 @@ mtcars_transformed <- mtcars_tibble %>%
 mtcars_transformed
 ```
 
-We can inspect visually to see if any values in `disp` are larger than 400 -- they shouldn't be! 
+We can inspect visually to see if there are any repeating values in `disp` or if any of those values turn out larger than 400 -- there shouldn't be! 
+
+The following graphic illustrates the effect of the `purrr` map inside the mutate call.  
+
+```{r, echo=FALSE, fig.align="center", out.width='40%', fig.asp=1/2}
+knitr::include_graphics('images/csc100-Page-2.drawio.svg')
+```
+
+Note that the use of map allows a vector to be returned by the `cutoff_400` function, which can then be used as a column in the `mutate` call. 
 
 __Pop quiz:__ In our two examples of applying a function to `wt` and `disp`, the new tibble (stored in `mtcars_transformed`) lost information about the values of `wt` and `disp` before the transformation. How could we amend our examples to still preserve the old information in case we would like to make comparisons between the before and after?  
 
@@ -1054,9 +1166,9 @@ trouble_temps %>%
 ```
 
 
-## Case Study: A Computer Science Course
+## Case Study I: A Computer Science Course
 
-Before we end this chapter, we present a worked example of a real-life dataset and apply the transformations that are necessary to bring it into tidy data. The goal of this exercise is to demonstrate how all the transformations we have learned in this chapter are not tools meant to be used in isolation, but work best when used together to fulfill a complex goal.  
+In this section, we present a worked example of a real-life dataset and apply the transformations that are necessary to bring it into tidy data. The goal of this exercise is to demonstrate how the transformations we have learned in this chapter are not tools meant to be used in isolation, but work best when used together to fulfill a complex goal.  
 
 ### Prerequisites
 
@@ -1235,7 +1347,209 @@ csc_summary %>%
   filter(mean_overall_score < 70)
 ```
 
-You can imagine how such an analysis could be useful when used mid-semester -- we should check in with those students to see what is going on. 
+You can imagine how such an analysis could be useful when used mid-semester -- we should check in with those students to see what is going on.
+
+## Case Study II: Department of Education College Scorecard
+
+Before closing the chapter, we present one more application of data transformation techniques in a real-world setting. This time, we turn to a much larger dataset and appeal to the [annual College Scorecard](https://collegescorecard.ed.gov) published by the Department of Education on recent institution-level data. We will use this dataset to explore the average annual cost of attending public and private institutions in the Miami area. 
+
+### Prerequisites
+
+As before, let us load `tidyverse`. 
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+The full data is available for download [here](https://collegescorecard.ed.gov/data), however, we have already done some basic preprocessing of this dataset by including only Florida-based institutions. This tibble is available in `scorecard_fl`. Let us have a look at the data:
+
+```{r echo=FALSE}
+scorecard_fl <- read_csv("data/Most-Recent-Cohorts-Institution-FL.csv") 
+``` 
+
+```{r}
+scorecard_fl
+```
+
+The information is divided into small specific categories. Have a look at the [accompanying glossary](https://collegescorecard.ed.gov/data/glossary/) and [data dictionary](https://collegescorecard.ed.gov/data/documentation/) to learn more about the variables in the dataset. You can also download it to learn about what each variable represents and the corresponding data types.
+
+Indeed, the number of variables present in this dataset is very large (2,989) and certainly beyond any inspection we could accomplish by hand.
+
+### Net Tuition of Four-Year Institutions in Miami
+
+We will concentrate specifically on variables that correspond to the average *net price* for students who receive some kind of financial aid for one year of academic study. Therefore, we will collect the following from the large number of variables present in the dataset: 
+
+* Institution name (`INSTNM`)
+* City of location (`CITY`)
+* State of location (`STABBR`)
+* Zipcode (`ZIP`)
+* Number of undergraduate students (`UGDS`)
+* Four-year net tuition in the case of a public institution (`NPT4_PUB`)
+* Four-year net tuition in the case of a private institution (`NPT4_PRIV`)
+
+Note that the last two variables have different names, but they both represent the net tuition. We drill down the tibble to contain just these variables: 
+
+```{r}
+scorecard_relevant <- scorecard_fl %>%
+  select(INSTNM:NPT4_PRIV) 
+scorecard_relevant
+```
+
+For the purposes of this analysis, we would like to perform the following to bring this data into tidy format:
+
+* Form a single representation of the net tuition where the distinction between a "public" tuition and a "private" tuition does not matter. At the moment, this variable is split across two columns. 
+* Standardize the ZIP codes so that it contains only the first five digit specification and not the ZIP+4 specification. 
+* Filter down the institutions to those that are based in Miami. 
+* Create a dedicated column that expresses whether the institution is private or public. 
+
+### Handling missing values 
+
+We would like to focus only on those institutions that have a recorded four-year net tuition (public or private). We would expect, then, to be able to eliminate the observations that do not by keeping only those observations where a missing value is *not* present in one of the two net tuition variables (`NPT4_PUB` and `NPT4_PRIV`). 
+
+```{r}
+scorecard_relevant %>%
+  filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) 
+```
+
+It would seem all is well and that the data we have is indeed complete. However, a closer look at one of the institutions tells all: 
+
+```{r eval=FALSE}
+scorecard_relevant %>%
+  filter(INSTNM == "Florida Institute of Ultrasound Inc")
+```
+
+```{r echo=FALSE}
+scorecard_relevant %>%
+  filter(INSTNM == "Florida Institute of Ultrasound Inc") %>%
+  relocate(c(NPT4_PUB, NPT4_PRIV), .before = CITY)
+```
+
+The College Scorecard chooses to present missing values in a non-standard form using the special string `"NULL"`. While human users of this table will have no trouble understanding the meaning of this keyword, R is unable to distinguish `"NULL"` from any other string that may be present. Therefore, as far as our `dplyr` code is concerned, there are no "missing values" in this dataset.  
+
+We can remedy the problem by converting all instances of `"NULL"` to proper missing values so that these can be detected appropriately by our `dplyr` verbs. 
+
+```{r}
+scorecard_relevant <- scorecard_relevant %>%
+  mutate(across(everything(), ~ na_if(.x, "NULL")))
+```
+
+By running our prior code chunk again, the irrelevant institutions are now properly removed. 
+
+```{r}
+scorecard_relevant %>%
+  filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) 
+```
+
+We can combine our steps to form a strategy for handling missing values in this dataset. While we are at it, we will convert the net tuition columns to *double* columns as these express numerical quantities and not strings. 
+
+```{r}
+with_net_tuition <- scorecard_relevant %>%
+  mutate(across(everything(), ~ na_if(.x, "NULL"))) %>% 
+  filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) %>%
+  mutate(NPT4_PUB = as.double(NPT4_PUB),
+         NPT4_PRIV = as.double(NPT4_PRIV))
+with_net_tuition
+```
+
+### ZIP code information 
+
+We turn to cleaning the ZIP code information in the dataset. Let us examine some of these ZIP codes in `ZIP`: 
+
+```{r}
+with_net_tuition %>%
+  select(ZIP)
+```
+
+As the table snippet shows, some of the ZIP codes are given using the 5 digit specification (e.g., `32440`) and others using the ZIP+4 specification (e.g., `33063-3902`). 
+
+We can standardize the ZIP codes using functionality from `stringr`. The following extracts just the 5 digit specification from representations that may be present: 
+
+```{r}
+str_replace(c("33172-2209", "34474"), "\\-[:number:]+", "")
+```
+
+We replace the column `ZIP` with the cleaned zip code format.  
+
+```{r}
+with_net_tuition %>% 
+  mutate(ZIP5 = str_replace(ZIP, "\\-[:number:]+", "")) %>%
+  relocate(ZIP5, .before = CITY)
+```
+
+We add a step to this sequence where we zoom in on institutions that are Miami-based. We can accomplish this by filtering ZIP codes that begin with `"331"`.
+
+```{r}
+with_clean_zip <- with_net_tuition %>%
+  mutate(ZIP = str_replace(ZIP, "\\-[:number:]+", "")) %>%
+  relocate(ZIP, .before = CITY) %>%
+  filter(str_starts(ZIP, "331")) 
+with_clean_zip
+```
+
+### Uniting the tuition columns  
+
+Next, we unite the net tuition columns together into a single new column named `NPT4`. We can accomplish this work using the `tidyr` verb `unite`.
+
+```{r}
+with_clean_zip %>%
+  unite("NPT4", NPT4_PUB:NPT4_PRIV, na.rm = TRUE) 
+```
+
+However, before uniting we would like to form a new column named `ISPUB` that indicates whether a given institution is a public or private entity. Moreover, the tuition amounts are currently expressed as character sequences in R (observe the `chr` data type associated with this column) when these are actually integer quanities. We should convert the newly created `NPT4` to an integer column by using `as.integer`. 
+
+Thus, we have the following steps to bring the tuition amounts into a tidy format:   
+
+```{r}
+tuition_tidy <- with_clean_zip %>%
+  mutate(ISPUB = !(is.na(NPT4_PUB))) %>%
+  unite("NPT4", NPT4_PUB:NPT4_PRIV, na.rm = TRUE) %>%
+  mutate(NPT4 = as.integer(NPT4))
+tuition_tidy
+```
+
+
+### ZIP code versus net tuition 
+
+With our tibble in tidy format, we are ready to use it for data analysis. We are interested in learning more about the following:
+
+1. What is the average net tuition for public and private institutions in each zip code area? Which ZIP codes see the highest average net tuition?
+2. Are private institutions more expensive to attend in the Miami area? 
+3. Which institutions are below the average net tuition for that ZIP code area? 
+
+The first two points can be addressed using the following `dplyr` work. We group observations by ZIP code and type of institution, compute the mean net tuition for each group, and sort the table according to these values.
+
+```{r}
+tuition_tidy %>%
+  group_by(ZIP, ISPUB) %>%
+  summarize(NPT4_AVE = mean(NPT4)) %>%
+  ungroup() %>%
+  arrange(desc(NPT4_AVE)) 
+```
+
+Indeed, the top ranking ZIP code areas are dominated by private entities. We can also see that the most expensive area is 33146, where the authors' home institution resides.  
+
+```{r}
+tuition_tidy %>%
+  filter(ZIP == "33146")
+```
+
+For the third point, we can compute the difference of an institution's net tuition from the mean net tuition in that ZIP code area. We accomplish the work using a grouped mutate. 
+
+```{r}
+tuition_tidy %>%
+  group_by(ZIP) %>%
+  mutate(NPT4_avg = mean(NPT4),
+         tuition_diff = NPT4 - NPT4_avg) %>%
+  ungroup() %>%
+  arrange(tuition_diff) %>%
+  relocate(ISPUB, .before = ZIP)
+```
+
+We can see that a public institution, Miami Dade College, appears toward the top of this ranking. 
+
+Because ZIP codes correspond to geographic locations, a possibility for further study would be to overlay the net tuition dataset with spatial information. We could then plot a map of the South Florida and Miami areas and see if the plot reveals any "hot spots", i.e., areas with unusually high annual costs relative to neighboring ZIP codes. This would add a geographical context for our data points which could suggest new questions for data exploration.  
+
+Learning how to plot maps and generate visualizations of tibbles is the subject of the next chapter. 
 
 <!---
 In summary, to access the columns and the rows, here are the rules we should follow:

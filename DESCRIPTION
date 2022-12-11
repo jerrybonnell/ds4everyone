@@ -32,4 +32,5 @@ Suggests:
   xml2
 Remotes: 
   rstudio/bookdown, 
-  rstudio/bslib
+  rstudio/bslib,
+  jerrybonnell/edsdata
