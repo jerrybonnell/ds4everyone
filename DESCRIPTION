@@ -29,7 +29,7 @@ Suggests:
   jsonlite,
   xml2,
 Config/Needs/website: 
-    ropensci/gutenbergr
+  ropensci/gutenbergr
 Remotes: 
   rstudio/bookdown, 
   rstudio/bslib,
