@@ -2,9 +2,9 @@ Package: placeholder
 Type: Book
 Title: Does not matter.
 Version: 0.0.1
-Depends: 
-    R (>= 3.1.0)
 Imports: 
+  tidyverse,
+  svglite,
   pdftools,
   kableExtra,
   readtext,
@@ -13,7 +13,6 @@ Imports:
   faraway,
   nycflights13,
   htmlwidgets,
-  gutenbergr,
   tidytext,
   tm,
   reshape2,
@@ -22,14 +21,14 @@ Imports:
   datasauRus,
   gapminder,
   ggplot2,
-  tidyverse,
-  svglite
 Suggests:
   bookdown,
   bslib,
   downlit,
   jsonlite,
-  xml2
+  xml2,
+Config/Needs/website: 
+    ropensci/gutenbergr
 Remotes: 
   rstudio/bookdown, 
   rstudio/bslib,
