@@ -28,9 +28,8 @@ Suggests:
   downlit,
   jsonlite,
   xml2,
-Config/Needs/website: 
-  ropensci/gutenbergr
 Remotes: 
   rstudio/bookdown, 
   rstudio/bslib,
-  jerrybonnell/edsdata
+  jerrybonnell/edsdata,
+  ropensci/gutenbergr

@@ -956,6 +956,29 @@
       "Hash": "36b4265fb818f6a342bed217549cd896",
       "Requirements": []
     },
+    "gutenbergr": {
+      "Package": "gutenbergr",
+      "Version": "0.2.1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "gutenbergr",
+      "RemoteUsername": "ropensci",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "063e1304b4f8fdd833c6a7b22557c45edce00caf",
+      "Hash": "a63b59524029b127588ee9ffce8010cf",
+      "Requirements": [
+        "cli",
+        "dplyr",
+        "glue",
+        "lazyeval",
+        "magrittr",
+        "purrr",
+        "readr",
+        "stringr",
+        "urltools"
+      ]
+    },
     "hardhat": {
       "Package": "hardhat",
       "Version": "1.2.0",
@@ -2695,6 +2718,16 @@
         "tm"
       ]
     },
+    "triebeard": {
+      "Package": "triebeard",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "847a9d113b78baca4a9a8639609ea228",
+      "Requirements": [
+        "Rcpp"
+      ]
+    },
     "tune": {
       "Package": "tune",
       "Version": "1.0.1",
@@ -2744,6 +2777,17 @@
       "Hash": "6c374b265ba437f8d384ec7a313edd96",
       "Requirements": [
         "Rcpp"
+      ]
+    },
+    "urltools": {
+      "Package": "urltools",
+      "Version": "1.7.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "e86a704261a105f4703f653e05defa3e",
+      "Requirements": [
+        "Rcpp",
+        "triebeard"
       ]
     },
     "utf8": {
