@@ -18,6 +18,7 @@ Imports:
   htmlwidgets,
   tidytext,
   mapview,
+  maps,
   tm,
   gridExtra,
   reshape2,
