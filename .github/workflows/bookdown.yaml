@@ -9,7 +9,7 @@ name: bookdown
 
 jobs:
   build:
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -29,6 +29,10 @@ jobs:
         run: |
           echo "::set-output name=version::$(Rscript -e 'cat(as.character(getRversion()))')"
         shell: bash
+        
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libgdal-dev
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
