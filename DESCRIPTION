@@ -15,6 +15,7 @@ Imports:
   htmlwidgets,
   tidytext,
   tm,
+  gridExtra,
   reshape2,
   quanteda,
   topicmodels,
