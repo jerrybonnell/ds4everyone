@@ -1,5 +1,5 @@
 --- 
-title: "Data Science for the World"
+title: "Exploring Data Science with R and the Tidyverse: A Concise Introduction"
 author: "Jerry Bonnell and Mitsunori Ogihara"
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
@@ -15,12 +15,14 @@ graphics: yes
 output:
   bookdown::gitbook:
     df_print: paged
-description: "This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook."
+description: "Online website for the textbook Exploring Data Science with R and the Tidyverse: A Concise Introduction"
 ---
 
 # Welcome {-}
 
-This is the textbook for the course *Data Science for the World* (CSC100) taught at the University of Miami.
+This is the website for the first edition of "Exploring Data Science with R and the Tidyverse: A Concise Introduction", published TBA by CRC Press. 
+
+This textbook was used to teach the courses *Data Science for the World* (CSC100) and *Introduction to Data Science in R* (CSC200) at the University of Miami in Fall 2021 and Fall 2022.
 
 __Colophon__
 
@@ -28,7 +30,7 @@ This book was written in [bookdown](http://bookdown.org/) inside [RStudio](http:
 
 __License__
 
-<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://ds4world.cs.miami.edu">Data Science for the World</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="http://cs.miami.edu/~ogihara">Jerry Bonnell and Mitsunori Ogihara</a> is licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-NC-ND 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nd.svg?ref=chooser-v1"></a></p>
+<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"> This website is (and will always be) free to use, and is licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-NC-ND 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nd.svg?ref=chooser-v1"></a></p>
 
  
 

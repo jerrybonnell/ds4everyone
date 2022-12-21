@@ -27,21 +27,21 @@ What does data science look like? Here is a short list of some examples, followe
 * Diagnosing pulmonary diseases based on patient X ray images (medicine)
 * Identifying students that are at-risk (education)
 
-The prominence of data science comes from the fact that the means for collecting, sharing and analyzing data have become widely accessible thanks to the rise of computers. In many disciplines, research by way of data science has received a formidable status. It is thus important for new generations of professionals (educators, scientists, engineers, doctors, etc.) to understand data science fundamentals and know how to start explorations using data science. The objective of this course is to introduce the basics of data science and to teach data science tools and concepts that have immediate practical value to the students' field of interest.  
+The prominence of data science comes from the fact that the means for collecting, sharing and analyzing data have become widely accessible thanks to the rise of computers. In many disciplines, research by way of data science has received a formidable status. It is thus important for new generations of professionals (educators, scientists, engineers, doctors, etc.) to understand data science fundamentals and know how to start explorations using data science. The objective of this text is to introduce the basics of data science and to teach data science tools and concepts that have immediate practical value to the students' field of interest.  
 
-One such tool that we will study is the programming language R. R has its roots in statistics and has a wide variety of tools that make it easy for R programmers to conduct statistical analysis and visualization. While R is certainly not the only programming language data scientists use -- you may have heard about Python or Julia -- we identify some key reasons for designating it as the language for this course. 
+One such tool that we will study is the programming language R. R has its roots in statistics and has a wide variety of tools that make it easy for R programmers to conduct statistical analysis and visualization. While R is certainly not the only programming language data scientists use -- you may have heard about Python or Julia -- we identify some key reasons for designating it as the language for this textbook. 
 
 * The syntax (i.e., the rules for writing code in a programming language) is easier to digest and understand for newcomers to programming. 
 * R is not just a language, but an interactive environment for doing data science. This makes R much more flexible than many other programming languages, and helps focus on specific parts of the data science process. 
 * R allows the use of "notebooks" that allow programmers to interleave code with prose in an intuitive manner. This is a great way for data scientists to explain and share their work with peers. 
 
-After completing the course, students will be able to keep running and modifying their notebooks with new data sources and ideas.
+After completing the text, students will be able to keep running and modifying their notebooks with new data sources and ideas.
 
-## Enter the `tidyverse`
+## Package Installation
 
 The bare-bones version of R, sometimes called *base* R, is complete but requires a bit more effort to write code for data analysis. People have developed code in R for serving certain purposes and have shared it as *packages*. Using packages is key to successful application of R; you can load a package someone else has written into your R programming environment and use it for your coding.
 
-A nonprofit organization promoting R, [CRAN](https://cran.r-project.org/) (the **c**omprehensive **R** **a**rchive **n**etwork), maintains packages researchers have developed. The majority of the packages we will be studying in this course are part of the *tidyverse*, which is actually a collection of packages that are useful for data analysis and visualization; they are designed to work together with ease.  
+A nonprofit organization promoting R, [CRAN](https://cran.r-project.org/) (the **c**omprehensive **R** **a**rchive **n**etwork), maintains packages researchers have developed. The majority of the packages we will be studying in this text are part of the *tidyverse*, which is actually a collection of packages that are useful for data analysis and visualization; they are designed to work together with ease.  
 
 The tidyverse can be installed with just a single line of code. 
 
@@ -51,11 +51,25 @@ install.packages("tidyverse")
 
 Type the above in the console, and press "Enter" to run it. R will download the packages from CRAN and install them on to your computer. 
 
-Let us see an example of how to plot some data using the `tidyverse`. 
+Sharing code through CRAN is the best way to make your package discoverable by the R community and give your package a "stamp of authenticity." However, publishing to CRAN can be a frustrating (and sometimes long) process. To make package development easier, authors can first release their R package as a [GitHub](https://github.com/) repository. Users can then download and install the package to their system using a package called `devtools`. 
+
+Many of the book's datasets are made available through a package called `edsdata` which, at the time of this writing, is available only as a GitHub repository. The package can be installed using `devtools`. First, make sure you have `devtools` installed.
+
+```{r eval=FALSE}
+install.packages("devtools")
+```
+
+The `edsdata` package can then be installed using `devtools` as follows:
+
+```{r eval=FALSE}
+devtools::install_github("jerrybonnell/edsdata")
+```
+
+We will see examples that use the `edsdata` package later in the text. For now, let us see an example of how to plot some data using code from the `tidyverse`. 
 
 ### The world's telephones
 
-R ships with a number of off-the-shelf data sets you can play with. One of them is `WordPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
+Base R ships with a number of off-the-shelf data sets you can play with. One of them is `WordPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
 
 The analysis begins by loading the package into your programming environment.
 
@@ -63,7 +77,7 @@ The analysis begins by loading the package into your programming environment.
 library(tidyverse)
 ```
 
-This dataset is a 7x7 table of numbers where the rows correspond to years and the columns correspond to seven geographical areas: North America, Europe, Asia, South America, Oceania, Africa, and Middle America (meaning Central America).
+This dataset is a 7x7 table of numbers where the rows correspond to years and the columns correspond to seven geographical regions: North America, Europe, Asia, South America, Oceania, Africa, and Middle America (meaning Central America).
 
 We can inspect the table contents by typing its name into the console. 
 
@@ -72,7 +86,7 @@ WorldPhones
 ```
 
 ```{r echo = FALSE}
-as.data.frame(WorldPhones)
+as_tibble(WorldPhones)
 ```
 
 Run your eye down the table and observe that the number of telephones in each region increases, some by much more than others.  
@@ -81,9 +95,9 @@ Suppose our goal is to plot the trend in the seven regions over the years. To ac
 
 ```{r}
 transformed <- WorldPhones %>%
-  as.data.frame() %>%
+  as_tibble() %>%
   rownames_to_column("Year") %>% 
-  pivot_longer(cols = 2:8, names_to = "Area", values_to = "Count")
+  pivot_longer(cols = 2:8, names_to = "Region", values_to = "Count")
 ```
 
 Here is how the new dataset looks like. We see that there are seven rows for each year and the regions and their counts appear vertically as a pair of columns.
@@ -92,29 +106,29 @@ Here is how the new dataset looks like. We see that there are seven rows for eac
 transformed
 ```
 
-Don't worry if the code above seems overwhelming. We will go over each piece in great detail during the course. For now, just pay attention to what the dataset looks like after the transformation, and how it differs from the original. 
+Don't worry if the code above seems overwhelming. We will go over each piece in great detail in this text. For now, just pay attention to what the dataset looks like after the transformation, and how it differs from the original. 
 
 We can now plot the number of telephones with the year as the horizontal axis and the count as the vertical axis. We assign a different color to each of the seven regions.
 
 ```{r}
 ggplot(transformed, aes(x = Year, y = Count)) +
-  geom_point(aes(color = Area))
+  geom_point(aes(color = Region))
 ```
 
-We call this a *scatter plot*, which we will see later in the course. This scatter plot tells us that the numbers steadily increased in North America, Europe, and Asia.
+We call this a *scatter plot*, which we will see later in the text. This scatter plot tells us that the numbers steadily increased in North America, Europe, and Asia.
 
 We can also plot the changes as bars where color denotes a certain region.
 
 ```{r}
 ggplot(transformed) +
-  geom_bar(aes(x = Year, y = Count, fill = as.factor(Area)),
+  geom_bar(aes(x = Year, y = Count, fill = as.factor(Region)),
            stat = "identity", position = "fill") +
-  labs(fill = "Area")
+  labs(fill = "Region")
 ```
 
-We call this one a *stacked bar chart*, which we will also see later. Every plot tells a different story. This one signals to us how the *proportion* of telephones changes across each region.     
+We call this one a *stacked bar chart*, which we will also see later. Every plot tells a different story. This one signals how the *proportion* of telephones changes across each region. For instance, the stacked bar chart makes it easier to see how the regions Asia and Africa gradually increase its share of telephone usage when compared to the scatter plot.       
 
-Can you spot some more differences between the two plots, especially in regards to what they say about the data?
+Can you spot some other differences between the two plots, especially in regards to what the visualizations say about the data?
 
 ## Processing Text 
 
@@ -216,29 +230,35 @@ Indeed, word counts can only take us so far. But they are a first step in the in
 
 ### A rough outline
 
-Our two introductory examples have hopefully shown you a glimpse of what data science looks like. Here is the plan for the course. 
+Our two introductory examples have hopefully shown you a glimpse of what data science work looks like. Here is an outline of what you will learn in this textbook: 
 
 * We begin with a coverage of the fundamentals of R programming.
 * We will move on to learning how the `tidyverse` can be used for data tidying and visualization.
-* We then study how to extract *insights* from our data using statistical techniques.
-* We end with some special topics, e.g., making *predictions* about data using regression analysis.  
+* We then study how to extract *insights* from our data using statistical inferencing technioques. 
+* We end with generating *models* from data. We then use these to make *predictions* about possible outcomes for "unknown" observations using regression and text analysis techniques.  
 
 We hope that you will find the journey interesting.
 
 ## Setting Up a Workflow 
 
-In this course we will be using RStudio. RStudio is an integrated development environment (also known as an IDE) popularly used among data scientists for writing R code. It is a powerful tool that can be used to write and debug code, view visualizations, pull up documentation, write "notebooks", and much more which we will probably not get to see! In this section we will go over setting up RStudio on your machine, and discuss how we will use it in this course.
+RStudio is an integrated development environment (also known as an IDE) popularly used among data scientists for writing R code. It is a powerful tool that can be used to write and debug code, view visualizations, pull up documentation, write "notebooks", and much more which we will probably not get to see! In this section we will go over setting up RStudio on your machine. 
 
-### Some prerequisites
+### Posit Cloud and RStudio 
 
-First, you will need to install R and RStudio Desktop from the web. They can be found at the following links. 
+There are two ways to work with R. The first option is Posit Cloud, a lightweight and cloud-based interface to RStudio. If you use Posit Cloud, you can code right from your favorite browser! However, because Posit Cloud is cloud-based, the code you write is executed on someone else's machine and, therefore, uses up their computational resources. For this reason, Posit Cloud offers a "free tier" that gives access to limited resources (1GB memory and 1 CPU per project) with 25 project hours/month. This should be sufficient for the examples and exercises covered in this text, but you may run up against the project hour quota. You may wish to upgrade to a paid tier that gives more project hours and computational power. We recommend Posit Cloud to students with older machines and students who prefer a zero-installation setup for getting started. Posit Cloud is available here:
+
+* Posit Cloud: https://posit.cloud/ 
+
+The second option is to install R and RStudio Desktop directly to your system. First, you will need to install R and RStudio Desktop from the web. They can be found at the following links. 
 
 * R: https://cloud.r-project.org
-* RStudio: https://rstudio.com/products/rstudio/download/#download
+* RStudio: https://posit.co/download/rstudio-desktop/#download
 
-### Meet RStudio 
+### Creating a RStudio Project 
 
-Assuming you have successfully installed both, launch RStudio. There may be some "getting started" help guides that you are presented with, which you can ignore for now. Your next step will be to create a __R project__ for this course by going to: `File > New Project...`. 
+If you are working on Posit Cloud, navigate to your workspace and create a new RStudio project by clicking "New Project" and then "New RStudio Project". This should bring you into a RStudio environment, as shown in the next section.  
+
+If you installed RStudio Desktop locally, launch the RStudio application. There may be some "getting started" help guides that you are presented with, which you can ignore for now. Your next step will be to create a __R project__ by going to: `File > New Project...`. 
 
 ```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
 knitr::include_graphics('images/project_wizard.png')
@@ -250,9 +270,13 @@ From the options that are presented, select `New Directory > New Project`. This 
 knitr::include_graphics('images/project_wizard2.png')
 ```
 
-In the input box that asks for a "Directory name", you can name it whatever you like; however, you should use something informative -- like "CSC100" -- which we will name ours for this example. The default directory for this project is fine, but do make a note of it; also, do not worry about any of the check boxes and leave those unchecked. 
+In the input box that asks for a "Directory name", you can name it however you like. For instance, we named ours "CSC100". The default directory for this project is fine, but do make a note of it; also, do not worry about any of the check boxes and leave those unchecked. 
 
-When you are ready, go ahead and select `Create Project`. This should present you with what will be our editing environment for the semester.   
+When you are ready, go ahead and select `Create Project`. 
+
+### Meet RStudio 
+
+You should now be presented with a view that looks like the following: 
 
 ```{r, echo=FALSE, fig.align="center", out.width='80%', fig.asp=1/2}
 knitr::include_graphics('images/rstudio_environment.png')
@@ -260,10 +284,9 @@ knitr::include_graphics('images/rstudio_environment.png')
 
 Let us go over each of the labeled parts. 
 
-* __Console.__ This is a great place to get started coding in R! It isn't fully featured like a R markdown notebook is (which we will see in a moment) and you wouldn't want to put anything important here as it will be lost as soon as you exit RStudio. However, it can be useful for checking small things, e.g. as a built-in calculator. Try out `2 + 2` and see what you get! You can also check the current "working directory" by typing `getwd()`. This will pull up the directory/folder on your machine where you created this project. Ours says: `"/Users/jerrybonnell/Documents/csc100"`. 
+* __Console.__ This is a great place to get started coding in R! It isn't fully featured like a R markdown notebook is (which we will see in a moment) and you wouldn't want to put anything important here as it will be lost as soon as you exit RStudio. However, it can be useful for checking small things, e.g. as a built-in calculator. Try out `2 + 2` and see what you get! You can also check the current "working directory" by typing `getwd()`. This will pull up the directory/folder on your machine where you created this project.  
 
 * __Environment.__ This is where RStudio keeps track of "objects" that R has created during your session. We haven't learned what these are yet, but you can revisit this part of the notes again to make sense of what is going on here. 
-
 To demonstrate this, let us create an object `my_value` that holds the value 5. The benefit of the environment view is that it reminds us of the current value held by the object. Run this cell in the "Console" area of RStudio and then glance over at the "Environment" view.   
 
 ```{r}
@@ -276,7 +299,6 @@ Note what happens in the environment view if we were to change the value. As bef
 my_value <- "hello data science!"
 ```
 
-
 * __File Explorer/Plots/Help.__ This area is actually a "three-in-one". At the moment, it presents you the files and folders that currently exist inside your project -- which is practically nothing at the moment. We will create some directories in just a moment. 
 
 The __plots view__ reveals itself when you have created a visualization on the console. Here is an example. You need not understand what this code does; simply copy and paste into the console, and run. 
@@ -287,28 +309,26 @@ plot(cyl ~ mpg, mtcars)
 
 Let us navigate to the __help tab__, which should be one or two tabs down from the "Plots" tab. Here, we can look up documentation about functions or datasets we would like to learn more about. For instance, in the search bar, we can type `plot` to look up information for the function `plot` we just used earlier. 
 
-An equivalent, and perhaps more straightforward, way of looking up documentation is right from the console. Just type in `?plot`, hit enter, and on you go.  
+An equivalent, and perhaps more straightforward, way of looking up documentation is right from the console. Just type in `?plot`, and hit enter.  
 
 ### Organizing your work 
 
-Let us create some folders in our project to organize our work for the semester. We recommend the following structure. You can use the `New Folder` button in the file explorer view to create these directories. 
+We can create folders in our project to better organize our work. We recommend the following structure. You can use the `New Folder` button in the file explorer view to create these directories. 
 
 ```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
 knitr::include_graphics('images/file_directory.png')
 ```
 
-The folder names should be self-explanatory, but here is a brief explanation: 
+This folder structure can be useful if you are taking a course that requires using RStudio. The folder names should be self-explanatory, but here is a brief explanation: 
 
 * `labs`, for working on lab assignments. 
 * `hw`, for working on homework assignments.
-* `notes`, for your own notes, say, from lecture. 
-* `project`, for working on the project. 
-
-What files will we be writing in each of these folders? Let us turn to the next section and find out!  
+* `notes`, for your own notes. 
+* `project`, for working on projects.  
 
 ### R markdown notebooks 
 
-All of the assignments in this course will be distributed as *R markdown notebooks*, which allows users to intersperse code with prose in an intuitive manner; this is great to use in practice for sharing and communicating your work to peers.
+R markdown notebooks allow users to intersperse code with prose in an intuitive manner. This is great to use in practice for sharing and communicating your work to peers.
 
 We can try playing with an example notebook that RStudio automatically generates when creating a notebook. Let us try it. 
 
@@ -328,18 +348,20 @@ Let us go over the parts.
 
 If you navigate to the `notes` directory in the File Explorer (or wherever you created this notebook), you should see a PDF file that has been generated. Clicking on it in the File Explorer should present you with a PDF version of the notebook. 
 
-What RStudio did was take our R markdown file and convert it to a PDF using [LaTeX](https://en.wikipedia.org/wiki/LaTeX). Beneath each code block is the corresponding output, interspersed neatly with the surrounding prose -- all formatting taken care of for you :-) 
+What RStudio did was take our R markdown file and convert it to a PDF using [LaTeX](https://en.wikipedia.org/wiki/LaTeX). Beneath each code block is the corresponding output, interspersed neatly with the surrounding prose -- all formatting taken care of for you :-)
 
-### Final touches 
+### Preferences settings 
 
-Before we end this tutorial, we need to set two RStudio settings. This will help to  avoid any heartache throughout the course. 
+Before we end this tutorial, we also need to set two RStudio settings. This will help to avoid any heartache when working through this text. 
 
 Open up `Preferences` in RStudio. Do the following in the `General` tab:
 
 * Uncheck the box that says "Restore .RData into workspace at startup"
 * Following the text that says "Save workspace data to .RData on exit:", select `Never`. 
 
-We are done with our setup!
+This completes the setup! 
+
+
 
 
 

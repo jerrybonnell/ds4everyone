@@ -637,8 +637,8 @@
       "RemoteRepo": "edsdata",
       "RemoteUsername": "jerrybonnell",
       "RemoteRef": "HEAD",
-      "RemoteSha": "3939ec13ddb9e46c224e799ddbcaf010cc710925",
-      "Hash": "2b19efc4b24b831848b4308780bbd9f9",
+      "RemoteSha": "5d314b3095509a8f9bb3fe7f00c74a0125ed2064",
+      "Hash": "a59ab6c2b10db3aa5209cac7b07c7ba5",
       "Requirements": []
     },
     "ellipsis": {
@@ -1425,6 +1425,14 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "7ce2733a9826b3aeb1775d56fd305472",
+      "Requirements": []
+    },
+    "maps": {
+      "Package": "maps",
+      "Version": "3.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "644a88fb036ab50cee0b715394eefa1a",
       "Requirements": []
     },
     "maptools": {

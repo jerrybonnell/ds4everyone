@@ -31,7 +31,7 @@ In the early days of modern computing, programmers had to provide instructions t
 
 That is the birth of modern, machine-independent programming languages. Allowing the use of machine-independent languages in writing programs requires the creation of a layer that sits between programmers who code with universal languages and the computers who will execute the program but do not understand the languages the programmers use.
 
-Early on, there was only one layer separating programmers from computers. Nowadays there are multiple layers separating between them. What these layers do is outside the coverage of the course, and we will skip it entirely. The key point is that a programmer can use a specific language to write what she intends to do with program.
+Early on, there was only one layer separating programmers from computers. Nowadays there are multiple layers separating between them. What these layers do is outside the coverage of this text, and we will skip it entirely. The key point is that a programmer can use a specific language to write what she intends to do with program.
 
 Many types of programming languages exist. One type is the *scripting language*. In a scripting language, a programmer "enters" an environment specific to the language and then executes her program "line by line". 
 
@@ -39,8 +39,7 @@ A *line* of a program is a sequence of characters which is syntactically complet
 
 ### Programming in R
 
-We will use the programming language [R](https://www.r-project.org/) in this course.
-There are four major reasons to choose R as our language.
+We will use the programming language [R](https://www.r-project.org/) in this text. There are four major reasons to choose R as our language.
 
 * R is quite popular. There are many data scientists out there who enjoy conducting science using R.
 * There are so many R codes for public use. You can adapt such programs to your own needs. Reciprocally, you can share your R codes with others. Some of the popular codes have become libraries, groups of R codes that you can use for specific purposes. You can download such libraries for your own use with a simple line of code.
@@ -69,7 +68,7 @@ Here are some examples of numerical literals.
 1956.5436781
 ```
 
-An important numerical literal type uses `e` to specify shifting the decimal point. You are probably already familiar with this idea from other courses. It is called writing in *scientific notation*. 
+An important numerical literal type uses `e` to specify shifting the decimal point. You are probably already familiar with this idea from elementary math courses. It is called writing in *scientific notation*. 
 
 ```{r}
 5.07e-2
@@ -163,14 +162,16 @@ a
 
 Once you have executed it, the assignment will persist until you make another assignment to `a` or you terminate the R environment program you are running. 
 
+A common idiom when working in a notebook environment is to make an assignment on one line and then immediately show the result on the next line by simply typing its name. For instance:
+
 ```{r}
-a <- 5 * 15
-a
+a <- 5 * 15 # an assignment 
+a # type its name to reveal its value
 ```
 
 Note how the value of `a` has changed from `7.6` to `75`. We call such named entities that hold a value `objects`.
 
-> You may have noticed the leading `[1]` in front of the value of `a`. This involves the internal workings of R and is a technical detail, so we ignore it for now. 
+> You may have noticed the leading `[1]` in front of the value of `a`. This involves the internal workings of R and is a technical detail that we will learn about later. 
 
 What happens when we try to refer to an object that currently does not exist? 
 
@@ -203,6 +204,81 @@ If the object cannot be found, the environment produces an error message.
 a <- barnie * 3
 ```
 
+### Expressions and R notebook gotchas 
+
+There are a few gotchas that you should be aware of when working with expressions in a R notebook environment. We  illustrate these issues by example. 
+
+Consider the following code chunk that assigns the value 5 to a name `a`. 
+
+```{r}
+a <- 5 
+```
+
+Let us create another name, `b`, bound to the value 3. 
+
+```{r}
+b <- 3 
+```
+
+The name `summed` is the sum of `a` and `b`. 
+
+```{r}
+summed <- a + b
+summed
+```
+
+The name `summed` is *bound* to the number 8 even though it was created using the expression `a + b`. __Names are bound to values, not mathematical expressions or "formulas"__. 
+
+Now let us assign `a` to a different value. We will then print the value of `summed` again. Can you guess what the value of `summed` will be?  
+
+```{r}
+a <- 10
+summed
+```
+
+This may come as a surprise! Since we updated  `a` to be 10 and `summed` is the addition of `a` and `b`, you might have expected `summed` to be 13! However, because __names are bound to the value at the time the expression was evaluated__, `summed` *remains* to be 8. The value does not change later, which is unlike spreadsheet software like Excel. 
+
+If it is important for `summed` to reflect the new value of `a`, we would need to amend the previous code or add another code chunk that performs the addition again: 
+
+```{r}
+summed <- a + b
+summed
+```
+
+Next, try to restart your R session by navigating to `Session > Restart R`. Confirm that the "Environment" pane has emptied. If there are names that still appear, revisit the instructions in [Section 1.4](https://ds4world.cs.miami.edu/getting-started.html#setting-up-a-workflow). 
+
+Then try to print out these values: 
+
+```{r eval=FALSE}
+a
+b
+summed
+```
+
+You should see an error! Because the session was restarted, R forgets that `a`, `b`, and `summed` ever existed despite the code for its creation being immediately above this code chunk. If we wish to remedy the error, we would need to execute again all code chunks starting from the top of the notebook.  
+
+This raises another issue when working with R notebooks: evaluating code chunks out-of-order. 
+
+Let us re-define `a` as follows:
+
+```{r}
+a <- 15
+```
+
+Consider the following code chunk.
+
+```{r}
+a <- a + 5
+a
+```
+
+The cell re-assigns `a` after adding 5 to the current amount. We see the result of that operation is 15. 
+
+However, if you were to execute this code chunk again (by pressing the green "play" button), the value becomes 20. If you did that again, the value is 25! Then 30, 35, and so on. So the value of `a` is __dependent on the number of times you executed the code chunk__, even though the code responsible for making `a` a value greater than 15 is nowhere to be seen in the notebook.
+
+Therefore, you should __avoid executing code chunks out-of-order as much as possible__. This is a convenience brought by notebook environments, but the unpredictability that is introduced by it creates confusion and ultimately leads to mistakes. Worse, if you were to return to the notebook at a later time, you are prone to forget how to drive the notebook. If you are ever in doubt, reset your R session and execute your code chunks again in a linear top-down fashion.
+
+One benefit of *knitting* is that the knitting process always clears your R environment and runs your code chunks top-down. If the knitting process ever picks up an error, you may have one or more code chunks that were dependent on out-of-order execution! Be careful with this! 
 
 ### Function calls
 
@@ -226,7 +302,7 @@ abs(a)
 <!--The expression to call a function for its action is `NAME(ARGS)`, where `NAME` is the name of the function object and `ARGS` is the series of object that the function uses in its calculation.
 The `ARGS` part appears as a list of objects a comma in between. We call them *arguments*. Arguments are order dependent. --> 
 
-R ships with many functions that we are familiar with from math courses, e.g., `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `log`, and `log10`, which are sine, cosine, tangent, inverse sine, inverse cosine, inverse tangent, natural logarithm, and logarithm base 10, respectively. The unit of the argument is radian for the first three (i.e., 360 degrees are equal to $\pi$ radians).
+R ships with many functions that we are familiar with from mathematical courses, e.g., `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `log`, and `log10`, which are sine, cosine, tangent, inverse sine, inverse cosine, inverse tangent, natural logarithm, and logarithm base 10, respectively. The unit of the argument is radian for the first three (i.e., 360 degrees are equal to $\pi$ radians).
 
 ```{r}
 sin(1)
@@ -350,7 +426,7 @@ Here are the two steps in a nutshell: to install a package, you enter `install.p
 A package is a collection of objects. Each object has a name. Sometimes two packages contain objects having the same names. If such objects appear, the R environment warns you about the duplicate names, and chooses to use the most recent name assignment ignoring the earlier ones. Also, if you attempt to load a package with the `library` function and if the package needs installation, the R environment gives you a warning.
 Once you have installed the package, the warning will go away. You can also install packages as many times you want.
 
-The package we will most frequently use in this course is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science. Once you have installed it, loading the package is as we stated earlier.
+The package we will most frequently use in this text is [tidyverse](https://www.tidyverse.org/), which is actually a suite of packages designed for doing data science. Once you have installed it, loading the package is as we stated earlier.
 
 ```{r, eval=FALSE}
 install.packages("tidyverse")
@@ -375,6 +451,6 @@ The packages in the suite include:
 * `ggplot2` for visualization (e.g., creating graphs)
 * `purrr` for data mapping and processing nested data
 
-The list seems quite long, but don't worry; we will introduce them gradually throughout the course and only as needed. The shape of its "hex sticker" above gives us a clue as to how to think about the tidyverse: each package should be thought of as building blocks that "stick" together and work in unison with the other packages in the tidyverse. Together they build a complex data science pipeline, transforming raw data into insights and knowledge that can be communicated.  
+The list seems quite long, but don't worry; we will introduce them gradually throughout the text and only as needed. The shape of its "hex sticker" above gives us a clue as to how to think about the tidyverse: each package should be thought of as building blocks that "stick" together and work in unison with the other packages in the tidyverse. Together they build a complex data science pipeline, transforming raw data into insights and knowledge that can be communicated.  
 
 Note that once we have loaded the tidyverse, we can call any of the functions from the individual packages. 

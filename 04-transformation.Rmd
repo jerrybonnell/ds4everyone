@@ -1,12 +1,12 @@
 ---
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 # Data Transformation
 
-The work of data science begins with a dataset. These datasets can be so large that any manual inspection or review of them, say using editing software like TextEdit or Notepad++, becomes totally infeasible. To overcome this, data scientists rely on computational tools like R for working with datasets. Learning how to use these tools well lies at the heart of data science and what data scientists do daily at their desks. 
+The work of data science begins with a dataset. These datasets can be so large that any manual inspection or review of them, say using editing software like TextEdit or Notepad++, becomes totally infeasible. To overcome this, data scientists rely on computational tools like R for working with datasets. Learning how to use these tools well lies at the heart of data science and what data scientists do daily at their desks.
 
 A part of what makes these tools so powerful is that we often need to apply a series of actions to a dataset. Data scientists talk a lot about the importance of data cleaning, stating that without data cleaning no data analysis results are meaningful. Some go further to say that the most important step in the data science life cycle is data cleaning because, from their point of view, the analysis process following data cleaning is a routine to a great degree. As such, another important aspect of working with datasets is *transforming* data, i.e., rendering data suitable for analysis. When data is made into an analysis-ready form, we call such data *tidy data*. Transforming data to become tidy data is the focus of this chapter.    
 
@@ -55,16 +55,24 @@ This dataset contains 352 values representing 11 variables and 32 observations. 
 
 ### In pursuit of tidy data
 
-We are now ready to provide a definition of tidy data. We defer to [Hadley Wickham (2014)](https://vita.had.co.nz/papers/tidy-data.pdf) for a definition. We say that data is tidy when it satisfies four conditions: 
+We are now ready to provide a definition of tidy data. We defer to [Hadley Wickham (2014)](https://vita.had.co.nz/papers/tidy-data.pdf) for a definition. We say that data is "tidy" when it satisfies four conditions: 
 
 1. Each *variable* forms a column. 
 2. Each *observation* forms a row. 
 3. Each value must have its own cell.
 4. Each type of observational unit forms a table. 
 
-Data that exists in any other arrangement is, consequently, *messy*. The goal of this chapter is to learn about methods for *transforming* messy data into tidy data, with some help from R and the tidyverse. 
+Data that exists in any other arrangement is, consequently, *messy*. A critical aspect in distinguishing between tidy and messy data forms is defining the __observational unit__. This can look different depending on the statistical question being asked. Defining the observational unit is so important because data that is tidy in one application can, in fact, be messy in another.  
 
-The `mtcars` dataset above is an example of tidy data, with one small exception we will return to later. Let us look at other examples of datasets that fulfill or violate these properties. 
+The goal of this chapter is to learn about methods for *transforming* messy data into tidy data, with some help from R and the tidyverse. 
+
+With respect to the `mtcars` dataset, we can glean the observational unit from its help page: 
+
+> Fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+
+Therefore, we expect each row to correspond to exactly one of the 32 different car models. With one small exception that we will return to later, the `mtcars` dataset fulfills the properties of tidy data. Let us look at other examples of datasets that fulfill or violate these properties. 
+
+### Example: is it tidy? 
 
 Suppose that you are keeping track of weekly sales of three different kinds of cookies at a local Miami bakery in 2021. By instinct, you decide to keep track of the data in the following table.    
 
@@ -93,7 +101,13 @@ colnames(bakery2) <- c("week", 1,2,3,4)
 bakery2
 ```
 
-Do either of these tables fulfill the properties of tidy data? In `bakery1`, the variable we are trying to measure -- *sales* -- is actually split across three different columns and multiple observations appear in each row. In `bakery2`, the situation remains bad: both the *cookie type* and *sales* variables appear in each column and, still, multiple observations appear in each row. Therefore, neither of these datasets are *tidy*.    
+Do either of these tables fulfill the properties of tidy data? 
+
+First, we define the observational unit as follows:
+
+> A weekly sale for one of three different kinds of cookies sold at a Miami bakery in 2021. Three variables are measured per unit: the week it was sold, the kind of cookie, and the number of sales. 
+
+In `bakery1`, the variable we are trying to measure -- *sales* -- is actually split across three different columns and multiple observations appear in each row. In `bakery2`, the situation remains bad: both the *cookie type* and *sales* variables appear in each column and, still, multiple observations appear in each row. Therefore, neither of these datasets are *tidy*.    
 
 A tidy version of the dataset appears as follows. Compare this with the tables from `bakery1` and `bakery2`. Do not worry about the syntax and the functions used; we will learn about what these mean and how to use them in a later section. 
 
@@ -103,9 +117,9 @@ bakery_tidy <- bakery1 %>%
 bakery_tidy
 ```
 
-When a dataset is expressed in this manner, we say that it is in *long* format because the number of rows is comparatively larger compared to `bakery1` and `bakery2`. Admittedly, this form can make it harder to identify patterns or trends in the data by eye. However, tidy data opens the door to more efficient data science so that you can rely on existing tools to do the things you need to do. Without a standardized means of representing data, such tools would need to be developed from scratch each time you begin work on a new dataset.   
+When a dataset is expressed in this manner, we say that it is in *long* format because the number of rows is comparatively larger compared to `bakery1` and `bakery2`. Admittedly, this form can make it harder to identify patterns or trends in the data by eye. However, tidy data opens the door to more efficient data science so that you can rely on existing tools to proceed with next steps. Without a standardized means of representing data, such tools would need to be developed from scratch each time you begin work on a new dataset.   
 
-Observe how this dataset fulfills the four properties of tidy data. The fourth property is fulfilled because the observational unit we are measuring is a weekly cookie sale, and we are measuring three variables -- `week`, `type`, and `sales` -- per observational unit. These variables do not refer to measurements on a sale or bakery store; they refer to measurements on a given weekly cookie sale from a local Miami bakery in 2021. 
+Observe how this dataset fulfills the four properties of tidy data. The fourth property is fulfilled because the observational unit we are measuring is a weekly cookie sale, and we are measuring three variables -- `week`, `type`, and `sales` -- per observational unit. The detail of the observational unit description is important: these variables do not refer to measurements on some sale or bakery store; they refer specifically to measurements on a given weekly cookie sale for one of three kinds of cookies ("gingerbread", "chocolate peppermint", and "macadamia nut") sold a local Miami bakery in 2021. If this dataset were to contain sales for a different year or kind of cookie not specified in our observational unit statement, then said observations would need to be sorted out into a different table.  
 
 A possible scenario in violation the third property might look like the following: the bakery decides to record sale *ranges* instead of a single estimate, e.g., in the case of making a forecast on future sales. 
 
@@ -173,7 +187,7 @@ mtcars_tibble <- tibble(rownames_to_column(mtcars, var = "model_name"))
 mtcars_tibble
 ```
 
-Throughout the course, we will store data using the `tibble` construct. However, because `tibbles` and data frames are close siblings, we may use the terms *tibble* and *data frame* interchangeably when talking about data that is stored in a rectangular format.       
+Throughout the text, we will store data using the `tibble` construct. However, because `tibbles` and data frames are close siblings, we may use the terms *tibble* and *data frame* interchangeably when talking about data that is stored in a rectangular format.       
 
 ### Accessing columns and rows
 
@@ -297,10 +311,10 @@ bloom <- read_csv(path)
 
 The data set shows the traffic in the city of Bloomington, the hometown of the Indiana University at Bloomington, Indiana.
 
-We can inspect the first few rows of the tibble using the function `head`.
+We can inspect the first few rows of the tibble using the function `slice_head`.
 
 ```{r}
-head(bloom)
+slice_head(bloom, n = 5)
 ```
 
 Note that some columns have spaces in them. To access the column corresponding to the attribute, we cannot simply type the column because of the white space. To access these columns, we surround the attribute with backticks (`). 
@@ -456,6 +470,12 @@ If we are interested in some particular row, we can use `slice` for that as well
 
 ```{r}
 slice(mtcars_tibble, 3)
+```
+
+We can also select a *random* row by using `slice_sample`. In this example, each row has an equal chance of being selected. 
+
+```{r}
+slice_sample(mtcars_tibble)
 ```
 
 ### Renaming columns with `rename`
@@ -717,9 +737,9 @@ Note also that the `rate` column needs tidying. We leave the tidying of this col
 
 ### Pulling data from multiple sources
 
-The fourth principle of tidy data stated that an observational unit should form a table. However, often times the observational unit we are measuring will be split across multiple tables.  
+The fourth principle of tidy data stated that an observational unit should form a table. However, often times the observational unit we are measuring is split across multiple tables.  
 
-Let us suppose we are measuring student scores in a classroom. The data is given to us in the form of two tables, one for exams and the other for assignments. We load the scores into our R environment with tibble. 
+Let us suppose we are measuring student assessments in a class. The data is given to us in the form of two tables, one for exams and the other for assignments. We load the scores into our R environment with tibble. 
 
 ```{r}
 exams <- tibble(name = c("Adriana", "Beth", "Candy", "Emily"), 
@@ -732,7 +752,7 @@ exams
 assignments
 ```
 
-If our observational unit is the *grade*, then it should be clear that the current arrangement of data is not tidy. The data should be kept together in a single table.  
+If the observational unit is an *assessment* result, then some assessments are in one table and some assessments are in another. Therefore, according to this definition, the current arrangement of the data is *not* tidy. The data should be kept together in a single table.  
 
 You can combine two tibbles using a common attribute as the key for combining; that is, finding values appearing in both tibbles and then connecting rows having the names in common. In general, if there are multiple matches between the two tibbles concerning the attribute, each possible row matches will appear.
 
@@ -780,8 +800,7 @@ scores_inner
 
 The third property of tidy data is fulfilled now that the observational unit forms a single table. However, the joined table is still messy. The grades are split across four different columns and, therefore, multiple observations occur at each row. 
 
-To remedy this, we use *pivot* and, in terms of R, the function `pivot_longer`. The syntax for `pivot_longer` can be complex, and so we do not go over it in detail. Here is how we can use it.   
-
+To remedy this, we use *pivot* and, in terms of R, the function `pivot_longer` from the `tidyr` package. The syntax for `pivot_longer` can be complex, and so we do not go over it in detail. Here is how we can use it.   
 ```{r}
 scores_long <- scores_inner %>%
   pivot_longer(c(assign1, assign2, midterm, final), 
@@ -789,14 +808,25 @@ scores_long <- scores_inner %>%
 scores_long
 ```
 
-The usage above takes `scores_inner`, merges all the assessment columns, creates a new column with name `assessment`, and presents the corresponding values under the column `score`. Observe how we can easily read off the three variables from this table: `name`, `assessment`, and `score`. We can be confident in knowing that this is tidy data.
+The usage above takes `scores_inner`, merges all the assessment columns, creates a new column with name `assessment`, and presents the corresponding values under the column `score`. Graphically, this is what a pivot longer transformation computes. 
 
-If we wish to go in the other direction, say for readability, we can use `pivot_wider`. The function `pivot_wider` grabs a pair of columns and spreads the pair into a series of columns. One column of the pair serves as the source for the new column names after spreading. For each value appearing in the source column, the function creates a new column by the name.
-The value appearing opposite to the source value appears as the value for the column corresponding to the source.
+```{r, echo=FALSE, fig.align="center", out.width='70%', fig.asp=1/2}
+knitr::include_graphics('images/pivot_longer.png')
+```
+
+Observe how we can easily read off the three variables from this table: `name`, `assessment`, and `score`. We can be confident in knowing that this is tidy data.
+
+If we wish to go in the other direction, we can use `pivot_wider`. The function `pivot_wider` grabs a pair of columns and spreads the pair into a series of columns. One column of the pair serves as the source for the new column names after spreading. For each value appearing in the source column, the function creates a new column by the name. The value appearing opposite to the source value appears as the value for the column corresponding to the source.
 
 ```{r}
 scores_long %>%
   pivot_wider(names_from = assessment, values_from = score)
+```
+
+Here is a visual demonstrating the pivot wider transformation:
+
+```{r, echo=FALSE, fig.align="center", out.width='70%', fig.asp=1/2}
+knitr::include_graphics('images/pivot_wider.png')
 ```
 
 Note how this simply undoes what we have done, returning us to the original `scores_inner` table. We can also prefix each of the new columns with `assess_`. 
@@ -811,7 +841,7 @@ There are two details to note when working with the pivot functions.
 * `pivot_wider()` should not be thought of as an "undo" operation. Like `pivot_longer()` its primary purpose is also to make data tidy. Consider the following table and observe how each observation is scattered across two rows. The appropriate means to bring this data into tidiness is through an application of `pivot_wider()`.   
 
 ```{r}
-head(table2)
+slice_head(table2, n = 5)
 ```
 
 * `pivot_longer()` and `pivot_wider()` are not perfectly symmetrical operations. That is, there are cases where applying `pivot_wider()`, followed by `pivot_longer()`, will not reproduce the exact same dataset. Consider such an application on the following dataset. Keep in mind the column names and how the column data types change at each pivot step.
@@ -850,7 +880,7 @@ We have used several times by now the word "function". Here are some basic rules
 
 * _A function is a block of code with a name that allows execution from other codes._ This mean that you can take any part of a working (i.e., all parentheses and brackets in the part have matching counterparts in the same part) and specify it to be a function.
 * _If the function is active in the present run of R, each time a code call the function, the code of the function runs._ This means that R suspends the execution of the present code and processes the execution of the code of the function. When it finishes running the code of the function, it returns to the execution of the one it has suspended.
-* _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return` at the end so as to specify the value it has computed. Note that the use of `return` is __optional__ and, by default, R always returns the last line of computation performed in the function. 
+* _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return` at the end so as to specify the value it has computed. Note that the use of `return` is __optional__ and, by default, R returns the last line of computation performed in the function. 
 * _If a function has the role of returning a value, the call itself represents the value it computes._ So you store the value the function computes in a variable using an assignment.
 * _A function may require some number of values to use in its calculation._ We call them *arguments*. When using a function that requires arguments, the arguments must appear in the call.
 
@@ -1063,7 +1093,7 @@ map_dbl(1:6, ~ 5)
 
 By now we have seen enough examples of how to use `map` with a vector. Let us return to the issue of applying the function `cutoff_400` to the `disp` variable. 
 
-To incorporate this into a tibble, we encase our `map` inside a call to `mutate`, which modifies the column `disp`. 
+To incorporate this into a tibble, we encase our `map` inside a call to `mutate`, which modifies the column `disp`.
 
 ```{r}
 mtcars_transformed <- mtcars_tibble %>%
@@ -1145,14 +1175,21 @@ The directional specifications are: "up", "down", "updown", and "downup". The de
 
 ### Filling values according to a global constant 
 
-If you want to make an across-the-board replacement of NA with a specific value, you can use `replace(is.na(.), X)`. Here `X` is the value to substitute the missing value with. 
+If you want to make an across-the-board replacement of NA with a specific value, you can use the function `replace_na` from `tidyr`. For instance, the following replaces missing values in `week1` with the value 70.
 
 ```{r}
 trouble_temps %>%
-  replace(is.na(.), 70)
+  mutate(week1 = replace_na(week1, 70))
 ```
 
-Note that if your dataset contains a mixture of strings and numbers, then a straightforward application like this will not work. Instead, you will need to split the process into two steps: first taking care of missing values in the strings columns and then, afterwards, taking care of the missing values in the numeric columns.  
+If you wish to apply this for all columns in the dataset, we can use provide `replace_na` as an anonymous function in a combination of `mutate` with `across`.
+
+```{r}
+trouble_temps %>%
+  mutate(across(week1:week3, function(x) replace_na(x, 70)))
+```
+
+Note that if your dataset contains a mixture of strings and numbers, then a straightforward application like this will not work. Instead, you will need to split the process into two steps: first handling missing values in the strings columns and then, afterwards, taking care of the missing values in the numeric columns.  
 
 Alternatively, you can use `replace_na` to give an instruction how to handle NA appearing in specific columns. 
 
@@ -1166,26 +1203,24 @@ trouble_temps %>%
 ```
 
 
-## Case Study I: A Computer Science Course
+## Vignette: Tidying Assessments in a Course
 
-In this section, we present a worked example of a real-life dataset and apply the transformations that are necessary to bring it into tidy data. The goal of this exercise is to demonstrate how the transformations we have learned in this chapter are not tools meant to be used in isolation, but work best when used together to fulfill a complex goal.  
+In this section, we present a larger dataset and apply transformations that are necessary to bring it into tidy data to facilitate further analysis. The goal of this exercise is to demonstrate how the transformations we have learned in this chapter are not tools meant to be used in isolation, but work best when used together to fulfill a complex goal.  
 
 ### Prerequisites
 
-As always, we will need the `tidyverse` to accomplish our task.  
+As always, we will need the `tidyverse` to accomplish our task. We will also load in the `edsdata` package that contains the datasets we will be working with. 
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(edsdata)
 ```
 
-### The `csc_course` tibble
+### The tibbles `csc_course_lab`, `csc_course_hw`, and `csc_course_qz`
 
-We will examine a dataset containing scores from a course in Computer Science. 
+We will examine three datasets that contain assessment results from a hypothetical introductory course in Computer Science. These datasets come from the `edsdata` package.
 
 ```{r message = FALSE, warning = FALSE}
-csc_course_lab <- read_csv("data/csc_course_lab.csv")
-csc_course_hw <- read_csv("data/csc_course_hw.csv")
-csc_course_qz <- read_csv("data/csc_course_qz.csv")
 csc_course_lab
 csc_course_hw
 csc_course_qz
@@ -1195,16 +1230,16 @@ Following is some information about the dataset:
 
 * The `number` column gives a unique number of each student enrolled in the course.
 * There are ten `labXX` attributes (for labs), eleven `hwXX` attributes (for homeworks), and three `qzXX` scores (for quizzes).
-* The dataset is split across three different tables as CSV files: one for lab scores, a second for homework scores, and a third for quiz scores. 
+* The dataset is split across three different tables: one for lab scores, a second for homework scores, and a third for quiz scores. 
 * The data abounds with missing values. The missing values in this dataset have a clear explanation: some students did not turn in all of the labs and/or assignments.  
 
-We can tell the variables that are being measured in this dataset. 
+Let us state the __observational unit__ to be an individual student assessment and we would like to measure the following variables: 
 
-* *number*, the unique number of each student 
+* *number*, a unique number of each student 
 * *assessment*, the kind of assessment, e.g., lab01, hw01, qz01 
 * *score*, the received score on the assessment 
 
-It should hopefully be clear that the current format of the dataset violates all three principles of tidy data. Those problems being: 
+We can see the current format of the dataset violates all three principles of tidy data. Those problems being: 
 
 1. The observational unit is the *student* which is spread across three different tables.
 2. There is missing data present which, by definition, is not tidy.
@@ -1237,11 +1272,11 @@ Note that even though we used `inner_join` here, the resulting tibble would have
 
 Now that we have the data in a single table, we can address the problem of missing data. As we noted earlier, the missing values have a meaning in the dataset: the student did not turn in the associated assessment. The appropriate way to handle this is to substitute each missing value with a 0 -- sorry folks!  
 
-We can accomplish this using the `is.na` function. 
+We can accomplish this using the `replace_na` function. We express the anonymous function that uses `replace_na` with formula notation. 
 
 ```{r}
 csc_course_merged <- csc_course_merged %>%
-  replace(is.na(.), 0)
+  mutate(across(everything(), ~replace_na(.x, 0)))
 csc_course_merged
 ```
 
@@ -1259,7 +1294,7 @@ convert_to_100_points <- function(x) {
 }
 ```
 
-We could use `map_dbl` for each of the eleven homeworks and twelve labs, but this can be quite cumbersome to type. The function `across` is equivalent to `map`, but allows us to apply a function to multiple columns at once. Then, as before, we include the incantation inside a call to `mutate`. Here is how we can put everything together. 
+We could apply a `mutate` for each of the eleven homeworks and twelve labs, but this can be quite cumbersome to type. The function `across` allows us to mutate multiple columns at once. Here is how we can put everything together. 
 
 ```{r}
 csc_course_merged <- csc_course_merged %>%
@@ -1347,9 +1382,9 @@ csc_summary %>%
   filter(mean_overall_score < 70)
 ```
 
-You can imagine how such an analysis could be useful when used mid-semester -- we should check in with those students to see what is going on.
+You can imagine how such an analysis could be useful when used mid-semester -- we could check in with those students to investigate further.
 
-## Case Study II: Department of Education College Scorecard
+## Vignette: Exploring the College Scorecard
 
 Before closing the chapter, we present one more application of data transformation techniques in a real-world setting. This time, we turn to a much larger dataset and appeal to the [annual College Scorecard](https://collegescorecard.ed.gov) published by the Department of Education on recent institution-level data. We will use this dataset to explore the average annual cost of attending public and private institutions in the Miami area. 
 
@@ -1359,13 +1394,10 @@ As before, let us load `tidyverse`.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(edsdata)
 ```
 
-The full data is available for download [here](https://collegescorecard.ed.gov/data), however, we have already done some basic preprocessing of this dataset by including only Florida-based institutions. This tibble is available in `scorecard_fl`. Let us have a look at the data:
-
-```{r echo=FALSE}
-scorecard_fl <- read_csv("data/Most-Recent-Cohorts-Institution-FL.csv") 
-``` 
+The full data is available for download [here](https://collegescorecard.ed.gov/data), however, we have already done some basic preprocessing of this dataset by including only Florida-based institutions. This tibble is available in `scorecard_fl` from the `edsdata` package. Let us have a look at the data:
 
 ```{r}
 scorecard_fl
@@ -1426,7 +1458,7 @@ scorecard_relevant %>%
 
 The College Scorecard chooses to present missing values in a non-standard form using the special string `"NULL"`. While human users of this table will have no trouble understanding the meaning of this keyword, R is unable to distinguish `"NULL"` from any other string that may be present. Therefore, as far as our `dplyr` code is concerned, there are no "missing values" in this dataset.  
 
-We can remedy the problem by converting all instances of `"NULL"` to proper missing values so that these can be detected appropriately by our `dplyr` verbs. 
+We can remedy the problem by converting all instances of `"NULL"` to proper missing values so that these can be detected appropriately by our `dplyr` verbs. The function we use is `na_if`, which is similar to the `replace_na` function shown earlier. 
 
 ```{r}
 scorecard_relevant <- scorecard_relevant %>%

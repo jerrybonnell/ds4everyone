@@ -59,7 +59,7 @@ This implies that there is a limit to how large a positive whole number or how s
 If a number should go out of the range of accurately-presentable whole numbers, R switches to a double number using some approximation.
 
 To represent a *double* number, computers split the number of bits it can use to three parts: the sign (1 bit), the *significand*, and the *exponent*.
-How R uses the significand and exponents in representing a real number is beyond the scope of this course.
+How R uses the significand and exponents in representing a real number is beyond the scope of this text.
 
 $$
 (\mathrm{sign}) ~(\mathrm{number~significand~represents}) \cdot (\mathrm{base})^{\mathrm{number~exponent~represents}}
@@ -185,7 +185,7 @@ So, using whether the result is `Inf` or not, we can explore around where betwee
 ```
 
 So, around `1.79e308` is the limit.
-The quantity is large enough so as to accommodate the computation we will do in the course.
+The quantity is large enough so as to accommodate the computation we will do in this text.
 
 How about integers?
 We can do the same exploration, this time appending the character `L` at the end of each number literal.
@@ -196,15 +196,15 @@ Keep in mind that if you supply an integer that is too big, R will present a war
 
 ## Strings
 
-A *string* is a sequence of characters, which takes its place as our third principal data type.
-Formally, R calls such sequences *character vectors*, where the word "vector" should seem like gibberish jargon at this point.
-In this section, we examine the string type.
+A *string* is a sequence of characters, which takes its place as our third principal data type. Formally, R calls such sequences *character vectors*, where the word "vector" should seem like gibberish jargon at this point. In this section, we examine the string type.
 
-There is a variety of operations that are available in base R for manipulating strings.
-A part of the `tidyverse` super-library is the `stringr` library.
-We will discuss some `stringr` functions later.
+### Prerequisite
 
-Right now, let us introduce some of the standard functions of string manipulations in base R.
+There is a variety of operations that are available in base R for manipulating strings. A part of the `tidyverse` super-library is the `stringr` library. We will use a few functions from `stringr` here, so let us load this package. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+```
 
 ### Strings in R
 
@@ -216,7 +216,7 @@ Here are some examples of strings.
 ```{r}
 "This is my first string."
 "We love R!"
-'"CSC100" is a lot of fun :-)'
+'"Data Science" is a lot of fun :-)'
 ```
 
 Notice that the R substituted the single quotation marks we used for the last literal with double quotation marks.
@@ -252,10 +252,10 @@ as.character(-465)
 ### Length of strings
 
 If you know the contents of the string, you can count the characters in the sequence to obtain its length.
-However, if you do not know or if the string is very long, you can rely on R to do the counting for you using `nchar`.
+However, if you do not know or if the string is very long, you can rely on R to do the counting for you using `str_length` from the `stringr` package.
 
 ```{r}
-nchar("310A Ungar Building, 1365 Memorial Drive, Coral Gables, Florida 33146")
+str_length("310A Ungar Building, 1365 Memorial Drive, Coral Gables, Florida 33146")
 ```
 
 ### Substrings
@@ -274,33 +274,35 @@ The positioning starts from the left end of the sequence.
 -   The four characters of the string, `"s"`, `"o"`, `"n"`, and `"g"`, have positions 1, 2, 3, and 4, respectively.
 -   You can specify a string and two positions and obtain a new string consisting of the characters between the two positions.
 
-For example, the substring from position 2 to position 3 of the string "song" is "on".
-We can use the function `substring` to retrieve substrings.
+For example, the substring from position 2 to position 3 of the string "song" is "on". We can use the function `str_sub` from `stringr` to retrieve substrings.
 
 ```{r}
-substring("song", 2, 3)
+str_sub("song", 2, 3)
 ```
 
-The syntax is `substring(some_string, start, end)` where `some_string` from which we will build a substring, `start` is the staring position, and `end` is the ending position.
+The syntax is `str_sub(some_string, start, end)` where `some_string` from which we will build a substring, `start` is the staring position, and `end` is the ending position.
 
 You can omit the ending position if it is the last position of the string.
-If the starting number is less than -1, R adjusts it to 1, and if the ending number is greater than the length of the string, R adjusts it to the length of the string.
 
 ```{r}
-substring("song", 2)
-substring("song", -1, 6)
+str_sub("song", 2)
+```
+
+You can also retrieve substrings by searching from the *right*. If the starting number is less than -1, R looks at the index starting from the right. For instance, the following extracts the substring from the third-to-last to last position. 
+
+```{r}
+str_sub("song", -3, -1)
 ```
 
 If the ending position is smaller than the starting position, the substring is the empty.
 
 ```{r}
-substring("song", 2, 0)
+str_sub("song", 2, 0)
 ```
 
-### Pasting
+### String concatenation
 
-We may want to combine multiple strings into a single string.
-We call such action *concatenation*.
+We may want to combine multiple strings into a single string. We call such action *concatenation*.
 
 Let us consider three strings.
 
@@ -310,22 +312,21 @@ str2 <- "science"
 str3 <- "rocks"
 ```
 
-There are two types of concatenation.
-One type connects strings with no gap, the other connects strings with on white space inserted in between.
-The two actions are `paste0` and `paste` in R.
+There are two types of concatenation. One type connects strings with no gap, the other connects strings with on white space inserted in between. We can perform these actions using the `str_c` function from `stringr`. 
 
 Below, we think of concatenating three strings `"data"`, `"science"`, and `"rocks"` with the two functions individually.
 
 ```{r}
-paste0(str1, str2, str3)
-paste(str1, str2, str3)
+str_c(str1, str2, str3)
+str_c(str1, str2, str3, sep = " ")
 ```
+
+In the second, we provide a whitespace character `" "` to the argument `sep`. The effect obtained is that each individual word is separated by a space. 
 
 ## Logical Data
 
-As we stated before, boolean is the data type for logical values, true and false.
-`TRUE` is the value representing true and `FALSE` is the one representing false.
-When you use a number where R is expecting to see a boolean, it interprets 0 as `FALSE` and any non-zero as `TRUE`.
+As we stated before, boolean is the data type for logical values, true and false. `TRUE` is the value representing true and `FALSE` is the one representing false. When you use a number where R is expecting to see a boolean, it interprets 0 as `FALSE` and any non-zero as `TRUE`.
+
 Here are the two values.
 
 ```{r}
@@ -937,6 +938,10 @@ To set up, let us load the `tidyverse`.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+```
+
+```{r echo=FALSE, message = FALSE, warning = FALSE}
+options(stringr.html = TRUE)
 ```
 
 ### Regular expressions
