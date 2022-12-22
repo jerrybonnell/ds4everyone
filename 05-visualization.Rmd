@@ -142,18 +142,18 @@ After the removal of the "2seater" class, the downward trend appears more vivid.
 
 ### Mapping versus setting 
 
-Perhaps the most frequent mistake `ggplot` newcomers make is conflating aesthetic *mapping* with aesthetic *setting*. 
+Perhaps the most frequent mistake newcomers to `ggplot` make is conflating aesthetic *mapping* with aesthetic *setting*. 
 
-Instead of coloring points according to "type" of car, you may wish to set all points to a single color, say, blue. So you devise the following `ggplot` code. 
+For instance, you may wish to set all points to a single color instead of coloring points according to the "type" of car. So you devise the following `ggplot` code to color all points in the scatter blue. 
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(data = no_sports_cars) +
   geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
 ```
 
-As we can see, this code colors all points *red*, not blue! Before reading on, can you spot the mistake we made? 
+This code colors all points *red*, not blue! Can you spot the mistake in the above code? 
 
-When we wish to *set* an aesthetic to some global value (e.g., "red", "triangle", an alpha of "0.5"), it __must not be included as part of the mapping specification in the `aes` call__. 
+When we wish to *set* an aesthetic to some global value (e.g., a "red" color, a "triangle" shape, an alpha level of "0.5"), it __must be excluded from the mapping specification in the `aes` call__. 
 
 By moving the color specification out of the `aes` function we can remedy the problem.
 
@@ -176,7 +176,7 @@ Can we develop more insights from categorical variables?
 Using the `mutate` function, we can create a new categorical variable `japanese_make`, which is either `TRUE` or `FALSE` depending on whether the manufacturer is one of Honda, Nissan, Subaru, or Toyota. We create a new dataset with the addition of this new variable. 
 
 ```{r}
-no_sports_cars <- no_sports_cars %>% 
+no_sports_cars <- no_sports_cars |> 
   mutate(japanese_make = 
            manufacturer %in% c("honda", "nissan", "subaru", "toyota"))
 ```
@@ -229,8 +229,8 @@ This one reveals a *positive association* in the data, as opposed to the *negati
 Observe that there are two points that seem to be very far off to the right and one point off to the left. We may call such data points *outliers* meaning that they do not appear to conform to the associations that other observations are following. Let us isolate these points using `filter`. 
 
 ```{r}
-no_sports_cars %>% filter(cty < 10 | cty > 32.5) %>% 
-  relocate(cty, .after = year) %>%
+no_sports_cars |> filter(cty < 10 | cty > 32.5) |> 
+  relocate(cty, .after = year) |>
   relocate(hwy, .before = cyl)
 ```
 
@@ -323,7 +323,7 @@ What if we want to see now both `hwy` and `cty` against `displ`? Is it possible 
 Yes, we can do the merge easily using pivoting. Recall that `pivot_longer` combines multiple columns into one. We can create a new data frame that combines the values from `hwy` and `cty` under the name `efficiency` while specifying whether the value is from `hwy` or from `cty` under the name `eff_type`.
 
 ```{r}
-no_sports_cars_pivot <- no_sports_cars %>% 
+no_sports_cars_pivot <- no_sports_cars |> 
   pivot_longer(cols = c(hwy,cty), 
                names_to = "eff_type", 
                values_to = "efficiency") 
@@ -364,7 +364,7 @@ We will study a tibble called `airmiles`, which contains data about passenger mi
 
 ```{r, echo = FALSE}
 df_airmiles <- data.frame(
-  miles = as.matrix(airmiles), date = time(airmiles)) %>%
+  miles = as.matrix(airmiles), date = time(airmiles)) |>
   tibble()
 df_airmiles
 ```
@@ -386,8 +386,8 @@ df
 To visualize these three functions, we first need to *pivot* the data so that it becomes a long table. The reason for this step should become evident in a moment.  
 
 ```{r}
-df_long <- df %>%
-  pivot_longer(c(f1, f2, f3), names_to = "type", values_to = "y") %>%
+df_long <- df |>
+  pivot_longer(c(f1, f2, f3), names_to = "type", values_to = "y") |>
   select(x, y, type)
 df_long
 ```
@@ -431,7 +431,7 @@ By the way, there are many line types offered by `ggplot`. Available line types 
 Let us turn our attention to the function `f3` and set aside the functions `f1` and `f2` for now. We know how to do this using `filter` from `dplyr`. 
 
 ```{r}
-only_f3 <- df_long %>%
+only_f3 <- df_long |>
   filter(type == "f3")
 ```
 
@@ -444,16 +444,16 @@ ggplot(data = only_f3) +
 
 However, we have discussed before how naming objects, and keeping track of them, can be cumbersome. Moreover, `only_f3` is only useful as input for the visualization; for anything else, it is a useless object sitting in memory. 
 
-We have learned that the pipe operator (`%>%`) is useful for eliminating  redundancy with `dplyr` operations. We can use the pipe again here, this time to "pipe in" a filtered data frame to use as a data source for  visualization. Here is the re-worked code.    
+We have learned that the pipe operator (`|>`) is useful for eliminating  redundancy with `dplyr` operations. We can use the pipe again here, this time to "pipe in" a filtered data frame to use as a data source for  visualization. Here is the re-worked code.    
 
 ```{r warning = FALSE, fig.align="center", dpi=80}
-df_long %>%
-  filter(type == "f3") %>%
+df_long |>
+  filter(type == "f3") |>
   ggplot() + 
   geom_line(mapping = aes(x = x, y = y)) 
 ```
 
-There is something unfortunate about this code: the pipe operator cannot be used when specifying the `ggplot` layers, so we have a motley mix of `%>%` and `+` symbols in the code. Keep this in mind to keep the two straight in your head: use `%>%` when working with `dplyr` and use `+` when working with `ggplot`. 
+There is something unfortunate about this code: the pipe operator cannot be used when specifying the `ggplot` layers, so we have a motley mix of `|>` and `+` symbols in the code. Keep this in mind to keep the two straight in your head: use `|>` when working with `dplyr` and use `+` when working with `ggplot`. 
 
 This curve bears the shape of the famous sinusoidal wave true to trigonometry. However, upon closer inspection, you may notice that the curve is actually a concatenation of many straight-line pieces stitched together. Here is another example using `df_airmiles`.
 
@@ -590,7 +590,7 @@ ggplot(no_sports_cars,
 It is also possible to specify a different dataset to use at the geom layer. We can take advantage of this feature to give a smoother for only a subset of the data, say, the midsize cars.
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-different_dataset <- mpg %>%
+different_dataset <- mpg |>
   filter(class == "midsize")
 
 ggplot(mpg, aes(x = displ, y = hwy)) + 
@@ -641,8 +641,8 @@ diamonds
 The *values* of the categorical variable *cut* are "fair", "good", "very good", "ideal", and "premium". We can look at how many diamonds are in each category by using `group_by()` and `summarize()`.
 
 ```{r, message = FALSE}
-diamonds %>%
-  group_by(cut) %>%
+diamonds |>
+  group_by(cut) |>
   summarize(count = n())
 ```
 
@@ -690,7 +690,7 @@ Let us turn to the `happy` data frame. We can consider the *categories* to be po
 Below, we take the `happy` data set and execute grouping by `happy`. The category for the happy value is `happiness` in this new dataset `happy_students`. We summarize in terms of the counts `n()` and we state the count as an attribute `number`.
 
 ```{r out.width = "50%", fig.align="default", message = FALSE}
-happy_students <- group_by(happy, happiness = happy) %>% 
+happy_students <- group_by(happy, happiness = happy) |> 
   summarize(number = n())
 happy_students
 ```
@@ -841,7 +841,7 @@ As an example, consider the dataset `and_salamanders` sourced from the package `
 ```{r}
 library(lterdatasampler)
 
-and_salamanders <- and_vertebrates %>%
+and_salamanders <- and_vertebrates |>
   filter(species == "Coastal giant salamander")
 and_salamanders
 ```
@@ -853,7 +853,7 @@ ggplot(and_salamanders) +
   geom_point(aes(x = length_1_mm, y = weight_g), alpha = 0.4) 
 ```
 
-As illustrated by the alpha, we can observe most observations are concentrated where length is in the range $[19, 100)$ and that observations are more dispersed in the range $[100, 181]$. A log transformation can help distribute the observations more evenly along the axis. We can apply this transformation to both axes as follows. 
+As illustrated by the alpha, we can observe most observations are concentrated where length is in the range $[19, 100]$ and that observations are more dispersed in the range $[100, 181]$. A log transformation can help distribute the observations more evenly along the axis. We can apply this transformation to both axes as follows. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE, warning=FALSE}
 ggplot(and_salamanders) +
@@ -912,8 +912,8 @@ library(gapminder)
 library(gridExtra)
 library(palmerpenguins)
 
-g1<- penguins %>% 
-  filter(species == "Adelie") %>% 
+g1<- penguins |> 
+  filter(species == "Adelie") |> 
   ggplot() + 
   geom_histogram(aes(x = flipper_length_mm), 
                  bins = 10, color = "gray", fill="darkcyan") + 
@@ -922,8 +922,8 @@ g1<- penguins %>%
   theme(plot.title = element_text(size = 11, colour = 'black'),
         plot.subtitle = element_text(size = 8, colour = 'black'))
 
-g2 <- gapminder %>% 
-  filter(gdpPercap < 60000) %>% 
+g2 <- gapminder |> 
+  filter(gdpPercap < 60000) |> 
   ggplot() + 
   geom_histogram(aes(x = gdpPercap), color = "gray",
                  fill="darkcyan", bins = 25) + 
@@ -932,8 +932,8 @@ g2 <- gapminder %>%
   theme(plot.title = element_text(size = 11, colour = 'black'),
         plot.subtitle = element_text(size = 8, colour = 'black'))
 
-g3 <- longjump %>%
-  filter(year == 2012) %>%
+g3 <- longjump |>
+  filter(year == 2012) |>
   ggplot() + 
   geom_histogram(aes(x = distance), bins = 12, 
                  fill = "darkcyan", color = "gray") + 
@@ -948,7 +948,7 @@ Plotting a histogram for penguin flipper lengths from the `palmerpenguins` packa
 
 Plotting GDP per capita data from the `gapminder` package gives rise to a distribution where the bulk of the countries have a GDP per capita less than $20,000 and countries with more are more extreme, especially at very high values of GDP per capita. Because of its distinctive appearance, distributions with this shape are called __right tailed__ because the "mean" GDP per capita is "dragged" to the right in the direction of the tail. 
 
-The opposite is true for results of the men's long jump in the London Olympics 2012 qualifier. In which case, we call such a distribution to be __left tailed__ as the "mean" is pulled leftward.
+The opposite is true for results of the men's long jump in the London Olympics 2012 qualifier. This histogram is generated from the `longjump` tibble in the `edsdata` package. In this case, we call such a distribution to be __left tailed__ as the "mean" is pulled leftward.
 
 ### The horizontal axis and bar width
 
@@ -1015,8 +1015,8 @@ Below, we create a new attribute `bin` that shows the bin name as its value usin
 
 ```{r}
 bins <- seq(10,50,1)
-binned <- mpg_sub %>%
-  mutate(bin = cut(hwy, breaks = bins)) %>%
+binned <- mpg_sub |>
+  mutate(bin = cut(hwy, breaks = bins)) |>
   count(bin, .drop = FALSE)
 binned
 ```
@@ -1027,8 +1027,8 @@ If you want to ignore the empty bins, change the option of `.drop = FALSE` to `.
 
 ```{r}
 bins <- seq(10,50,1)
-binned <- mpg_sub %>%
-  mutate(bin = cut(hwy, breaks = bins)) %>%
+binned <- mpg_sub |>
+  mutate(bin = cut(hwy, breaks = bins)) |>
   count(bin, .drop = TRUE)
 binned
 ```
@@ -1037,8 +1037,8 @@ We can try the alternate bin sequence, whose step size is 5.
 
 ```{r}
 bins2 <- seq(10,50,5)
-binned2 <- mpg_sub %>%
-  mutate(bin = cut(hwy, breaks = bins2)) %>%
+binned2 <- mpg_sub |>
+  mutate(bin = cut(hwy, breaks = bins2)) |>
   count(bin, .drop = TRUE)
 binned2
 ```
@@ -1071,8 +1071,8 @@ bins <- seq(10, 50, bin_width)
 2. Like before, when we "cut" the `hwy` values using `bins` as break points, we get the bins and their counts under variables `bin` and `n`, respectively.
 
 ```{r}
-binned <- mpg_sub %>%
-  mutate(bin = cut(hwy, breaks = bins)) %>%
+binned <- mpg_sub |>
+  mutate(bin = cut(hwy, breaks = bins)) |>
   count(bin, .drop = TRUE)
 binned
 ```
@@ -1080,7 +1080,7 @@ binned
 3. We obtain the proportions of the counts in the entire cars appearing in the tibble `mpg_sub` by dividing the counts by `nrow(mpg_sub)`.
 
 ```{r}
-binned <- binned %>%
+binned <- binned |>
   mutate(proportion = n/nrow(mpg_sub)) 
 binned
 ```
@@ -1088,7 +1088,7 @@ binned
 4. For each bin, split the proportion in the bin among the 5 units the bin contains.
 
 ```{r}
-binned <- binned %>%
+binned <- binned |>
   mutate(density = proportion/bin_width) 
 binned
 ```
@@ -1130,8 +1130,8 @@ ggplot(mpg, aes(x = hwy)) +
 Here are the counts in the three bins. Observe that the first and last bins have roughly the same number of elements.  
 
 ```{r}
-mpg_sub %>%
-  mutate(bin = cut(hwy, breaks = uneven_bins)) %>%
+mpg_sub |>
+  mutate(bin = cut(hwy, breaks = uneven_bins)) |>
   count(bin, .drop = FALSE)
 ```
 
@@ -1161,13 +1161,13 @@ For this reason, we will prefer to plot our histograms in density scale rather t
 Histograms in density scale allow comparisons to be made between histograms generated from datasets of different sizes or make different bin choices. Consider the following two subsets of car models in `mpg`.
 
 ```{r}
-first_subset <- mpg %>%
+first_subset <- mpg |>
   filter(class %in% c("minivan", "midsize", "suv"))
-second_subset <- mpg %>%
+second_subset <- mpg |>
   filter(class %in% c("compact", "subcompact", "2seater"))
 ```
 
-We can generate a histogram in density scale for each subset. Note that both histograms apply the same bin choices given in `bin_choices`. 
+We can generate a histogram in density scale for each subset. Note that both histograms apply the same bin choices given in the following `bin_choices`. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 bin_choices <- c(10, 15, 20, 22, 27, 30, 45)
@@ -1255,8 +1255,8 @@ We also use `tigris`, `patchwork`, and `mapview`, so we load in these packages a
 `ggplot2` provides functionality for drawing maps. For instance, the following dataset from `ggplot2` contains longitude and latitude points that correspond to the mainland United States. 
 
 ```{r}
-us <- map_data("state") %>%
-  as_tibble() %>%
+us <- map_data("state") |>
+  as_tibble() |>
   select(long, lat, group, region)
 us
 ```
@@ -1274,7 +1274,7 @@ us_map
 For instance, we can annotate the map with the position track of Atlantic storms in 2006 using the `storms` dataset provided by `dplyr`.  
 
 ```{r}
-storms2006 <- storms %>% 
+storms2006 <- storms |> 
   filter(year == 2006) 
 storms2006
 ```
@@ -1308,7 +1308,7 @@ The data frame gives one row per state/territory. The shape information in the v
 Despite the unfamiliar presentation, we can work with `states_sf` using tidyverse tools like `dplyr`. For instance, we can filter the data frame to include just the information corresponding to Florida.  
 
 ```{r}
-fl_sf <- states_sf %>% 
+fl_sf <- states_sf |> 
   filter(NAME == "Florida")
 fl_sf
 ```
@@ -1316,7 +1316,7 @@ fl_sf
 The shape data in the `geometry` variable can be visualized using a **s**imple **f**eature geom ("sf" for short). The sf geom can automatically detect the presence of a geometry variable stored in a data frame and draw a map accordingly. 
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-fl_sf %>%
+fl_sf |>
   ggplot() + 
   geom_sf() + 
   theme_void()
@@ -1339,7 +1339,7 @@ fl_county_sf
 This time, the data frame gives one row per Florida county. We can use the same `ggplot` code to visualize the county-level shape data.  
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-fl_county_sf %>%
+fl_county_sf |>
   ggplot() + 
   geom_sf() +
   theme_void()
@@ -1354,7 +1354,7 @@ The tibble `pres_election` contains county presidential election returns from 20
 
 ```{r}
 library(edsdata)
-fl_election_returns <- election %>%
+fl_election_returns <- election |>
   filter(year %in% c(2008, 2020), state_po == "FL") 
 fl_election_returns
 ```
@@ -1364,10 +1364,10 @@ We apply some `dplyr` work to determine the candidate winner in each county. We 
 ```{r}
 candidates_levels <- c("DONALD J TRUMP", "JOHN MCCAIN", "BARACK OBAMA", "JOSEPH R BIDEN JR")
 
-fl_county_winner <- fl_election_returns %>% 
-  group_by(year, county_name) %>%
-  slice_max(candidatevotes) %>%
-  ungroup() %>%
+fl_county_winner <- fl_election_returns |> 
+  group_by(year, county_name) |>
+  slice_max(candidatevotes) |>
+  ungroup() |>
   mutate(candidate = factor(candidate, 
                             levels = candidates_levels))
 fl_county_winner
@@ -1376,16 +1376,16 @@ fl_county_winner
 We can join the county shape data with the county-level election returns. 
 
 ```{r}
-with_election <- fl_county_sf %>%
-  mutate(NAME = str_to_upper(NAME)) %>%
+with_election <- fl_county_sf |>
+  mutate(NAME = str_to_upper(NAME)) |>
   left_join(fl_county_winner, by = c("NAME" = "county_name")) 
 ```
 
 We can use the sf geom to plot the shape data and map the `fill` aesthetic to the candidate. 
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-with_election %>%
-  filter(year == 2020) %>%
+with_election |>
+  filter(year == 2020) |>
   ggplot() + 
   theme_void() + 
   geom_sf(aes(fill = candidate)) 
@@ -1394,14 +1394,14 @@ with_election %>%
 How do these results compare with the 2008 presidential election? The `patchwork` library allows us to panel two `ggplot` figures side-by-side. 
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-election2008_g <- with_election %>%
-  filter(year == 2008) %>%
+election2008_g <- with_election |>
+  filter(year == 2008) |>
   ggplot() + 
   theme_void() + 
   geom_sf(aes(fill = candidate)) 
 
-election2020_g <- with_election %>%
-  filter(year == 2020) %>%
+election2020_g <- with_election |>
+  filter(year == 2020) |>
   ggplot() + 
   theme_void() + 
   geom_sf(aes(fill = candidate)) 
@@ -1414,8 +1414,8 @@ election2008_g + election2020_g
 `mapview` is a powerful package that can be used to generate an interactive map. We can use it to visualize the county-level data annotated with the 2020 election returns. 
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-with_election %>%
-  filter(year == 2020) %>%
+with_election |>
+  filter(year == 2020) |>
   mapview(zcol = "candidate")
 ```
 
@@ -1426,8 +1426,8 @@ Unfortunately, the default color palette used will likely be unfamiliar to users
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 political_palette <- colorRampPalette(c('red', 'blue'))
 
-with_election %>%
-  filter(year == 2020) %>%
+with_election |>
+  filter(year == 2020) |>
   mapview(zcol = "candidate", col.regions = political_palette)
 ```
 
@@ -1436,8 +1436,8 @@ with_election %>%
 We can also zoom in on a particular county and show the results for just those areas. 
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-with_election %>%
-  filter(year == 2020, NAME %in% c("HILLSBOROUGH", "MANATEE")) %>%
+with_election |>
+  filter(year == 2020, NAME %in% c("HILLSBOROUGH", "MANATEE")) |>
   mapview(zcol = "candidate", col.regions = political_palette)
 ```
 
@@ -1445,7 +1445,7 @@ with_election %>%
 <br />
 For instance, this map reveals election results for the Tampa Bay and Brandenton areas.  
 
-## Vignette: Exploring the US Census 
+## Case Study: Exploring the US Census 
 
 The [United States Census Bureau](https://www.census.gov/) conducts a survey of the population in the United States called the US Census. The Center for Optimization and Data Science (CODS) in the Bureau supports data scientists by providing access to the survey results. 
 
@@ -1468,20 +1468,20 @@ library(edsdata)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-scorecard_relevant <- scorecard_fl %>%
+scorecard_relevant <- scorecard_fl |>
   select(INSTNM:NPT4_PRIV) 
-with_net_tuition <- scorecard_relevant %>%
-  mutate(across(everything(), function(x) na_if(x, "NULL"))) %>% 
-  filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) %>%
+with_net_tuition <- scorecard_relevant |>
+  mutate(across(everything(), function(x) na_if(x, "NULL"))) |> 
+  filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) |>
   mutate(NPT4_PUB = as.double(NPT4_PUB),
          NPT4_PRIV = as.double(NPT4_PRIV))
-with_clean_zip <- with_net_tuition %>%
-  mutate(ZIP = str_replace(ZIP, "\\-[:number:]+", "")) %>%
-  relocate(ZIP, .before = CITY) %>%
+with_clean_zip <- with_net_tuition |>
+  mutate(ZIP = str_replace(ZIP, "\\-[:number:]+", "")) |>
+  relocate(ZIP, .before = CITY) |>
   filter(str_starts(ZIP, "331")) 
-tuition_tidy <- with_clean_zip %>%
-  mutate(ISPUB = !(is.na(NPT4_PUB))) %>%
-  unite("NPT4", NPT4_PUB:NPT4_PRIV, na.rm = TRUE) %>%
+tuition_tidy <- with_clean_zip |>
+  mutate(ISPUB = !(is.na(NPT4_PUB))) |>
+  unite("NPT4", NPT4_PUB:NPT4_PRIV, na.rm = TRUE) |>
   mutate(NPT4 = as.integer(NPT4))
 ```
 
@@ -1532,7 +1532,7 @@ A quick examination of the table reveals that each row represents a combination 
 `tidycensus` plays nicely with tidyverse tools we learned, so we can use `dplyr` and `stringr` to explore how the labels are organized. For instance, we can pick out variables that do not start with `"Estimate!!Total:"`. 
 
 ```{r}
-acs1_variables %>% 
+acs1_variables |> 
   filter(!str_starts(label, "Estimate!!Total:"))
 ```
 
@@ -1541,14 +1541,14 @@ The resulting tibble reveals more descriptive information, e.g., the sub-table l
 We can zoom in further and look at the information corresponding to the variable `B01001_003`. 
 
 ```{r}
-acs1_variables %>% 
+acs1_variables |> 
   filter(name == "B01001_003")
 ```
 
 Alternatively, looking for `"Median family income"` returns all variables that correspond to median family income. 
 
 ```{r}
-acs1_variables_median_income <- acs1_variables %>% 
+acs1_variables_median_income <- acs1_variables |> 
   filter(str_detect(label, "Median family income"))
 acs1_variables_median_income
 ```
@@ -1617,8 +1617,8 @@ asians_flzip
 Finally, we show an example of querying by racial composition at the county-level. During this step, we also form a shorter description of the concept in a column `concept_short`. The following variables are available to us with respect to this criteria. 
 
 ```{r}
-race_variables <- acs1_variables %>%
-  filter(str_detect(name, "B01001._001")) %>%
+race_variables <- acs1_variables |>
+  filter(str_detect(name, "B01001._001")) |>
   mutate(concept_short = str_extract(concept, regex("(?<=\\().{11}")))
 race_variables
 ```
@@ -1688,17 +1688,15 @@ fl_races_county_geo
 Let us compute the percentage of each `estimate` relative to `summary_est` and add the percentage value as a new column named `percent`.
 
 ```{r}
-with_race_percent <- fl_races_county_geo %>% 
+with_race_percent <- fl_races_county_geo |> 
   mutate(percent = 100 * estimate / summary_est)
-with_race_percent
 ```
 
 Let us join this data with the tibble `race_variables` so that we can bring forward descriptions of the variables.
 
 ```{r}
-with_race_percent <- with_race_percent %>%
+with_race_percent <- with_race_percent |>
   inner_join(race_variables, by = c("variable" = "name"))
-with_race_percent
 ```
 
 ### Choropleth maps for racial composition
@@ -1706,7 +1704,7 @@ with_race_percent
 We can generate a choropleth map of the six racial groups. Note that the titles of each figure are an aid to understand the variable visualized and are based on the truncated concept names developed earlier.
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-with_race_percent %>%
+with_race_percent |>
   ggplot(aes(fill = percent)) +
   facet_wrap(~concept_short) +
   geom_sf(color = NA) +
@@ -1726,7 +1724,7 @@ Let us first visualize the net tuition for Miami-based public and private instit
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 bins <- seq(0, 50000, 5000)
 
-tuition_tidy %>%
+tuition_tidy |>
   ggplot() + 
   geom_histogram(aes(x = NPT4, color = ISPUB, y = after_stat(density)), 
                  breaks = bins, color = "gray") +
@@ -1738,7 +1736,7 @@ Not surprisingly, the number where the bulk of annual costs for private institut
 Let us return to the US census data and extract the median family income along with the associated shape data. This information is available in the variable `"B07011_001"`. 
 
 ```{r}
-acs1_variables %>% 
+acs1_variables |> 
   filter(name == "B07011_001")
 ```
 
@@ -1750,7 +1748,7 @@ median_income_zip <- get_acs(
   geography = "zcta",
   variable = "B07011_001",
   geometry = TRUE, 
-  state = "FL") %>%
+  state = "FL") |>
   mutate(ZIP = str_replace(NAME, "ZCTA5 ", ""))
 median_income_zip
 ```
@@ -1758,9 +1756,8 @@ median_income_zip
 We are ready to join the census data with the net tuition data. Let us join the pre-processed net tuition with the census data using `"ZIP"` as the key for linking the two. We prefer a full join for this step as we do not want to discard any observations from either table. 
 
 ```{r}
-income_with_tuition <- median_income_zip %>% 
+income_with_tuition <- median_income_zip |> 
   full_join(tuition_tidy, by = "ZIP") 
-income_with_tuition
 ```
 
 At this point, it can be helpful to inspect the status of the `income_with_tuition` tibble using the `View` utility.
@@ -1776,15 +1773,15 @@ knitr::include_graphics('images/view_tuition.png')
 The `estimate` variable is the median family income. Let us compute the ratio of the net tuition to the median income and store it in a new variable named `tuition_to_income`. This column serves as a measure of the disparity between the net tuition of an institution and the median family income of households in the surrounding area. The closer this ratio is to 1, the more similar these two quantities are. 
 
 ```{r}
-with_disparity <- income_with_tuition %>% 
+with_disparity <- income_with_tuition |> 
   mutate(tuition_to_income = NPT4/estimate)
 ```
 
 We can generate a choropleth map of the net tuition to income ratio data where the ZIP code begins with `"33"`. This spans parts of Florida. 
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-with_disparity %>% 
-  filter(str_detect(ZIP, "^33")) %>%
+with_disparity |> 
+  filter(str_detect(ZIP, "^33")) |>
   ggplot(aes(fill = tuition_to_income)) +
   geom_sf(color = NA) +
   theme_void() + 
@@ -1795,8 +1792,8 @@ with_disparity %>%
 Let's dive in further by looking at ZIP code areas with `"331"` as a prefix.
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-with_disparity %>% 
-  filter(str_detect(ZIP, "^331")) %>%
+with_disparity |> 
+  filter(str_detect(ZIP, "^331")) |>
   ggplot(aes(fill = tuition_to_income)) +
   geom_sf(color = NA) +
   theme_void() + 
@@ -1807,16 +1804,16 @@ with_disparity %>%
 Let's plot this along with the net tuition data. We can use the `patchwork` library to place plots side-by-side. 
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
-tuition_g <- with_disparity %>% 
-  filter(str_detect(ZIP, "^331")) %>%
+tuition_g <- with_disparity |> 
+  filter(str_detect(ZIP, "^331")) |>
   ggplot(aes(fill = NPT4)) +
   geom_sf(color = NA) +
   theme_void() + 
   scale_fill_viridis_c(option = "inferno") +
   labs(fill = "Net tuition")
 
-disparity_g2 <- with_disparity %>% 
-  filter(str_detect(ZIP, "^331")) %>%
+disparity_g2 <- with_disparity |> 
+  filter(str_detect(ZIP, "^331")) |>
   ggplot(aes(fill = tuition_to_income)) +
   geom_sf(color = NA) +
   theme_void() + 
@@ -1833,8 +1830,8 @@ An interactive map can make the exact pinpointing of these areas easier to see.
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 color_palette <- colorRampPalette(inferno(20))
 
-with_disparity %>% 
-  filter(str_detect(ZIP, "^331")) %>%
+with_disparity |> 
+  filter(str_detect(ZIP, "^331")) |>
   mapview(zcol = "tuition_to_income", col.regions = color_palette)
 ```
 

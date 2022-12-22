@@ -19,6 +19,7 @@ Imports:
   tidytext,
   mapview,
   maps,
+  webshot,
   tm,
   gridExtra,
   reshape2,

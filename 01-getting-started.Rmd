@@ -10,6 +10,10 @@ output:
 
 # Getting Started
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(webshot)
+```
+
 Data science is a field of science that aims at discovering patterns and extracting knowledge through analysis of data and developing methods to support such investigation. The field is rooted in mathematics, statistics, computer science, and vision science and has contributed to a wide array of disciplines, e.g.,  biology, chemistry, economics, literary studies, medicine, physical sciences, and psychology. 
 
 
@@ -94,9 +98,9 @@ Run your eye down the table and observe that the number of telephones in each re
 Suppose our goal is to plot the trend in the seven regions over the years. To accomplish this, we need to do some *data tidying*. Namely, we need the region and the number of telephones to appear as column pairs; we also give the year its own column. 
 
 ```{r}
-transformed <- WorldPhones %>%
-  as_tibble() %>%
-  rownames_to_column("Year") %>% 
+transformed <- WorldPhones |>
+  as_tibble() |>
+  rownames_to_column("Year") |> 
   pivot_longer(cols = 2:8, names_to = "Region", values_to = "Count")
 ```
 
@@ -126,7 +130,7 @@ ggplot(transformed) +
   labs(fill = "Region")
 ```
 
-We call this one a *stacked bar chart*, which we will also see later. Every plot tells a different story. This one signals how the *proportion* of telephones changes across each region. For instance, the stacked bar chart makes it easier to see how the regions Asia and Africa gradually increase its share of telephone usage when compared to the scatter plot.       
+We call this one a *stacked bar chart*, which we will also see later. Every plot tells a different story. This one signals how the *proportion* of telephones changes across each region. For instance, the stacked bar chart makes it easier to see how the Asia and Africa regions gradually increase its share of telephone usage when compared to the scatter plot.       
 
 Can you spot some other differences between the two plots, especially in regards to what the visualizations say about the data?
 
@@ -148,23 +152,23 @@ library(readtext)
 We load the data from the Gutenberg Project and remove any preface or introductory material; we designate the loaded text with the name `moby`, so that we can refer to it again later on. 
 ```{r}
 url <- "https://www.gutenberg.org/files/2701/2701-0.txt"
-moby <- readtext(url) %>%
+moby <- readtext(url) |>
   str_sub(27780)
 ```
 
 The current version of the text is what data scientists call "dirty." To make it tidy, we trim whitespaces and newline characters from the text, and lowercase all characters.   
 
 ```{r}
-moby_chapters <- unlist(str_split(moby, fixed("CHAPTER"))) %>%
-  str_trim() %>%
-  str_replace_all("\\s+", " ") %>%
+moby_chapters <- unlist(str_split(moby, fixed("CHAPTER"))) |>
+  str_trim() |>
+  str_replace_all("\\s+", " ") |>
   str_to_lower()
 ```
 
 We store the text in a table called `moby_df`. 
 
 ```{r, results='hide'}
-moby_df <- tibble("chapters" = moby_chapters) %>% 
+moby_df <- tibble("chapters" = moby_chapters) |> 
   slice(-1)
 ```
 
@@ -177,17 +181,19 @@ slice_head(moby_df, n = 5)
 ```{r warning = FALSE, message = FALSE, echo = FALSE}
 library(kableExtra)
 
-moby_chapters_tmp <- unlist(str_split(moby, fixed("CHAPTER"))) %>% 
-  str_trim() %>%
-  str_replace_all("\\s+", " ") %>%
-  str_to_lower() %>%
+moby_chapters_tmp <- unlist(str_split(moby, fixed("CHAPTER"))) |>
+  str_trim() |>
+  str_replace_all("\\s+", " ") |>
+  str_to_lower() |>
   str_sub(end = 200) 
-disp_df <- data.frame("chapters" = moby_chapters_tmp)
+  
 
+disp_df <- tibble("chapters" = moby_chapters_tmp) |>
+  slice(-1)
 
 knitr::kable(
-  head(disp_df, 5), booktabs = TRUE) %>%
-  kable_styling(bootstrap_options = "striped", full_width = F) %>%
+  head(disp_df, 5), booktabs = TRUE) |>
+  kable_styling(bootstrap_options = "striped", full_width = F) |>
   column_spec(1, width = "30em")
 ```
 
@@ -199,7 +205,7 @@ Now that we have the main text stored in tabular form, we are ready to do some a
 We compute in each chapter how many times each of the words occur: "ship", "sea", and "god". The results are stored as new columns appended to the table `moby_df`.
 
 ```{r}
-moby_df <- moby_df %>%
+moby_df <- moby_df |>
   mutate(
     chapter_num = row_number(),
     ship = str_count(chapters, "ship"),
@@ -211,7 +217,7 @@ moby_df <- moby_df %>%
 Here is what those new columns look like. 
 
 ```{r}
-moby_df %>%
+moby_df |>
   select(chapter_num, ship, sea, god)
 ```
 
@@ -245,20 +251,20 @@ RStudio is an integrated development environment (also known as an IDE) popularl
 
 ### Posit Cloud and RStudio 
 
-There are two ways to work with R. The first option is Posit Cloud, a lightweight and cloud-based interface to RStudio. If you use Posit Cloud, you can code right from your favorite browser! However, because Posit Cloud is cloud-based, the code you write is executed on someone else's machine and, therefore, uses up their computational resources. For this reason, Posit Cloud offers a "free tier" that gives access to limited resources (1GB memory and 1 CPU per project) with 25 project hours/month. This should be sufficient for the examples and exercises covered in this text, but you may run up against the project hour quota. You may wish to upgrade to a paid tier that gives more project hours and computational power. We recommend Posit Cloud to students with older machines and students who prefer a zero-installation setup for getting started. Posit Cloud is available here:
+There are two ways to work with R. The first option is Posit Cloud, a lightweight and cloud-based interface to RStudio. If you use Posit Cloud, you can code right from your favorite browser! However, because Posit Cloud is cloud-based, the code you write is not executed on your machine and, instead, uses someone else's computational resources. Posit Cloud offers a "free tier" that gives access to limited resources (1GB memory and 1 CPU per project) with 25 project hours/month. This should be sufficient for the examples and exercises covered in this text, but you may run up against the project hour quota. A paid tier is available that gives more project hours and computational power. We recommend Posit Cloud to students with older machines and anyone who prefers a zero-installation setup for getting started. Posit Cloud is available here:
 
 * Posit Cloud: https://posit.cloud/ 
 
-The second option is to install R and RStudio Desktop directly to your system. First, you will need to install R and RStudio Desktop from the web. They can be found at the following links. 
+The second option is to install R and RStudio Desktop directly to your system. They can be found at the following links: 
 
 * R: https://cloud.r-project.org
 * RStudio: https://posit.co/download/rstudio-desktop/#download
 
 ### Creating a RStudio Project 
 
-If you are working on Posit Cloud, navigate to your workspace and create a new RStudio project by clicking "New Project" and then "New RStudio Project". This should bring you into a RStudio environment, as shown in the next section.  
+If you are working on Posit Cloud, navigate to your workspace and create a new RStudio project by clicking "New Project" and then "New RStudio Project". This should bring you into a RStudio environment. Once there, feel free to skip to the next section.  
 
-If you installed RStudio Desktop locally, launch the RStudio application. There may be some "getting started" help guides that you are presented with, which you can ignore for now. Your next step will be to create a __R project__ by going to: `File > New Project...`. 
+If you are working with a local installation, launch the RStudio application. There may be some "getting started" help guides that you are presented with, which you can ignore for now. Your next step will be to create a __R project__ by going to: `File > New Project...`. 
 
 ```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
 knitr::include_graphics('images/project_wizard.png')

@@ -62,9 +62,9 @@ We are now ready to provide a definition of tidy data. We defer to [Hadley Wickh
 3. Each value must have its own cell.
 4. Each type of observational unit forms a table. 
 
-Data that exists in any other arrangement is, consequently, *messy*. A critical aspect in distinguishing between tidy and messy data forms is defining the __observational unit__. This can look different depending on the statistical question being asked. Defining the observational unit is so important because data that is tidy in one application can, in fact, be messy in another.  
+Data that exists in any other arrangement is, consequently, *messy*. A critical aspect in distinguishing between tidy and messy data forms is defining the __observational unit__. This can look different depending on the statistical question being asked. In fact, defining the observational unit is so important because data that is "tidy" in one application can be "messy" in another.  
 
-The goal of this chapter is to learn about methods for *transforming* messy data into tidy data, with some help from R and the tidyverse. 
+The goal of this chapter is to learn about methods for *transforming* "messy" data into "tidy" data, with some help from R and the tidyverse. 
 
 With respect to the `mtcars` dataset, we can glean the observational unit from its help page: 
 
@@ -92,7 +92,7 @@ bakery1
 Alternatively, you may decide to encode the information as follows. 
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
-bakery2 <- as_tibble(t(bakery1), rownames = "week") %>%
+bakery2 <- as_tibble(t(bakery1), rownames = "week") |>
   slice(-1)
 colnames(bakery2) <- c("week", 1,2,3,4)
 ```
@@ -112,14 +112,14 @@ In `bakery1`, the variable we are trying to measure -- *sales* -- is actually sp
 A tidy version of the dataset appears as follows. Compare this with the tables from `bakery1` and `bakery2`. Do not worry about the syntax and the functions used; we will learn about what these mean and how to use them in a later section. 
 
 ```{r}
-bakery_tidy <- bakery1 %>%
+bakery_tidy <- bakery1 |>
   pivot_longer(gingerbread:`macadamia nut`, names_to = "type", values_to = "sales")
 bakery_tidy
 ```
 
 When a dataset is expressed in this manner, we say that it is in *long* format because the number of rows is comparatively larger compared to `bakery1` and `bakery2`. Admittedly, this form can make it harder to identify patterns or trends in the data by eye. However, tidy data opens the door to more efficient data science so that you can rely on existing tools to proceed with next steps. Without a standardized means of representing data, such tools would need to be developed from scratch each time you begin work on a new dataset.   
 
-Observe how this dataset fulfills the four properties of tidy data. The fourth property is fulfilled because the observational unit we are measuring is a weekly cookie sale, and we are measuring three variables -- `week`, `type`, and `sales` -- per observational unit. The detail of the observational unit description is important: these variables do not refer to measurements on some sale or bakery store; they refer specifically to measurements on a given weekly cookie sale for one of three kinds of cookies ("gingerbread", "chocolate peppermint", and "macadamia nut") sold a local Miami bakery in 2021. If this dataset were to contain sales for a different year or kind of cookie not specified in our observational unit statement, then said observations would need to be sorted out into a different table.  
+Observe how this dataset fulfills the four properties of tidy data. The fourth property is fulfilled because the observational unit we are measuring is a weekly cookie sale, and we are measuring three variables -- `week`, `type`, and `sales` -- per observational unit. The detail of the observational unit description is important: these variables do not refer to measurements on some sale or bakery store; they refer specifically to measurements on a given weekly cookie sale for one of three kinds of cookies ("gingerbread", "chocolate peppermint", and "macadamia nut") sold at a local Miami bakery in 2021. If this dataset were to contain sales for a different year or cookie type not specified in our observational unit statement, then said observations would need to be sorted out into a different table.  
 
 A possible scenario in violation the third property might look like the following: the bakery decides to record sale *ranges* instead of a single estimate, e.g., in the case of making a forecast on future sales. 
 
@@ -127,7 +127,7 @@ A possible scenario in violation the third property might look like the followin
 forecast_sales <- tibble(
   week          = c(1, 2, 3),
   forecast = c("200-300", "300-400", "200-500")
-) %>% 
+) |> 
   print()
 ```
 
@@ -191,7 +191,7 @@ Throughout the text, we will store data using the `tibble` construct. However, b
 
 ### Accessing columns and rows
 
-You can access an individual column in two ways: (1) by attaching the dollar sign to the name of the data frame and then the attribute name, and (2) using the function `pull`. We prefer to use the latter because of the `%>%` operator which we will see later. Here are some example usages. 
+You can access an individual column in two ways: (1) by attaching the dollar sign to the name of the data frame and then the attribute name, and (2) using the function `pull`. We prefer to use the latter because of the `|>` operator which we will see later. Here are some example usages. 
 
 ```{r}
 mtcars_tibble$cyl
@@ -358,7 +358,7 @@ mtcars_tibble
 
 The main important verbs from `dplyr` that we will cover are shown in the following figure.
 
-```{r, echo=FALSE, fig.align="center", out.width='40%', fig.asp=1/2}
+```{r, echo=FALSE, fig.align="center", out.width='45%', fig.asp=1/2}
 knitr::include_graphics('images/dplyr_verbs.svg')
 ```
 
@@ -373,7 +373,7 @@ This section will cover the following:
 * `mutate` and `transmute`, for adding new columns 
 * `group_by` and `summarize`, for grouping rows together and summarizing information about the group 
 
-We will also discuss the `%>%` operator to coordinate multiple actions seamlessly. 
+We will also discuss the `|>` operator to coordinate multiple actions seamlessly. 
 
 Be sure to bookmark the `dplyr` [cheatsheet](https://rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) which will come in handy and useful for exploring more verbs available. 
 
@@ -617,7 +617,7 @@ These functions come handy when you want to examine data by grouping rows and su
  
 <!-- Generally speaking, the higher an engine’s displacement the more power it can create, while the lower the displacement the less fuel it can consume. --> 
  
-### Coordinating multiple actions using `%>%`
+### Coordinating multiple actions using `|>`
 
 Let us revise a bit our previous study. Curious about the joint effect of the numbers of cylinders and the transmission of the car, you decide to group by both `cyl` and `am`. After summarizing the groups, you calculate the counts in each group and the average `mpg`. Finally, after the summary is done, you would like to remove any groups from the summary that have less than 2 cars. 
 
@@ -643,31 +643,31 @@ avg_mpg_counts
 
 Observe how the code we have just written is quite cumbersome. It introduces several intermediate products that we do not need, namely, the names `grouped_by_cl` and `summarized`. It can also be difficult to come up with descriptive names.  
 
-Conveniently, there is a construct called the "pipe" which allows us to pass the results from one function as input to another. The way to use piping is simple.
+Conveniently, there is a construct from base R called the "pipe" which allows us to pass the results from one function as input to another. The way to use piping is simple.
 
 * You start by stating the initial dataset. 
-* For each operation to form, you append `%>%` and then the operation, where you omit the dataset name part.
+* For each operation to form, you append `|>` and then the operation, where you omit the dataset name part.
 * If you need to save the result in a data set, you use the assignment operator `<-` at the beginning as usual.
 
 Thus, we can rewrite our first solution as follows. 
 
 ```{r message = FALSE}
-avg_mpg_counts <- mtcars %>%
-  group_by(cyl, am) %>%
+avg_mpg_counts <- mtcars |>
+  group_by(cyl, am) |>
   summarize(count = n(), 
-            avg_mpg = mean(mpg)) %>%
+            avg_mpg = mean(mpg)) |>
   filter(count > 2)
 ```
 
-This solution is much easier to read than our first; we can clearly identify the transformations being performed on the data. It is good to read `%>%` as "then". 
+This solution is much easier to read than our first; we can clearly identify the transformations being performed on the data. It is good to read `|>` as "then". 
 
-Note that there is not much mystery with `%>%`. All the pipe operator does is place an object into the first argument of a function. So, when we say `mtcars %>% group_by(cyl, am)`, the pipe changes this to `group_by(mtcars, cyl, am)`. Or, more generally, if we have `x %>% func(y)`, this is changed to `func(x, y)`.   
+Note that there is not much mystery with `|>`. All the pipe operator does is place an object into the first argument of a function. So, when we say `mtcars |> group_by(cyl, am)`, the pipe changes this to `group_by(mtcars, cyl, am)`. Or, more generally, if we have `x |> func(y)`, this is changed to `func(x, y)`.   
 
 Here is another use of the pipe, using our `mtcars_mutated` tibble from earlier. 
 
 ```{r}
-mtcars_mutated %>%
-  pull(make) %>%
+mtcars_mutated |>
+  pull(make) |>
   unique()
 ```
 
@@ -679,7 +679,7 @@ This section has covered a lot of `dplyr` functions for transforming datasets an
 
 Begin with the `mtcars` dataset from this section and run through each of the functions and the examples discussed here on your own. Observe what the dataset looks like before and after the transformation and try to understand what the transformation is.
 
-Once you develop enough familiarity with these functions, try making small changes to our examples and coming up with your own transformations to apply. Be sure to include the `%>%` operator whenever possible. 
+Once you develop enough familiarity with these functions, try making small changes to our examples and coming up with your own transformations to apply. Be sure to include the `|>` operator whenever possible. 
 
 You may also wish to look at some of the datasets available to you when running the command `data()`. 
 
@@ -712,7 +712,7 @@ forecast_sales
 A solution would be to *split* `forecast` into multiple columns, one giving the lower bound and the other the upper bound. The `tidyr` function `separate` accomplishes the work. 
 
 ```{r}
-forecast_sales %>%
+forecast_sales |>
   separate(forecast, c("low", "high"), "-", convert = TRUE)
 ```
 
@@ -727,7 +727,7 @@ table5
 The `unite` function can be used to merge a split value. Its functionality is similar to `separate`.  
 
 ```{r}
-table5 %>%
+table5 |>
   unite("year", century:year, sep="")
 ```
 
@@ -802,7 +802,7 @@ The third property of tidy data is fulfilled now that the observational unit for
 
 To remedy this, we use *pivot* and, in terms of R, the function `pivot_longer` from the `tidyr` package. The syntax for `pivot_longer` can be complex, and so we do not go over it in detail. Here is how we can use it.   
 ```{r}
-scores_long <- scores_inner %>%
+scores_long <- scores_inner |>
   pivot_longer(c(assign1, assign2, midterm, final), 
                names_to = "assessment", values_to = "score")
 scores_long
@@ -819,7 +819,7 @@ Observe how we can easily read off the three variables from this table: `name`, 
 If we wish to go in the other direction, we can use `pivot_wider`. The function `pivot_wider` grabs a pair of columns and spreads the pair into a series of columns. One column of the pair serves as the source for the new column names after spreading. For each value appearing in the source column, the function creates a new column by the name. The value appearing opposite to the source value appears as the value for the column corresponding to the source.
 
 ```{r}
-scores_long %>%
+scores_long |>
   pivot_wider(names_from = assessment, values_from = score)
 ```
 
@@ -832,7 +832,7 @@ knitr::include_graphics('images/pivot_wider.png')
 Note how this simply undoes what we have done, returning us to the original `scores_inner` table. We can also prefix each of the new columns with `assess_`. 
 
 ```{r}
-scores_long %>%
+scores_long |>
   pivot_wider(names_from = assessment, values_from = score, names_prefix = "assess_")
 ```
 
@@ -869,7 +869,7 @@ library(tidyverse)
 We will use the `mtcars` tibble again in this section so let us prepare the tibble by migrating the row names to a dedicated column. Note how the pipe operator can be used to help with the work. 
 
 ```{r}
-mtcars_tibble <- mtcars %>%
+mtcars_tibble <- mtcars |>
   rownames_to_column("model_name") 
 ```
 
@@ -968,7 +968,7 @@ Let us now return to the discussion of how we can *apply* functions to a column.
 Recall the tidied tibble `mtcars_tibble`. 
 
 ```{r echo=FALSE}
-mtcars_tibble <- mtcars %>%
+mtcars_tibble <- mtcars |>
   as_tibble()
 ```
 
@@ -994,7 +994,7 @@ wt_conversion(100:105)
 To incorporate this into the tibble, we make a call to `mutate` using our function `wt_conversion`, which *modifies* the column `wt`. 
 
 ```{r}
-mtcars_transformed <- mtcars_tibble %>%
+mtcars_transformed <- mtcars_tibble |>
   mutate(wt = wt_conversion(wt))
 mtcars_transformed
 ```
@@ -1012,7 +1012,7 @@ cutoff_400 <- function(x) {
 We could then apply the function to the column `disp` using a similar approach.
 
 ```{r}
-mtcars_transformed <- mtcars_tibble %>%
+mtcars_transformed <- mtcars_tibble |>
   mutate(disp = cutoff_400(disp))
 mtcars_transformed
 ```
@@ -1041,10 +1041,6 @@ To make `cutoff_400` work as intended, we turn to a new programming construct ca
 
 The main construct we will be using from `purrr` is called the *map*. A map applies a function, say the `cutoff_400` function we just wrote, to __each element__ of a vector or list. 
 
-```{r, echo=FALSE, fig.align="center", out.width='20%'}
-knitr::include_graphics('images/purr_logo.png')
-```
-
 `purrr` offers many flavors of map, depending on what the output vector should look like:  
 
 * `map_lgl()` outputs a logical vector.
@@ -1069,16 +1065,16 @@ map_int(1:5, function(x) x)
 
 > A catch here is that the code after the comma, i.e., `function(x) x` specifies *in place* the function to apply to each element of the series preceding the comma `1:5`. The function in question `function(x) x` specifies that the function will receive a value named `x` and *returns* the value of `x` without modification. Thus we call it an identity function. The external function `map_int` states that the result of applying the identify function thus specified with `function(x) x` to each element of the sequence `1:5` will be presented as an integer.
 
-We could write the above anonymous function more compactly using a `purrr`-style "formula". 
+We could write the above anonymous function more compactly. 
 
 ```{r}
-map_int(1:5, ~ .x)
+map_int(1:5, \(x) x)
 ```
 
 The next one is perhaps more useful than the identify function. It computes the square of each element, i.e., $x^2$. 
 
 ```{r}
-map_dbl(1:5, ~ .x ** 2)
+map_dbl(1:5, \(x) x ** 2)
 ```
 
 > __Why use map_dbl() instead of map_int()?__ By default, R treats numbers as doubles. While `1:5` is a vector of integers, each element is subject to the expression `x ** 2`, where `x` is an integer and `2` is a double. To make this operation compatible, R will "promote" `x` to a double, making the output of this expression a double as well.  
@@ -1086,7 +1082,7 @@ map_dbl(1:5, ~ .x ** 2)
 The next one will always return a vector of 5's, regardless of the input. Can you see why? Do you also see why there are six elements, unlike five elements in the previous examples?
 
 ```{r}
-map_dbl(1:6, ~ 5)
+map_dbl(1:6, \(x) 5)
 ```
 
 ### `purrr` with `mutate`
@@ -1096,7 +1092,7 @@ By now we have seen enough examples of how to use `map` with a vector. Let us re
 To incorporate this into a tibble, we encase our `map` inside a call to `mutate`, which modifies the column `disp`.
 
 ```{r}
-mtcars_transformed <- mtcars_tibble %>%
+mtcars_transformed <- mtcars_tibble |>
   mutate(disp = map_dbl(disp, cutoff_400))
 mtcars_transformed
 ```
@@ -1144,7 +1140,7 @@ As you might expect, this tibble contains missing values. We can see that Boston
 If you need to get rid of all rows with `NA`, you can use `drop_na` which is part of `dplyr`.
 
 ```{r}
-temps_clean <- trouble_temps %>% 
+temps_clean <- trouble_temps |> 
   drop_na()
 temps_clean
 ```
@@ -1156,7 +1152,7 @@ There is a way to fill missing values by dragging the non-`NA` value immediately
 Let us fill the values using this setting.
 
 ```{r}
-trouble_temps %>%
+trouble_temps |>
   fill(week1:week3, .direction = "up")
 ```
 
@@ -1167,7 +1163,7 @@ In the case where the bottom row has an `NA` and the top row does not have an `N
 We can also combine the two actions in a bidirectional manner, either going down and then up or going up and then down.
 
 ```{r}
-trouble_temps %>%
+trouble_temps |>
   fill(week1:week3, .direction = "updown")
 ```
 
@@ -1178,14 +1174,14 @@ The directional specifications are: "up", "down", "updown", and "downup". The de
 If you want to make an across-the-board replacement of NA with a specific value, you can use the function `replace_na` from `tidyr`. For instance, the following replaces missing values in `week1` with the value 70.
 
 ```{r}
-trouble_temps %>%
+trouble_temps |>
   mutate(week1 = replace_na(week1, 70))
 ```
 
 If you wish to apply this for all columns in the dataset, we can use provide `replace_na` as an anonymous function in a combination of `mutate` with `across`.
 
 ```{r}
-trouble_temps %>%
+trouble_temps |>
   mutate(across(week1:week3, function(x) replace_na(x, 70)))
 ```
 
@@ -1198,12 +1194,12 @@ The syntax for the instruction is simple. For each attribute you make a placemen
 Below, we fill any `NA` in `week1` with 89, in `week2` with 91, and in `week3` with 88. 
 
 ```{r}
-trouble_temps %>% 
+trouble_temps |> 
   replace_na(list(week1 = 89, week2 = 91, week3 = 88))
 ```
 
 
-## Vignette: Tidying Assessments in a Course
+## Case Study: Tidy Assessments
 
 In this section, we present a larger dataset and apply transformations that are necessary to bring it into tidy data to facilitate further analysis. The goal of this exercise is to demonstrate how the transformations we have learned in this chapter are not tools meant to be used in isolation, but work best when used together to fulfill a complex goal.  
 
@@ -1260,8 +1256,8 @@ To resolve the first problem, we should merge the data from each of the three ti
 We are quite fortunate because each table shares a common attribute which we can use as a key in the join: `number`. We will coordinate the join by first merging the homework and lab tibbles together, and then merging the resulting tibble with the quiz tibble.  
 
 ```{r}
-csc_course_merged <- csc_course_hw %>%
-  inner_join(csc_course_lab, by = "number") %>%
+csc_course_merged <- csc_course_hw |>
+  inner_join(csc_course_lab, by = "number") |>
   inner_join(csc_course_qz, by = "number")
 csc_course_merged
 ```
@@ -1275,8 +1271,8 @@ Now that we have the data in a single table, we can address the problem of missi
 We can accomplish this using the `replace_na` function. We express the anonymous function that uses `replace_na` with formula notation. 
 
 ```{r}
-csc_course_merged <- csc_course_merged %>%
-  mutate(across(everything(), ~replace_na(.x, 0)))
+csc_course_merged <- csc_course_merged |>
+  mutate(across(everything(), \(x) replace_na(x, 0)))
 csc_course_merged
 ```
 
@@ -1297,7 +1293,7 @@ convert_to_100_points <- function(x) {
 We could apply a `mutate` for each of the eleven homeworks and twelve labs, but this can be quite cumbersome to type. The function `across` allows us to mutate multiple columns at once. Here is how we can put everything together. 
 
 ```{r}
-csc_course_merged <- csc_course_merged %>%
+csc_course_merged <- csc_course_merged |>
   mutate(across(matches("lab"), convert_to_100_points),
          across(matches("hw"), convert_to_100_points))
 csc_course_merged
@@ -1310,7 +1306,7 @@ Note that the function `matches("lab")` looks for all columns that have the name
 We will now resolve our fourth stated problem. To overcome this, we can use the *pivot* transformation so that the three variables become apparent in the table: `number`, `assessment`, and `score`. 
 
 ```{r}
-csc_course_merged <- csc_course_merged %>%
+csc_course_merged <- csc_course_merged |>
   pivot_longer(starts_with("hw") | starts_with("lab") | starts_with("qz"), 
                names_to = "assessment", values_to = "score")
 csc_course_merged
@@ -1335,7 +1331,7 @@ str_replace("hw05", "[0-9]+", "")
 We can now pull everything together using a call to `mutate`.  
 
 ```{r}
-csc_course_merged <- csc_course_merged %>%
+csc_course_merged <- csc_course_merged |>
   mutate(assessment = str_replace(assessment, "[0-9]+", ""))
 csc_course_merged
 ```
@@ -1349,8 +1345,8 @@ We are now ready to answer some of the questions we proposed at the outset of th
 We can answer this using a combination of the `group_by` and `summarize` verbs. We will group by the variables `number` and `assessment` and then summarize the grouped means for each group.  
 
 ```{r message=FALSE, warning=FALSE}
-csc_course_merged %>%
-  group_by(number, assessment) %>%
+csc_course_merged |>
+  group_by(number, assessment) |>
   summarize(mean_score = mean(score))
 ```
 
@@ -1359,8 +1355,8 @@ Compare this table with the previous and note how there is only one `hw`, `lab`,
 Let us go further and report the overall assessment averages. 
 
 ```{r message=FALSE, warning=FALSE}
-csc_course_merged %>% 
-  group_by(assessment) %>%
+csc_course_merged |> 
+  group_by(assessment) |>
   summarize(mean_score = mean(score))
 ```
 
@@ -1369,8 +1365,8 @@ Neat! Users of Excel or spreadsheet software might find a result like this famil
 Assuming that each assessment is weighted equally, let us find the mean score for each of the students. 
 
 ```{r message=FALSE, warning=FALSE}
-csc_summary <- csc_course_merged %>% 
-  group_by(number) %>%
+csc_summary <- csc_course_merged |> 
+  group_by(number) |>
   summarize(mean_overall_score = mean(score))
 csc_summary
 ```
@@ -1378,13 +1374,13 @@ csc_summary
 Now let us zoom in on those that are performing less than, say, 70.  
 
 ```{r message=FALSE, warning=FALSE}
-csc_summary %>%
+csc_summary |>
   filter(mean_overall_score < 70)
 ```
 
 You can imagine how such an analysis could be useful when used mid-semester -- we could check in with those students to investigate further.
 
-## Vignette: Exploring the College Scorecard
+## Case Study: Exploring the College Scorecard
 
 Before closing the chapter, we present one more application of data transformation techniques in a real-world setting. This time, we turn to a much larger dataset and appeal to the [annual College Scorecard](https://collegescorecard.ed.gov) published by the Department of Education on recent institution-level data. We will use this dataset to explore the average annual cost of attending public and private institutions in the Miami area. 
 
@@ -1422,7 +1418,7 @@ We will concentrate specifically on variables that correspond to the average *ne
 Note that the last two variables have different names, but they both represent the net tuition. We drill down the tibble to contain just these variables: 
 
 ```{r}
-scorecard_relevant <- scorecard_fl %>%
+scorecard_relevant <- scorecard_fl |>
   select(INSTNM:NPT4_PRIV) 
 scorecard_relevant
 ```
@@ -1439,20 +1435,20 @@ For the purposes of this analysis, we would like to perform the following to bri
 We would like to focus only on those institutions that have a recorded four-year net tuition (public or private). We would expect, then, to be able to eliminate the observations that do not by keeping only those observations where a missing value is *not* present in one of the two net tuition variables (`NPT4_PUB` and `NPT4_PRIV`). 
 
 ```{r}
-scorecard_relevant %>%
+scorecard_relevant |>
   filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) 
 ```
 
 It would seem all is well and that the data we have is indeed complete. However, a closer look at one of the institutions tells all: 
 
 ```{r eval=FALSE}
-scorecard_relevant %>%
+scorecard_relevant |>
   filter(INSTNM == "Florida Institute of Ultrasound Inc")
 ```
 
 ```{r echo=FALSE}
-scorecard_relevant %>%
-  filter(INSTNM == "Florida Institute of Ultrasound Inc") %>%
+scorecard_relevant |>
+  filter(INSTNM == "Florida Institute of Ultrasound Inc") |>
   relocate(c(NPT4_PUB, NPT4_PRIV), .before = CITY)
 ```
 
@@ -1461,23 +1457,23 @@ The College Scorecard chooses to present missing values in a non-standard form u
 We can remedy the problem by converting all instances of `"NULL"` to proper missing values so that these can be detected appropriately by our `dplyr` verbs. The function we use is `na_if`, which is similar to the `replace_na` function shown earlier. 
 
 ```{r}
-scorecard_relevant <- scorecard_relevant %>%
-  mutate(across(everything(), ~ na_if(.x, "NULL")))
+scorecard_relevant <- scorecard_relevant |>
+  mutate(across(everything(), \(x) na_if(x, "NULL")))
 ```
 
 By running our prior code chunk again, the irrelevant institutions are now properly removed. 
 
 ```{r}
-scorecard_relevant %>%
+scorecard_relevant |>
   filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) 
 ```
 
 We can combine our steps to form a strategy for handling missing values in this dataset. While we are at it, we will convert the net tuition columns to *double* columns as these express numerical quantities and not strings. 
 
 ```{r}
-with_net_tuition <- scorecard_relevant %>%
-  mutate(across(everything(), ~ na_if(.x, "NULL"))) %>% 
-  filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) %>%
+with_net_tuition <- scorecard_relevant |>
+  mutate(across(everything(), \(x) na_if(x, "NULL"))) |> 
+  filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) |>
   mutate(NPT4_PUB = as.double(NPT4_PUB),
          NPT4_PRIV = as.double(NPT4_PRIV))
 with_net_tuition
@@ -1488,7 +1484,7 @@ with_net_tuition
 We turn to cleaning the ZIP code information in the dataset. Let us examine some of these ZIP codes in `ZIP`: 
 
 ```{r}
-with_net_tuition %>%
+with_net_tuition |>
   select(ZIP)
 ```
 
@@ -1503,17 +1499,17 @@ str_replace(c("33172-2209", "34474"), "\\-[:number:]+", "")
 We replace the column `ZIP` with the cleaned zip code format.  
 
 ```{r}
-with_net_tuition %>% 
-  mutate(ZIP5 = str_replace(ZIP, "\\-[:number:]+", "")) %>%
+with_net_tuition |> 
+  mutate(ZIP5 = str_replace(ZIP, "\\-[:number:]+", "")) |>
   relocate(ZIP5, .before = CITY)
 ```
 
 We add a step to this sequence where we zoom in on institutions that are Miami-based. We can accomplish this by filtering ZIP codes that begin with `"331"`.
 
 ```{r}
-with_clean_zip <- with_net_tuition %>%
-  mutate(ZIP = str_replace(ZIP, "\\-[:number:]+", "")) %>%
-  relocate(ZIP, .before = CITY) %>%
+with_clean_zip <- with_net_tuition |>
+  mutate(ZIP = str_replace(ZIP, "\\-[:number:]+", "")) |>
+  relocate(ZIP, .before = CITY) |>
   filter(str_starts(ZIP, "331")) 
 with_clean_zip
 ```
@@ -1523,7 +1519,7 @@ with_clean_zip
 Next, we unite the net tuition columns together into a single new column named `NPT4`. We can accomplish this work using the `tidyr` verb `unite`.
 
 ```{r}
-with_clean_zip %>%
+with_clean_zip |>
   unite("NPT4", NPT4_PUB:NPT4_PRIV, na.rm = TRUE) 
 ```
 
@@ -1532,9 +1528,9 @@ However, before uniting we would like to form a new column named `ISPUB` that in
 Thus, we have the following steps to bring the tuition amounts into a tidy format:   
 
 ```{r}
-tuition_tidy <- with_clean_zip %>%
-  mutate(ISPUB = !(is.na(NPT4_PUB))) %>%
-  unite("NPT4", NPT4_PUB:NPT4_PRIV, na.rm = TRUE) %>%
+tuition_tidy <- with_clean_zip |>
+  mutate(ISPUB = !(is.na(NPT4_PUB))) |>
+  unite("NPT4", NPT4_PUB:NPT4_PRIV, na.rm = TRUE) |>
   mutate(NPT4 = as.integer(NPT4))
 tuition_tidy
 ```
@@ -1551,29 +1547,29 @@ With our tibble in tidy format, we are ready to use it for data analysis. We are
 The first two points can be addressed using the following `dplyr` work. We group observations by ZIP code and type of institution, compute the mean net tuition for each group, and sort the table according to these values.
 
 ```{r}
-tuition_tidy %>%
-  group_by(ZIP, ISPUB) %>%
-  summarize(NPT4_AVE = mean(NPT4)) %>%
-  ungroup() %>%
+tuition_tidy |>
+  group_by(ZIP, ISPUB) |>
+  summarize(NPT4_AVE = mean(NPT4)) |>
+  ungroup() |>
   arrange(desc(NPT4_AVE)) 
 ```
 
 Indeed, the top ranking ZIP code areas are dominated by private entities. We can also see that the most expensive area is 33146, where the authors' home institution resides.  
 
 ```{r}
-tuition_tidy %>%
+tuition_tidy |>
   filter(ZIP == "33146")
 ```
 
 For the third point, we can compute the difference of an institution's net tuition from the mean net tuition in that ZIP code area. We accomplish the work using a grouped mutate. 
 
 ```{r}
-tuition_tidy %>%
-  group_by(ZIP) %>%
+tuition_tidy |>
+  group_by(ZIP) |>
   mutate(NPT4_avg = mean(NPT4),
-         tuition_diff = NPT4 - NPT4_avg) %>%
-  ungroup() %>%
-  arrange(tuition_diff) %>%
+         tuition_diff = NPT4 - NPT4_avg) |>
+  ungroup() |>
+  arrange(tuition_diff) |>
   relocate(ISPUB, .before = ZIP)
 ```
 
@@ -1650,13 +1646,13 @@ those rows whose value for "B" is less than or equal to 90.
 The filter function by default, removes all rows for which evaluating the criteria is not possible due to NA.
 
 ```{r eval = FALSE}
-na_data %>% filter(B <= 90)
+na_data |> filter(B <= 90)
 ```
 
 If you have multiple criteria you want to apply conjunctively (meaning all of them have to be true), you can connect the individual criteria with a comma in between.
 
 ```{r eval = FALSE}
-na_data %>% filter(B <= 90, B >= 80)
+na_data |> filter(B <= 90, B >= 80)
 ```
 
 The filtering function has something clever, you can compute some values on the fly using some attributes and feed them into the filtering criterion.
@@ -1665,13 +1661,13 @@ You can use the function to compute the minimum in "B" ignoring the NA in the at
 The filtering function below takes the minimum and then keeps only those rows whose "B" value is less than or equal to the minimum.
 
 ```{r eval = FALSE}
-na_data %>% filter(C <= min(B, na.rm = TRUE))
+na_data |> filter(C <= min(B, na.rm = TRUE))
 ```
 
 ```{r eval = FALSE}
 # Load data and replace all NA's with 0
 # Save it as `csc0`
-read_csv("data/csc_course.csv") %>%
+read_csv("data/csc_course.csv") |>
   replace(is.na(.), 0) -> csc0
 # Create a lab part `csc_lab` by:
 # (a) selecting "number" and the ten lab scores,
@@ -1680,8 +1676,8 @@ read_csv("data/csc_course.csv") %>%
 #     where selection of the columns for pivoting is by way of specifying all the columns other than "number",
 # (c) creating a new attribute "temp_id" by connecting the value appearing in "number",
 #     an underscore, and the value appearing in "lab_index"
-csc0 %>% select(number, lab01:lab10) %>%
-  pivot_longer(cols = !number, names_to = "lab_index", values_to = "lab_score", names_prefix="lab" ) %>%
+csc0 |> select(number, lab01:lab10) |>
+  pivot_longer(cols = !number, names_to = "lab_index", values_to = "lab_score", names_prefix="lab" ) |>
   mutate(temp_id = str_c(number, "_", lab_index)) -> csc_lab
 # Create a homework part `hw_lab` by:
 # (a) selecting "number" and the first ten homework scores,
@@ -1690,8 +1686,8 @@ csc0 %>% select(number, lab01:lab10) %>%
 #     where selection of the columns for pivoting is by way of specifying all the columns other than "number",
 # (c) creating a new attribute "temp_id" by connecting the value appearing in "number",
 #     an underscore, and the value appearing in "hw_index"
-csc0 %>% select(number, hw01:hw10) %>%
-  pivot_longer(cols = !number, names_to = "hw_index", values_to = "hw_score", names_prefix="hw" ) %>%
+csc0 |> select(number, hw01:hw10) |>
+  pivot_longer(cols = !number, names_to = "hw_index", values_to = "hw_score", names_prefix="hw" ) |>
   mutate(temp_id = str_c(number, "_", hw_index)) -> csc_hw
 # check the two sub parts
 csc_lab
@@ -1701,8 +1697,8 @@ csc_hw
 # (b) compute the difference as a new attribute "diff"
 # (c) create a new attribute "index" whose values are identical to those of "lab_index"
 # (d) select five columns "number", "index", "lab_socre", "hw_score", and "diff" in this order.
-full_join(csc_lab, csc_hw, name = temp_id) %>% mutate(diff = hw_score - lab_score) %>%
-  mutate(index = lab_index) %>%
+full_join(csc_lab, csc_hw, name = temp_id) |> mutate(diff = hw_score - lab_score) |>
+  mutate(index = lab_index) |>
   select(number,index,lab_score,hw_score,diff) -> csc_new
 csc_new
 ```

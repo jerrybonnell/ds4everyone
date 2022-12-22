@@ -233,7 +233,7 @@ capitol <- function(x) {
   } else if (x == "Alabama") {
     return("Montgomery")
   } else {
-    return("oops, don't know where that is")
+    return("Oops, don't know where that is")
   }
 }
 ```
@@ -424,10 +424,9 @@ Looks like we made some money!
 
 Note that while `replicate` eliminates the need to write `for` loops in common situations, R internally must still perform a `for` loop, i.e., the code for `replicate` contains a `for` loop and it is not directly visible to us as the programmer who wrote the code. Therefore, the chief benefit of using constructs like `replicate` and map is not for its speed, but clarity: it is much easier to read (and write!).
 
-If you are still not convinced, we defer to a prominent data scientist and one of the leading contributors to the tidyverse for an explanation. 
+If you are still not convinced, we defer to a prominent data scientist and an authority on tidyverse for an explanation. 
 
 > Of course, someone has to write loops. It doesn’t have to be you. — Jenny Bryan
-
 
 ### Example: 1,000 tosses
 
@@ -481,7 +480,7 @@ The first step is to figure out which part of the physical process we want to im
 
 ### Step 2: Figure out how to simulate one value
 
-The second step is to figure out how to generate values for the numerical representation from the first step using a computer program. If some numbers require updates during the simulation procedure, we will figure out how to update them. Randomness is often a key ingredient in this step.  
+The second step is to figure out how to generate values for the numerical representation from the first step using a computer program. If some numbers require updating during the simulation procedure, we will figure out how to update them. Randomness is often a key ingredient in this step. This is usually the most difficult part of the simulation to complete.   
 
 ### Step 3: Run the simulation and visualize!
 
@@ -496,7 +495,7 @@ Note that we have followed these same steps in the betting experiment from the p
 * Create an "experiment" function to simulate one value based on the code we developed.
 
 * Call the function `replicate` to replicate the experiment function a great number of times. 
-  * Store the resulting to a variable. We call this the "outcomes" vector.
+  * Store the results to a variable. We call this the "outcomes" vector.
   * A general format takes the form: `outcomes <- replicate(n = rounds, experiment_func())`
 
 The outcomes vector will contain all the simulated values. A good next step would be to visualize the distribution of the simulated values by counting the number of simulated values that fall into some category or, perhaps more directly, by using `ggplot`! 
@@ -571,9 +570,9 @@ one_trial()
 Here we face a critical question, "for our goal of developing an insight about coin tosses, how many times do we want to repeat it?" We can easily run the code 10,000 times, so let's choose 10,000 times. 
 
 We have programmed `one_trial` so that it executes 100 coin tosses and returns the number of "Heads".
-We can use a for-loop to repeat `one_trial` as many times we want.
+We now need a loop to repeat `one_trial` as many times we want.
 
-To do that, we use the map.
+To do that, we use the `replicate` construct.
 
 ```{r}
 # Number of repetitions
@@ -591,8 +590,7 @@ Instead, we can ask `heads` how many elements it has, using the `length` functio
 length(heads)
 ```
 
-Aha! It has the desired number of elements.
-We can peek at some of the elements in the vector.
+Aha! It has the desired number of elements. We can peek at some of the elements in the vector.
 
 ```{r}
 heads[1]
@@ -614,7 +612,7 @@ results
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) + 
-  geom_histogram(aes(x = num_heads, y = ..density..), 
+  geom_histogram(aes(x = num_heads, y = after_stat(density)), 
                  color = "gray", fill = "darkcyan", breaks = seq(30.5, 69.6, 1))
 ```
 
@@ -627,13 +625,13 @@ If the coin is fair, for all number $d$, the event that we see $50-d$ "Heads" is
 The symmetry that we observe confirms the hypothesis.
 We also see that about 8% (i.e., 0.08 on the y-axis) of the simulation results produced 50.
 Furthermore, we see that very few times we see occurrences of numbers less than 35 or greater than 65.
-We thus conclude from the experiment that the range of thew number is likely to reside in the range [35,65].
+We thus conclude from the experiment that the range of thew number is likely to reside in the range $[35,65]$.
 
-### Example: The story of the doubling grains 
+### Accounting errors
 
-There is a famous the story of a king awarding a minister with doubling amount of grains. There are many versions of the story, but the gist is like this: one day a king has decided to award a minister for his great work.
+There is a famous story of a king awarding a minister with doubling amount of grains. There are many versions of the story, but the gist is like this: one day a king has decided to award a minister for his great work.
 
-* The kind asks, "Great work, what do you want from me as a reward? You name it, I will make you wish come true."
+* The kind asks, "Great work, what do you want from me as a reward? You name it, I will make your wish come true."
 * The minister says, "Your Majestry, what an honor! If you are so kind as to indulge me, may I ask to receive grains of rice on a board of chess. We will start with one grain on a space on the board, given one day. The next day, I would like two grains on the next space. The following day, I would like four grains on the third space. Each day, I would like twice as many grains as you have given me on the previous day. In this manner, for the next 64 days, you would be so generous to give me grains of rice. Would that be too imposing to ask?"
 * The king says, "You ask so little. That would be so easy to do. Of course, this great King will grant you your request."
 
@@ -665,79 +663,103 @@ At the end of calculation, we get
 \[
 2^{63} + 2^{63} - 1 
 \]
-and this is equal to $2^{64}-1$, which is by the way an obscenely large number.
+and this is equal to $2^{64}-1$, which is, by the way, an obscenely large number.
 
 We know the story as a fable that tells us we must think before promising something. This story took place hundreds of years ago, where there were no computers. For the king to provide the grains he had promised to give to the minister, he would have ordered a clerk to do the calculation.
 
-If the clerk is super-human, her calculation would be perfect, and so the total amount she would provide would be exactly what we had anticipated. But, since she is human, humans are prone to error. In the process of writing down numbers, there may be various errors, such as skipping a digit or writing a wrong digit.
+If the clerk is super-human, her calculation would be perfect, and so the total amount she would provide would be exactly what we had anticipated. But, since she is human, she is prone to error. In the process of writing down numbers, there may be various errors, such as skipping a digit or writing a wrong digit.
 
 If she does not notice an error, the minister would get a different amount of grains at the end of the 64 days. Suppose we want to mimic the process of her calculation using a computer, with the chance factor in mind. This is where "randomness" comes in to play.
 
-To simplify the scenario, we will consider the number of grains the minister receives at the end of 10th day. We know that the number of grains should equal $2^{10} - 1$.
+Let us consider two different scenarios for the source of error: 
 
-### Step 1: Determine what to simulate 
+* The errors are __independent__. That is, the error the clerk makes on a day does __not__ affect the bookkeeping the next day.  
+* The errors are __dependent__. That is, the error the clerk makes affects the next day's counting and has a lasting effect on the bookkeeping for the remaining days. 
 
-We are interested in simulating the number of grains the minister receives at the end of the 10th day. We hypothesize that the number of grains should cluster around $2^{10} - 1 = 1023$. 
+The first scenario is easier, so we will develop a simulation scheme for this first. Also, to simplify the number crunching, we consider the number of grains the minister receives at the end of 10th day. We know that this number should equal $2^{10} - 1$.
 
-### Step 2: Figure out how to simulate one value
+#### Step 1: Determine what to simulate 
 
-We need to imagine the variability in the clerk's calculations for the number of grains a minister receives on a given day. If the clerk is perfect, we expect that number of grains to be $2^{\text{ day} - 1}$. For instance, on the third day the minister should receive 4 grains which is $2^{3 - 1} = 2^2 = 4$. 
+We are interested in simulating the number of grains the minister receives at the end of the 10th day, assuming independent errors in bookkeeping. We hypothesize that the number of grains should cluster around $2^{10} - 1 = 1023$. 
 
-```{r}
-grains3 <- 2^(3 - 1)
-grains3 
-```
+#### Step 2: Figure out how to simulate one value
 
-However, the clerk is *not* perfect. How can we account for this in our simulation? We can use `sample`!
+We need to imagine the variability in the clerk's calculation for the number of grains a minister receives. Based on what we know from the story, three actions are possible:
 
-We will assume that, for the most part, the clerk is correct and calculates the right number of grains. But, we will also say that the clerk may double count the number of grains or forget to count the day altogether with some probability. This yields three events: *correct*, *double count*, and *forget*. Say the probabilities for these events are $2/3$, $1/3$, and $1/3$, respectively. We can pass these probabilities in as an additional argument to `sample`. 
+1. The clerk counts one less grain. 
+2. The clerk counts the right amount of grains.
+3. The clerk counts one extra grain.
 
-```{r}
-some_error <- sample(c(-1, 0, 1), prob = c(1/3, 2/3, 1/3), size = 1) 
-some_error
-```
-
-If `some_error` is `0`, then there is no error. If `some_error` is `1`, the clerk double counted. Finally, if `some_error` is `-1`, she neglected to count the day. Therefore, the following calculation gives us the actual number of grains the minister received on day 3.
+We will assume that "getting it right" has a slightly higher chance of occurring with the other two actions having an equal chance of occurring. The following function receives a number of grains as an argument and returns the number of grains after the clerk's calculation. This is the amount the minister would receive after some day. 
 
 ```{r}
-grains3 + some_error * grains3
-```
-
-Now we can pull everything together into a function. 
-
-```{r}
-grains_on_day <- function(day) {
-  grains <- 2^(day - 1)
-  some_error <- sample(c(-1, 0, 1), prob = c(1/3, 2/3, 1/3), size = 1)  # clerk doing her best!
-  return(grains + some_error * grains)
+after_clerk_calculation <- function(grains) {
+  grains + sample(c(-1, 0, 1), 1, prob=c(1/4, 2/4, 1/4))
 }
 ```
 
-One trial of our simulation then is summing up the number of grains the minister received from day 1 to day 10. Note the call we make to the *map* function `map_dbl` to accomplish this work. 
+We can try the function with some arbitrary number of grains, say, 10. 
 
 ```{r}
-one_trial <- function() {
-  grains_per_day <- map_dbl(1:10, grains_on_day)
-  return(sum(grains_per_day))
-} 
+after_clerk_calculation(10)
+```
+
+Try running this a few times to observe the different outcomes. Sometimes the clerk gets it right (counts 10), counts one less (9), or counts one more (11). 
+
+The expected amounts the minister should receive each day follows the form $2^{\text{ day number} - 1}$. We can write the following sequence for the amounts starting at day 1 and ending after day 10.
+
+```{r}
+2 ** (0:9)
+```
+
+Using a `purrr` map, we can simulate the amounts after the clerk's calculation by applying the function `after_clerk_calculation` to each of the elements in the above sequence.
+
+```{r echo=FALSE}
+set.seed(2)
 ```
 
 ```{r}
-one_trial()
+map_dbl(2 ** (0:9), after_clerk_calculation)
+```
+
+```{r echo=FALSE}
+set.seed(2)
+```
+
+Therefore, the total number of grains the minister receives is the sum of these amounts. 
+
+```{r}
+map_dbl(2 ** (0:9), after_clerk_calculation) |>
+  sum()
+```
+
+We now have enough machinery to write a function for simulating one value. This functions receives the number of days as an argument and returns the total grains received by the minister after the given number of days is over. 
+
+```{r}
+total_grains_received <- function(num_days) {
+  map_dbl(2 ** (0:(num_days - 1)), after_clerk_calculation) |> 
+    sum()
+}
+```
+
+For a 10-day scheme, we call the function as follows. 
+
+```{r}
+total_grains_received(10)
 ```
 
 Run the cell a few times and observe the variability in the number of grains.
 
-### Step 3: Run and visualize!
+#### Step 3: Run and visualize!
 
-We will use 100,000 repetitions of the simulation this time to get a good sense of the variability. Each element of the `grains` vector stores the resulting number of grains at the end of the 10th day in each simulation of the story. 
+We will use 10,000 repetitions of the simulation this time to get a sense of the variability. Each element of the `grains` vector stores the resulting number of grains at the end of the 10th day in each simulation of the story. 
 
 ```{r}
 # Number of repetitions
-num_repetitions <- 100000
+num_repetitions <- 10000
 
 # simulate the experiment!
-grains <- replicate(n = num_repetitions, one_trial())
+grains <- replicate(n = num_repetitions, total_grains_received(10))
 ```
 
 As before, we collect our results into a tibble. 
@@ -754,16 +776,125 @@ Finally, we visualize our results.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) + 
-  geom_histogram(aes(x = num_grains, y = ..density..), 
-                 color = "gray", fill = "darkcyan", bins = 30) + 
+  geom_histogram(aes(x = num_grains, y = after_stat(density)), 
+                 color = "gray", fill = "darkcyan", bins = 18) + 
   geom_point(aes(x = 1023, y = 0), color = "salmon", size = 3)
 ```
 
-We observe that the number of grains cluster around 1023, as expected (see the orange dot). Note how in some simulations of the story the minister ends up receiving little to no grains at the end of the 10th day! 
+We observe that the number of grains cluster around 1023, as expected (see the orange dot). In general, each round after the first can create a difference of at most 1, so with $N$ rounds, the difference is at most $N - 1$. Our simulation confirms this fact. 
+
+### Accumulation
+
+We now turn to the second scenario in the doubling grains story. Because the calculation for the next day *depends* on what happened the previous day, we will not be able to use the `map` or `replicate` operations as we did when assuming the errors were independent. We need a programming construct that allows us to update some value as we go along. We could use the `for` loop construct shown in [Section 6.3](https://ds4world.cs.miami.edu/building-simulations.html#for-loops) to achieve this work easily, but we would like to eliminate the need to write a loop as much as possible. 
+
+`purrr` offers another construct called `accumulate` that sequentially applies a 2-argument function to elements of a vector. A key aspect of its operation is that each application of the function uses the *result* of the previous application as the first argument.
+
+Let's see an example. Consider the following character vector of fruits.  
+
+```{r}
+delicious_fruits <- c("apple", "banana", "pineapple", "mango")
+```
+
+We can use `accumulate` to implement string concatenation. Here, we provide an anonymous function that receives two arguments `acc` (an accumulator) and `nxt` (the next element in the input vector). The `str_c` function is called using the two arguments using the colon as a separator.  The effect is the joining, or "concatenation", of all strings in the vector `delicious_fruits` into a single string. 
+
+```{r}
+accumulate(delicious_fruits, \(acc, nxt) str_c(acc, nxt, sep = ":"))
+```
+
+There is a good deal of technical detail here so let us unpack what we just did. The accumulator (stored in the argument `acc`) stores the resulting string after concatenation with each element in the vector `delicious_fruits`. The accumulation begins with the first element, the string `"apple"`. After concatenation with the argument `nxt` ( containing the string `"banana"`), the resulting string is `"apple:banana"` and the accumulator is updated with this value in the next step of the iteration, available in the argument `acc`.
+
+The process continues until each element of the input vector has been exhausted. The result of the accumulation at each step is shown in the vector returned by the `accumulate` function. This vector has the same length as the input vector and the final result appears at the last index (index 4), a single string containing each fruit separated by a colon. 
+
+We could discard the intermediate results and extract just the final product by applying the function `last` from `dplyr`. Observe how this is equivalent to `str_c` when used with the collapse setting. 
+
+```{r}
+# str_c from stringr with collapse
+str_c(delicious_fruits, collapse = ":")
+
+# using accumulate!
+accumulate(delicious_fruits, \(acc, nxt) str_c(acc, nxt, sep = ":")) |>
+  last()
+```
+
+We can also set an initial value to use to begin the accumulation. 
+
+```{r}
+accumulate(delicious_fruits, \(acc, nxt) str_c(acc, nxt, sep = ":"), .init = "a")
+```
+
+This has the effect of extending the resulting vector length by 1. 
+
+In some cases, it is desirable to use the accumulator and ignore the elements in the input vector given (available in the argument `nxt`). This can be useful when you care only about the accumulation and repeating this for some number of steps. 
+
+For instance, the following `accumulate` continuously adds 10 to an initial value 10. The length of the input vector controls the number of steps taken, but the vector contents are ignored.
+
+```{r}
+accumulate(541:546, \(acc, nxt) acc + 10, .init = 10)
+```
+
+It is also possible to terminate the accumulation early based on some condition being met using the `done` sentinenl. This can also be useful depending on the simulation scheme. Question 4 from the exercise set explores this feature in greater depth. 
+
+__Pop quiz:__ Would you expect the resulting vector to change if we used the sequence `1:6` instead as the input vector in the above `accumulate`? Why or why not?  
+
+### Lasting effects of errors
+
+We can use the `accumulate` construct in the doubling grains simulation. Recall that, under the second scenario, the error the clerk makes on some day *affects* the bookkeeping on the remaining days. That is, the amount the clerk gives on a day after the initial day is two times the amount she gave in the previous with a possible error of $\pm$ 1 grain. 
+
+We write a function `grains_after_day` that receives a single argument containing the current number of grains. It returns the sum of the current grains and the calculated grains after `after_clerk_calculation` is called. When things go right, this has the desired effect of *doubling* the current number of grains. 
+
+```{r}
+grains_after_day <- function(current_grains) {
+  new_amount <- current_grains + after_clerk_calculation(current_grains)
+  return(max(1, new_amount))
+}
+```
+
+The second line is added as a sanity check to ensure the resulting grain amounts do not ever go negative. 
+
+We can use this function within an `accumulate` call to simulate one value in this experiment. Here we provide an initial value 1 to begin the accumulation and use the input vector only to step the simulation 10 times.  
+
+```{r}
+accumulate(1:10, \(acc, nxt) grains_after_day(acc), .init = 1)
+```
+
+We can now rewrite the function `total_grains_received` to use the `accumulate` call and retrieve the final value.  
+
+```{r}
+total_grains_received <- function(num_days) {
+  accumulate(1:10, \(acc, nxt) grains_after_day(acc), .init = 1) |> 
+    last()
+}
+```
+
+We can now call this function a large number of times, say, 10,000, to gauge the amount of variability. Each element of the `grains` vector stores the resulting number of grains after the 10th day, assuming *dependent* errors. 
+
+```{r}
+num_repetitions <- 10000
+grains <- replicate(n = num_repetitions, total_grains_received(10))
+```
+
+Finally, we visualize the result. 
+
+```{r}
+grains |>
+  tibble() |> 
+  ggplot() + 
+  geom_histogram(aes(x = grains, y = ..density..), 
+                 bins = 18, color = "gray", fill = "darkcyan") +
+  geom_point(aes(x = 1023, y = 0), color = "salmon", size = 3)
+```
+
+Sometimes the minister received few to no grains at the end of the 10th day and sometimes he received much more than he asked for! Like the first scenario, we see the simulated values cluster again around the expected amount. 
 
 ### Simulation round-up 
 
-table for map, replicate, and accumulate
+This section discussed multiple iteration constructs for building simulations. The following table clarifies when to use each.  
+
+| Construct    | Arguments                                                                                                                            | Returns                                                                                      | When to use?                                                                                      |
+|--------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `map_*`      | (1) a sequence  (2) a function that receives as an argument an element from that sequence                                            | List or vector the same length as the input sequence                                         | Applying a function to a sequence or a tibble column                         |
+| `replicate`  | (1) Number of repetitions (`reps`) (2) a function to repeat                                                                          | Vector of length `reps` that can be stored for later analysis                                | Repeating a function some fixed number of times                                                 |
+| `accumulate` | (1) a sequence  (2) a two-argument function; first argument is an *accumulator* and the second argument an element from the sequence | Vector the same length as the input sequence that  contains the results of the accumulation (or one longer if `.init` used)  | Applying a function where some value needs to be updated in the duration of the simulation  |
 
 ## The Birthday Paradox
 
@@ -909,7 +1040,7 @@ Finally, we visualize our results.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) + 
-  geom_histogram(aes(x = proportions, y = ..density..), 
+  geom_histogram(aes(x = proportions, y = after_stat(density)), 
                  color = "gray", fill = "darkcyan", breaks = seq(0.35, 0.65, 0.01)) + 
   geom_point(aes(x = 0.51, y = 0), color = "salmon", size = 3)
 ```
@@ -1118,17 +1249,17 @@ game_results
 To see whether the contestant should stick with her original choice or switch, let's see how frequently the car is behind each of her two options.
 
 ```{r}
-original_choice <- game_results %>% 
-  group_by(guess) %>%
-  count() %>%
+original_choice <- game_results |> 
+  group_by(guess) |>
+  count() |>
   mutate(which_door = "original")
 original_choice
 ```
 
 ```{r}
-remaining_doors <- game_results %>% 
-  group_by(remaining) %>%
-  count() %>%
+remaining_doors <- game_results |> 
+  group_by(remaining) |>
+  count() |>
   mutate(which_door = "remaining")
 remaining_doors
 ```
@@ -1138,8 +1269,8 @@ As our earlier solution said, the car is behind the remaining door two-thirds of
 To see this graphically, we can "stick" these two tables together and draw a stacked bar chart.
 
 ```{r}
-original_choice <- original_choice %>% rename(item = guess)
-remaining_doors <- remaining_doors %>% rename(item = remaining)
+original_choice <- original_choice |> rename(item = guess)
+remaining_doors <- remaining_doors |> rename(item = remaining)
 stuck_together <- bind_rows(original_choice, remaining_doors)
 stuck_together
 ```
@@ -1300,7 +1431,7 @@ ggplot(results) +
 In 50 rolls, you are almost certain to get at least one 6.
 
 ```{r}
-filter(results, rolls == 50) %>% as.data.frame()
+filter(results, rolls == 50) |> as.data.frame()
 ```
 
 If you have ever played games that rely heavily on "RNG" (*r*andom *n*umber *g*enerator), chances are you intuitively exploited this finding: just keep "rolling" until you find that rare item! 

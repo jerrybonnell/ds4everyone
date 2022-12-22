@@ -940,10 +940,6 @@ To set up, let us load the `tidyverse`.
 library(tidyverse)
 ```
 
-```{r echo=FALSE, message = FALSE, warning = FALSE}
-options(stringr.html = TRUE)
-```
-
 ### Regular expressions
 
 The pattern matching functions of `stringr` accept *regular expressions*.
@@ -998,8 +994,8 @@ So, the syntax is:
 
 A useful diagnostic tool to visualize matches against a pattern is the function `str_view_all`, which highlights any matches hit by the regular expression. For instance: 
 
-```{r}
-str_view_all(s, "[aeiou].[aeiou]")
+```{r warning=FALSE, message=FALSE}
+str_view_all(s, "[aeiou].[aeiou]", html = TRUE)
 ```
 
 In the square brackets you can specify a range using a dash and the caret to mean "not".
@@ -1230,8 +1226,8 @@ The common names are `Black-crowned Night-Heron` and `Little-egret`.
 We can extract this by looking for the *last* occurrence of the dash (`-`).
 Here they are:
 
-```{r}
-str_view_all(birds, "-")
+```{r warning=FALSE, message=FALSE}
+str_view_all(birds, "-", html=TRUE)
 ```
 
 The `str_locate_all` function can tell us the starting and ending positions of all occurrences of the dash.
