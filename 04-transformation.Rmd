@@ -358,9 +358,7 @@ mtcars_tibble
 
 The main important verbs from `dplyr` that we will cover are shown in the following figure.
 
-```{r, echo=FALSE, fig.align="center", out.width='45%', fig.asp=1/2}
-knitr::include_graphics('images/dplyr_verbs.svg')
-```
+![](images/csc100-Page-1.pdf){width=70%}
 
 This section will cover the following:
 
@@ -1102,7 +1100,7 @@ We can inspect visually to see if there are any repeating values in `disp` or if
 The following graphic illustrates the effect of the `purrr` map inside the mutate call.  
 
 ```{r, echo=FALSE, fig.align="center", out.width='40%', fig.asp=1/2}
-knitr::include_graphics('images/csc100-Page-2.drawio.svg')
+knitr::include_graphics('images/csc100-Page-2.drawio.png')
 ```
 
 Note that the use of map allows a vector to be returned by the `cutoff_400` function, which can then be used as a column in the `mutate` call. 

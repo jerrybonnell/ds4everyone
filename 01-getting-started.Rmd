@@ -12,6 +12,7 @@ output:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(webshot)
+options(tinytex.clean = FALSE)
 ```
 
 Data science is a field of science that aims at discovering patterns and extracting knowledge through analysis of data and developing methods to support such investigation. The field is rooted in mathematics, statistics, computer science, and vision science and has contributed to a wide array of disciplines, e.g.,  biology, chemistry, economics, literary studies, medicine, physical sciences, and psychology. 

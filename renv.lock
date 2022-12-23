@@ -2680,10 +2680,15 @@
     },
     "tinytex": {
       "Package": "tinytex",
-      "Version": "0.42",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "7629c6c1540835d5248e6e7df265fa74",
+      "Version": "0.43.1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "tinytex",
+      "RemoteUsername": "yihui",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "ffe74993f470a94935ccb240e712e7d578fb7f0b",
+      "Hash": "e2b2423d0fdea2d943fef3e857162936",
       "Requirements": [
         "xfun"
       ]

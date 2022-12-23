@@ -56,9 +56,11 @@ Note that a third argument `replace` is specified here. By setting it to `TRUE`,
 
 What happens if the size of the vector is smaller than the number of repetitions? 
 
-```{r error=TRUE}
+```{r eval=FALSE}
 sample(two_groups, size = 8)
 ```
+
+![](images/sample_error_code_chunk.png){width=100%}
 
 There are not enough elements to choose from! 
 
@@ -627,7 +629,7 @@ We also see that about 8% (i.e., 0.08 on the y-axis) of the simulation results p
 Furthermore, we see that very few times we see occurrences of numbers less than 35 or greater than 65.
 We thus conclude from the experiment that the range of thew number is likely to reside in the range $[35,65]$.
 
-### Accounting errors
+### Not-so-doubling rewards
 
 There is a famous story of a king awarding a minister with doubling amount of grains. There are many versions of the story, but the gist is like this: one day a king has decided to award a minister for his great work.
 
@@ -639,37 +641,55 @@ The question is how many grains of rice will the minister receive at the end of 
 
 We know the answer to the question. The daily amount doubles each day starting from 1.
 He would thus receive:
+
+
 \[
 1 + 2 + 4 + 8 + 16  + \cdots = 2^0 + 2^1 + 2^2 + 2^3 + 2^4 + \cdots+ 2^{63}
 \]
 
+
 We can express this quantity more compactly as $2^{64} - 1$.
 
 Why? Suppose he has one more grain in his pocket to add to the piles at the end of the 64th day. We have
+
+
 \[
 1 + 1 + 2 + 4 + 8 + \cdots + 2^{63} - 1
 \]
-as the same total amount.
-The first two occurrences of 1 are equal to 2. So we can simplify the sum as
+
+
+as the same total amount. The first two occurrences of 1 are equal to 2. So we can simplify the sum as
+
+
 \[
 2 + 2 + 4 + 8 + \cdots + 2^{63} - 1
 \]
+
+
 We have got rid of the twos.
 By joining the first two 2's, we get
+
+
 \[
 4 + 4 + 8 + \cdots + 2^{63} - 1
 \]
+
+
 At the end of calculation, we get 
+
+
 \[
 2^{63} + 2^{63} - 1 
 \]
+
+
 and this is equal to $2^{64}-1$, which is, by the way, an obscenely large number.
 
 We know the story as a fable that tells us we must think before promising something. This story took place hundreds of years ago, where there were no computers. For the king to provide the grains he had promised to give to the minister, he would have ordered a clerk to do the calculation.
 
 If the clerk is super-human, her calculation would be perfect, and so the total amount she would provide would be exactly what we had anticipated. But, since she is human, she is prone to error. In the process of writing down numbers, there may be various errors, such as skipping a digit or writing a wrong digit.
 
-If she does not notice an error, the minister would get a different amount of grains at the end of the 64 days. Suppose we want to mimic the process of her calculation using a computer, with the chance factor in mind. This is where "randomness" comes in to play.
+If she does not notice an error, the minister would get a different amount of grains at the end of the 64 days. Suppose we want to mimic the process of her calculation using a computer, with the chance factor in mind. This is how "randomness" comes in to play.
 
 Let us consider two different scenarios for the source of error: 
 
@@ -684,13 +704,19 @@ We are interested in simulating the number of grains the minister receives at th
 
 #### Step 2: Figure out how to simulate one value
 
-We need to imagine the variability in the clerk's calculation for the number of grains a minister receives. Based on what we know from the story, three actions are possible:
+We imagine the variability in the clerk's calculation for the number of grains a minister receives. Based on what we know from the story, three actions are possible:
 
 1. The clerk counts one less grain. 
 2. The clerk counts the right amount of grains.
 3. The clerk counts one extra grain.
 
-We will assume that "getting it right" has a slightly higher chance of occurring with the other two actions having an equal chance of occurring. The following function receives a number of grains as an argument and returns the number of grains after the clerk's calculation. This is the amount the minister would receive after some day. 
+We will assume that "getting it right" has a slightly higher chance of occurring ($2/4$) with the other two actions having an equal chance of occurring ($1/4$). We can simulate the clerk's action using `sample` and setting the `prob` argument.  
+
+```{r}
+sample(c(-1, 0, 1), 1, prob=c(1/4, 2/4, 1/4))
+```
+
+The following function receives a number of grains as an argument and returns the number of grains after the clerk's calculation. This is the amount the minister would receive after some day. 
 
 ```{r}
 after_clerk_calculation <- function(grains) {
@@ -704,9 +730,9 @@ We can try the function with some arbitrary number of grains, say, 10.
 after_clerk_calculation(10)
 ```
 
-Try running this a few times to observe the different outcomes. Sometimes the clerk gets it right (counts 10), counts one less (9), or counts one more (11). 
+Try running this a few times to observe the different outcomes. Sometimes the clerk gets it right (10), counts one less (9), or counts one more (11). 
 
-The expected amounts the minister should receive each day follows the form $2^{\text{ day number} - 1}$. We can write the following sequence for the amounts starting at day 1 and ending after day 10.
+The expected amount the minister should receive each day follows the form $2^{\text{ day number} - 1}$. We can write the following sequence for the amounts starting at day 1 and ending after day 10.
 
 ```{r}
 2 ** (0:9)
@@ -795,7 +821,7 @@ Let's see an example. Consider the following character vector of fruits.
 delicious_fruits <- c("apple", "banana", "pineapple", "mango")
 ```
 
-We can use `accumulate` to implement string concatenation. Here, we provide an anonymous function that receives two arguments `acc` (an accumulator) and `nxt` (the next element in the input vector). The `str_c` function is called using the two arguments using the colon as a separator.  The effect is the joining, or "concatenation", of all strings in the vector `delicious_fruits` into a single string. 
+We can use `accumulate` to implement string concatenation. Here, we provide an anonymous function that receives two arguments `acc` (an accumulator) and `nxt` (the next element in the input vector). The `str_c` function is called using the two arguments using the colon as a separator.  The effect achieved is the joining, or "concatenation", of all strings in the vector `delicious_fruits` into a single string. 
 
 ```{r}
 accumulate(delicious_fruits, \(acc, nxt) str_c(acc, nxt, sep = ":"))
@@ -824,7 +850,7 @@ accumulate(delicious_fruits, \(acc, nxt) str_c(acc, nxt, sep = ":"), .init = "a"
 
 This has the effect of extending the resulting vector length by 1. 
 
-In some cases, it is desirable to use the accumulator and ignore the elements in the input vector given (available in the argument `nxt`). This can be useful when you care only about the accumulation and repeating this for some number of steps. 
+In some cases, it is desirable to use the accumulator and ignore the elements in the input vector given (in the argument `nxt`). This can be useful when you care only about the accumulation and repeating this for some number of steps. 
 
 For instance, the following `accumulate` continuously adds 10 to an initial value 10. The length of the input vector controls the number of steps taken, but the vector contents are ignored.
 
@@ -832,13 +858,13 @@ For instance, the following `accumulate` continuously adds 10 to an initial valu
 accumulate(541:546, \(acc, nxt) acc + 10, .init = 10)
 ```
 
-It is also possible to terminate the accumulation early based on some condition being met using the `done` sentinenl. This can also be useful depending on the simulation scheme. Question 4 from the exercise set explores this feature in greater depth. 
+It is also possible to terminate the accumulation early based on some condition being met using the `done` sentinel. This can also be useful depending on the simulation scheme. Question 4 from the exercise set explores this feature in greater depth. 
 
-__Pop quiz:__ Would you expect the resulting vector to change if we used the sequence `1:6` instead as the input vector in the above `accumulate`? Why or why not?  
+__Pop quiz:__ In the above `accumulate` example, would you expect the resulting vector to change if we had used the sequence `1:6` as the input vector? Why or why not?  
 
 ### Lasting effects of errors
 
-We can use the `accumulate` construct in the doubling grains simulation. Recall that, under the second scenario, the error the clerk makes on some day *affects* the bookkeeping on the remaining days. That is, the amount the clerk gives on a day after the initial day is two times the amount she gave in the previous with a possible error of $\pm$ 1 grain. 
+We can use the `accumulate` construct in the doubling grains simulation. Recall that, under the second scenario, the error the clerk makes on some day *affects* the bookkeeping for the remaining days. That is, the amount the clerk gives on a day after the initial day is two times the amount she gave in the previous with a possible error of $\pm$ 1 grain. 
 
 We write a function `grains_after_day` that receives a single argument containing the current number of grains. It returns the sum of the current grains and the calculated grains after `after_clerk_calculation` is called. When things go right, this has the desired effect of *doubling* the current number of grains. 
 
@@ -851,13 +877,13 @@ grains_after_day <- function(current_grains) {
 
 The second line is added as a sanity check to ensure the resulting grain amounts do not ever go negative. 
 
-We can use this function within an `accumulate` call to simulate one value in this experiment. Here we provide an initial value 1 to begin the accumulation and use the input vector only to step the simulation 10 times.  
+We can use this function within an `accumulate` call to simulate one value in this experiment. Here we provide an initial value 1 to begin the accumulation with and use the input vector only to step the simulation 10 times.  
 
 ```{r}
 accumulate(1:10, \(acc, nxt) grains_after_day(acc), .init = 1)
 ```
 
-We can now rewrite the function `total_grains_received` to use the `accumulate` call and retrieve the final value.  
+We rewrite the function `total_grains_received` to use the `accumulate` call and retrieve the final value.  
 
 ```{r}
 total_grains_received <- function(num_days) {
@@ -879,7 +905,7 @@ Finally, we visualize the result.
 grains |>
   tibble() |> 
   ggplot() + 
-  geom_histogram(aes(x = grains, y = ..density..), 
+  geom_histogram(aes(x = grains, y = after_stat(density)), 
                  bins = 18, color = "gray", fill = "darkcyan") +
   geom_point(aes(x = 1023, y = 0), color = "salmon", size = 3)
 ```
@@ -890,11 +916,18 @@ Sometimes the minister received few to no grains at the end of the 10th day and 
 
 This section discussed multiple iteration constructs for building simulations. The following table clarifies when to use each.  
 
-| Construct    | Arguments                                                                                                                            | Returns                                                                                      | When to use?                                                                                      |
-|--------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| `map_*`      | (1) a sequence  (2) a function that receives as an argument an element from that sequence                                            | List or vector the same length as the input sequence                                         | Applying a function to a sequence or a tibble column                         |
-| `replicate`  | (1) Number of repetitions (`reps`) (2) a function to repeat                                                                          | Vector of length `reps` that can be stored for later analysis                                | Repeating a function some fixed number of times                                                 |
-| `accumulate` | (1) a sequence  (2) a two-argument function; first argument is an *accumulator* and the second argument an element from the sequence | Vector the same length as the input sequence that  contains the results of the accumulation (or one longer if `.init` used)  | Applying a function where some value needs to be updated in the duration of the simulation  |
+1. `map_*` 
+    + __Arguments:__ (1) a sequence (2) a function that receives as an argument an element from that sequence
+    + __Returns:__ List or vector the same length as the input sequence
+    + __When to use?__ Applying a function to a sequence or a tibble column
+2. `replicate` 
+    + __Arguments:__ (1) Number of repetitions (`reps`) (2) a function to repeat
+    + __Returns:__ Vector of length `reps` that can be stored for later analysis
+    + __When to use?__ *Repeating* a function some fixed number of times
+3. `accumulate` 
+    + __Arguments:__ (1) a sequence (2) a two-argument function; first argument is an *accumulator* and the second argument an element from the sequence
+    + __Returns:__ Vector the same length as the input sequence that contains the results of the accumulation at each step (or one longer if `.init` argument is set)
+    + __When to use?__ Applying a function where some value needs to be updated through the duration of the simulation
 
 ## The Birthday Paradox
 
@@ -920,9 +953,11 @@ We have 23 students in the class. Each student gets to choose her birthday freel
 
 With no restriction, the number of possible choices of birthdays for the 23 students is
 
+
 \[
 365 * 365 * 365 * \dots * 365 = 365^{23}
 \]
+
 
 These possibilities contain the cases where birthdays may be shared among the people.
 
@@ -938,17 +973,27 @@ We can generalize the action. The $k$-th person has $365 - k + 1$ choices.
 
 By combining all of these for the 23 students, we have that the number of possibilities for choosing all-distinct birthdays is
 
+
 \[
 365 \cdot 364 \cdot 363 \cdot \cdots \cdot 353.
 \]
+
+
 Thus, the chances for the 23 students to make the selections so there are no duplicates are thus
+
+
 \[
 (365 \cdot 364 \cdot 363 \cdot \cdots \cdot 343) / 365^{23}.
 \]
+
+
 Moving terms, we get that the chances are
+
+
 \[
 \frac{365}{365} \cdot \frac{364}{365} \cdots \frac{343}{365}.
 \]
+
 
 The quantity is approximately $0.4927$. The chances we find a duplicate are 1 minus this quantity, which is approximately $0.5073$. Pretty interesting, isn't it?
 
