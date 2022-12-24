@@ -13,52 +13,63 @@ In the previous chapters, we learned about randomness and sampling. Quite often,
 
 Here are examples of the two situations.
 
-* A company making dice is testing the fairness of a die. Using some machine, the company throws the die 100,000 times. They record the face that turns up. By examining the record of the 100,000 throws, can you tell how likely it is that the die is fair?
-* You are evaluating the performance data of National Football League (NFL) players. Are the receivers in 2019 better than those in 2017?
+* A company making coins is testing the fairness of a coin. Using some machine, the company tosses the coin 10,000 times. They record the face that turns up. By examining the record of the 10,000 tosses, can you tell how likely it is that the coin is fair?
+* Is the proportion of enrolled Asian American students at Harvard University disproportionately less than the pool of Harvard-admissible applicants? (*SFFA v. Harvard*)
 
-For both situations, an important consideration to make is in terms of how to compare the differences and
-figuring out how a sample at hand was generated. 
+For both situations, an important consideration to make is in terms of how to compare the differences and figuring out how a sample at hand was generated. 
 
 ## Testing a Model
 
-Suppose 10,000 throws of a die generate the following counts for the faces 1 through 6:
+Suppose 10,000 tosses of a coin generate the following counts for "Heads" and "Tails": 
 
 ```{r}
-face_counts <- c(1620, 1618, 1633, 1658, 1802, 1669)
-face_counts
+mystery_coin <- tibble(face = c("Heads", "Tails"),
+                       face_counts = c(4953, 5047)) 
+mystery_coin
 ```
 
 By dividing each number by 10,000, we get the *proportion* of the occurrence of each face.
 
 ```{r}
-face_props <- face_counts / 10000
-face_props
+mystery_coin <- mystery_coin |>
+  mutate(face_prop = face_counts / 10000)
+mystery_coin
 ```
 
-The six values comprise the sampling distribution representing the behavior of the die. We notice that the values are not exactly 0.1667 (= 1/6). How far away is that from what we know about the true distribution?
+We notice that the values are not exactly 0.5 (= $1/2$). How far away is that from what we know about the distribution of a fair coin?
 
-We know that the probability of each face is $1/6$. By subtracting $1/6$ from each and obtaining the absolute difference values from them by removing any negative sign we have: 
+We know that the probability of each face in a fair coin is $1/2$. By subtracting $1/2$ from each and obtaining the absolute difference values from them by removing any negative sign we have: 
 
 ```{r}
-abs(face_props - 1/6)
+mystery_coin <- mystery_coin |>
+  mutate(fair_prop = 1/2,
+         abs_diff = abs(face_prop - fair_prop))
+mystery_coin
 ```
 
-We then compute the sum and take one half of this value. We will call this the *observed value*. 
+We then compute the sum and take one half of this value.  
 
 ```{r}
-observed_tvd <- sum(abs(face_props - 1/6)) * 1/2
-observed_tvd
+mystery_coin |>
+  summarize(tvd_value = sum(abs_diff) / 2)
 ```
 
-In statistics, this value has a special name: the *total variation distance* (or, for short, TVD).  The total variation distance serves as the measure for the difference between two distributions, namely, the difference between the true and a sampling distribution. 
+The number found by following the above steps is called the *test statistic*. The test statistic is a statistic used to evaluate a hypothesis, i.e., whether a coin at hand is fair or not. When we compute the test statistic from the data given to us, we call this the *observed value of the test statistic*.  
 
-Now that we have the technical term referring to the difference, we can state the question as follows:
+There are many possible test statistics we could have tried for this problem. This one goes by a special name: the *total variation distance* (or, for short, TVD). The total variation distance serves as the measure for the difference between two distributions, namely, the difference between some given distribution (e.g., following the coin handed to us) and a sampling distribution (e.g., following a fair coin). 
 
-> Is the total variation distance 0.0137 too big or too small?
+Another possible, and perhaps straightforward, test statistic is to simply count the number of heads that appear in the sample. 
 
-It is hard to tell without knowing the differences we get by chance.
+```{r}
+observed_heads <- mystery_coin |> 
+  filter(face == "Heads") |> 
+  pull(face_counts)
+observed_heads
+```
 
-Let us conduct some simulation to obtain a sampling distribution of the absolute difference of a fair dice. As mentioned earlier, the proportion that each face turns up is not constant, even for a fair die. So by simulating throws of a fair dice, we must expect to see a range of absolute differences.
+Is 4953 heads *too small* to be due to chance? It is hard to tell without knowing the number of heads we get by chance.
+
+We can conduct some simulation to obtain a sampling distribution of the number of heads produced by a fair coin. As mentioned earlier, the proportion that each face turns up is not constant, even for a fair coin. So, by simulating tosses of a fair coin, we must expect to see a range of the number of heads seen. 
 
 ### Prerequisites
 
@@ -71,9 +82,9 @@ library(tidyverse)
 
 ### The `rmultinom` function
 
-We saw before that we can generate a sampling distribution by putting in place some sampling strategy. Perhaps the most straightforward is simple random sampling with replacement. This will be the approach we continue to make use of here, as well as throughout the rest of the course.  
+We saw before that we can generate a sampling distribution by putting in place some sampling strategy. Perhaps the most straightforward is simple random sampling with replacement. This will be the approach we continue to make use of here, as well as throughout the rest of the text.  
 
-We also learned about two different ways to sample with replacement. `sample` samples items from a *vector*, which we used when simulating the number of expected heads in 100 coin tosses or the expected amount of grains a minister receives after some number of days. `slice_sample` functions identically, but instead samples from rows of a *data frame* or tibble. To generate a sampling distribution for this experiment, we could just use `sample` again. But there is a quicker way, using a function called `rmultinom`, which is tailored for sampling at random from categorical distributions. We introduce it here and will use it several times this chapter.
+We also learned about two different ways to sample with replacement. `sample` samples items from a *vector*, which we used when simulating the expected amount of grains a minister receives after some number of days. `slice_sample` functions identically, but instead samples from rows of a *data frame* or tibble. To generate a sampling distribution for this experiment, we could just use `sample` again. But there is a quicker way, using a function called `rmultinom`, which is tailored for sampling at random from *categorical distributions*. We introduce it here and will use it several times this chapter.
 
 Here is how we can use it to generate a sampling distribution of 100 tosses of a fair coin.
 
@@ -83,7 +94,7 @@ sample_vector <- rmultinom(n = 1, size = 100, prob = fair_coin)
 sample_vector
 ```
 
-For a sampling distribution, we are more interested in the *proportion* of resulting heads and tails. Thus, we should divide by the number of tosses. Note how the probability of heads and tails is about equal. 
+For generating a sampling distribution, we are more interested in the *proportion* of resulting heads and tails. Thus, we should divide by the number of tosses. Note how the probability of heads and tails is about equal. 
 
 ```{r}
 sample_vector / 100
@@ -99,98 +110,115 @@ The classic interpretation of `rmultinom` is that you have some marbles to put i
 
 It returns a vector containing the number of marbles in each category in a random sample of the given size taken from the population. Because this distribution is so special, statisticians have given it a name: the *multinomial distribution*. 
 
-Let us see how we can use it to assess the model for 10,000 throws of dice. 
+Let us see how we can use it to assess the model for 10,000 tosses of a coin.  
 
-### A model for 10,000 die throws 
+### A model for 10,000 coin tosses  
 
-Generating a sampling distribution for the dice throw is an extension of the coin toss we saw just earlier. As before, note how the probability of each face is about equal. 
+We can extend our coin toss example code to incorporate the `rmultinom` function: 
 
 ```{r}
-fair_die_probs <- rep(1/6, 6)
-sample_vector <- rmultinom(n = 1, size = 10000, prob = fair_die_probs) / 10000
-sample_vector
+sample_tibble <- tibble(
+  face = c("Heads", "Tails"), 
+  fair_probs = 1/2, 
+  sample_counts = rmultinom(n = 1,
+                          size = 10000,
+                          prob = fair_probs))
+sample_tibble
 ```
 
-We can compute the total variation distance (TVD) of this sample. 
+How many heads are in this sample?
 
 ```{r}
-sum(abs(sample_vector - fair_die_probs)) / 2
+sample_heads <- sample_tibble |>
+  filter(face == "Heads") |>
+  pull(sample_counts)
+sample_heads
 ```
 
-Let's wrap this up into a function we can call. 
+We can use this to generate a sampling distribution for the number of heads produced by a fair coin. Let's wrap this up into a function we can call. This will produce one simulated test statistic under the assumption of a fair coin. 
 
 ```{r}
-one_simulated_tvd <- function() {
-  fair_die_probs <- rep(1/6, 6)
-  sample_vector <- rmultinom(n = 1, size = 10000, prob = fair_die_probs) / 10000
-  return(sum(abs(sample_vector - fair_die_probs)) / 2)
+one_simulated_statistic <- function() {
+  sample_tibble <- tibble(
+    face = c("Heads", "Tails"), 
+    fair_probs = 1/2, 
+    sample_counts = rmultinom(n = 1,
+                            size = 10000,  
+                            prob = fair_probs))
+  
+  sample_heads <- sample_tibble |>
+    filter(face == "Heads") |>
+    pull(sample_counts)
+  
+  return(sample_heads)
 }
 ```
 
-Next, we create a vector `sample_tvds` containing 10,000 simulated TVD values. As before, we will use `replicate` to do the work. 
+Next, we create a vector `sample_stats` containing 1,000 simulated test statistics. As before, we will use `replicate` to do the work. 
 
 ```{r echo=FALSE}
 set.seed(1)
 ```
 
 ```{r}
-num_repetitions <- 10000
-sample_tvds <- replicate(n = num_repetitions, one_simulated_tvd())
+num_repetitions <- 1000
+sample_stats  <- replicate(n = num_repetitions, one_simulated_statistic())
 ```
 
-### Chance of the observed value occurring
+### Chance of the observed value of the test statistic occurring
 
 To interpret the results of our simulation, we start by visualizing the results using a  histogram of the samples.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(tibble(sample_tvds)) +
-  geom_histogram(aes(x = sample_tvds, y = ..density..), fill = "darkcyan", color = 'gray')
+ggplot(tibble(sample_stats)) +
+  geom_histogram(aes(x = sample_stats, y = after_stat(density)), 
+                 fill = "darkcyan", color = 'gray', bins=14)
 ```
 
 Where does the observed value fall in this histogram? We can plot it easily. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(tibble(sample_tvds)) +
-  geom_histogram(aes(x = sample_tvds, y = ..density..), fill = "darkcyan", color = 'gray') +
-  geom_point(aes(x = observed_tvd, y = 0), size = 3, color = "salmon")
+ggplot(tibble(sample_stats)) +
+  geom_histogram(aes(x = sample_stats, y = after_stat(density)), 
+                 fill = "darkcyan", color = 'gray', bins = 12) +
+  geom_point(aes(x = observed_heads, y = 0), size = 3, color = "salmon") +
+  labs(x = "Number of heads")
 ```
 
 
-Let us look at the proportion of the elements in the list `sample_tvds` that are at least the observed TVD value 0.01376 or more extreme, whose value we have stored in `observed_tvd`. We simply count the elements matching the requirement and then divide the count by the length of the vector.
+Let us look at the proportion of the elements in the vector `sample_stats` that are at least as small as the observed number of heads or more extreme, whose value we have stored in `observed_heads`. We simply count the elements matching the requirement and then divide the count by the length of the vector.
 
 ```{r}
-sum(sample_tvds >= observed_tvd) / length(sample_tvds)
+sum(sample_stats <= observed_heads) / length(sample_stats)
 ```
 
-
-The value we get is 0.0638, or about 6.4%. <!-- how do we adjust according to the outcome? -->
-We interpret the value as stating the *chance* the TVD achieves a value, under the null hypothesis, *at least as extreme* as 0.0137 or more is 6.4%. We can conclude that a fair dice would yield the observed test statistic value we found (or greater) 6.4% of the time. This value, computed through simulation, is what we call a *p-value*.
+The value we get is 0.19, or about 19%. We interpret this value as stating the *chance* the test statistic achieves a value, under the assumption of the model, *at least as extreme* as 4953 heads or less. We conclude that a fair coin would yield the observed test statistic value we found (or less) 19% of the time. This value, computed through simulation, is what we call a *p-value*.
 
 To compute a *p-value*, we take the following steps:
 
-1. Establish some model that is possibly describing a quantifiable phenomenon (e.g., the absolute distance from the ideal distribution).
+1. Establish some model that is possibly describing a quantifiable phenomenon.
 2. Run a simulation to obtain a histogram of the quantifiable phenomenon under the model.
 3. Compare the observation and examine where in the histogram the observation stands.
 
 More specifically, we estimate how far the observation is from the central portion of the histogram by splitting the histogram at the point of observation. As shown in the following figure, the portion less than or equal to the observation (in dark cyan) and the portion greater than or equal to the observation (in orange). Note that we can include the equality, when the sampled value equals the observed value, on either side. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-colors <- c(rep("darkcyan",17), rep("salmon",13))
+colors <- c(rep("salmon",4), rep("darkcyan",8))
 
-ggplot(tibble(sample_tvds)) +
-  geom_histogram(aes(x = sample_tvds, y = ..density..), fill = colors, color = 'gray') +
-  geom_point(aes(x = observed_tvd, y = 0), size = 3, color = "red")
+ggplot(tibble(sample_stats)) +
+  geom_histogram(aes(x = sample_stats, y = after_stat(density)), 
+                 bins = 12, fill = colors, color = 'gray') +
+  geom_point(aes(x = observed_heads, y = 0), size = 3, color = "red")
 ```
 
-The more orange bars that are visible in the histogram, the higher the likelihood of the observation. Conversely, the less orange bars there are, the lower the likelihood of seeing such an observation.
-The area covered by the orange bars is formally called the "area in the tail." The area in the tail is also designated a special name:  __the p-value__. 
+The more orange bars that are visible in the histogram, the higher the likelihood of the observation. Conversely, the less orange bars there are, the lower the likelihood of seeing such an observation. The area covered by the orange bars is formally called the "area in the tail." The area in the tail is designated a special name:  __the p-value__. 
 
 When we compute a p-value, we have in mind two possible interpretations. We call them the *Null Hypothesis* and the *Alternative Hypothesis*.
 
-* __Null Hypothesis (NH):__ The hypothesis we use to create the model for simulation. For example, we assume that the die we have is a fair die, about 16% equal chance to see any face. Any variation from what we expect is because of chance variation.
-* __Alternative Hypothesis (AH):__ The opposite, or counterpart, of the Null Hypothesis. For example, the AH states that the die we have is not fair - the chances are not equal. The differences are caused by something other than randomness. 
+* __Null Hypothesis (NH):__ The hypothesis we use to create the model for simulation. For example, we assume that the coin we have is a fair coin, about 50% equal chance to see either face. Any variation from what we expect is because of chance variation.
+* __Alternative Hypothesis (AH):__ The opposite, or counterpart, of the Null Hypothesis. For example, the AH states that the coin is *biased* towards tails. The difference we observed is caused by something other than randomness. 
 
-It is important that your null hypothesis acknowledges differences in the data. For example, if the null hypothesis states that the die is fair, why did you not get any `3`'s when rolling the die 6 times? 
+It is important that your null hypothesis acknowledges differences in the data. For example, if the null hypothesis states that a die is fair, why did you not get any `3`'s when rolling the die 6 times? 
 
 We can provide one more definition of the p-value in the language of these hypotheses:
 
@@ -199,6 +227,7 @@ We can provide one more definition of the p-value in the language of these hypot
 ## Case Study: Entering Harvard
 
 Harvard University is one of the most prestigious universities in the United States. A recent lawsuit by [Students for Fair Admissions (SFFA)](https://studentsforfairadmissions.org/) led by Edward Blum against Harvard University alleges that Harvard has used soft racial quotas to keep the numbers of Asian-Americans low.
+
 Put differently, the allegation claims that, from the pool of Harvard-admissible American applicants, Harvard uses a racial discriminatory score that allows the college to choose disproportionately less Asian-Americans. As of this writing, the lawsuit has been appealed and is to appear before the Supreme Court.
 
 This section examines the "Harvard model" to assess, at a basic level, the claim put forward by the lawsuit.  
@@ -238,7 +267,7 @@ Notwithstanding these differences, let us conduct an experiment to see how the d
 As we will be handling proportions, let us scale the numbers down (by dividing each element by 100) so that they are expressed as percentages.
 
 ```{r}
-class_props <- class_props %>% 
+class_props <- class_props |> 
   mutate(Harvard = Harvard / 100,
          Almanac = Almanac / 100)
 class_props
@@ -255,48 +284,57 @@ compute_tvd <- function(x, y) {
 In this study, our observed value is the TVD between the distribution of students in the Harvard class and the Almanac. 
 
 ```{r}
-harvard_diff <- compute_tvd(pull(class_props, Harvard), pull(class_props, Almanac))
+harvard_diff <- class_props |>
+  summarize(compute_tvd(Harvard, Almanac)) %>%
+  pull()
 harvard_diff
 ```
 
-The Harvard class of 2024 has 2015 students. We can think of the process of sampling 2015 people to fill the "Harvard class" from those who "were attending" a four-year non-profit college in Fall 2018 and then examining their racial distribution. Of course, we cannot reach out to those individuals specifically; but we know the distribution of the entire population from which we want to sample. Therefore, we can simulate a great number of times what this "Harvard class" looks like and compare it with what we know about the true Harvard class distribution, available in `harvard_diff`. 
+The Harvard class of 2024 has 2015 students. We can think of the process of sampling 2015 people to fill the "Harvard class" from those who "were attending" a four-year non-profit college in Fall 2018 and then examining their racial distribution. Of course, we cannot reach out to those individuals specifically, but we know the distribution of the entire population from which we want to sample. Therefore, we can simulate a large number of times what this "Harvard class" looks like and compare it with what we know about the actual Harvard class distribution, available in `harvard_diff`. 
 
 Our sampling plan can be framed as a "boxes and marbles" problem, as we saw in the previous section. There are five "boxes" to choose from, where each corresponds to a race: White, Black, Hispanic, Asian, and Other. The goal is to place marbles (which correspond to students) in each of the boxes, where the probability of ending up in any of the boxes is given by the Almanac. 
 
 This is an excellent fit for the `rmultinom` function. For example, here is one simulation of the proportion of races found in a "Harvard class." 
 
 ```{r}
-sample_vector <- rmultinom(n=1, size=2015, prob = pull(class_props, Almanac)) / 2015
+sample_vector <- rmultinom(n=1, size=2015, 
+                           prob = pull(class_props, Almanac)) / 2015
 sample_vector
 ```
 
-How far is our simulated class from the Almanac? We can compute the TVD to find out. 
+How far is our simulated class from the Almanac? We compute the TVD to find out. 
 
 ```{r}
-compute_tvd(sample_vector, pull(class_props, Almanac))
+class_props |>
+  mutate(sample = sample_vector) |>
+  summarize(compute_tvd(sample, Almanac)) %>%
+  pull()
 ```
 
 We wrap our work into a function.  
 
 ```{r}
 one_simulated_class <- function(props) {
-  sample_vector <- rmultinom(n=1, size=2015, prob = pull(props, Almanac)) / 2015
-  return(compute_tvd(sample_vector, pull(props, Almanac)))
+  props |>
+    mutate(sample = rmultinom(n=1, size=2015, prob = Almanac) / 2015) |>
+    summarize(compute_tvd(sample, Almanac)) |>
+    pull()
 }
 ```
 
-Let us simulate what 10,000 classes could look like. This will be contained in a vector called `sample_class_tvds`. Also, as before, we will use `map_dbl()` to do the work. 
+Let us simulate what 10,000 classes could look like. This will be contained in a vector called `sample_class_tvds`. Also, as before, we will use `replicate` to do the work. 
 
 ```{r}
 num_repetitions <- 10000
-sample_class_tvds <- replicate(n = num_repetitions, one_simulated_class(class_props))
+sample_class_tvds <- replicate(n = num_repetitions, 
+                               one_simulated_class(class_props))
 ```
 
 We can now visualize the result. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(sample_class_tvds)) +
-  geom_histogram(aes(x = sample_class_tvds, y = ..density..), 
+  geom_histogram(aes(x = sample_class_tvds, y = after_stat(density)), 
                  bins = 30, fill = "darkcyan", color = 'gray')
 ```
 
@@ -304,7 +342,7 @@ Where does the true Harvard class lie on this histogram? We can plot a point geo
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(sample_class_tvds)) +
-  geom_histogram(aes(x = sample_class_tvds, y = ..density..), 
+  geom_histogram(aes(x = sample_class_tvds, y = after_stat(density)), 
                  bins = 70, fill = "darkcyan", color = 'gray') +
   geom_point(aes(x = harvard_diff, y = 0), size = 3, color = "salmon")
 ```
@@ -325,7 +363,7 @@ class_props_asian
 As before, we transform the data to be in terms of proportions.
 
 ```{r}
-class_props_asian <- class_props_asian %>% 
+class_props_asian <- class_props_asian |> 
   mutate(Harvard = Harvard / 100,
          Almanac = Almanac / 100)
 class_props_asian
@@ -334,9 +372,14 @@ class_props_asian
 The proportion of Asian American in private non-profit 4-year colleges is just 8.1% while the race occupies 24.4% of the Harvard freshman class. Let's recompute our observed TVD value. 
 
 ```{r}
-harvard_diff <- compute_tvd(pull(class_props_asian, Harvard), pull(class_props_asian, Almanac))
+harvard_diff <- class_props_asian |>
+  filter(Race == "Asian") |>
+  summarize(abs(Harvard - Almanac)) |>
+  pull()
 harvard_diff
 ```
+
+Note that we took a shortcut for computing the TVD here. When dealing with two categories, the TVD is equal to the distance between the two proportions in one of the categories. 
 
 Re-running the simulation is easy. Note that instead of passing `class_props` as an argument to the function `one_simulated_class`, we pass the new tibble `class_props_asian`.
 
@@ -349,7 +392,7 @@ We again visualize the result.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(sample_class_tvds)) +
-  geom_histogram(aes(x = sample_class_tvds, y = ..density..), 
+  geom_histogram(aes(x = sample_class_tvds, y = after_stat(density)), 
                  binwidth=0.002, fill = "darkcyan", color = 'gray')
 ```
 
@@ -357,7 +400,7 @@ Where does the observed value fall in this histogram?
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(sample_class_tvds)) +
-  geom_histogram(aes(x = sample_class_tvds, y = ..density..), 
+  geom_histogram(aes(x = sample_class_tvds, y = after_stat(density)), 
                  binwidth=0.002, fill = "darkcyan", color = 'gray') +
   geom_point(aes(x = harvard_diff, y = 0), size = 3, color = "salmon")
 ```
@@ -372,18 +415,19 @@ __Important note:__ The reader should be cautioned not to accept these results a
 So far we have evaluated models by comparing some observation to a prediction made by a model. For instance, we compared:
 
 * Racial demographics at Harvard University with the national Almanac at four-year non-profit private colleges. 
-* 10,000 throws of an unknown six-sided die at hand with a fair six-sided die. 
+* 10,000 tosses of an unknown coin at hand with a fair coin. 
 
-Sometimes the observed statistic, e.g. the sample total variation distance (TVD), ended up close to the predictions; sometimes it ended up very far away. But how do we define what "close" or "far" is? And at what point does an observed statistic transition from being "close" to "far"? 
+Sometimes the observed value of the test statistic ends up in the "bulk" of the predictions; sometimes it ends up very far away. But how do we define what "close" or "far" is? And at what point does the observed value transition from being "close" to "far"? 
 
-This section examines the *significance* of an observed statistic. To set up the discussion, we introduce another example still on the topic of academics: midterm scores in a Computer Science course at the University of Miami. 
+This section examines the *significance* of an observed value. To set up the discussion, we introduce another example still on the topic of academics: midterm scores in a hypothetical Computer Science course. 
 
 ### Prerequisites
 
-Before starting, let's load the `tidyverse` as usual.
+Before starting, let's load the `tidyverse` as usual. We will also use a dataset from the `edsdata` package, so let us load this in as well.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(edsdata)
 ```
 
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
@@ -393,22 +437,21 @@ set.seed(1)
 
 ### A midterm grumble? 
 
-A Computer Science course at the University of Miami had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads each section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following a exam?
+A hypothetical Computer Science course had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads each section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following a exam?
 
 If we were to fill that lab section with randomly selected students from the class, it is possible that their average midterm grade will look a lot like the score the grumbling students are unhappy about. It turns out that what we have stated here is a chance model that we can simulate. 
 
-Let's have a look at the data from each (anonymized) student in the course. The following tibble `csc_labs` contains midterm and final scores, and the lab section the student is enrolled in. 
+Let's have a look at the data from each student in the course. The following tibble `csc_labs` contains midterm and final scores, and the lab section the student is enrolled in. 
 
 ```{r message = FALSE, warning = FALSE}
-csc_labs <- read_csv("data/csc_labs.csv")
 csc_labs
 ```
 
 We can use the dplyr verb `group_by` to examine the mean midterm grade as well as the number of students in each section. 
 
 ```{r message = FALSE}
-lab_stats <- csc_labs %>%
-  group_by(section) %>%
+lab_stats <- csc_labs |>
+  group_by(section) |>
   summarize(midterm_avg = mean(midterm),
             count = n())
 lab_stats
@@ -417,10 +460,13 @@ lab_stats
 Indeed, it seems that the section H students fared the worst, albeit by a small margin, among the three sections. Our statistic then is the mean grade of students in the lab section. Thus, our observed statistic is the mean grade from section H, which is about 68.56.  
 
 ```{r}
-observed_statistic <- 68.56
+observed_statistic <- lab_stats |>
+  filter(section == "H") |>
+  pull(midterm_avg)
+observed_statistic
 ```
 
-We can also formally state our null and alternative hypothesis. 
+We formally state our null and alternative hypothesis. 
 
 __Null Hypothesis:__ The mean midterm grades of students in lab section H looks like the mean grades of a "section H" that is generated by randomly sampling the same number of students from the class.  
 
@@ -429,8 +475,8 @@ __Alternative Hypothesis:__ The section H midterm grades are too low.
 To form a random sample, we will need to sample *without* replacement 9 students from the course to fill up the theoretical "lab section H".  
 
 ```{r}
-random_sample <- csc_labs %>%
-  select(midterm) %>%
+random_sample <- csc_labs |>
+  select(midterm) |>
   slice_sample(n = 9, replace = FALSE)
 random_sample
 ```
@@ -438,17 +484,22 @@ random_sample
 We can look at the mean midterm score for this randomly sampled section. 
 
 ```{r}
-mean(pull(random_sample, midterm))
+random_sample |>
+  summarize(mean(midterm)) |>
+  pull()
 ```
 
 Now that we know how to simulate one value, we can wrap this into a function. 
 
 ```{r}
 one_simulated_mean <- function() {
-  random_sample <- csc_labs %>%
-    select(midterm) %>%
+  random_sample <- csc_labs |>
+    select(midterm) |>
     slice_sample(n = 9, replace = FALSE)
-  return(mean(pull(random_sample, midterm)))
+  
+  random_sample |>
+    summarize(mean(midterm)) |>
+    pull()
 }
 ```
 
@@ -463,7 +514,7 @@ As before, we visualize the resulting distribution of grades.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(sample_means)) +
-  geom_histogram(aes(x = sample_means, y = ..density..), 
+  geom_histogram(aes(x = sample_means, y = after_stat(density)), 
                  bins = 15, fill = "darkcyan", color = 'gray')
 ```
 
@@ -471,14 +522,14 @@ It seems that the grades cluster around 72. Where does the actual section H sect
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(sample_means)) +
-  geom_histogram(aes(x = sample_means, y = ..density..), 
+  geom_histogram(aes(x = sample_means, y = after_stat(density)), 
                  bins = 15, fill = "darkcyan", color = 'gray') + 
   geom_point(aes(x = observed_statistic, y = 0), size = 3, color = "salmon")
 ```
 
 It seems that the observed statistic is "close" to the center of randomly sampled scores. 
 
-### Choosing a significance level
+### Cut-off points
 
 Let's sort the sample means generated. We will examine in particular the value at 10% and 5% from the bottom. We will first turn to the value at 10%. 
 
@@ -487,18 +538,17 @@ sorted_samples <- sort(sample_means)
 sorted_samples[length(sorted_samples)*0.1]
 ```
 
-We will plot this value on our sampling histogram, as well as the area to the left of it. 
+We plot our sampling histogram and overlay it with a vertical line at this value.
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-colors <- c(rep("salmon",6), rep("darkcyan",9))
-
 ggplot(tibble(sample_means)) +
-  geom_histogram(aes(x = sample_means, y = ..density..), bins = 15,
-                 fill = colors, color = 'gray') +
-  geom_point(aes(x = sorted_samples[length(sorted_samples)*0.1], y = 0), size = 3, color = "red")
+  geom_histogram(aes(x = sample_means, y = after_stat(density)), 
+                 bins = 15, fill = "darkcyan", color = 'gray') +
+  geom_vline(xintercept = sorted_samples[length(sorted_samples)*0.1], y = 0, 
+             size = 2, color = "purple")
 ```
 
-This means that our simulated mean midterm score is less than 63 10% of the time. Put differently, the chance of a an average midterm score *lower* than 63 occurring, under the assumption of a TA teaching in good faith, is around 10%. 
+This means that 10% of our simulated mean statistics are equal to or less than 63. Put differently, the chance of a an average midterm score *lower* than 63 occurring, under the assumption of a TA teaching in good faith, is around 10%. 
 
 The situation is not much different if we look at the value 5% from the bottom, which we find to be about 61. We redraw the situation in on our sampling histogram. 
 
@@ -507,54 +557,90 @@ sorted_samples[length(sorted_samples)*0.05]
 ```
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-colors <- c(rep("salmon",5), rep("darkcyan",10))
-
 ggplot(tibble(sample_means)) +
-  geom_histogram(aes(x = sample_means, y = ..density..), bins = 15,
-                 fill = colors, color = 'gray') +
-  geom_point(aes(x = sorted_samples[length(sorted_samples)*0.05], y = 0), size = 3, color = "red")
+  geom_histogram(aes(x = sample_means, y = after_stat(density)), bins = 15,
+                 fill = "darkcyan", color = 'gray') +
+  geom_vline(xintercept = sorted_samples[length(sorted_samples)*0.05], 
+             size = 2, color = "purple")
 ```
 
-This time, the chance of a mean midterm score *at least* as low as about 61 occurring is 5%.   
+This time, the chance of obtaining a simulated mean midterm score *at least* as low as 61 is about 5%.   
 
 We say that the threshold point 63 is at the 90% *significance level* and the threshold point 61 is at the 95% significance level.
 
 ### The significance level is an error probability
 
-The last figure shows that, although rare, a lab section with a "TA teaching in good faith" can still produce mean midterm scores that are as low as 61 or less. How often does that occur? The figure tells us the answer for that as well: it does so with about 5% chance. 
+The last figure shows that, although rare, a lab section with a "TA teaching in good faith" can still produce mean midterm scores that are at least as low as 61. How often does that occur? The figure gives the answer for that as well: it does so with about 5% chance. 
 
-Therefore, if the TA is *teaching in good faith* and our test uses a 95% significance level for deciding whether or not the TA is guilty, then there is about a 5% chance that the test will wrongly conclude that the mean midterm scores are too low and, consequently, the TA is at fault. This example points to a general fact about significance levels: 
+Therefore, if the TA is *teaching in good faith* and our test uses a 95% significance level to decide whether or not the TA is guilty, then there is about a 5% chance that the test will wrongly conclude that the mean midterm scores are too low and, consequently, the TA is at fault. This example points to a general fact about significance levels: 
 
 > If you use a $p$% significance level for the p-value, and the null hypothesis happens to be true, there is about a $1-p$% chance that the test will incorrectly conclude the alternative hypothesis. 
 
-Statistics is about quantifying uncertainty. This means we can control the chance of wrongly convicting the TA by choosing a higher significance level. We could look at the 99% significance level or even the 99.9% and 99.99% levels; these are commonly referred to in the area of physics which rely on enormous evidence to prove something axiomatic. 
+Statistical inferences, unlike logical inferences, can be wrong! But the power of statistics lies in its ability to *quantify* how often this error will occur. In fact, we can control the chance of wrongly convicting the TA by choosing a higher significance level. We could look at the 99% significance level or even the 99.9% and 99.99% levels; these are commonly referred to in the area of physics which rely on enormous evidence to prove something axiomatic. 
 
-It is important to note that these cut-off points are conventional only and do not have a strong theoretical backing. They were first established by the statistician Ronald Fisher in his seminal work [*Statistical Methods for Research Workers*](https://en.wikipedia.org/wiki/Statistical_Methods_for_Research_Workers). 
+Here, too, are trade-offs. By minimizing the error of wrongly convicting a TA teaching in good faith, we increase the chance of another kind of error occurring: our test concluding nothing when in fact there is something unusual about the lab section's midterm grades.  
 
-Therefore, declaring an observed statistic as being "too low" or "too high" is a matter of judgment. In any statistical-based research, you should always provide the observed test statistic and the p-value used in addition to explaining your decision; this way your readers can decide for themselves whether or not the results are indeed significant. 
+It is important to note that these cut-off points are convention only and do not have any strong theoretical backing. They were first established by the statistician Ronald Fisher in his seminal work [*Statistical Methods for Research Workers*](https://en.wikipedia.org/wiki/Statistical_Methods_for_Research_Workers). 
+
+Therefore, declaring an observed statistic as being "too low" or "too high" is a judgment call. In any statistics-based research, you should always provide the observed test statistic and the p-value used in addition to giving your decision; this way your readers can decide for themselves whether or not the results are indeed significant. 
 
 ### The verdict: is the TA guilty? 
 
-We can set a modest significance level at 95% for the course case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level to be fully convinced.  
+We can set a modest significance level at 95% for the course case study. Of course, judgment is needed if the decision resulting from this study will cause the TA to be reprimanded -- we may tend towards a much more conservative significance level to be fully convinced, even if this means increasing the chance of a "guilty TA" being let free. 
 
 We overlay the observed statistic on the sampling histogram. As before, the orange bars show the 95% significance region.
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-colors <- c(rep("salmon",6), rep("darkcyan",9))
-
 ggplot(tibble(sample_means)) +
-  geom_histogram(aes(x = sample_means, y = ..density..), bins = 15,
-                 fill = colors, color = 'gray') +
+  geom_histogram(aes(x = sample_means, y = after_stat(density)), bins = 15,
+                 fill = "darkcyan", color = 'gray') +
+  geom_vline(xintercept = sorted_samples[length(sorted_samples)*0.05], 
+             size = 2, color = "purple") + 
   geom_point(aes(x = observed_statistic, y = 0), size = 3, color = "red")
 ```
 
-We see that the point does not fall within this region. We can check numerically how much area is to the left of the observed statistic. 
+We see that the point does not cross the vertical purple line. We can check numerically how much area "is in the tail". 
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+colors <- c(rep("salmon",8), rep("darkcyan",7))
+ggplot(tibble(sample_means)) +
+  geom_histogram(aes(x = sample_means, y = after_stat(density)), bins = 15,
+                 fill = colors, color = 'gray') +
+  geom_point(aes(x = observed_statistic, y = 0), size = 3, color = "red")
+```
 
 ```{r}
 sum(sample_means <= observed_statistic) / num_repetitions
 ```
 
-We can conclude the TA's defense holds up pretty well: the average lab section H scores are not any different from those generated by chance. It may be wise to check in with the TA to get their take on the story.   
+We conclude the TA's defense holds up pretty well: the average lab section H scores are not any different from those generated by chance. It would be prudent to check in with the TA to get their take on the story.   
+
+### Choosing a test statistic
+
+By this point, we have been introduced to a few different test statistics. A common challenge when developing a hypothesis test is to first define what a "good" test statistic is for the problem. 
+
+Consider your alternative hypothesis and what evidence favors it over the null. If only "large values" or "small values" of the test statistic favor the alternative, then we recommend using the test statistic. For instance, in the midterm example, we considered only "small values" of the sample mean statistic to determine if the lab section H scores are "too low." In the Harvard admissions example, we considered "large values" of the TVD test statistic to determine if the TVD of the Harvard proportions is "too big" to have been generated by a model under the null hypothesis. 
+
+Avoid choosing test statistics where "both big values and small values" favor the alternative. In this case, the area that supports the alternative includes both the left and right "tails". Consider the following sampling histogram of the test statistic and note the tails as indicated by the orange bars. 
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+colors <- c(rep("salmon",6), rep("darkcyan",5), rep("salmon",4))
+ggplot(tibble(sample_means)) +
+  geom_histogram(aes(x = sample_means, y = after_stat(density)), bins = 15,
+                 fill = colors, color = 'gray') +
+  guides(x = "none", y = "none") + 
+  labs(x = "", y="")
+```
+
+We suggest modifying your test statistic so that the evidence favoring the alternative involves only one tail.  
+
+Finally, we present a table with some common test statistics and when to use each. 
+
+| Test statistic                                   | When to use?                                                                                                               |
+|--------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| Total Variation Distance (TVD)                   | __Categorical data__; compare your sample with the distribution it was drawn from. `rmultinom`                             |
+| Number of heads, difference in means        | __Numerical data__; direction matters, e.g., "too few heads" or "too many heads"                                          |
+| Absolute difference, mean absolute difference | __Numerical data__; direction does not matter, only distance, e.g., "number of heads seen is different from a chance flip" |
 
 ## Permutation Testing
 
@@ -569,21 +655,18 @@ In the previous section, we study the use of hypothesis testing. In this section
 
 ### Prerequisites
 
-Let us begin by loading the `tidyverse`.
+Let us begin by loading the `tidyverse`. We will also use a dataset from the `edsdata` package.
 
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
+library(edsdata)
 ```
 
 ### The effect of a tutoring program 
 
-The tibble `finals` contains final exam grades in a Computer Science course for 105  students. They are divided into two groups, based on two different offerings of the course labeled `A` and `B`. The more recent offering `B` featured a tutoring program for students to receive help on assignments and exams. The course instructor is interested in finding out if the tutoring program boosted overall performance in the class, measured by a final exam. This could help the instructor and department decide if the program should continue or even be expanded. The dataset is collected over two semesters from the same Computer Science course taught at the University of Miami.
+The tibble `finals` from the `edsdata` package contains final exam grades in a hypothetical Computer Science course for 105 students. They are divided into two groups, based on two different offerings of the course labeled `A` and `B`. The more recent offering `B` featured a tutoring program for students to receive help on assignments and exams. The course instructor is interested in finding out if the tutoring program boosted overall performance in the class, measured by a final exam. This could help the instructor and department decide if the program should continue or even be expanded. Suppose that the dataset is collected over two semesters from the same Computer Science course.
 
 Let's first load the dataset. 
-
-```{r message = FALSE, echo = FALSE}
-finals <- read_csv("data/final_exams.csv")
-```
 
 ```{r message = FALSE}
 finals
@@ -592,8 +675,8 @@ finals
 We can examine the number of enrolled students in each of the two offerings. 
 
 ```{r}
-finals %>%
-  group_by(class) %>%
+finals |>
+  group_by(class) |>
   count()
 ```
 
@@ -601,7 +684,7 @@ It appears they are about equal. Let's now turn to a distribution of the student
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(finals) + 
-  geom_histogram(aes(x = grade, y = ..density.., fill = class),
+  geom_histogram(aes(x = grade, y = after_stat(density), fill = class),
                  bins = 10, color = "gray",
                  alpha = 0.7, position = "identity")
 ```
@@ -614,7 +697,7 @@ __Null hypothesis:__ In the population, the distribution of final exam scores wh
 
 __Alternative hypothesis:__ In the population, the distribution of final exam scores when the tutoring program was available are, on average, *higher* than the scores when the program was not.  
 
-According to the alternative hypothesis, the average final score in offering `B` should be higher than the average final score in offering `A`. Therefore, a natural test statistic we can use is the difference in the mean between the two groups. That is,
+According to the alternative hypothesis, the average final score in offering `B` should be *higher* than the average final score in offering `A`. Therefore, a good test statistic we can use is the difference in the mean between the two groups. That is,
 
 \[
 \text{test statistic} = \mu_B - \mu_A
@@ -625,10 +708,10 @@ where $\mu$ denotes the mean of the group.
 First, we form two vectors `finalsA` and `finalsB` that contain final scores with respect to the course offering. 
 
 ```{r}
-finalsA <- finals %>%
-  filter(class == 'A') %>% pull(grade)
-finalsB <- finals %>%
-  filter(class == 'B') %>% pull(grade)
+finalsA <- finals |>
+  filter(class == 'A') |> pull(grade)
+finalsB <- finals |>
+  filter(class == 'B') |> pull(grade)
 ```
 
 The observed value of the statistic can be computed as the following. 
@@ -699,7 +782,8 @@ one_difference <- function(a, b, compute_statistic) {
 We are now ready to perform a permutation test for the tutoring program example. We would like to simulate the test statistic under the null hypothesis multiple times and collect the values into a vector. As before, we can use `replicate`. We will simulate 10,000 values. 
 
 ```{r}
-differences <- replicate(n = 10000, one_difference(finalsA, finalsB, mean_diff))
+differences <- replicate(n = 10000, 
+                         one_difference(finalsA, finalsB, mean_diff))
 ```
 
 ### Conclusion
@@ -708,12 +792,12 @@ Let's visualize the results.
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(tibble(differences)) + 
-  geom_histogram(aes(x = differences, y = ..density..), 
+  geom_histogram(aes(x = differences, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 20) +
   geom_point(aes(x = observed_statistic, y = 0), color = "salmon", size = 3)
 ```
 
-First observe how the distribution is centered around 0. Under the assumption of the null hypothesis, there is no difference between the final exam averages in the two course offerings and, therefore, the difference clusters around 0. 
+First, observe how the distribution is centered around 0. Under the assumption of the null hypothesis, there is no difference between the final exam averages in the two course offerings and, therefore, the difference clusters around 0. 
 
 Also observe that the observed test statistic is quite far from the center. To get a better sense of how far, we compute the p-value. 
 
@@ -723,65 +807,46 @@ sum(differences >= observed_statistic) / 10000
 
 This means that the chance of obtaining a mean difference at least as large as $6.10$ is around 8%. By standards of the conventional cut-off points we have discussed, we would have enough evidence to refute the null hypothesis at a 90% significance level. Would this be enough to convince us that the tutoring program is indeed effective? Let us consider for a moment what it would mean if it does not. 
 
-If we were to demand a higher significance level, say 95%, our observed statistic is no longer significant. The logical next step would be to conclude that the null hypothesis is true, bearing the implication that the tutoring program is ineffective. This would be a statistical fallacy! Even if our results are not significant at the desired level, we do *not* take the null hypothesis to be true. Put another way, we fail to reject the null hypothesis. That is a mouthful! 
+If we were to demand a higher significance level, say 95%, our observed statistic is no longer significant. The logical next step would be to conclude that the null hypothesis is true, bearing the implication that the tutoring program is ineffective. This would be a statistical fallacy! Even if our results are not significant at the desired level, we do __NOT__ take the null hypothesis to be true. Put another way, __we fail to reject the null hypothesis__. That is a mouthful! 
 
-The problem here is a lack of evidence. A lack of evidence does not prove that something *does not* exist, e.g., the tutoring program is *not* effective; it very well could be, but our study missed it. Indeed, our permutation test only evaluated one criteria -- that is, difference in final exam scores -- as a measure for improvement. There are other criteria we could have considered, like class participation, which may have benefited from the program. It would be up to the judgment of the department on how to use these results in deciding the merit of the tutoring program. 
+The problem here is a lack of evidence. A lack of evidence does not prove that something *does not* exist, e.g., the tutoring program is *not* effective; it very well could be, but our study missed it. Indeed, our permutation test only evaluated one criteria -- that is, difference in final exam scores -- as a measure for improvement. There are other test statistics or criteria we could have considered, like class participation, which may have benefited from the program. It would be up to the judgment of the department on how to use these results in deciding the merit of the tutoring program. 
 
-### Another permutation test: NFL and NCAA players 
+### Another permutation test: Summer and Winter Olympic athletes 
 
-We end this section with one more example of a permutation test: comparing the yardage of NFL and NCAA players. We load in both datasets and select out the column containing year and yardage information. We also add a new column to each tibble containing which league (NFL or NCAA) the yardage pertains to, so we can refer to it later. 
+We end this section with one more example of a permutation test: comparing the weight information of Summer and Winter Olympic athletes. The dataset is available in the name `athletes` from the `edsdata` package.
+
+For the sake of this analysis, we focus on Olympic games after the 2000 Summer Olympics. 
 
 ```{r message = FALSE}
-ncaa_with_yards <- read_csv("data/ncaa-receivers-2005-2011.csv") %>%
-  select(Yards, Year) %>%
-  mutate(league = "NCAA")
-nfl_with_yards <- read_csv("data/nfl_receivers.csv") %>% 
-  select(Yds, Year) %>%
-  rename(Yards = Yds) %>%
-  mutate(league = "NFL")
+my_athletes <- athletes |>
+  filter(Year > 2000)
 ```
 
-Let us use NCAA data for 2011 and NFL data from 2019 and 2018. 
+We can glance at how much athletes we have in each season. 
 
 ```{r}
-ncaa_with_yards <- ncaa_with_yards %>%
-  filter(Year == 2011)
-nfl_with_yards <- nfl_with_yards %>%
-  filter(Year == 2019 | Year == 2018)
+my_athletes |>
+  count(Season) %>%
+  mutate(prop = n / sum(n))
 ```
 
-It will be easier if we merge these two tibbles together. 
-
-```{r}
-all_yards <- bind_rows(ncaa_with_yards, nfl_with_yards)
-```
-
-We can glance at how much yardage information we have in each league. 
-
-```{r}
-all_yards %>%
-  group_by(league) %>%
-  count()
-```
-
-We observe that they are roughly the same. Before proceeding any further, we should visualize the yardage with an overlaid histogram. 
+We observe that Summer athletes make up the bulk of this dataset. Before proceeding any further, we should visualize the weight information with an overlaid histogram. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(all_yards) + 
-  geom_histogram(aes(x = Yards, y = ..density.., fill = league),
-                 bins = 30, color = "gray",
-                 alpha = 0.7, position = "identity")
+my_athletes |>
+  ggplot() + 
+    geom_histogram(aes(x = Weight, y = after_stat(density), fill = Season),
+                   bins = 13, color = "gray",
+                   alpha = 0.7, position = "identity")
 ```
 
-We state our hypothesis tests. 
+We give our hypothesis statements. 
 
-__Null hypothesis:__ In the population, the distribution of yardage information in the NFL is, on average, the same as in the NCAA. 
+__Null hypothesis:__ In the population, the distribution of weight information in the Summer Olympics is, on average, the same as the Winter Olympics. 
 
-__Alternative hypothesis:__ In the population, the distribution of yardage information in the NFL is, on average, different from the NCAA. 
+__Alternative hypothesis:__ In the population, the distribution of weight information in the Summer Olympics is, on average, different from the Winter Olympics. 
 
-Note that the alternative hypothesis, unlike the tutoring program example, does not care whether the yardage information in the NFL is *higher* or *less* than that of the NCAA. It only states that some *difference* exists.  
-
-We can apply the same test statistic before but we take the absolute value of the difference to account for this change. 
+Note that the alternative hypothesis, unlike the tutoring program example, does not care whether the weight information for athletes competing in the Winter Olympics is *higher* or *less* than that of athletes in the Summer Olympics. It only states that some *difference* exists. Therefore, the absolute difference in the means would be a good test statistic to use for this problem.   
 
 \[
 \text{test statistic} = | \mu_B - \mu_A | 
@@ -797,24 +862,33 @@ mean_abs_diff <- function(a, b) {
 
 ### The test 
 
-We form two vectors `ncaa_yardage` and `nfl_yardage` that contain the yardage information with respect to the league. 
+We form two vectors `winter_weights` and `summer_weights` that contain the weight information with respect to the season. 
 
 ```{r}
-ncaa_yardage <- ncaa_with_yards %>% pull(Yards)
-nfl_yardage <- nfl_with_yards %>% pull(Yards)
+winter_weights <- my_athletes |> 
+  filter(Season == "Winter") |> 
+  pull(Weight)
+summer_weights <- my_athletes |> 
+  filter(Season == "Summer") |> 
+  pull(Weight)
 ```
 
 The observed value of the statistic can be computed as the following. 
 
 ```{r}
-observed_statistic <- mean_abs_diff(ncaa_yardage, nfl_yardage)
+observed_statistic <- mean_abs_diff(winter_weights, summer_weights)
 observed_statistic
 ```
 
 We are now ready to perform the permutation test. As before, let us simulate the test statistic under the null hypothesis 10,000 times. 
 
+```{r echo=FALSE}
+set.seed(3)
+```
+
 ```{r}
-differences <- replicate(n = 10000, one_difference(ncaa_yardage, nfl_yardage, mean_abs_diff))
+differences <- replicate(n = 10000, 
+                one_difference(winter_weights, summer_weights, mean_abs_diff))
 ```
 
 ### Conclusion
@@ -823,15 +897,15 @@ We are ready to visualize the results.
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(tibble(differences)) + 
-  geom_histogram(aes(x = differences, y = ..density..), 
+  geom_histogram(aes(x = differences, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 15) +
   geom_point(aes(x = observed_statistic, y = 0), color = "salmon", size = 3)
 ```
 
-The observed statistic is quite far away from the distribution of simulated test statistics. Let's do a quick numerical check. 
+The observed statistic is quite far away from the distribution of simulated test statistics. Let's do a numerical check. 
 
 ```{r}
 sum(differences >= observed_statistic) / 10000
 ```
 
-The chance of obtaining a mean absolute difference of $53.9$ is practically 0. We can safely reject the null hypothesis at a significance level over 99.9%. This confirms that the yardage information between NCAA and NFL players are likely, on average, to be different. 
+The chance of obtaining a mean absolute difference of $1.29$ is roughly 0.1%. We can safely reject the null hypothesis at a significance level over 99%. This confirms that, assuming our dataset is representative of the population of Olympic athletes, the weight information between Summer and Winter Olympic players are likely, on average, to be different. 

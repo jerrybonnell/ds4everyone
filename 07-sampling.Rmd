@@ -6,14 +6,14 @@ output:
 
 # Sampling
 
-In the previous chapter we learned that we can make selections by chance using randomness and that we can encapsulate randomness by means of simulation. In this chapter we will use sampling more aggressively and learn to exploit the power of sampling.
+In the previous chapter we learned that we can make selections by chance using randomness and that we can encapsulate randomness by means of simulation. In this chapter we will use sampling more aggressively and learn to exploit random samples for drawing meaningful conclusions from data.
 
 Specifically, we will learn that: 
 
-* By drawing samples, we are able to observe what an unknown distribution might look like
-* By conducting experiments using sampling we can assess how unlikely or likely a phenomenon is at hand. 
+* By drawing random samples, we are able to observe what an unknown distribution might look like
+* By conducting experiments using random sampling we can assess how unlikely or likely a phenomenon is at hand. 
 
-In both cases, the number of samples we draw plays an important role.
+In both cases, the number of samples we draw and the manner of sampling play an important role.
 
 ## To Sample or Not to Sample?
 
@@ -41,7 +41,7 @@ The contents of a row are the values of different variables measured on the same
 
 ### The existential questions: Shakespeare ponders sampling
 
-When we get down to the business of sampling, some critical decisions must be decided before beginning to sample. Not unlike the [famous soliloquy given by Prince Hamlet](https://www.poetryfoundation.org/poems/56965/speech-to-be-or-not-to-be-that-is-the-question) in Shakespeare's *Hamlet*, the questions of how to sample are not always straightforward to answer and merit much consideration. Here are the main ones to consider:  
+When we get down to the business of sampling, some critical decisions must be decided before beginning to sample. Not unlike the [famous soliloquy given by Prince Hamlet](https://www.poetryfoundation.org/poems/56965/speech-to-be-or-not-to-be-that-is-the-question) in Shakespeare's *Hamlet*, the questions of how to sample are not always straightforward to answer and merit consideration. Here are the main ones to consider:  
 
 * Is the sampling to be done deterministically or probabilistically? 
 * Is the sampling to be done systematically or not?
@@ -60,7 +60,7 @@ mpg_sub <- mpg |>
 mpg_sub
 ```
 
-Note that `slice` does not care if the row numbers appearing in the second argument are all different or if the row numbers are given in non-decreasing order. For instance, we can create a tibble containing four repeats of Audi A4's and Chevrolet Corvette's. 
+Note that `slice` does not care if the row numbers appearing in the second argument are all different or if the row numbers are given in non-decreasing order. For instance, we can create a tibble containing four instances of Audi A4's and Chevrolet Corvette's. 
 
 ```{r}
 mpg_sub <- mpg |>
@@ -70,7 +70,7 @@ mpg_sub
 
 In the above examples, we knew beforehand which rows would appear in the sampled data frame because we specified explicitly the corresponding index of rows to include (e.g., four repeats of row 3 and row 25). We call such a sampling process with a selection vector a *deterministic sample*. The determinism refers to the non-existence of chance during the selection process.  
 
-An alternative to directly specifying the row numbers is specifying a condition on a variable for a record to be in the sample data frame. We have also seen this before. This is the `dplyr` verb `filter`. 
+An alternative to directly specifying the row numbers is specifying a condition on a variable for a record to be in the sample. We have also seen this before. This is the `dplyr` verb `filter`. 
 
 ```{r}
 mpg_sub <- mpg |>
@@ -80,22 +80,24 @@ mpg_sub
 
 The condition on the variable of a record either puts it in the subset or it does not. Exactly one of the two must occur. Like `slice`, `filter` also selects the records deterministically. If you are not convinced, you could run through each of the 234 rows of `mpg` by hand and manually check whether the manufacturer is indeed a `land rover`. Those that pass the check will end up in the sample data frame and, by the end of it all, you would end up with the same result as `filter` -- no manual effort needed!  
 
-### Probabilistic sampling and random samples
+### Random sampling
 
-The antonym of "deterministic" is "non-deterministic", which is a concept that plays an important role in computer science. The meaning of it is quite obvious: it refers to a process that is not deterministic. However, it is quite vague in that it does not state *how* to draw the non-determinism. Data science prefers a more concrete form of non-determinism called *randomness*, which we have seen before. We call the process of sampling that uses randomness to make its draws *probabilistic sampling*.
+The antonym of "deterministic" is "non-deterministic", which is a concept that plays an important role in computer science. The meaning of it is quite obvious: it refers to a process that is not deterministic. However, it is quite vague in that it does not state *how* to draw the non-determinism. Data science prefers a more concrete form of non-determinism called *randomness*, which we have seen before. We call the process of sampling that leverages randomness to make its draws *random sampling*.
 
-The objects from which we draw samples are called the *population*. There are multiple types of populations and the determining factors of the types is its quantity and the way the samples are generated. Following are some (non-comprehensive) examples of populations and how we sample from the data.
+The pool of subjects from which we draw samples is called the *population*. There are multiple types of populations and the determining factors of the types is its quantity and the way the samples are generated. 
 
-* *Accessible Data with Succinct Definition* We want to study the choice of major at a college. The registrar's office can generate a complete list of all the students currently attending the college. Using filtering, we can narrow down the population to a specific group (e.g., the full-time sophomore students). We can then sample from the group or we can choose to include all the students in the group in our study.
+When we draw a *random sample*, there are two questions that must be answered before the sampling is done: (1) what is the *population* being measured, and (2) what is the the *chance of selection* for each group in that population? If either of these points are not known beforehand, the sample obtained is __NOT__ a random sample! This is an important point to emphasize because sometimes a sample can appear "random" even though it is not.   
+
+Following are some (non-comprehensive) examples of populations and how sampling might be carried out.
+
+* *Accessible Data with Succinct Definition* We want to study the choice of major at a college. The registrar's office can generate a complete list of all the students currently attending the college. We could form a random sample by selecting at random a student from the enrollment database where each student has an equal chance of appearing in the sample. Alternatively, a deterministic sample may apply some filtering. This can be done to narrow down the population to a specific group (e.g., the full-time sophomore students). We can then form a random sample from just this group or we can opt to include all the students in the group in our study.
 * *Continuous Population Requiring Discretization* We want to study the quality of air based on how ``blue'' the skies are. There is no clear definition of the population. The geographical location of measurement equipment, the area to cover in the sky, and the time of measurement can be factors in determining the samples. The determination of these factors essentially *discretize* the continuous data. After determining all these factors succinctly, a technician can make a measurement.
-* *Data with Succinct Definition Beyond Reach* We want to study the relationship between the height and weight of the people living in the United States. The population appears to have a clear definition, but it is difficult to determine who gets in the population because the population is transient (due to babies coming to life, people moving out of the country, etc.). By specifying at which point of time the person must be living in the United States, the definition can be succinct. The problem is that it is impossible to include everyone in the population. There are more than 300 million people, and we have no way of knowing who those people are.
-* *Non-existing Population Requiring Active Generation* We want to examine the fairness of a coin. Each time we throw the coin, we generate a record. Throwing the coin N times you get a population of N records, but you may want to use the entire population for the analysis.
-
-A *random sample* makes use of *probabilistic sampling* during the sampling work. However, for a sample to be deemed a *random sample*, it must also fulfill two conditions: (1) the *population* being measured is known, and (2) the *chance of selection*, for each group in that population, is known. If these two conditions do not hold, the sample obtained is __NOT__ a random sample! 
+* *Data with Succinct Definition Beyond Reach* We want to study the relationship between the height and weight of the people living in the United States. The population appears to have a clear definition, but it is difficult to determine who gets to be included in the population because the population is transient (due to babies coming to life, people moving out of the country, etc.). By specifying at which point of time the person must be living in the United States, the definition can be succinct. The problem is that it is impossible to include everyone in the population. There are more than 300 million people, and we have no way of knowing who those people are.
+* *Non-existing Population Requiring Active Generation* We want to examine the fairness of a coin. Each time we throw the coin, we generate a record. Throwing the coin $N$ times you get a population of $N$ records, but you may wish to use the entire population for the analysis.
 
 ### To sample systematically or not? 
 
-In systematic samples, we choose samples in a systematic manner. For example, we can select all students whose university-issued ID number has an odd number in the second-to-last position from the population of all students in a university. Also, we could select, from the entire population of the United States, all voters whose mailing address has a postal code ending in 1, whose street address has a digit 2, owns a car, and whose license plate has either the letter T or the numeral 6. These options are compelling because the sampling work is somehow *convenient* to carry out.  
+In systematic samples, we choose samples in a systematic manner. For example, we can select all students whose university-issued ID number has an odd number in the second-to-last position from the population of all students in a university. Also, we could select, from the entire population of the United States, all voters whose mailing address has a postal code ending in 1, whose street address has a digit 2, owns a car, and whose license plate has either the letter T or the numeral 6. Systematic samples are usually *convenient* to carry out and are often called *convenience samples*. 
 
 Here is an example of making systematic sampling on the `mpg` data set using `dplyr` verbs. Let's start by preparing a version of the data frame that includes the row index for better visual inspection.
 
@@ -117,20 +119,19 @@ mpg_with_index |>
 
 Run the code a few times to see how the output varies.
 
-This is a combination of systematic sampling and probabilistic sampling. The starting point is random and there are 10 possibilities, and we pick one from these 10 possibilities with probability 10% (i.e., one in ten chances). The selection after determining the starting point is deterministic; we select every tenth element from the starting point. Therefore, there are just ten different sample data sets out of the original data set.
+This attempts to be a combination of systematic sampling and random sampling. The starting point is random and there are 10 possibilities, and we pick one from these 10 possibilities with probability 10% (i.e., one in ten chances). The selection after determining the starting point is deterministic; we select every tenth element from the starting point. Therefore, there are just ten different sample data sets out of the original data set.
 
-There are many other ways of selecting one out of ten records from the data set. We could expand the systematic selection to assembling every 10 rows into groups and selecting exactly one from each group. This selection would open up more possibilities. 
+There are many other ways of selecting one out of ten records from the dataset. We could expand the systematic selection to assembling every 10 rows into groups and selecting exactly one from each group. This selection would open up more possibilities. 
 
-Despite the use of the random initial selection, we caution against classifying this sample as a proper *random sample*. The systematic selection of every 10 rows after the initial random choice may disproportionately favor one or more groups from the population. Without further consideration, we would be right to label this a *convenience* sample and not a random sample. Convenience samples are examined in greater depth in [Section 7.6](https://ds4world.cs.miami.edu/power-of-sampling.html#sampling-plans).  
+Despite the use of the random initial point, we would not consider the resulting sample drawn to be a *random sample*. The systematic selection of every 10 rows after the random initial  choice may disproportionately favor one or more groups from the population. Without further consideration, we would label this a *convenience* sample. Convenience samples are examined in greater depth in [Section 7.6](https://ds4world.cs.miami.edu/power-of-sampling.html#sampling-plans). 
 
 Note, also, that there exist combinations that can never be generated. For instance, in both of the schemes we just described, it is impossible to generate a sample that contains the very first two records. Can you see why? 
 
 ### To sample with replacement or not?
 
-When we do random sampling, there are two main strategies. One is to prohibit any record from appearing more than once in the sampled data frame. The other is, of course, not to impose such a restriction.  
+When we conduct random sampling, there are two main strategies. One is to prohibit any record from appearing more than once in the sampled data frame. The other is, of course, not to impose such a restriction.  
 
-We call the first strategy *sampling without replacement* and the second *sampling with replacement*.
-Most of the sampling we conduct is sampling *with* replacement. The reasons for this will follow in the next section.   
+We call the first strategy *sampling without replacement* and the second *sampling with replacement*. Most of the sampling we conduct is sampling *with* replacement. The reasons for this will follow in the next section.   
 
 ### To select samples uniformly or not?
 
@@ -138,9 +139,9 @@ There are situations in which the population we want to observe is a mixture of 
 
 ## Distribution of a Sample
 
-One of the most important applications of sampling is to obtain an approximation for a true distribution, which we often do not know. Think of a question like: "what percent of people in the United States are taller than six feet?" To attempt an answer, we would need to define who are "the people in the United States" and then engage in an enormous effort to collect the heights for all qualifying individuals -- a task that is not only tedious, but impossible to accomplish. 
+One of the most important applications of sampling is to obtain an approximation for a "true" distribution, which we often do not know. Think of a question like: "what percent of people in the United States are taller than six feet?" If we had access to a census that contained all qualifying individuals in the population, we could compute the answer directly. Without a census, we would need to not only define who are "the people in the United States," but engage in an enormous effort to collect and record all the heights -- a task that is not only tedious, but likely impossible to accomplish. 
 
-Enter sampling. Instead of trying to account for every individual in the country, we can *sample* people from the population and approximate the height of people in the United States from the samples we collect. Our hope is that any histogram we construct from our sampled population will be close enough to the one we would have if we could record the heights from the entire population. All the heights from the U.S. population follows what we call the *true distribution*, and those from our sampled population the *sampling distribution*.   
+Enter sampling. Instead of trying to account for every individual in the country, we can *sample* people from the population that we determine and approximate the height of people in the United States from the sample we collect. Our hope is that any histogram we construct from our sample will be close enough to the one we would have if we could record the heights from the entire population. All the heights from the U.S. population follows what we call the *true distribution* and those from our sampled population the *sampling distribution*.   
 
 <!-- Keep in mind that the human height carries inaccuracies because the way a person stands affects height measurement.
 We might say beyond a certain level of granularity, such as one tenth of an inch, it would be impossible to produce consistent measurements.
@@ -191,7 +192,7 @@ Note that the sampling we are about to conduct is different from the example of 
 * The population exists only in our throwing of the die; that is, each time we throw the die, the throw and its outcome becomes a new member of the population.
 * Because we can generate a sample any number of times, the population is actually infinite in size.
 
-Nevertheless, we know what the true distribution looks like. It is our ggplot histogram just above. 
+Nevertheless, we know what the true distribution looks like. It is our histogram shown above. 
 
 #### A sampling distribution
 
@@ -200,7 +201,8 @@ We now generate a sampling distribution using simulation. We used previously `sa
 Here are the results of 10 rolls of a die.
 
 ```{r}
-slice_sample(die, n = 10, replace = TRUE)
+die |>
+  slice_sample(n = 10, replace = TRUE)
 ```
 
 Run the cell above a few times and observe how the faces selected changes. 
@@ -209,7 +211,8 @@ We can adjust the sample size by changing the number given to the `n` argument. 
 
 ```{r}
 sample_hist <- function(n) {
-  die_sample <- slice_sample(die, n = n, replace = TRUE)
+  die_sample <- die |> 
+    slice_sample(n = n, replace = TRUE)
   ggplot(die_sample, aes(x = face, y = after_stat(density))) + 
     geom_histogram(bins = 6, color = "gray")
 }
@@ -231,9 +234,9 @@ sample_hist(100)
 sample_hist(1000)
 ```
 
-The phenomenon we have observed - the sampling distribution growing closer and closer to the true distribution as the sample size is increased - is an important concept in data science. In fact, it is so important that it has a name: we call it the *law of averages*. 
+The phenomenon we have observed - the sampling distribution growing closer and closer to the true distribution as the sample size is increased - is an important concept in data science. In fact, it is so important that it has a special name: we call it the *Law of Averages*. 
 
-A critical requirement for the law of averages to be applicable is that the samples come from the same underlying distribution and do not depend on the drawing of other samples, e.g. the rolling of a 2 does not make the rolling of a 6 more likely on the next roll. This idea is sometimes called sampling "independently and under identical conditions", where the resulting distribution is "independently and identically distributed".
+A critical requirement for the Law of Averages to be applicable is that the samples come from the same underlying distribution and do not depend on the drawing of other samples, e.g. the rolling of a 2 does not make the rolling of a 6 more likely on the next roll. This idea is sometimes called sampling "independently and under identical conditions", where the resulting distribution is "independently and identically distributed".
 
 ### Pop quiz: why sample with replacement? 
 
@@ -242,7 +245,8 @@ The careful reader may have noticed that in the calls to `slice_sample` in this 
 You may have already guessed at an answer: if we sample without replacement, we would not be able to make more than 6 draws since we would have run out of faces on the die to choose from! Here is what happens when trying to sample 6 times without replacement.  
 
 ```{r}
-slice_sample(die, n = 6, replace = FALSE)
+die |>
+  slice_sample(n = 6, replace = FALSE)
 ```
 
 We simply get back the 6-sided die! So sampling with replacement is a requirement for the dice roll example. But, there is another problem when sampling without replacement. Let's look at the true distribution again. 
@@ -263,12 +267,11 @@ slice(die, -selected_face) |>
 
 If we were to sample again from this die, the probability of rolling any of the faces is no longer the same as when we rolled the 2. For one thing, the probability of rolling the faces $1, 3, 4, 5, 6$ has increased to 20% (or $1/5$) and it is impossible to roll a 2. The underlying distribution has fundamentally changed, confirmed by the above ggplot. 
 
-Recall that a prerequisite for the law of averages to work is that the drawing of samples must be done "independently and under identical conditions". Sampling without replacement is a clear violation of this assumption. And yet, the story does not end there. In our example, there were only 6 individuals to choose from -- the faces of a 6-sided die. If we were to increase the number of individuals that we could sample from, say the entire U.S. population, then the effect observed here actually becomes negligible. Sampling without replacement remains an important method for sampling, especially in drug studies with treatment/control groups where it is physically not possible to sample with replacement -- cloning people remains the stuff of science fiction, at least for now :-) Therefore, our hope is that both sampling plans will generate similar results.  
-
+Recall that a prerequisite for the Law of Averages to work is that the drawing of samples must be done "independently and under identical conditions". Sampling without replacement is a clear violation of this assumption. And yet, the story does not end there. In our example, there were only 6 individuals to choose from -- the faces of a 6-sided die. If we were to increase the number of individuals that we could sample from, say the entire U.S. population, then the effect observed here actually becomes negligible. Sampling without replacement remains an important method for sampling, especially in drug studies with treatment/control groups where it is physically not possible to sample with replacement. Cloning people remains the imagination of science fiction, at least for now :-) Therefore, our hope is that both sampling plans will generate similar results in practice.  
 
 ## Populations
 
-The law of averages can be useful when the population from which to draw samples is very large.
+The Law of Averages can be useful when the population from which to draw samples is very large.
 
 As an example, we will study a population of flight delay times. The tibble `flights` contains all 336,776 flights that departed from New York City in 2013. It is drawn from the [Bureau of Transportation Statistics](http://www.transtats.bts.gov/DatabaseInfo.asp?DB_ID=120&Link=0) in the United States. The help page `?flights` contains more documentation about the dataset.  
 
@@ -326,8 +329,7 @@ ggplot(flights, aes(x = dep_delay, y = after_stat(density))) +
   geom_histogram(col="grey", breaks = delay_bins)
 ```
 
-The tallest bar in the histogram is the (-10, 0] bar is just below 0.06, which is equal to 6%.
-There are ten values of delay minutes in the bin, we multiply the below-0.06% by 10 to assess that the delays in the interval occupy slightly below 60%.
+The tallest bar in the histogram is the $(-10, 0]$ bar is just below 0.06, which is equal to 6%. There are ten values of delay minutes in the bin, we multiply the below-0.06% by 10 to assess that the delays in the interval occupy slightly below 60%.
 We can confirm the visual assessment by counting rows:
 
 ```{r}
@@ -336,7 +338,7 @@ nrow(filter(flights, dep_delay > -10 & dep_delay <= 0)) / nrow(flights)
 
 ### Sampling distribution of departure delays 
 
-Let us now think of the 336,776 flights as a population, and draw random samples from it with replacement. As we may try using various values for the number of samples, let us define a function for sampling and plotting.
+Let us now think of the 336,776 flights as a *population*, and draw random samples from it with replacement. As we may try using various values for the number of samples, let us define a function for sampling and plotting.
 
 The function `sample_hist` takes the sample size as its argument, which we call `n`, and draws a histogram of the results.
 
@@ -360,13 +362,9 @@ sample_hist(10)
 sample_hist(100)
 ```
 
-We may notice various differences between the two plots.
-The plots may vary each time we execute the code.
-Of all the differences that emerge when we execute the two codes and compare the plots, the most notable are the number of bars and how far the bars reach to the right without a gap.
-We notice that in the case of 100 samples, there are always bars far to the right and there almost is also some presence in each bar between the tallest bar and the farthest one.
+We may notice various differences between the two plots. The plots may vary each time we execute the code. Of all the differences that emerge when we execute the two codes and compare the plots, the most notable are the number of bars and how far the bars reach to the right without a gap. We notice that in the case of 100 samples, there are always bars far to the right and there almost is also some presence in each bar between the tallest bar and the farthest one.
 
-Here is a plot with 1000 samples.
-We see the plot is much closer to the one with the entire flight data.
+Here is a plot with 1000 samples. We see the plot is much closer to the one with the entire flight data.
 
 ```{r dpi=80,  fig.align="center", warning = FALSE, message = FALSE}
 sample_hist(1000)
@@ -380,7 +378,7 @@ From the experiments we have conducted with 10, 100, and 1000 samples, we have o
 
 > At some large size, with high probability, the approximation of the true distribution we produce through sampling becomes almost indistinguishable from the true one.
 
-Because of the two properties, we can use random samples in statistical inference.
+Because of the two properties, we can use random sampling in *statistical inference*.
 The indistinguishable nature of sampling distributions is quite powerful.
 When the population is large, we can turn to sampling to generate a sample data set of a reasonably large size, which saves computation time.
 
@@ -546,7 +544,7 @@ Thus, our final property:
 
 ## Simulating a Statistic
 
-In many situations we do not know the value of a parameter of a population. It turns out that sampling is a reliable tool that can offer a good estimate of a parameter. Since large-scale sampling produces an sampling distribution that is close to the true population, we hope that the value we compute from it will also be close enough to the parameter we obtain from the population when the sample size is large. 
+In many situations we do not know the value of a parameter of a population. Yet, it turns out that random sampling is a reliable tool we can use to find a good estimate of a parameter. Since large-scale sampling produces a sampling distribution that approximates the true distribution, we hope that the value we compute from it will also be close enough to the parameter we could obtain from the population directly when the sample size is large enough. 
 
 Before jumping into the tidyverse, first some vocabulary: 
 
@@ -581,7 +579,9 @@ ggplot(sample_1000, aes(x = dep_delay, y = after_stat(density))) +
   geom_histogram(col="grey", breaks = delay_bins)
 ```
 
-Since we are assuming that the population of all departed NYC flights in 2013 is available to us in `flights`, we can directly compute the value of the parameter "median flight delay." This is a rare luxury not often possible using real data. We can check the value we obtain through sampling against the value we obtain from the entire population.
+Since we are assuming that the population of all departed NYC flights in 2013 is available to us in `flights`, we can compute directly the value of the parameter "median flight delay." This is a rare luxury not usually possible using real data. 
+
+We can check the value we obtain through sampling against the value we obtain from the entire population.
 
 ```{r}
 flights |>
@@ -613,9 +613,9 @@ slice_sample(flights, n = 1000, replace = TRUE) |>
   median(na.rm = TRUE)
 ```
 
-You can run the code a few times to see that the value that appears as the result is not consistent, but always either -1 or -2. While the two values are close, you cannot assert that the median is -1 or it is -2. 
+You can run the code a few times to see that the value that appears as the result is not consistent, but always either -1 or -2. While the two values are close, you cannot assert that the median is -1 or -2. 
 
-Is there any way out of this? Can we say anything about how likely the median is -1 and how likely the median is -2? We thus turn to simulation. We obtain the statistic of median many times using sampling and then see a histogram of the numbers we obtain.
+Is there any way out of this? Can we say anything about how likely the median is -1 and how likely the median is -2? We thus turn to simulation. We compute the sample median statistic many times using sampling and then see a histogram of the numbers we obtain.
 
 ### Simulating a statistic 
 
@@ -623,17 +623,17 @@ Before getting down to the business of estimating the median distribution, let u
 
 __Step 1: Select the statistic to estimate.__ Two questions are at hand. What statistic do we want to estimate? How many samples do we use in each estimate?
 
-__Step 2: Write the code for estimation.__ We need to write the code for sampling and then computing a statistic from the sample. Typically we encapsulate such steps in a function that we can use in a call to the function `replicate()`. 
+__Step 2: Write the code for estimation.__ We need to write the code for sampling and then computing a statistic from the sample. Typically we encapsulate such steps in a function that we can use in a call to the function `replicate`. 
 
 __Step 3: Generate estimations and visualize.__ A question at hand is how many times do we repeat the experiment? We may not have an answer to the question. We will write the code for repeating experiments, collecting the results in a vector whose length is equal to the number of repetitions, and then generating a visualization of the results we have collected in the vector. The code we write may be a function that takes the number of repetitions as an argument.
 
 ### Guessing a "lucky" number
 
-Before continuing with the `flights` data, let us see an example of simulating a statistic using a toy problem. 
+Before continuing on with the `flights` data, let us first see an example of simulating a statistic using a toy problem. 
 
-Your friend invites you to a game of rolling die. He rolls a special 30-sided die (sometimes called a "D30" die) 10 times and, after each roll, adds some "lucky" number of his choosing. He does not say what his lucky number is. 
+Your friend invites you to a game of rolling die. He rolls a special 30-sided die (sometimes called a "D30" die) 10 times and, after each roll, adds some "lucky" number of his choosing. He does not say what his lucky number is or show you the dice rolls before he adds the number to the roll. 
 
-Let us suppose the lucky number is 6. We can use `sample` to simulate the total rolls we get to see. This is what one set of total rolls might look like after the game is over:
+Let us suppose his lucky number is 6. We can use `sample` to simulate the total rolls we get to see. This is what one set of total rolls might look like after the game is over:
 
 ```{r echo=FALSE, warning=FALSE}
 set.seed(3)
@@ -664,7 +664,6 @@ one_game(6)
 ```
 
 We can call `one_game` to generate a sample and then compute a statistic from it. This is a process we can repeat a large number of times to simulate a large number of sample statistics.  
-
 ### Step 2: Write code for estimation
 
 The following function `min_based` implements the min-based estimator. As noted earlier, we use the smallest total roll as our estimate and subtract 1. 
@@ -690,7 +689,7 @@ d30_expected_value <- mean(sample_rolls)
 d30_expected_value
 ```
 
-This mean goes by a special name: the *expected* value. Statisticians gave it this name because it is the number that we can *expect* to get in the long run, say after doing an arbitrarily large number of trials. For a 30-sided die, probability theory dictates this should be 15.5. Our answer in `d30_expected_value` comes pretty close!
+This value we just computed has a special name: the *expected* value. Statisticians give it this name because it is the number that we can *expect* to get in the long run, say, after doing an arbitrarily large number of trials. For a 30-sided die, probability theory dictates this should be 15.5. Our answer in `d30_expected_value` comes pretty close!
 
 We are now ready to implement the mean-based estimator. 
 
@@ -726,7 +725,7 @@ mean_estimates <- replicate(n = reps, simulate_one_stat(mean_based))
 min_estimates <- replicate(n = reps, simulate_one_stat(min_based)) 
 ```
 
-We put the results together into a tibble `estimate_tibble`. Note that a pivot transformation is applied here such that one row corresponds to one simulated statistic. 
+We collect the results together into a tibble `estimate_tibble`. Note that a pivot transformation is applied here so that one row corresponds to exactly one simulated statistic. 
 
 ```{r}
 estimate_tibble <- tibble(mean_est = mean_estimates, 
@@ -738,7 +737,7 @@ estimate_tibble
 
 We can now visualize the sampling distribution of the two estimators using an overlaid histogram. 
 
-```{r dpi=80, fig.align="center", message = FALSE, eval=FALSE}
+```{r dpi=80, fig.align="center", message = FALSE}
 bins <- seq(0, 22, 1)
   
 ggplot(estimate_tibble) + 
@@ -749,17 +748,20 @@ ggplot(estimate_tibble) +
   scale_x_continuous(breaks = bins)
 ```
 
-The distribution of each estimator reveals a trade-off between *variance* and *bias*. We observe that the min-based estimator almost always overestimates. The bulk of the simulated statistics cluster around the $(5, 6]$ bin, but, by design, the estimator can only predict larger numbers. In this case, we say that the min-based estimator is *biased* and has low *variability*. 
+The distribution of each estimator reveals a trade-off between *variance* and *bias*. We observe that the min-based estimator almost always overestimates because, by design, the estimator can only predict a number equal to the lucky number or greater. Therefore, we see that the bulk of its simulated statistics "bottom out" in the $(5, 6]$ bin. In this case, we say that the min-based estimator is *biased* but enjoys low *variability*. 
 
-In contrast, the mean-based estimator overestimates about as often as it underestimates. This estimator is not *biased* but incurs more *variability* as a result. 
+In contrast, the mean-based estimator overestimates about as often as it underestimates. This gives rise to a familiar "bell-shaped" curve. This estimator trades off *bias* for more *variability* in the estimates as a result. 
+
+Which estimator would you choose for this problem? Are there other situations where you might prefer one more than the other, given the bias-variance trade-off? 
 
 ### Median flight delay in `flights`
 
-Let us now return to estimating the median flight delay in the `flights` data frame. Recall that, based on our assumptions, we know the value of the parameter the statistic is trying to estimate. It is the value $-2$. 
+Let us now return to estimating the median flight delay in the `flights` data frame. Recall that, following our assumptions, we know the value of the parameter the statistic is trying to estimate. It is the value $-2$. 
 
 ### Step 1: Select the statistic to estimate
 
 We will draw random samples of size 1,000 from the population of flights and simulate the median.  
+
 ### Step 2: Write code for estimation
 
 We know how to generate a random sample of 1,000 flights. 
@@ -814,11 +816,11 @@ ggplot(medians_df) +
   geom_histogram(aes(x = medians, y = after_stat(density)), color = "gray", bins = 3)
 ```
 
-The sample median is very likely to be about -2, which is exactly the value of the population median. This is because the sampling distributions of 1,000 flight departure delays are close to the true ones. We know that we generated before looked a lot like the true distribution of flight delays. We can guess that in running the experiment, each sampling distribution with 1,000 flights would have liked like the true one.
+The sample median is very likely to be about -2, which is exactly the value of the population median. This is because the sampling distributions of 1,000 flight departure delays are close to the true ones. We know that we generated before looked a lot like the true distribution of flight delays. We can guess that in running the experiment, each sampling distribution with 1,000 flights would have looked like the true one.
 
 ## Convenience Sampling
 
-The story goes that we can derive meaningful conclusions about a population using sampling distributions. Such distributions are formed by the application of random samples. The one we have used so far has been drawing random samples with (or without) replacement. We refer to such a scheme as *simple random sampling*. However, simple random sampling is not the only way to generate an sampling distribution. We briefly discussed another method at the start of this chapter: *convenience sampling*. In this section, we examine convenience sampling in greater detail and its suitability for statistical analysis.   
+The story goes that we can derive meaningful conclusions about a population using sampling distributions. Such distributions are formed by the application of random sampling. The one we have used so far has been drawing random samples with (or without) replacement. We refer to such a scheme as *simple random sampling*. However, simple random sampling is not the only way to generate a sampling distribution. We briefly discussed another method at the start of this chapter: *convenience sampling*. In this section, we examine convenience sampling in greater detail and discuss its suitability for statistical analysis.   
 
 ### Prerequisites
 
@@ -912,12 +914,12 @@ mystery_flights |>
   slice(c(1, 101, 201, 301, 401))
 ```
 
-It turns out that the flights with even row numbers all have early departures. By fixing `start` to be an even value, our systematic sampling scheme was fooled into always choosing flights that are ahead of schedule. Under such circumstances, we conclude that this sample is *not* a random sample!
+It turns out that the flights with even row numbers all have early departures. By fixing `start` to be an even value, our systematic sampling scheme was "fooled" into always choosing flights that are ahead of schedule. Under such circumstances, we conclude that this sample is *not* a random sample!
 
 ### Beware: the presence of patterns 
 
-The `mystery_flights` tibble is a contrived example that required careful reorganization of the rows to create a setup where *every* flight with an even row index among the approximately 330K flights present in the dataset had an early departure. While it is quite unlikely that a real-world dataset would contain such an anomaly, the example points to valuable lessons that can occur in practice, especially when working with a convenience sample.  
+The `mystery_flights` tibble is a contrived example that required careful reorganization of the rows to create a setup where *every* flight with an even row index among the approximately 330K flights present in the dataset had an early departure. While it is quite unlikely that a real-world dataset would contain such an anomaly, the example points to valuable lessons that can occur in practice, especially when dealing with a convenience sample.  
 
-Real-world datasets are rife with patterns. Manufacturing errors due to a particular malfunctioning machine that assemble every $n$-th product; software engineering teams where every tenth member is designated the product manager; university-issued ID's where ID numbers ending in 0 are reserved for faculty members. Any systematic sampling scheme is much more prone to selecting samples that follow (unexpected) patterns than a simple random scheme would be. Not unlike like the story with `mystery_flights`, a biased sample can result and lead to misleading (and likely erroneous) findings. Even more, some may be willing to exploit such patterns for the sole possibility of increasing the significance of their results -- we would hardly call them data scientists!  
+Real-world datasets are rife with patterns. Manufacturing errors due to a particular malfunctioning machine that assemble every $n$-th product; software engineering teams where every tenth member is designated the product manager; university-issued ID's where ID numbers ending in 0 are reserved for faculty members. Any systematic sampling scheme is much more prone to selecting samples that follow (unexpected) patterns than a simple random sample would be. Not unlike like the story with `mystery_flights`, a biased sample can result and lead to misleading (and likely erroneous) findings. Even more, some may be willing to exploit such patterns for the sole possibility of increasing the significance of their results -- we would hardly call them data scientists!  
 
-Regardless of the sampling plan used, sampling strategies demand prudence on the part of the data scientist.  
+Sampling strategies demand prudence on the part of the data scientist. It is for this reason that random sampling is the most principled approach.  

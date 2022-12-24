@@ -914,7 +914,7 @@ Sometimes the minister received few to no grains at the end of the 10th day and 
 
 ### Simulation round-up 
 
-This section discussed multiple iteration constructs for building simulations. The following table clarifies when to use each.  
+This section discussed multiple iteration constructs for building simulations. The following list clarifies when to use each.  
 
 1. `map_*` 
     + __Arguments:__ (1) a sequence (2) a function that receives as an argument an element from that sequence
