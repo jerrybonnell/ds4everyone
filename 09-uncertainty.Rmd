@@ -35,25 +35,25 @@ In our prior exploration of this data frame, we generated empirical distribution
 
 ```{r dpi=80,  fig.align="center", message = FALSE, warning = FALSE}
 ggplot(flights) + 
-  geom_histogram(aes(x = dep_delay, y = ..density..), col="grey", bins = 30)
+  geom_histogram(aes(x = dep_delay, y = after_stat(density)), col="grey", bins = 30)
 ```
 
 As before, we are interested in the bulk of the data here, so we can ignore the 1.83% of flights with delays of more than 150 minutes.
 
 ```{r}
-flights150 <- flights %>%
+flights150 <- flights |>
   filter(dep_delay <= 150)
 ```
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(flights150) + 
-  geom_histogram(aes(x = dep_delay, y = ..density..), col="grey", bins = 30)
+  geom_histogram(aes(x = dep_delay, y = after_stat(density)), col="grey", bins = 30)
 ```
 
 Let's extract the departure delay column as a vector. 
 
 ```{r}
-dep_delays <- flights150 %>% pull(dep_delay)
+dep_delays <- flights150 |> pull(dep_delay)
 ```
 
 ### `median`
@@ -95,8 +95,8 @@ max(dep_delays)
 Recall that this maximum is actually artificial because we filtered all rows whose departure delay was more than 150. To recover the true maximum, we need to refer to the original `flights` data. 
 
 ```{r}
-flights %>%
-  pull(dep_delay) %>%
+flights |>
+  pull(dep_delay) |>
   max(na.rm = TRUE)
 ```
 
@@ -114,14 +114,14 @@ Before starting, let's load the `tidyverse` as usual.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(edsdata)
 ```
 
 ### The `finals` tibble  
 
-In the spirit of the College Board, we will examine exam scores to develop an understanding of percentiles. Recall that the `finals` data frame contains final exams from two offerings of an undergraduate computer science course taught at the University of Miami. Let's load it in. 
+In the spirit of the College Board, we will examine exam scores to develop an understanding of percentiles. Recall that the `finals` data frame contains hypothetical final exam scores from two offerings of an undergraduate computer science course. Let's load it in. 
 
 ```{r message = FALSE}
-finals <- read_csv("data/final_exams.csv")
 finals
 ```
 
@@ -134,7 +134,7 @@ nrow(finals)
 We will not concern ourselves with the individual offerings of the course this time. Since the scores are of interest for this study, let us extract a vector of scores from the tibble.  
 
 ```{r}
-scores <- finals %>%
+scores <- finals |>
   pull(grade)
 ```
 
@@ -151,14 +151,14 @@ Finally, let us visualize the distribution of scores.
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(finals) + 
-  geom_histogram(aes(x = grade, y = ..density..), 
+  geom_histogram(aes(x = grade, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 10)
 ```
 
 
 ### The `quantile` function
 
-The percentile is an order statistic where the position of the data is not the rank but a percentage that specifies relative position in the data. For instance, the 50th percentile is the smallest value that is at least as large as 50% of the elements in `scores`; it must be a value on the list of scores. We can compute this simply with the `quantile()` function in R. 
+The percentile is an order statistic where the position of the data is not the rank but a percentage that specifies relative position in the data. For instance, the 50th percentile is the smallest value that is at least as large as 50% of the elements in `scores`; it must be a value on the list of scores. We can compute this simply with the `quantile` function in R. 
 
 ```{r}
 quantile(scores, c(0.5), type = 1)
@@ -242,12 +242,11 @@ Let's return to the example of final exam scores. Suppose that one offering of t
 
 Since top 10 is 20% of 50 students, there is a 20% chance for a student to be among the top 10, while the chances decrease to 5% for the class of 200. That is, if we specify a top group with its size, the significance being in the top group varies depending on the size of the population and so we must to specify the size of the underlying group, e.g., "top 10 in a group of 4000 students". Percentiles are nice in that they are not sensitive to these changes.
 
-
 ## Resampling
 
-It is usually the case that a data scientist will receive a collection of samples from an underlying population to which she has no access. If she had access to the underlying population, she could calculate the parameter value directly. Since that is impossible, is there a way for her to deal with the sample collection at hand to generate a range of values for the statistic?
+It is usually the case that a data scientist will receive a sample from an underlying population to which she has no access. If she had access to the underlying population, she could calculate the parameter value directly. Since that is impossible, is there a way for her to use the sample at hand to generate a range of values for the statistic?
 
-Yes! This is a technique we call *resampling*, which is also known as the *bootstrap*. In bootstrapping, we treat the dataset at hand as the true population and generate samples from it. But there is a catch. Each sample data set that we generate should be equal in size to the original. This necessarily means that our sampling plan be done *with* replacement, rather than without. 
+Yes! This is a technique we call *resampling*, which is also known as the *bootstrap*. In bootstrapping, we treat the dataset at hand as the "population" and generate "new" samples from it. But there is a catch. Each sample data set that we generate should be equal in size to the original. This necessarily means that our sampling plan be done *with* replacement. 
 
 Since the samples have the same size as the original with the use of replacement, duplicates and omissions can arise. That is, there are items that will appear multiple times as well as items that are missing. Because randomness is involved, the discrepancy varies.
 
@@ -270,15 +269,15 @@ Recall the distribution of departure delays in `flights150`.
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(flights) + 
-  geom_histogram(aes(x = air_time, y = ..density..), 
+  geom_histogram(aes(x = air_time, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 20)
 ```
 
 As before, let's concentrate on the bulk of the data and filter out any flights that flew for more than 400 minutes.  
 
 ```{r}
-flights400 <- flights %>%
-  filter(air_time < 400) %>%
+flights400 <- flights |>
+  filter(air_time < 400) |>
   drop_na()
 ```
 
@@ -286,15 +285,15 @@ We plot this distribution one more time.
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(flights400) + 
-  geom_histogram(aes(x = air_time, y = ..density..), 
+  geom_histogram(aes(x = air_time, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 20)
 ```
 
 The parameter we will select for this study is the mean air time. 
 
 ```{r}
-pop_mean <- flights400 %>%
-  pull(air_time) %>%
+pop_mean <- flights400 |>
+  pull(air_time) |>
   mean()
 pop_mean
 ```
@@ -306,23 +305,22 @@ Let us see how well we can estimate this value based on a sample of the flights.
 For our mechanical sample, we will assume that we have been given only a cross-section of the flights data and try to estimate the population median based on this sample. Let us suppose we have been given the flight data for only the months of September and October.     
 
 ```{r}
-flights_sample <- flights400 %>%
+flights_sample <- flights400 |>
   filter(month == 9 | month == 10)
 ```
 
 There are 55,522 flights appearing in the subset. Let's visualize the distribution of air time from our sample. 
-
 ```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(flights_sample) + 
-  geom_histogram(aes(x = air_time, y = ..density..), 
+  geom_histogram(aes(x = air_time, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 20)
 ```
 
 It appears close to the population of flights, though there are notable differences: flights that have longer air times (between 300 and 400 minutes) appear exaggerated in this dataset. Let's compute the mean from this sample.
 
 ```{r}
-sample_mean <- flights_sample %>%
-  pull(air_time) %>%
+sample_mean <- flights_sample |>
+  pull(air_time) |>
   mean()
 sample_mean
 ```
@@ -336,14 +334,15 @@ To perform a bootstrap, we will draw from the sample, at random __with replaceme
 To simplify the work, let us extract the column of air times as a vector. 
 
 ```{r}
-air_times <- flights_sample %>% pull(air_time)
+air_times <- flights_sample |> 
+  pull(air_time)
 ```
 
 We know already how to sample at random with replacement from a vector using `sample`. Computing the sample mean is also straightforward: just pipe the returned vector into `mean`. 
 
 ```{r}
-sample_mean <- air_times %>% 
-  sample(replace = TRUE) %>%
+sample_mean <- air_times |> 
+  sample(replace = TRUE) |>
   mean()
 sample_mean
 ```
@@ -352,9 +351,9 @@ Let us move this work into a function we can call.
 
 ```{r}
 one_sample_mean <- function() {
-  sample_mean <- flights_sample %>% 
-    pull(air_time) %>%
-    sample(replace = TRUE) %>%
+  sample_mean <- flights_sample |> 
+    pull(air_time) |>
+    sample(replace = TRUE) |>
     mean()
   return(sample_mean)
 }
@@ -370,9 +369,9 @@ This function is actually quite useful. Let's generalize the function so that we
 
 ```{r}
 one_sample_value <- function(df, label, statistic) {
-  sample_value <- df %>% 
-    pull({{ label }}) %>%
-    sample(replace = TRUE) %>%
+  sample_value <- df |> 
+    pull({{ label }}) |>
+    sample(replace = TRUE) |>
     statistic()
   return(sample_value)
 }
@@ -391,14 +390,15 @@ one_sample_value(flights_sample, air_time, mean)
 We now have all the pieces in place to perform the bootstrap. We will replicate this process many times so that we can compose an empirical distribution of all the bootstrapped sample means. Let's repeat the process 10,000 times. 
 
 ```{r}
-bstrap_means <- replicate(n = 10000, one_sample_value(flights_sample, air_time, mean))
+bstrap_means <- replicate(n = 10000, 
+                          one_sample_value(flights_sample, air_time, mean))
 ```
 
 Let us visualize the bootstrapped sample means using a histogram. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
 df <- tibble(bstrap_means)
-ggplot(df, aes(x = bstrap_means, y = ..density..)) + 
+ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 8)
 ```
 
@@ -406,12 +406,12 @@ ggplot(df, aes(x = bstrap_means, y = ..density..)) +
 
 How often does the population mean fall somewhere in the empirical histogram? Does it reside 
 "somewhere at the center" or at the fringes where the tails are? Let us be more specific by what we mean when we say "somewhere at the center": the middle 95% of bootstrapped means containing the population mean.  
-
 We can identify the "middle 95%" using the percentiles we learned from the last section. Here they are: 
 
 ```{r}
 desired_area <- 0.95
-middle95 <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle95 <- quantile(bstrap_means, 
+                     0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle95
 ```
 
@@ -420,7 +420,7 @@ Let us annotate this interval on the histogram.
 ```{r dpi=80,  fig.align="center", message = FALSE}
 df <- tibble(bstrap_means)
 
-ggplot(df, aes(x = bstrap_means, y = ..density..)) + 
+ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 8) +
   geom_segment(aes(x = middle95[1], y = 0, xend = middle95[2], yend = 0), 
                    size = 2, color = "salmon") 
@@ -432,14 +432,14 @@ pop_mean
 
 Our population mean is 149.6 minutes -- that is nowhere to be seen in this interval or even in the histogram! It would seem then that in all of the 10,000 replications of the bootstrap, not even one was able to capture the population mean. What happened? 
 
-Recall the subset selection we used: all flights in September or October. This was a very artificial selection that is prone to bias. We learned before when we discussed sampling plans that bias in the data can mislead the results, especially when using a convenient sample such as the one here. 
+Recall the subset selection we used: all flights in September or October. This was a very artificial selection that is prone to bias. We learned before when we discussed sampling plans that bias in the sample can mislead the statistic computed from it, especially when using a convenience sample such as the one here. 
 
 ### Second try: A random sample 
 
 We will now try to estimate the population mean using a random sample of flights. Let us select at random without replacement 10,000 flights from the data. 
 
 ```{r}
-flights_sample <- flights400 %>% 
+flights_sample <- flights400 |> 
   slice_sample(n = 10000, replace = FALSE)
 ```
 
@@ -447,15 +447,15 @@ We will visualize what our random sample looks like.
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(flights_sample) + 
-  geom_histogram(aes(x = air_time, y = ..density..), 
+  geom_histogram(aes(x = air_time, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 20)
 ```
 
 Let us also compute the sample mean again. 
 
 ```{r}
-sample_mean <- flights_sample %>%
-  pull(air_time) %>%
+sample_mean <- flights_sample |>
+  pull(air_time) |>
   mean()
 sample_mean
 ```
@@ -469,14 +469,16 @@ Let us now repeat the bootstrap. Recall that we will treat this sample as if it 
 We have done all the hard work already in setting up the bootstrap. To redo the process, we need only to pass in the random sample contained in `flights_sample`. As before, let us repeat the process 10,000 times. 
 
 ```{r}
-bstrap_means <- replicate(n = 10000, one_sample_value(flights_sample, air_time, mean))
+bstrap_means <- replicate(n = 10000, 
+                          one_sample_value(flights_sample, air_time, mean))
 ```
 
 We will identify the "middle 95%". Here is the interval:
 
 ```{r}
 desired_area <- 0.95
-middle95 <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle95 <- quantile(bstrap_means, 
+                     0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle95
 ```
 
@@ -485,7 +487,7 @@ Let us annotate this interval on the histogram. We will also plot the population
 ```{r dpi=80,  fig.align="center", message = FALSE}
 df <- tibble(bstrap_means)
 
-ggplot(df, aes(x = bstrap_means, y = ..density..)) + 
+ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 8) +
   geom_segment(aes(x = middle95[1], y = 0, xend = middle95[2], yend = 0), 
                    size = 2, color = "salmon") +
@@ -500,18 +502,21 @@ Our interval of bootstrapped means captured the parameter in the air time data. 
 
 We would like to see how often the "middle 95%" interval captures the parameter. We will need to redo the entire process many times to find an answer. More specifically, we will follow the recipe:
 
-* Generate a sample of size 10,000 from the population. For the sampling plan, sample at random without replacement. 
+* Collect a fresh sample of size 10,000 from the population. For the sampling plan, sample at random without replacement. 
 * Do 10,000 replications of the bootstrap process and find the "middle 95%" interval of bootstrapped means. 
-
 We will repeat this process 100 times so that we end up with 100 intervals; we will count how many of them contain the population mean.  
 
 ```{r}
 all_the_bootstraps <- function() {
   desired_area <- 0.95
     
-  flights_sample <- flights400 %>% slice_sample(n = 10000, replace = FALSE)
-  bstrap_means <- replicate(n = 10000, one_sample_value(flights_sample, air_time, mean))
-  middle95 <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+  flights_sample <- flights400 |> 
+    slice_sample(n = 10000, replace = FALSE)
+  
+  bstrap_means <- replicate(n = 10000, 
+                            one_sample_value(flights_sample, air_time, mean))
+  middle95 <- quantile(bstrap_means, 
+                       0.5 + (desired_area / 2) * c(-1, 1), type = 1)
   return(middle95)
 }
 ```
@@ -551,8 +556,8 @@ interval_df
 How many of these contain the population mean? We can count the number of intervals where the population mean is between the left and right endpoints. 
 
 ```{r}
-interval_df %>%
-  filter(left <= pop_mean & right >= pop_mean) %>%
+interval_df |>
+  filter(left <= pop_mean & right >= pop_mean) |>
   nrow()
 ```
 
@@ -563,10 +568,10 @@ ggplot(interval_df) +
   geom_segment(aes(x = left, y = replication, 
                    xend = right, yend = replication), color = "salmon") +
   geom_vline(xintercept = pop_mean, color = "red") + 
-  xlab("Air time (minutes)")
+  labs(x = "Air time (minutes)")
 ```
 
-We expect about 95 of the 100 intervals to cross the vertical line; meaning, it contains the parameter. We would label such intervals as "good". If an interval does not, oh well -- that's the nature of chance. Fortunately, these do not occur often. In fact, they should occur about 5 times among 100 trials, or 95%. The strength of statistics lies not in clairvoyance, but in the ability to quantify our uncertainty. 
+We expect about 95 of the 100 intervals to cross the vertical line; meaning, it contains the parameter. We would label such intervals as "good". If an interval does not, oh well -- that's the nature of chance. Fortunately, these do not occur often. In fact, they should occur about 5 times among 100 trials, or 95%. The strength of statistics is not clairvoyance, but the ability to quantify uncertainty. 
 
 ### Resampling round-up 
 
@@ -574,7 +579,7 @@ Before we close this section, we end with a quick summary on how to perform a bo
 
 __Goal:__ To estimate some population parameter we do not know about, e.g., the mean air time of New York City flights. 
 
-* Select a sampling plan. A safe bet is to sample at *random* without replacement from the population. Be sure that the sample drawn is *large* in size.
+* Select a sampling plan. A safe bet is to sample at *random* without replacement from the population. Be sure the sample drawn is *large* in size and remember that in reality sampling is an expensive process. It is likely you will get only one chance to draw a sample from the population.  
 * Bootstrap the random sample (this time, *with* replacement) and compute the desired statistic from it. 
 * Replicate this process a great number of times to obtain many bootstrapped samples.
 * Find the "middle 95%" interval of the bootstrapped samples. 
@@ -583,10 +588,9 @@ __Goal:__ To estimate some population parameter we do not know about, e.g., the 
 
 The previous section developed a way to estimate the value of a parameter we do not know. Because chance is an inevitable part of drawing a random sample, we cannot be precise and offer a single value for this estimate, e.g., we can determine that the mean height of all individuals in the United States is *exactly* 5.3 feet. Instead, we provide an *interval* of estimates by looking at a bulk of values that are "somewhere in the center". Typically this entails looking at the "middle 95%" interval, but we may prefer other intervals such as the "middle 90%" or even the "middle 99%".  
 
-Recall that knowing the value of the parameter beforehand is a rare luxury out of reach; if we could obtain it somehow, there would be no need for statistical methods like the bootstrap. Instead, data scientists rely on intervals of estimates with confidence that the parameter will sit on this interval some percentage of the time. 
+Recall that knowing the value of the parameter beforehand is a rare luxury out of reach; if we could obtain it somehow, there would be no need for statistical methods like the bootstrap. Instead, data scientists place their confidence on intervals of estimates where the process that generates said interval is successful in capturing the parameter some percentage of the time. 
 
 These "intervals of estimates" are so important to statistics and data science that they are given a special name: the *confidence interval*. This section will explore confidence intervals, and their use, in greater depth. 
-
 
 ### Prerequisites
 
@@ -600,171 +604,161 @@ We will also bring forward the `one_sample_value` function we wrote in the previ
 
 ```{r}
 one_sample_value <- function(df, label, statistic) {
-  sample_value <- df %>% 
-    pull({{ label }}) %>%
-    sample(replace = TRUE) %>%
+  sample_value <- df |> 
+    pull({{ label }}) |>
+    sample(replace = TRUE) |>
     statistic()
   return(sample_value)
 }
 ```
 
-For the running example in this section, we will turn to American football from the National Collegiate Athletic Association (NCAA) covering the years 2005 from 2011, which is available at [Football Outsiders](https://www.footballoutsiders.com/college-xp/2012/2005-11-college-football-receiver-data-targets-and-catches). There are two things to note before working with the data: 
-
-* The same receiver may appear more than once across different seasons so we eliminate any duplicate players from the tibble using `distinct`. 
-* Because real-life circumstances often do not grant us access to the population, we will mimic such circumstances by using only a random sample of the data and treating that as our population. We will select 1,000 random samples without replacement.
-
-Let us load in this dataset and o
-
-```{r echo = FALSE}
-set.seed(10)
-```
-
-```{r message = FALSE}
-path <- "data/ncaa-receivers-2005-2011.csv"
-ncaa <- read_csv(path) %>%
-  distinct(Player, .keep_all = TRUE) %>%
-  slice_sample(n = 1000, replace = FALSE)
-```
-
-We can inspect the resulting table. Note that there are 1,000 rows in the tibble.
+For the running example in this section, we turn to survey data collected by the US National Center for Health Statistics (NCHS) on nutrition and health information. This data is available in the tibble `NHANES` from the `NHANES` package. In accordance to the documentation (see `?NHANES`), the dataset can be treated as if it were a simple random sample from the American population. We use this dataset as an example where we *do not know* the population parameter.  
 
 ```{r}
-ncaa
+library(NHANES)
+NHANES
 ```
 
-### Estimating a population median 
 
-We will apply bootstrapping to the `ncaa` tibble to estimate an unknown parameter: the ratio of yards per catch. Let us first form a subset of the tibble with the relevant data. 
+### Estimating a population proportion 
+
+Let us use this dataset to estimate the proportion of healthy sleepers in the American population. A "healthy amount of sleep" is defined by the [American Academy of Sleep Medicine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4434546/#:~:text=Adults%20should%20sleep%207%20or,and%20increased%20risk%20of%20death) as 7 to 9 hours per night for adults between the ages of 18 and 60. 
+
+With this information, we perform some basic preprocessing of the data: 
+
+* Drop any observations that contain a missing value in the column `SleepHrsNight`.
+* Filter the data to contain observations for adults between the ages of 18 and 60.
+* Create a new Boolean variable `healthy_sleep` that indicates whether a participant gets a healthy amount of sleep. 
 
 ```{r}
-yards_catches_df <- ncaa %>%
-  transmute(player = Player,
-            catches = Catches,
-            yards = Yards,
-            ratio = yards / catches
-            )
-yards_catches_df
+# BEGIN SOLUTION
+NHANES_relevant <- NHANES |>
+  drop_na(c(SleepHrsNight)) |>
+  filter(between(Age, 18, 60)) |> 
+  mutate(healthy_sleep = between(SleepHrsNight, 7, 9)) |>
+  relocate(healthy_sleep, .before = SurveyYr)
+NHANES_relevant
+# END SOLUTION
 ```
 
-Let us visualize the histogram of yards per catch. 
+We can inspect the resulting table. Note that there are 5,748 observations in the tibble.
+
+```{r}
+NHANES_relevant
+```
+
+We will apply bootstrapping to the `NHANES_relevant` tibble to estimate an unknown parameter: the proportion of healthy sleepers in the American population. 
+
+Let us visualize the distribution of healthy sleepers using a bar chart. 
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
-ggplot(yards_catches_df) + 
-  geom_histogram(aes(x = ratio, y = ..density..), 
+ggplot(NHANES_relevant) + 
+  geom_bar(aes(x = healthy_sleep),
                  col="grey", fill = "darkcyan", bins = 20)
 ```
 
-We can inspect the maximum ratio value which is an impressive 43 yards per catch by Darius Williams. 
+The proportion of healthy sleepers is the fraction of `TRUE`'s in the `healthy_sleep` column. Recall that Boolean variables are just `1`'s and `0`'s. Thus, we can sum the number of `TRUE`'s and divide by the total number of subjects. This is equivalent to computing the mean for the `healthy_sleep` column. 
 
 ```{r}
-yards_catches_df %>%
-  slice_max(order_by = ratio)
+NHANES_relevant |>
+  summarize(prop = mean(healthy_sleep))
 ```
 
-The maximum ratio value helps us realize just how far away a value like 43 yards per catch is from the bulk of ratios. In fact, according to the histogram it appears that there are several "unusual" ratios that appear towards the far right of the histogram.  
-
-We saw earlier that the mean can be "pulled" up or down by unusually large or small values. Under such circumstances, we prefer to use the median as it is not sensitive to extreme ratio values. The median ratio in this sample is about 11.23 yards per catch. 
-
-```{r}
-yards_catches_df %>%
-  pull(ratio) %>%
-  median()
-```
-
-We are now ready to bootstrap from this random sample. Recall that `one_sample_value` will perform the bootstrap for us. We will replicate the bootstrap process a large number of times, say 10,000, so that we can plot an empirical histogram of the bootstrapped medians. 
+We are now ready to bootstrap from this random sample. Recall that `one_sample_value` will perform the bootstrap for us. We will replicate the bootstrap process a large number of times, say 10,000, so that we can plot a sampling histogram of the bootstrapped medians. 
 
 ```{r}
 # Do the bootstrap!
-bstrap_medians <- replicate(n = 10000, one_sample_value(yards_catches_df, ratio, median))
+bstrap_means <- replicate(n = 10000, 
+                        one_sample_value(NHANES_relevant, healthy_sleep, mean))
 ```
 
 As before, we will identify the 95% confidence interval. Here is the interval:
 
 ```{r}
 desired_area <- 0.95
-middle <- quantile(bstrap_medians, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle
 ```
 
-Let us plot the empirical histogram and annotate the interval on this histogram. 
+Let us plot the sampling histogram and annotate the interval on this histogram. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
-df <- tibble(bstrap_medians)
-ggplot(df, aes(x = bstrap_medians, y = ..density..)) + 
+df <- tibble(bstrap_means)
+ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
   geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
-                   size = 2, color = "salmon")
+                   size = 2, color = "salmon") +
+  labs(x = "Proportion of healthy sleepers")
 ```
 
 This looks a lot like what we saw in the previous section, with one key difference: there is no dot indicating where the parameter is! We do not know where the dot will fall or if it is even on this interval. 
-Statistics is not clairvoyance. It is a means to quantify uncertainty. What we have obtained is a 95% confidence interval of estimates, which means that about 95% of the time we will get it right. But that also leaves a 5% chance where we are totally off. Can we control the amount of uncertainty in our results? 
 
+Statistics does not promise clairvoyance. It is a tool for quantifying uncertainty. What we have obtained is a 95% confidence interval of estimates. Meaning, this bootstrap process will be successful in capturing the parameter about 95% of the time. But that also leaves a 5% chance where we are totally off. Can we control the level of uncertainty? 
 
 ### Levels of uncertainty: 80% and 99% confidence intervals
 
-So far we have examined the 95% confidence interval. Let us see what happens to the interval of estimates when we increase our level confidence. We will examine a 99% confidence interval.
+So far we have examined the 95% confidence interval. Let us see what happens to the interval of estimates when we increase our level of confidence. We will examine a 99% confidence interval.
 
 ```{r}
 desired_area <- 0.99
-middle <- quantile(bstrap_medians, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle
 ```
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
-df <- tibble(bstrap_medians)
-ggplot(df, aes(x = bstrap_medians, y = ..density..)) + 
+df <- tibble(bstrap_means)
+ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
   geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
-                   size = 2, color = "salmon")
+                   size = 2, color = "salmon") +
+  labs(x = "Proportion of healthy sleepers")
 ```
 
-The interval is much wider! It goes from about 10.9 yards per catch to 11.6. We observe a trade-off: as we increase our confidence in the interval of estimates, this is compensated by making the interval *wider*. That is, a 99% confidence interval has a chance of missing the parameter only 1% of the time now. 
+The interval is much wider! The proportion of healthy sleepers in the population goes from about 58.4% to 61.7%. This points to a trade-off: as we increase our confidence in the interval of estimates, this is compensated by making the interval *wider*. That is, a confidence interval generated by this resampling process has a chance of missing the parameter only 1% of the time. That probability does not correspond to the specific interval we found, but to the *process* that generated said interval. For the $[0.584, 0.617]$ interval we found, the parameter either sits on the interval or not. 
 
 Let us move in the other direction and try a 80% confidence interval. 
 
 ```{r}
 desired_area <- 0.80
-middle <- quantile(bstrap_medians, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle
 ```
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
-df <- tibble(bstrap_medians)
-ggplot(df, aes(x = bstrap_medians, y = ..density..)) + 
+df <- tibble(bstrap_means)
+ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
   geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
-                   size = 2, color = "salmon")
+                   size = 2, color = "salmon") +
+  labs(x = "Proportion of healthy sleepers")
 ```
 
-This interval is *much* narrower than the 99% interval and only goes from 11 to 11.4 yards per catch. This is a much tighter set of estimates, but we traded a narrower interval for lower confidence. This interval has a chance of missing 20% of the time. 
-
+This interval is *much* narrower than the 99% interval and estimates 59.3% to 60.9% healthy sleepers in the population. This is a much tighter set of estimates, but we traded a narrower interval for lower confidence. This interval has a chance of missing the parameter 20% of the time. 
 
 ### Confidence intervals as an hypothesis test
 
 Confidence intervals can be used for more than trying to estimate a population parameter. One popular use case for the confidence interval is something we saw in the previous chapter: the hypothesis test. 
 
-Let us reconsider the 95% confidence interval we obtained. The average ratio goes from 10.98 yards per catch to 11.5 yards per catch. Suppose that the NCAA is interested in testing the following hypothesis about its players:  
+Let us reconsider the 95% confidence interval we obtained. The proportion of healthy sleepers in the population goes from 58.8% to 61.4%. Suppose that a researcher is interested in testing the following hypothesis:  
 
-__Null hypothesis.__ The average ratio of yards per catch of NCAA receivers is 12 yards per catch. 
+__Null hypothesis.__ The proportion of healthy sleepers in the population is 61%.
 
-__Alternative hypothesis.__ The average ratio of yards per catch of NCAA receivers is not 12 yards per catch. 
+__Alternative hypothesis.__ The proportion of healthy sleepers in the population is *not* 61%. 
 
-If we were testing this hypothesis at the 95% significance level, we would comfortably reject the null hypothesis. Why? 
+If we were testing this hypothesis at the 95% significance level, we would *fail* to reject the null hypothesis. Why? 
 
-A population ratio of 12 yards per catch does not sit on our 95% confidence interval for the population ratio. Therefore, at this level of significance, a value of 12 is not plausible.
+The value supplied by the null (61%) sits on our 95% confidence interval for the population proportion. Therefore, at this level of significance, this value is plausible.
 
-If we were to lower our confidence (to say 90% or 80%), we may not have rejected the null hypothesis. This raises an important point about cut-offs: some fields demand a high level of significance for a result to be accepted by its scientific community; other fields may require much less convincing. For instance, [experimental studies](https://arxiv.org/pdf/0706.3283.pdf) in Physics demand significance levels at 99.9% [or even 99.99%](https://journals.aps.org/prd/pdf/10.1103/PhysRevD.93.122002?casa_token=LX4dEzEBwoEAAAAA%3ATEemb6ulsnfx89acCPP-GoEzMsjLDng26HX5YJ0CMZczkdOrPpmiHTLaFyUR3c6jZcuDYVgJys92eRU) for a result to be even considered publishable. It is not hard to imagine why: findings in Physics are usually axiomatic and rejecting a null hypothesis implies the discovery of phenomena in nature. A 99.99% confidence interval would guarantee that such a discovery is a fluke only 0.01% of the time. 
+If we were to lower our confidence (to say 90% or 80%), the conclusion could have been different. This raises an important point about cut-offs: some fields demand a high level of significance for a result to be accepted by its scientific community; other fields may require much less convincing. For instance, [experimental studies](https://arxiv.org/pdf/0706.3283.pdf) in Physics demand significance levels at 99.9% [or even 99.99%](https://journals.aps.org/prd/pdf/10.1103/PhysRevD.93.122002?casa_token=LX4dEzEBwoEAAAAA%3ATEemb6ulsnfx89acCPP-GoEzMsjLDng26HX5YJ0CMZczkdOrPpmiHTLaFyUR3c6jZcuDYVgJys92eRU) for a result to be even considered publishable. It is not hard to imagine why: findings in Physics are usually axiomatic and rejecting a null hypothesis implies the discovery of phenomena in nature. A 99.99% confidence interval would guarantee that such a discovery is a fluke only 0.01% of the time. 
 
 The basis for using confidence intervals as a hypothesis test is rooted in statistical theory. In practice, we simply check whether the value supplied by the null hypothesis sits on the confidence interval or not.  
 
-### Final remarks: resample with care 
+### Final remarks: resampling with care 
 
 We end this section with some points to keep in mind when applying resampling. 
 
-* Avoid introducing bias into the sample that is used as input for resampling. The sampling plan of simple random sampling will usually work best.    
+* Avoid introducing bias into the sample that is used as input for resampling. The sampling plan of simple random sampling will usually work best. And, even with simple random samples, it is possible to draw a "weird" original sample such that the confidence interval generated using it fails to capture the parameter.  
 * When the size of a random sample is moderately sized enough, the chance of the bootstrapped sample being identical to it is extremely rare. Therefore, you should aim to work with large random samples. 
 * Resampling does not work well when estimating extreme values, for instance, estimating the minimum or maximum value of a population.
-* The distribution of the statistic should look roughly "bell" shaped. 
-
-
+* The distribution of the statistic should look roughly "bell" shaped. The histogram of the resampled statistics will be a hint.  
 

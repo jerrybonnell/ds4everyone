@@ -6,11 +6,11 @@ output:
 
 # Towards Normality
 
-We have studied several statistics in this course such as the mean and order statistics like the median. We have also drawn empirical distributions to simulate a statistic to see if it approximates well some parameter value of interest. For some statistics, like total variation distance, we saw that the distribution skewed in some direction. But the empirical distribution for the sample mean has consistently shown something that resembles a bell shape, regardless of the underlying population.  
+We have studied several statistics in this text such as the mean and order statistics like the median. We have also drawn sampling distributions to simulate a statistic to see if it approximates well some parameter value of interest. For some statistics, like the total variation distance, we saw that the distribution skewed in some direction. But the sampling distribution for the sample mean has consistently shown something that resembles a bell shape, regardless of the underlying population.  
 
-Recall that a goal of this course is to make inferences about data in a population for which we know very little about. If we can extract properties of random samples that are true *regardless of the underlying population*, we have at hand a powerful tool for doing inference. The distribution of the mean is one such property, which we will develop more in depth in this chapter.      
+Recall that a goal of this text is to make inferences about data in a population for which we know very little about. If we can extract properties of random samples that are true *regardless of the underlying population*, we have at hand a powerful tool for doing inference. The distribution of the sample mean is one such property, which we will develop more in depth in this chapter.      
 
-When we refer to these bell-like curves, we are talking about a distribution called the *normal distribution*. To develop an intuition for this, we will first examine a new (but important) statistic called the *standard deviation*, which measures generally how much the data points are away from the mean. It is important because the shape of a normal distribution is completely determinable from its mean and standard deviation. We will then study that by taking a large number of samples from a population, where each sample has no relation to another, the resulting distribution will look like -- you guessed it -- a normal distribution. 
+When we refer to these bell-shaped curves, we are talking about a distribution called the *normal distribution*. To develop an intuition for this, we will first examine a new (but important) statistic called the *standard deviation*, which measures generally how much the data points are away from the mean. It is important because the shape of a normal distribution is completely determinable from its mean and standard deviation. We will then learn that by taking a large number of samples from a population, where each sample has no relation to another, the resulting distribution will look like -- you guessed it -- a normal distribution. 
 
 <!-- The mean and the standard deviation jointly provide descriptions of distributions at hand.
 There is a type of distributions which we call *normal distributions* (or *bell curves*).
@@ -36,22 +36,34 @@ library(tidyverse)
 
 Suppose we have some number, say $N$, of samples and for each sample, we have its measurement. Let us say $x_1, \ldots, x_N$ are the measurements.
 The mean of the samples is the total of $x_1, \ldots, x_N$ divided by the number of samples $N$, that is
+
+
 \[
 \frac{x_1 + \cdots + x_N}{N}
 \]
+
+
 Let $\mu$ denote the average. 
 The *variance* of the samples is the average of the square amounts of these samples from the mean.
+
+
 \[
 \frac{(x_1 - \mu)^2 + \cdots + (x_N - \mu)^2}{N}
 \]
+
+
 We use symbol $\sigma^2$ to represent the variance.
 Because of the subtraction of the mean from the individual values, the variance measures the spread of the data around the mean.
 Since each term in the total is a square, the unit of the variance is the square of the unit of the samples.
 For example, if the original measure is meters then the unit of the variance is square meters.
 To make the two units comparable to each other, we take the square root of the variance, which we denote by $\sigma$.
+
+
 \[
 \sigma = \sqrt{\frac{(x_1 - \mu)^2 + \cdots + (x_N - \mu)^2}{N}}
 \]
+
+
 We call the quantity $\sigma$ the *standard deviation*.
 
 ### Example: exam scores 
@@ -89,9 +101,9 @@ sdev
 The mean is 89 points and the standard deviation is about 7.3 points. Let us visualize the distribution of scores. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-tibble(sample_scores) %>%
+tibble(sample_scores) |>
   ggplot() + 
-  geom_histogram(aes(x = sample_scores, y = ..density..),
+  geom_histogram(aes(x = sample_scores, y = after_stat(density)),
                  color = "gray", fill = "darkcyan", binwidth = 3) + 
   scale_x_continuous(breaks = seq(70, 100, 4))
 ```
@@ -130,9 +142,9 @@ sum(diffs_from_mu_squared2)
 This tells us that the grades in the second group are closer together. We can confirm our findings with a histogram of the score distribution. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-tibble(sample_scores2) %>%
+tibble(sample_scores2) |>
   ggplot() + 
-  geom_histogram(aes(x = sample_scores2, y = ..density..),
+  geom_histogram(aes(x = sample_scores2, y = after_stat(density)),
                  color = "gray", fill = "darkcyan", binwidth = 3) + 
   scale_x_continuous(breaks = seq(70, 100, 4))
 ```
@@ -165,7 +177,7 @@ Thus, we can figure quite easily the value of the $?$.
 
 The phenomena we observed is representative of a general fact. In the formula that involves $\mu$ and $x_1, \ldots, x_N$, like the one for variance, there are no longer $N$ independent values, there are only $N-1$ of them.
 
-The difference in quantity by using $N-1$ instead of $N$ may not be large, specifically, when $N$ is large and the differences are small. Still, for an accurate understanding of the data spread, the choice can be highly critical. For this reason, statisticians prefer to work with the sample standard deviation when dealing with samples. We will do so as well for the remainder of this course.  
+The difference in quantity by using $N-1$ instead of $N$ may not be large, specifically, when $N$ is large and the differences are small. Still, for an accurate understanding of the data spread, the choice can be highly critical. For this reason, statisticians prefer to work with the sample standard deviation when dealing with samples. We will do so as well for the remainder of this text.  
 
 ### The `sd` function
 
@@ -195,15 +207,15 @@ library(datasauRus)
 We retrieve the two datasets here, and will explore them shortly. 
 
 ```{r, message = FALSE, warning = FALSE}
-star <- datasaurus_dozen %>%
+star <- datasaurus_dozen |>
   filter(dataset == "star") 
-bullseye <- datasaurus_dozen %>%
+bullseye <- datasaurus_dozen |>
   filter(dataset  == "bullseye")
 ```
 
 ### Working with SD 
 
-To see what we can glean from the SD, let us turn to a more interesting dataset. The tibble `starwars` contains data about all characters in the Star Wars canon. The table records a wealth of information about each character, e.g., name, height (cm), weight (kg), home world, etc.  Pull up the help (`?starwars`) for more information about the dataset. 
+To see what we can glean from the SD, let us turn to a more interesting dataset. The tibble `starwars` from the `dplyr` package contains data about all characters in the Star Wars canon. The table records a wealth of information about each character, e.g., name, height (cm), weight (kg), home world, etc.  Pull up the help (`?starwars`) for more information about the dataset. 
 
 ```{r}
 starwars
@@ -212,45 +224,41 @@ starwars
 Let us focus on the characters' heights. It turns out that the height information is missing for some of them; let us remove these entries from the dataset. 
 
 ```{r}
-filter(starwars, is.na(height))
-```
-
-```{r}
-starwars_clean <- starwars %>%
-  filter(!is.na(height))
+starwars_clean <- starwars |> 
+  drop_na(height)
 ```
 
 Here is a histogram of the characters' heights. 
 
 ```{r dpi=80, fig.align="center", warning = FALSE, message = FALSE}
 ggplot(starwars) + 
-  geom_histogram(aes(x = height, y = ..density..),
+  geom_histogram(aes(x = height, y = after_stat(density)),
                  color = "gray", fill = "darkcyan", bins = 20)
 ```
 
 The average height of Star Wars characters is just over 174 centimeters (or 5'8''), which is about 1.4 centimeters shorter than the average height of men in the United States (5'9''). 
 
 ```{r}
-mean_height <- starwars_clean %>%
-  pull(height) %>%
-  mean()
+mean_height <- starwars_clean |>
+  summarize(mean(height)) |> 
+  pull()
 mean_height
 ```
 
 The SD tells us how far off a character's height is from the average, which is about 34.77 centimeters. 
 
 ```{r}
-sd_height <- starwars_clean %>%
-  pull(height) %>%
-  sd()
+sd_height <- starwars_clean |>
+  summarize(sd(height)) |>
+  pull() 
 sd_height
 ```
 
 The shortest character in cannon is the legendary Jedi Master Yoda, registering a height of just 66 centimeters!
 
 ```{r}
-starwars_clean %>%
-  arrange(height) %>%
+starwars_clean |>
+  arrange(height) |>
   head(1)
 ```
 
@@ -269,8 +277,8 @@ Put another way, Yoda is about 3 SDs *below* the average height.
 We can repeat the same steps for the tallest character in canon: the Quermian Yarael Poof.   
 
 ```{r}
-starwars_clean %>%
-  arrange(desc(height)) %>%
+starwars_clean |>
+  arrange(desc(height)) |>
   head(1)
 ```
 
@@ -280,23 +288,24 @@ Yarael Poof's height is about 2.58 SDs *above* the average height.
 (264 - mean_height) / sd_height
 ```
 
-It seems then that the tallest and shortest characters are only a few SDs away from the mean -- no more than 3. The mean and SD is useful in this way: all the heights of Star Wars characters can be found within 3 SDs of the mean. This gives us a good sense as to where the histogram falls on the number line.
+It seems then that the tallest and shortest characters are only a few SDs away from the mean -- no more than 3. The mean and SD is useful in this way: all the heights of Star Wars characters can be found within 3 SDs of the mean. This gives us a good sense of the spread in the data.
 
 ### Standard units
 
 The number of standard deviations a value is away from the mean can be calculated as follows: 
-\[
-z = \frac{\text{value} - \text{mean}}{\text{SD}}
 
-\]
+$$
+z = \frac{\text{value} - \text{mean}}{\text{SD}}
+$$
+
 
 The resulting quantity $z$ measures *standard units* and is sometimes called the *z-score*. We saw two such examples of standard units when studying the tallest and shortest Star Wars characters. 
 
 R provides a function `scale` that converts values into standard units. Such a transformation is called *scaling*. For instance, we can add a new column with all of the heights in standard units. 
 
 ```{r}
-starwars_clean %>%
-  mutate(su = scale(height)) %>%
+starwars_clean |>
+  mutate(su = scale(height)) |>
   select(name, height, su)
 ```
 
@@ -336,13 +345,13 @@ That is where standard units come to play. We adjust each judge's scores by subt
 Let us compute the raw total of the three scores, and compare this with the scaled scores. 
 
 ```{r}
-contest %>% mutate(
+contest |> mutate(
   sweet_su = scale(sweet),
   hodge_su = scale(hodgepodge),
   cool_su = scale(coolblood),
   raw_sum = sweet + coolblood + hodgepodge, 
   scaled_sum = sweet_su + hodge_su + cool_su
-  ) %>%
+  ) |>
   select(name, raw_sum, scaled_sum)
 ```
 
@@ -357,13 +366,13 @@ Indeed, SD is an important tool and we will continue our study of it in the foll
 Recall that we have two datasets `star` and `bullseye`. Each contains some `x` and `y` coordinate pairs. Let us examine some of the `x` coordinates in each.
 
 ```{r}
-star_x <- star %>%
+star_x <- star |>
   pull(x)
 head(star_x)
 ```
 
 ```{r}
-bullseye_x <- bullseye %>%
+bullseye_x <- bullseye |>
   pull(x)
 head(bullseye_x)
 ```
@@ -387,10 +396,10 @@ The result points to a clear answer: both distributions represented by `star_x` 
 Whenever in doubt, turn to visualization. We plot a histogram of the distributions overlaid on top of each other. If the distributions are actually equal, we expect this to be reflected in the histogram. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-datasaurus_dozen %>%
-  filter(dataset == "star" | dataset == "bullseye") %>%
+datasaurus_dozen |>
+  filter(dataset == "star" | dataset == "bullseye") |>
   ggplot() + 
-  geom_histogram(aes(x = x, y = ..density.., fill = dataset),
+  geom_histogram(aes(x = x, y = after_stat(density), fill = dataset),
                  color = "gray", alpha = 0.9, bins = 10) + 
   scale_x_continuous(breaks = seq(15, 90, 5))
 ```
@@ -407,10 +416,11 @@ The most famous of them is the *normal distribution*, which we turn to in this s
 
 ### Prerequisites 
 
-We will continue to make use of the tidyverse so let us load it in. 
+We will continue to make use of the tidyverse so let us load it in. We will also work with some datasets from the `edsdata` package so let us load that in as well. 
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(edsdata)
 ```
 
 ### The standard normal curve
@@ -550,98 +560,97 @@ Therefore, for a standard normal curve, we can calculate the probability of wher
 * a sample that falls within $\pm 2$ SDs is about __95%__.
 * a sample that falls between $\pm 3$ is about __99.73%__.
 
-### Exam scores and the `dnorm` function
+### Normality in real data 
 
-A frequent -- and perhaps even cliched -- reference point to the bell curve occurs in the analysis of test scores.
+Normality frequently occurs in real datasets. Let us have a look at a few attributes from the Olympic athletes dataset in `athletes` from the `edsdata` package. 
 
-[Student Performance in Exams](https://www.kaggle.com/spscientist/students-performance-in-exams) is a data set available from the data archive [Kaggle](http://www.kaggle.com).
-
-```{r message = FALSE}
-path <- "data/StudentsPerformance.csv"
-students_data <- read_csv(path)
-```
-
-Here is the histogram of math scores.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(students_data, aes(x = `math score`, y = ..density..)) + 
-  geom_histogram(col="grey", fill = "darkcyan", breaks = seq(0, 100, 4)) 
-```
-
-Here is the histogram of the reading scores.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(students_data, aes(x = `reading score`, y = ..density..)) + 
-  geom_histogram(col="grey", fill = "darkcyan", breaks = seq(0, 100, 4)) 
-```
-
-Here is the histogram of the writing scores.
-
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(students_data, aes(x = `writing score`, y = ..density..)) + 
-  geom_histogram(col="grey", fill = "darkcyan", breaks = seq(0, 100, 4)) 
-```
-
-Let us compute the mean and standard deviation of the math scores.
+We focus specifically on the heights, weights, and age variables. 
 
 ```{r}
-math_mean <- mean(students_data$`math score`)
-math_sd <- sd(students_data$`math score`)
-c(math_mean,math_sd)
+my_athletes <- athletes |>
+  drop_na() |>
+  select(c(Height, Weight, Age))
 ```
 
-We can create a normal curve using the function `dnorm`. It takes as arguments a vector of x values, the mean, and SD; in terms of the plot, it returns the "y coordinate" for each corresponding x value. Let us construct a normal curve for the math scores using the mean and SD we have just obtained, and overlay it atop the histogram. 
+Here is the histogram of these variables.  
+
+```{r dpi=80,  fig.align="center", message = FALSE}
+my_athletes |>
+  pivot_longer(everything()) |>
+  ggplot(aes(x = value, y = after_stat(density), fill = name)) +
+  geom_histogram(bins=15, color = "gray") +
+  facet_wrap(~name, scales = "free") +
+  guides(fill = "none")
+```
+
+The heights most closely resemble the bell curve. We can also spot normality in the weight and age distributions, though they appear to be somewhat "lopsided" when compared to the heights. 
+
+Let us compute the mean and standard deviation of the athletes' heights. 
 
 ```{r}
-math_norm <- dnorm(students_data$`math score`, mean = math_mean, sd = math_sd)
+summarized <- athletes %>%
+  summarize(mean(Height), sd(Height))
+summarized
+
+height_mean <- summarized[[1]]
+height_sd <- summarized[[2]]
+```
+
+### Athlete heights and the `dnorm` function
+
+We can create a normal curve using the function `dnorm`. It takes as arguments a vector of $x$ values, the mean, and SD; in terms of the plot, it returns the "y coordinate" for each corresponding $x$ value. Let us construct a normal curve for the Olympic athlete heights using the mean and SD we have just obtained, and overlay it atop the histogram. 
+
+```{r}
+height_norm <- dnorm(athletes |> pull(Height), 
+                     mean = height_mean, sd = height_sd)
 ```
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(students_data, aes(x = `math score`, y = ..density..)) + 
-  geom_histogram(col="grey", fill = "darkcyan", breaks = seq(0, 100, 4)) +
-  geom_line(mapping = aes(x = `math score`, y = math_norm), color = "salmon") +
-  xlab("score") +
+ggplot(athletes, aes(x = Height, y = after_stat(density))) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins=14) +
+  geom_line(mapping = aes(x = Height, y = height_norm), color = "salmon") +
+  labs(x = "Height") +
   ggtitle("Normal curve and the histogram") 
 ```
 
 We observe the following.
 
 * The histogram shows strong resemblance to the normal curve.
-* The right end shows that the histograms and the curve go beyond 100, but 100 is the maximum and so there are no data points beyond 100.
+* The tails of the normal curve extend towards infinity, but there are no athletes shorter than 136 cm and taller than 223 cm.
 
-How close is the curve to the histogram? Let us compare the proportion of students whose math score is at most 95 with respect to the two distributions.
+How close is the curve to the histogram? Let us compare the proportion of athletes whose height is at most 200 cm with respect to the two distributions.
 
 ```{r}
-pnorm(95, mean = math_mean, sd = math_sd)
+pnorm(200, mean = height_mean, sd = height_sd)
 ```
 
 ```{r}
-num_rows <- students_data %>%
-  filter(`math score` <= 95) %>%
+num_rows <- athletes |>
+  filter(Height <= 200) |>
   nrow()
-num_rows / nrow(students_data)
+num_rows / nrow(athletes)
 ```
 
-The normal distribution says 97.17% while the actual record is 97.80%. Pretty close. 
+The normal distribution says 97.96% while the actual record is 98.12%. Pretty close. 
 
-How about 85?
+How about 181?
 
 ```{r}
-pnorm(85, mean = math_mean, sd = math_sd)
+pnorm(181, mean = math_mean, sd = math_sd)
 ```
 
 ```{r}
-num_rows <- students_data %>%
-  filter(`math score` <= 85) %>%
+num_rows <- athletes |>
+  filter(Height <= 181) |>
   nrow()
-num_rows / nrow(students_data)
+num_rows / nrow(athletes)
 ```
 
-The two values are 89.38% versus 89.70%.
+The two values are 62.07% versus 63.47%.
 
 ## Central Limit Theorem
 
-As noted at the outset of this chapter, the bell-shaped distribution has been a running motif through most of our examples. While most of the data histograms we studied have not turned out bell-shaped, the empirical distributions representing some simulated statistic has reliably turned out that way.
+As noted at the outset of this chapter, the bell-shaped distribution has been a running motif through most of our examples. While most of the data histograms we studied have not turned out bell-shaped, the sampling distributions representing some simulated statistic has reliably turned out that way.
 
 This is no coincidence. In fact, it is the consequence of an impressive theory in statistics called the *Central Limit Theorem*. We will study the theorem in this section, but let us first see a situation where a bell-shaped distribution results to set up the context. 
 
@@ -651,14 +660,10 @@ We will make use of the tidyverse in this chapter, so let’s load it in as usua
 
 ```{r}
 library(tidyverse)
+library(gapminder)
 ```
 
-We will also work with receiver data from the NFL and NCAA in this section, so let us load in those datasets. 
-
-```{r message = FALSE}
-nfl <- read_csv("data/nfl_receiving0.csv")
-ncaa <- read_csv("data/ncaa-receivers-2005-2011.csv")
-```
+We will also work with GDP per capita data from the `gapminder` package, so let us load that in as well. 
 
 ### Example: Net allotments from a clumsy clerk 
 
@@ -719,7 +724,7 @@ results
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) + 
-  geom_histogram(aes(x = net_allotments, y = ..density..), 
+  geom_histogram(aes(x = net_allotments, y = after_stat(density)), 
                  color = "gray", fill = "darkcyan", bins = 15)
 ```
 
@@ -728,12 +733,12 @@ We observe a bell-shaped curve, even though the distribution we drew from does n
 To understand the __spread__, look for the inflection point in this histogram. That point occurs at around 70 days, which means the SD is the distance from the center to this point -- that looks to be about 5.6 days. 
 
 ```{r}
-results %>%
-  pull(net_allotments) %>%
+results |>
+  pull(net_allotments) |>
   sd()
 ```
 
-To confirm the bell-shaped curve we are seeing, we can create a normal distribution from this mean and SD and overlay it atop the empirical histogram. We observe that it provides a good fit. 
+To confirm the bell-shaped curve we are seeing, we can create a normal distribution from this mean and SD and overlay it atop the sampling histogram. We observe that it provides a good fit. 
 
 ```{r}
 curve <- dnorm(net_allotments, mean = 64, sd = 5.66)
@@ -741,7 +746,7 @@ curve <- dnorm(net_allotments, mean = 64, sd = 5.66)
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) + 
-  geom_histogram(aes(x = net_allotments, y = ..density..), 
+  geom_histogram(aes(x = net_allotments, y = after_stat(density)), 
                  color = "gray", fill = "darkcyan", bins = 15) +
   geom_line(mapping = aes(x = net_allotments, y = curve), color = "salmon") 
 ```
@@ -752,51 +757,74 @@ The Central Limit Theorem is a formalization of the phenomena we observed from t
 
 > The sum or average of a large random sample that is identically and independently distributed will resemble a normal distribution, regardless of the underlying distribution from which the sample is drawn. 
 
-The "identically and independently distributed" condition, often abbreviated simply as IID, is a mouthful. It means that the random samples we draw must have no relation to each other, i.e., the drawing of one sample (say, the event *forgot*) does not make another event more or less likely of occcuring. Hence, we prefer a sampling plan of sampling with replacement. 
+The "identically and independently distributed" condition, often abbreviated simply as "IID", is a mouthful. It means that the random samples we draw must have no relation to each other, i.e., the drawing of one sample (say, the event *forgot*) does not make another event more or less likely of occcuring. Hence, we prefer a sampling plan of sampling with replacement. 
 
 The Central Limit Theorem is a powerful concept because it becomes possible to make inferences about unknown populations with very little knowledge. And, the larger the sample size becomes, the stronger the resemblance. 
 
-### Receiver yardage in the NFL and NCAA 
+### Comparing average systolic blood pressure 
 
-The Central Limit Theorem says that the sum of IID samples follows a distribution that resembles a normal distribution. Let us turn to the receiver data in the NFL and NCAA. In a large sample of football receivers, what is the sample average for yardage? According to the theorem, we expect the distribution to be roughly normal. 
+The Central Limit Theorem says that the sum of IID samples follows a distribution that resembles a normal distribution. Let us return to the `NHANES` package and compare average systolic blood pressure for males and females. If we take a large sample of participants, what is the sample average systolic blood pressure as given by `BPSysAve`? According to the theorem, we expect the distribution to be roughly normal. 
 
-Here is the yardage distribution for NFL players. 
+Let us first do some basic pre-processing and remove any missing values in the `BPSysAve` column. 
 
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(nfl) +
-  geom_histogram(aes(x = Yds, y = ..density..), color = "gray", fill="darkcyan")
+```{r}
+NHANES_relevant <- NHANES |>
+  drop_na(BPSysAve)
 ```
 
-And here it is for NCAA players. 
+Let us compare the systolic blood pressure readings for males and females using an overlaid histogram. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(ncaa) +
-  geom_histogram(aes(x = Yards, y = ..density..), color = "gray", fill="darkcyan")
+NHANES_relevant |>
+  ggplot() +
+  geom_histogram(aes(x = BPSysAve, fill = Gender, 
+                     y = after_stat(density)), 
+                 color = "gray", alpha = 0.7,
+                 position = "identity", bins=15)
 ```
 
-Observe how these data histograms look nothing like a normal distribution. 
+Observe the skew in these data histograms, as shown by the long right-tail in each. Neither closely resembles a normal distribution. 
 
-Let us simulate the average yardage in a sample of 100 players for both the NFL and NCAA leagues. We will write a function to simulate one value for us. 
+Let us also note the standard deviation and mean for these distributions. 
+
+```{r}
+summary_stats <- NHANES_relevant |>
+  group_by(Gender) |>
+  summarize(mean = mean(BPSysAve),
+            sd = sd(BPSysAve))
+summary_stats
+```
+
+Let us deal out the participants into two separate datasets according to the gender status. 
+
+```{r}
+NHANES_female <- NHANES_relevant |>
+  filter(Gender == "female")
+NHANES_male <- NHANES_relevant |>
+  filter(Gender == "male")
+```
+
+
+Let us simulate the average systolic blood pressure in a sample of 100 participants for both males and females. We will write a function to simulate one value for us. Observe that the sampling is done with replacement, in accordance to the "IID" precondition needed by the Central Limit Theorem. 
 
 ```{r}
 one_simulation <- function(df, label, sample_size) {
-  sample_mean <- df %>%
-    slice_sample(n = sample_size, replace = TRUE) %>%
-    pull({{ label }}) %>%
-    mean()
-  return(sample_mean)
+  df |>
+    slice_sample(n = sample_size, replace = TRUE) |>
+    summarize(mean({{ label }})) |>
+    pull()
 } 
 ```
 
 The function `one_simulation` takes as arguments the tibble `df`, the column `label` to use for computing the statistic, and the sample size `sample_size`. 
 
-Here is one run of the function with the NFL data. 
+Here is one run of the function with the female data.  
 
 ```{r}
-one_simulation(nfl, Yds, 100)
+one_simulation(NHANES_female, BPSysAve, 100)
 ```
 
-As before, we will simulate the statistic for NFL receivers 10,000 times. 
+As before, we will simulate the statistic for female data 10,000 times. 
 
 ```{r echo = FALSE}
 set.seed(1000)
@@ -804,64 +832,94 @@ set.seed(1000)
 
 ```{r}
 num_repetitions <- 10000
-sample_means <- replicate(n = num_repetitions, one_simulation(nfl, Yds, 100))
+sample_means <- replicate(n = num_repetitions, 
+                          one_simulation(NHANES_female, BPSysAve, 100))
 
-nfl_results <- tibble(
+female_results <- tibble(
   repetition = 1:num_repetitions,
   sample_mean = sample_means, 
-  league = "NFL"
+  gender = "female"
 )
-nfl_results
+female_results
 ```
 
-Let us repeat the simulation for the NCAA receivers. 
+Let us repeat the simulation for the male data. 
 
 ```{r echo = FALSE}
 set.seed(1000)
 ```
 
 ```{r}
-sample_means <- replicate(n = num_repetitions, one_simulation(ncaa, Yards, 100))
+sample_means <- replicate(n = num_repetitions, 
+                          one_simulation(NHANES_male, BPSysAve, 100))
 
-ncaa_results <- tibble(
+male_results <- tibble(
   repetition = 1:num_repetitions,
   sample_mean = sample_means,
-  league = "NCAA"
+  gender = "male"
 )
-ncaa_results
+male_results
 ```
 
-Let us merge the two tibbles together so that we can plot the empirical distributions together. 
+Let us merge the two tibbles together so that we can plot the sampling distributions together. 
 
 ```{r}
-results <- bind_rows(nfl_results, ncaa_results)
+results <- bind_rows(female_results, male_results)
 ```
 
-Let us plot the two empirical distributions together. 
+We plot an overlaid histogram in density scale showing the two distributions. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) +
-  geom_histogram(aes(x = sample_mean, y = ..density.., fill = league), 
-                 bins = 20, color = "gray", position = "identity", alpha = 0.8)
+  geom_histogram(aes(x = sample_mean, y = after_stat(density)), 
+                 bins = 20, color = "gray", 
+                 position = "identity", alpha = 0.8) + 
+  facet_wrap(~gender, scales = "free")
 ```
 
-Indeed, we see that both distributions are approximately normal, where each centers around a different mean. To confirm the shape, we overlay a normal curve atop each histogram. 
+Indeed, we see that both distributions are approximately normal, where each centers a different mean. To confirm the shape, we overlay a normal curve atop each histogram. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-dnorm1 <- dnorm(nfl_results$sample_mean, 
-                mean = mean(nfl_results$sample_mean), sd = sd(nfl_results$sample_mean))
-dnorm2 <- dnorm(ncaa_results$sample_mean, 
-                mean = mean(ncaa_results$sample_mean), sd = sd(ncaa_results$sample_mean))
+dnorm1 <- dnorm(female_results$sample_mean, 
+                mean = mean(female_results$sample_mean), 
+                sd = sd(female_results$sample_mean))
+dnorm2 <- dnorm(male_results$sample_mean, 
+                mean = mean(male_results$sample_mean), 
+                sd = sd(male_results$sample_mean))
 
 ggplot() +
-  geom_histogram(data = results, aes(x = sample_mean, y = ..density.., fill = league), 
-                 bins = 20, color = "gray", position = "identity", alpha = 0.8) + 
-  geom_line(data = nfl_results, mapping = aes(x = sample_mean, y = dnorm1), color = "darkcyan") +
-  geom_line(data = ncaa_results, mapping = aes(x = sample_mean, y = dnorm2), color = "salmon4") 
+  geom_histogram(data = results, aes(x = sample_mean, 
+                                     y = after_stat(density), fill = gender), 
+                 bins = 20, color = "gray", 
+                 position = "identity", alpha = 0.8) + 
+  geom_line(data = female_results, mapping = aes(x = sample_mean, y = dnorm1), 
+            color = "salmon4") +
+  geom_line(data = male_results, mapping = aes(x = sample_mean, y = dnorm2), 
+            color = "darkcyan") + 
+  scale_x_continuous(breaks = seq(110, 128, 2))
 ```
 
-<!-- each is about 30 SD -->
+<!-- female is about 2 SD -->
 
-We leave it as an exercise to the reader to determine the center and spread for each of the distributions. 
+```{r}
+summary_stats
+```
+
+Let us briefly compare the sampling histograms to the summary statistics computed earlier in `summary_stats`, which gives the mean and standard deviation for this dataset, which we are treating as the "population." We observe that both sampling histograms are centered at this *population* mean.  
+
+The standard deviation has a curious relationship and follows the equation:
+
+$$
+\text{sample SD} = \frac{\text{pop SD}}{\sqrt{\text{sample size}}}
+$$
+For instance, the standard deviation for the sample female distribution follows:
+
+```{r}
+17.81539 / sqrt(100)
+```
+
+The interested reader should confirm this visually by looking for the inflection point in the histogram, as well as what the sample SD would be for the male distribution. 
+
+It turns out this formula is a component of the Central Limit Theorem. We will explore this in more detail in the exercise set.  
 
 
