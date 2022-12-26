@@ -636,7 +636,7 @@ The normal distribution says 97.96% while the actual record is 98.12%. Pretty cl
 How about 181?
 
 ```{r}
-pnorm(181, mean = math_mean, sd = math_sd)
+pnorm(181, mean = height_mean, sd = height_sd)
 ```
 
 ```{r}
