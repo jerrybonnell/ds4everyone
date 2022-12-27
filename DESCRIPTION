@@ -7,6 +7,7 @@ Authors@R:
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Imports:
   tidyverse,
+  tidymodels,
   svglite,
   pdftools,
   kableExtra,
@@ -19,6 +20,7 @@ Imports:
   tidytext,
   mapview,
   maps,
+  palmerpenguins,
   webshot,
   tm,
   gridExtra,
@@ -31,7 +33,9 @@ Imports:
 Suggests:
   bookdown,
   bslib,
+  edsdata,
   downlit,
+  gutenbergr,
   jsonlite,
   xml2,
 Remotes:

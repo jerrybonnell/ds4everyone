@@ -172,7 +172,8 @@ To interpret the results of our simulation, we start by visualizing the results 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(tibble(sample_stats)) +
   geom_histogram(aes(x = sample_stats, y = after_stat(density)), 
-                 fill = "darkcyan", color = 'gray', bins=14)
+                 fill = "darkcyan", color = 'gray', bins=14) +
+  labs(x = "Number of heads")
 ```
 
 Where does the observed value fall in this histogram? We can plot it easily. 
@@ -208,7 +209,8 @@ colors <- c(rep("salmon",4), rep("darkcyan",8))
 ggplot(tibble(sample_stats)) +
   geom_histogram(aes(x = sample_stats, y = after_stat(density)), 
                  bins = 12, fill = colors, color = 'gray') +
-  geom_point(aes(x = observed_heads, y = 0), size = 3, color = "red")
+  geom_point(aes(x = observed_heads, y = 0), size = 3, color = "red") +
+  labs(x = "Number of heads")
 ```
 
 The more orange bars that are visible in the histogram, the higher the likelihood of the observation. Conversely, the less orange bars there are, the lower the likelihood of seeing such an observation. The area covered by the orange bars is formally called the "area in the tail." The area in the tail is designated a special name:  __the p-value__. 
@@ -285,7 +287,7 @@ In this study, our observed value is the TVD between the distribution of student
 
 ```{r}
 harvard_diff <- class_props |>
-  summarize(compute_tvd(Harvard, Almanac)) %>%
+  summarize(compute_tvd(Harvard, Almanac)) |>
   pull()
 harvard_diff
 ```
@@ -307,7 +309,7 @@ How far is our simulated class from the Almanac? We compute the TVD to find out.
 ```{r}
 class_props |>
   mutate(sample = sample_vector) |>
-  summarize(compute_tvd(sample, Almanac)) %>%
+  summarize(compute_tvd(sample, Almanac)) |>
   pull()
 ```
 
@@ -830,7 +832,7 @@ We can glance at how much athletes we have in each season.
 
 ```{r}
 my_athletes |>
-  count(Season) %>%
+  count(Season) |>
   mutate(prop = n / sum(n))
 ```
 

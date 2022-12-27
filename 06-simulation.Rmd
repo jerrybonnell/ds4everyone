@@ -227,7 +227,7 @@ Following are some notes to keep in mind:
 We end this section with another example, this time comparing strings. 
 
 ```{r}
-get_capitol <- function(x) {
+get_capital <- function(x) {
   if (x == "Florida") {
     return("Talahassee")
   } else if (x == "Georgia") {
@@ -250,13 +250,13 @@ some_students <- tibble(
 some_students
 ```
 
-We can annotate the tibble with a new column containing the capitol information for each state using a `purrr` map.  
+We can annotate the tibble with a new column containing the capital information for each state using a `purrr` map.  
 
 ```{r}
 some_students |>
-  mutate(capitol = map_chr(state, get_capitol))
+  mutate(capitol = map_chr(state, get_capital))
 ```
-Note how Christina's capitol information defaults to the result of the `else` condition. 
+Note how Christina's capital information defaults to the result of the `else` condition. 
 
 ## `for` Loops 
 

@@ -151,6 +151,7 @@ library(readtext)
 ```
 
 We load the data from the Gutenberg Project and remove any preface or introductory material; we designate the loaded text with the name `moby`, so that we can refer to it again later on. 
+
 ```{r}
 url <- "https://www.gutenberg.org/files/2701/2701-0.txt"
 moby <- readtext(url) |>
@@ -367,6 +368,92 @@ Open up `Preferences` in RStudio. Do the following in the `General` tab:
 * Following the text that says "Save workspace data to .RData on exit:", select `Never`. 
 
 This completes the setup! 
+
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+library(gapminder)
+library(emojifont)
+```
+
+**Question 1** The goal of this question is to develop familiarity with R, RStudio, and installing/loading packages into a RStudio environment. All work for this question can be done using the Console window inside RStudio or, preferably, by creating code chunks inside a R markdown notebook (see Section 1.4).  
+
+* **Question 1.1** Install the packages `tidyverse`, `emojifont`, `devtools`, and `edsdata` on your system. Recall that the `edsdata` package is not available on CRAN and must be installed using `install_github` from the `devtools` package. Then load these packages into your environment.  
+
+* **Question 1.2** `emoji()` is a *function* from the package `emojifont` which converts an emoji alias to its "unicode" representation. The following expression gives an example. Type and run the following code chunk: 
+
+  ```{r eval=FALSE}
+  emoji("star")
+  ```
+
+  Try converting another emoji alias name to its "unicode" representation.
+
+* **Question 1.3** There are actually a lot of emojis with stars. Use the function `search_emoji()` to find all aliases for "star". How many are there? __Hint:__ use `?search_emoji` to pull up the help documentation for this function. That is always a good idea when you are in doubt of how to use a function.  
+
+* **Question 1.4**  We have made a coding blunder in the next chunk. Type the following and run this code chunk to see what happens. Then fix the code so that you can run the chunk without error and see the intended message.
+
+  ```{r eval=FALSE}
+  print("what is missing?
+  ```
+
+* **Question 1.5** What happens if we try `print`ing a name that has not been assigned anything? Try to display the value for the name `bubble` or `tea`. What message is produced? Are you surprised? 
+
+  ```{r eval=FALSE}
+  bubble
+  tea
+  ```
+
+**Question 2** We saw in the textbook that we can visualize word relationships in Moby Dick using `tidyverse` and the R programming language. In this part we will continue exploring these relationships and answer some questions about what is being represented. Be sure you have also read Section 1.3 of the textbook. 
+
+Run the following chunk to produce the visualization we will examine for this question. You do __NOT__ need to understand what is happening in the following code!
+
+```{r eval=FALSE}
+library(edsdata)
+ggplot(moby_dick_counts) + 
+  geom_point(aes(x = whale, y = sea, color = "sea")) + 
+  geom_point(aes(x = whale, y = ahab, color = "ahab")) + 
+  ylab("count")
+```
+
+* **Question 2.1** What is being represented by this visualization? What is shown on the x-axis? On the y-axis? Please explain your answer. 
+
+* **Question 2.2** About how many times did the word "whale" occur in the chapter that contained the most number of occurrences of the word "ahab"? Assign either 1, 2, 3, 4, or 5 to the name `moby_q2` below.
+
+    1. 20
+    2. 30 
+    3. 35
+    4. 55
+    5. 60 
+
+* **Question 2.3** It seems that the occurrences of "whale" are not as closely associated with "ahab" as it is with "sea". Is this a fair observation? Explain why or why not.
+
+**Question 3** According to the textbook, which of the following, if any, are data science tasks? Explain why or why not. 
+
+1. An intern examines performance at a company by computing mean and median quarterly earnings using spreadsheet software (e.g., Microsoft Excel, Numbers, etc).
+2. A learning management system (LMS) collects large volumes of data on user activity patterns, module interactions, and diagnostics. 
+3. A research cohort explores issues of authorship in a collection of classic English works by using various text analysis tools (e.g., frequency analysis, sentiment analysis, etc).  
+4. A colleague reports results from a statistical analysis on an Alzheimer's disease study using line charts, "box-and-whisker" plots, and histograms. 
+
+**Question 4** The textbook lists some examples of what work in data science looks like. Can you come up with two or three additional examples of data science? Why do your examples fall within the boundaries of "data science", as defined by the textbook? 
+
+**Question 5** Following are steps in a data science workflow that are out-of-order. 
+
+1. collecting data
+2. communicating the results to the management
+3. assembling the results into a report
+4. transforming the data to determine the method for analysis
+5. determining the data sources
+6. "tidying" the data, including filling in missing values
+7. performing the analysis
+
+* **Question 5.1** Put the above steps in the correct order. 
+
+* **Question 5.2** Data science work is often an iterative and cyclical process that repeats until enough insight can be gleaned from the data. From the workflow outlined in **Question 5.1**, explain which of the steps may be repeated multiple times.   
+
 
 
 

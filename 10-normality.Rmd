@@ -588,7 +588,7 @@ The heights most closely resemble the bell curve. We can also spot normality in 
 Let us compute the mean and standard deviation of the athletes' heights. 
 
 ```{r}
-summarized <- athletes %>%
+summarized <- athletes |>
   summarize(mean(Height), sd(Height))
 summarized
 
@@ -675,9 +675,9 @@ This yields three events on a given day: the counting was *as expected*, it was 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 df <- tribble(~event, ~probability,
-              "as expected", 2/3,
-              "double counted", 1/3,
-              "forgot", 1/3
+              "as expected", 2/4,
+              "double counted", 1/4,
+              "forgot", 1/4
               )
 ggplot(df) + 
   geom_bar(aes(x = event, y = probability), 
@@ -699,7 +699,8 @@ We are now ready to simulate one value of the statistic. Let us put our work int
 
 ```{r}
 one_simulation <- function() {
-  allotments <- sample(c(0, 1, 2), prob = c(1/3, 2/3, 1/3), replace = TRUE, size = 64)
+  allotments <- sample(c(0, 1, 2), 
+                       prob = c(1/4, 2/4, 1/4), replace = TRUE, size = 64)
   return(sum(allotments))
 } 
 one_simulation()

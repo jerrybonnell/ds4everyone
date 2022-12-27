@@ -2,7 +2,7 @@
 
 # Regression
 
-In this chapter we turn to making guesses, or *predictions*, about the future. There are many examples in which you, your adviser, or an employer would want to make claims about the future -- that are accurate! For instance: 
+In this chapter we turn to making guesses, or *predictions*, about the future. There are many examples in which you, your supervisor, or an employer would want to make claims about the future -- that are accurate! For instance: 
 
 * Can we predict the miles per gallon of a brand new car model using aspects of its design and performance?
 * Can we predict the price of suburban homes in a city using information collected from towns in the city, e.g. crime levels, demographics, median income, and distance to closest employment center? 
@@ -20,48 +20,45 @@ In this section, we build an understanding of what correlation is.
 
 ### Prerequisites
 
-We will make use of the tidyverse in this chapter, so let’s load it in as usual. We will also return to some datasets from the `datasauRus`, so let us load that in as well. 
+We will make use of the tidyverse and the `edsdata` package in this chapter, so let us load these in as usual. We will also return to some datasets from the `datasauRus` package, so let us load that as well. 
 
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
 library(datasauRus)
+library(edsdata)
 ```
 
-To build some intuition, we will compose a tibble called `toy_df` that contains several artificial datasets. Don't worry about the internal details of how the data is generated; in fact, it would be better to think of it as real data! 
+```{r echo=FALSE}
+scatter_with_r <- function(r) {
+  x <- rnorm(10000)
+  z <- rnorm(10000)
+  y = r*x + (sqrt(1-r**2))*z
+  g <- tibble(x = x, y = y) %>%
+    ggplot() +
+    geom_point(aes(x = x, y = y), color = "darkcyan", alpha = 0.8) +
+    xlab("") +
+    ylab("")
+  return(g)
+}
+```
+
+To build some intuition, we composed a tibble called `corr_tibble` (available in `edsdata`) that contains several artificial datasets. Don't worry about the internal details of how the data is generated; in fact, it would be better to think of it as real data! 
 
 ```{r echo=FALSE}
 set.seed(1)
 ```
 
-```{r echo = FALSE}
-N <- 500
-toy_df <- tibble(t = runif(N) * 2 * pi,
-                 x = cos(t), # this is why there is some clumping in the endpoints 
-                 perf = x, 
-                 null = rnorm(N), 
-                 quadratic = jitter(x ** 2),
-                 linear = x + rnorm(N) / 5, 
-                 curvy = sin(t),
-                 cone = 2 * x + (x + rnorm(N)/3)^2 + rnorm(N)/3) %>%
-  filter(x > -0.9, x < 0.9) %>%
-  pivot_longer(c(perf, null, linear, curvy, quadratic, cone), 
-               names_to = "dataset", values_to = "y") %>%
-  select(x, y, dataset) %>%
-  arrange(dataset)
-```
-
 ```{r}
-toy_df
+corr_tibble
 ```
-
 
 ### Visualizing correlation with a scatter plot
 
-Let us begin by examining the relationship between the two variables `y` versus `x` in the dataset `linear` within `toy_df`. As we have done in the past, we will use a scatter plot for such a visualization. 
+Let us begin by examining the relationship between the two variables `y` versus `x` in the dataset `linear` within `corr_tibble`. As we have done in the past, we will use a scatter plot for such a visualization. 
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
-toy_df %>%
-  filter(dataset == "linear") %>%
+corr_tibble |>
+  filter(dataset == "linear") |>
   ggplot() + 
   geom_point(aes(x = x, y = y), color = "darkcyan") 
 ```
@@ -69,23 +66,23 @@ toy_df %>%
 We noted earlier that two variables are correlated if they appear to cluster around a straight line. It appears that there is a strong correlation present here, but let us confirm what we are seeing by drawing a reference line at $y = x$. 
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
-toy_df %>%
-  filter(dataset == "linear") %>%
+corr_tibble |>
+  filter(dataset == "linear") |>
   ggplot() + 
   geom_point(aes(x = x, y = y), color = "darkcyan") +
   geom_line(data = data.frame(x = c(-1,1), y = c(-1,1)),
-            aes(x = x, y = y), color = "salmon", size = 1)
+            aes(x = x, y = y), color = "blue", size = 1)
 ```
 
 Indeed, we can confirm a "strong" correlation between these two variables. We will define how strong momentarily. Let us turn to another dataset, `perf`. 
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
-toy_df %>%
-  filter(dataset == "perf") %>%
+corr_tibble |>
+  filter(dataset == "perf") |>
   ggplot() + 
   geom_point(aes(x = x, y = y), color = "darkcyan") +
-  geom_line(data = data.frame(x = c(-1,1), y = c(-1,1)),
-            aes(x = x, y = y), color = "salmon", size = 1)
+  geom_line(data = tibble(x = c(-1,1), y = c(-1,1)),
+            aes(x = x, y = y), color = "blue", size = 1)
 ```
 
 Neat! The points fall *exactly* on the line. We can confidently say that `y_perf` and `x` are perfectly correlated. 
@@ -93,12 +90,12 @@ Neat! The points fall *exactly* on the line. We can confidently say that `y_perf
 How about in the dataset `null`?
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
-toy_df %>%
-  filter(dataset == "null") %>%
+corr_tibble |>
+  filter(dataset == "null") |>
   ggplot() + 
   geom_point(aes(x = x, y = y), color = "darkcyan") +
   geom_line(data = data.frame(x = c(-1,1), y = c(-1,1)),
-            aes(x = x, y = y), color = "salmon", size = 1)
+            aes(x = x, y = y), color = "blue", size = 1)
 ```
 
 This one, unlike the others, does not cluster well around the line $y = x$ nor does it show a trend whatsoever; in fact, it seems the points are drawn at random, much like static noise on a television. We call a plot that shows such phenomena a *null plot*.   
@@ -111,7 +108,7 @@ We are now ready to present a formal definition for correlation, which is usuall
 
 > $r$ is the mean of the products of two variables that are scaled to standard units. 
 
-Here are some mathematical facts about $r$. Proving them is beyond the scope of this course, so we only state them as properties. 
+Here are some mathematical facts about $r$. Proving them is beyond the scope of this text, so we only state them as properties. 
 
 * $r$ can take on a value between $1$ and $-1$. 
 * $r = 1$ means perfect positive correlation; $r = -1$ means perfect negative correlation. 
@@ -119,22 +116,37 @@ Here are some mathematical facts about $r$. Proving them is beyond the scope of 
 * Because $r$ is scaled to standard units, it is a dimensionless quantity, i.e., it has no units.  
 * __Association does not imply causation!__ Just because two variables are strongly correlated, positively or negatively, does not mean that `x` *causes* `y`. 
 
+To build some intuition for this quantity, following are four scatter plots. We labeled each with its corresponding $r$. 
+
+```{r dpi=80, fig.asp = 0.4, message=FALSE, echo=FALSE, warning=FALSE, fig.show="hold", out.width="100%", message=FALSE, warning=FALSE, echo=FALSE}
+g1 <- scatter_with_r(0.87) +
+  labs(title = "r = 0.87")
+g2 <- scatter_with_r(0.29) +
+  labs(title = "r = 0.29")
+g3 <- scatter_with_r(0) +
+  labs(title = "r = 0")
+g4 <- scatter_with_r(-0.46) +
+  labs(title = "r = -0.46")
+library(patchwork)
+g1 | g2 | g3 | g4
+```
+
 Let us return to the `linear` dataset and compute the coefficient by hand. First, we append two new columns, `x_su` and `y_su`, that puts `x` and `y` in standard units. 
 
 ```{r}
-toy_df %>% 
-  filter(dataset == 'linear') %>%
+corr_tibble |> 
+  filter(dataset == 'linear') |>
   transmute(x = x, 
             y = y,
             x_su = scale(x),
             y_su = scale(y)) 
 ```
 
-Let us modify the above code to add one more column, `prod`, that takes the product of the columns `x_su` and `y_su`. We will also save the resulting tibble to a variable called `linear_df_standard`.
+We weill modify the above code to add one more column, `prod`, that takes the product of the columns `x_su` and `y_su`. We will also save the resulting tibble to a variable called `linear_df_standard`.
 
 ```{r}
-linear_df_standard <- toy_df %>% 
-  filter(dataset == 'linear') %>%
+linear_df_standard <- corr_tibble |> 
+  filter(dataset == 'linear') |>
   transmute(x = x, 
             y = y,
             x_su = scale(x),
@@ -146,8 +158,8 @@ linear_df_standard
 According to the definition, we need only to calculate the mean of the products to find $r$. 
 
 ```{r}
-r <- linear_df_standard %>%
-  pull(prod) %>%
+r <- linear_df_standard |>
+  pull(prod) |>
   mean()
 r
 ```
@@ -157,27 +169,76 @@ So the correlation of  `y` and `x` is about $0.94$ which implies a strong positi
 Thankfully, R comes with a function for computing the correlation so we need not repeat this work every time we wish to explore the correlation between two variables. The function is called `cor` and receives two vectors as input. 
 
 ```{r}
-linear_df_standard %>%
+linear_df_standard |>
   summarize(r = cor(x, y))
 ```
 
-Note that there may be some discrepancy between the two values. This is due to the $n - 1$ correction that R provides when calculating quantities like `sd`.  
+Note that there may be some discrepancy between the two values. This is due to the $n - 1$ correction that R provides when calculating quantities like `sd`.
 
-### The problem of linear correlation 
+### Technical considerations 
 
-We noted earlier that $r = 0$ is a special case. Let us turn to the dataset `curvy` to see why.  
+There are a few technical points to be aware of when using correlation in your analysis. We reflect on these here. 
+
+__Switching axes does not affect the correlation coefficient.__ Let us swap $x$ and $y$ in the "linear" dataset in `corr_tibble` and then plot the result. 
+
+```{r dpi=80, echo=FALSE, fig.align="center", warning = FALSE}
+swapped <- corr_tibble |>
+  filter(dataset == 'linear') |>
+  transmute(x_new = y, y_new = x)
+
+ggplot(swapped) + 
+  geom_point(aes(x = x_new, y = y_new), color = "darkcyan") +
+  geom_line(data = tibble(x = c(-1,1), y = c(-1,1)),
+            aes(x = x, y = y), color = "salmon", size = 1)
+```
+
+Observe how this visualization is a reflection over the $y = x$ line. We compute the correlation. 
 
 ```{r}
-curvy <- toy_df %>% filter(dataset == "curvy")
+swapped |>  
+  summarize(r = cor(x_new, y_new))
+```
+
+This value is equivalent to the value we found earlier for this dataset.  
+
+__Correlation is sensitive to "outliers."__ Consider the following toy dataset and its corresponding scatter. 
+
+```{r dpi=80, echo=FALSE, fig.align="center", warning = FALSE}
+weird <- tibble(
+  x = c(1, 2, 3, 4, 5),
+  y = c(0, 4, 3, 2, 1)
+)
+
+weird |>
+  ggplot() + 
+  geom_point(aes(x = x, y = y), 
+             color = "darkcyan", size = 6)
+```
+
+Besides the first point, we would expect this dataset to have a near perfect *negative correlation* between $x$ and $y$. However, computing the correlation coefficient for this dataset tells a different story.  
+
+```{r}
+weird %>%
+  summarize(r = cor(x, y))
+```
+
+We call such points that do not follow the overall trend "outliers". It is important to look out for these as said observations have the potential to dramatically affect the signal in the analysis. 
+
+__$r = 0$ is a special case.__ Let us turn to the dataset `curvy` to see why.  
+
+```{r}
+curvy <- corr_tibble |> 
+  filter(dataset == "curvy")
 ```
 
 We can compute the correlation coefficient as before. 
 
 ```{r}
-cor(pull(curvy, x), pull(curvy, y))
+curvy %>%
+  summarize(cor(x, y))
 ```
 
-The small value may suggest to some that there is no correlation and, therefore, the scatter diagram should resemble a null plot. Let us visualize the data.
+The small value may suggest that there is no correlation and, therefore, the scatter diagram should resemble a null plot. Let us visualize the data.
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(curvy) + 
@@ -186,27 +247,17 @@ ggplot(curvy) +
 
 A clear pattern emerges! However, the association is very much not *linear*, as indicated by the obtained $r$ value.
 
+__$r$ is agnostic to units of the input variables.__ This is due to its calculation being based on standard units. So, for instance, we can look at the correlation between a quantity in miles per gallon and another quantity in liters. 
+
 ### Be careful with summary statistics! (revisited)
 
-We saw before the danger of using summary statistics like mean and standard deviation without first visualizing data. Correlation is another one in the bunch to watch out for. Let us see why. 
-
-First, let us compose the same `bullseye` and `star` datasets we examined before. 
+We saw before the danger of using summary statistics like mean and standard deviation without first visualizing data. Correlation is another one to watch out for. Let us see why using the same `bullseye` and `star` datasets we examined before. We will compute the correlation coefficient for each dataset. 
 
 ```{r}
-bullseye <- datasaurus_dozen %>%
-  filter(dataset == "bullseye")
-```
-
-```{r}
-star <- datasaurus_dozen %>%
-  filter(dataset == "star")
-```
-
-We will compute the correlation coefficient for each dataset. 
-
-```{r}
-cor(pull(bullseye, x), pull(bullseye, y))
-cor(pull(star, x), pull(star, y))
+datasaurus_dozen |>
+  filter(dataset == "bullseye" | dataset == "star") |>
+  group_by(dataset) |>
+  summarize(r = cor(x, y))
 ```
 
 We observe that both datasets have almost identical coefficient values so we may be suspect that both also have seemingly identical associations as well. We may also claim there is some evidence that suggests there is a weak negative correlation between the variables. 
@@ -214,8 +265,8 @@ We observe that both datasets have almost identical coefficient values so we may
 As before, the test of any such claim is visualization. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-datasaurus_dozen %>%
-  filter(dataset == "bullseye" | dataset == "star") %>%
+datasaurus_dozen |>
+  filter(dataset == "bullseye" | dataset == "star") |>
   ggplot() +
   geom_point(aes(x = x, y = y, color = dataset)) +
   facet_wrap( ~ dataset, ncol = 2)
@@ -237,36 +288,94 @@ library(tidyverse)
 
 ### The `trees` data frame
 
-```{r echo=FALSE}
-trees <- tibble(trees)
-```
-
-The `trees` data frame contains data on the diameter, height, and volume of 31 felled black cherry trees. Note that the diameter is erroneously labeled as `Girth`. 
+The `trees` data frame contains data on the diameter, height, and volume of 31 felled black cherry trees. Let us first convert the data to a tibble. 
 
 ```{r}
-slice_head(trees, n=5)
+trees_data <- tibble(datasets::trees)
+```
+
+
+Note that the diameter is erroneously labeled as `Girth`. 
+
+```{r}
+slice_head(trees_data, n=5)
 ```
 
 Let us visualize the relationship between `Girth` and `Height`.  
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(trees) + 
+ggplot(trees_data) + 
   geom_point(aes(x = Height, y = Girth), color = "darkcyan")
 ```
 
-There seems to be some correlation between the two -- taller trees tend to have larger diameters. Confident in the trend we are seeing, we propose a (rather bold) research question: can we *predict* the average diameter of a black cherry tree from its height? To find out, let us turn to linear regression. 
+There seems to be some correlation between the two -- taller trees tend to have larger diameters. Confident in the trend we are seeing, we propose the question: can we *predict* the average diameter of a black cherry tree from its height? 
+
+## First approach: nearest neighbors regression
+
+One way to make a prediction about the outcome of some individual is to first find others who are similiar to that individual and whose outcome you do know. We can then use those outcomes to guide the prediction. 
+
+Say we have a new black cherry tree whose height is 65 ft. We can look at trees that are "close" to 65 ft, say, within 1 feet. We can find these individuals using `dplyr`:
+
+```{r}
+trees_data |> 
+  filter(between(Height, 75 - 1, 75 + 1))
+```
+
+Here is a scatter with those "close" observations annotated using the color cyan.  
+
+```{r dpi=80, fig.align="center", message = FALSE}
+trees_data |> 
+  mutate(close_to_75 = between(Height, 75 - 1, 75 + 1)) |>
+  ggplot() +
+    geom_point(aes(x = Height, y = Girth, color = close_to_75))
+```
+
+We can take the mean of the outcomes for those observations to obtain a *prediction* for the *average* diameter of a black cherry tree whose height is 65 ft. Let us amend our `dplyr` code to compute this value. 
+
+```{r}
+trees_data |> 
+  filter(between(Height, 75 - 1, 75 + 1)) |>
+  summarize(prediction = mean(Girth))
+```
+
+This method is called *nearest neighbors regression* because of the use of "neighbors" to make informed predictions about individuals whose outcomes we do not know. Its procedure is as follows:  
+
+* Define a threshold $t$
+* Filter each $x$ in the dataset to contain only rows where its $x$ value is within $x \pm t$. This defines a group, or "neighborhood", for each $x$. 
+* Take the mean of corresponding $y$ values in each group 
+* For each $x$, the prediction is the *average* of the $y$ values in the corresponding group
+
+We write a function called `nn_predict` to obtain a prediction for each height in the dataset. The function is designed so that it can be used to make predictions for any dataset with a given threshold amount. 
+
+```{r}
+nn_predict <- function(x, tib, x_label, y_label, 
+                       threshold) {
+  tib |>
+    filter(between({{ x_label }}, 
+                   x - threshold, 
+                   x + threshold)) |>
+    summarize(avg = mean({{ y_label }})) |>
+    pull(avg)
+}
+```
+
+We will use nearest neighbors regression to help us develop intuition for linear regression.  
 
 ### The simple linear regression model 
 
-*Linear regression* is a method that estimates the mean value of a *response* variable, say `Girth`, against a collection of *regressors*, say `Height` or `Volume`, so that we can express the value of the response as some combination of the regressors, where each regressor either adds to or subtracts from the response value estimation. It is customary to represent the response as $y$ and the regressors as $x_i$, where $i$ is the index for one of the regressors. 
+*Linear regression* is a method that estimates the mean value of a *response* variable, say `Girth`, against a collection of *predictor* variables (or *regressors*), say `Height` or `Volume`, so that we can express the value of the response as some combination of the regressors, where each regressor either adds to or subtracts from the response value estimation. It is customary to represent the response as $y$ and the regressors as $x_i$, where $i$ is the index for one of the regressors. 
 
 The linear model takes the form:
 
-\[y = c_0 + c_1x_1 + \ldots + c_n x_n \]
+$$
+y = c_0 + c_1x_1 + \ldots + c_n x_n
+$$
 
 where $c_0$ is the intercept and the other $c_i$'s are coefficients. This form is hard to digest, so we will begin with using only one regressor. Our model, then, reduces to: 
 
-\[y = c_0 + c_1 x\]
+$$
+y = c_0 + c_1x
+$$
 
 which is the equation of a line, just as you have seen it in high school math classes. There are some important assumptions we are making when using this model: 
 
@@ -277,21 +386,21 @@ We will return to what "errors" mean in just a moment. For now just keep in mind
 
 You may be wondering how we can obtain the intercept ($c_0$) and slope ($c_1$) for this line. For that, let us return to the tree data.  
 
-### Finding the equation of the line 
+### The regression line in standard units
 
-We have noted before that there exists a close relationship between correlation and linear regression. Let us see if we can distill that connection here.  
+We noted before that there exists a close relationship between correlation and linear regression. Let us see if we can distill that connection here.  
 
 We begin our analysis by noting the correlation between the two variables. 
 
 ```{r}
-trees %>%
+trees_data |>
   summarize(r = cor(Girth, Height))
 ```
 
 This confirms the positive linear trend we saw earlier. Recall that the correlation coefficient is a dimensionless quantity. Let us standardize `Girth` and `Height` so that they are in standard units and are also dimensionless.  
 
 ```{r}
-girth_height_su <- trees %>%
+girth_height_su <- trees_data |>
   transmute(Girth_su = scale(Girth),
          Height_su = scale(Height))
 girth_height_su
@@ -309,39 +418,121 @@ How can we find an equation of a line that "best" passes through this collection
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(girth_height_su) + 
   geom_point(aes(x = Height_su, y = Girth_su), color = "darkcyan") + 
-  geom_abline(aes(slope = 1, intercept = 0), color = "salmon", size = 1) +
+  geom_abline(aes(slope = 1, intercept = 0), color = "blue", size = 1) +
   geom_segment(aes(x = Height_su, y = Girth_su,
                    xend = Height_su, yend = 1 * Height_su + 0), color = "blue", alpha = 0)
 ```
 
-We can see that the line closely passes through some points while completely missing the mark for others.  Unfortunately, this description is useless as it doesn't *quantify* the amount of error for each point -- can we do better? 
+Let us compare this with the nearest neighbors regression line. We use the function `nn_predict` we developed earlier in combination with a `purrr` map and set the threshold amount to $\pm$ 1 ft. 
+
+```{r}
+with_nn_predictions <- girth_height_su |>
+  mutate(prediction = 
+           map_dbl(Height_su, 
+                   nn_predict, girth_height_su, Height_su, Girth_su, 1))
+with_nn_predictions
+```
+
+The new column `prediction` contains the nearest neighbor predictions. Let us overlay these atop the scatter plot.
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot(with_nn_predictions) + 
+  geom_point(aes(x = Height_su, y = Girth_su), color = "darkcyan") + 
+  geom_abline(aes(slope = 1, intercept = 0), color = "blue", size = 1) +
+  geom_segment(aes(x = Height_su, y = Girth_su,
+                   xend = Height_su, yend = 1 * Height_su + 0), color = "blue", 
+               alpha = 0) +
+  geom_point(aes(x = Height_su, y = prediction), color = "salmon")
+```
+
+The graph of these predictions is called a __"graph of averages."__ If the relationship between the response and predictor variables is roughly linear, then points on the "graph of averages" tend to fall on a line. 
+
+What is the equation of that line? It appears that the $y = x$ overestimates observations where $\text{Height} > 0$ and underestimates observations where $\text{Height} < 0$. 
+
+How about we try a line where the slope is the correlation coefficient, $r$, we found earlier? That follows the equation: 
+
+$$
+\text{Girth} = r * \text{Height} = 0.519 * \text{Height}
+$$
+Let us overlay this on the scatter plot using a purple line.
+
+```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
+ggplot(with_nn_predictions) + 
+  geom_point(aes(x = Height_su, y = Girth_su), color = "darkcyan") + 
+  geom_abline(aes(slope = 1, intercept = 0), color = "blue", size = 1) +
+  geom_segment(aes(x = Height_su, y = Girth_su,
+                   xend = Height_su, yend = 1 * Height_su + 0), color = "blue", alpha = 0) +
+  geom_abline(slope = 0.5192801, intercept = 0, color = "purple", size = 1) + 
+  geom_point(aes(x = Height_su, y = prediction), color = "salmon")
+```
+
+We can see that this line closely follows the "graph of averages" predicted by the nearest neighbor regression method. It turns out that, when the variables are scaled to standard units, __the slope of the regression line equals $r$__. We also see that the regression line passes through the origin so its intercept equals 0. 
+
+Thus, we discover a connection: 
+
+> When $x$ and $y$ are scaled to standard units, the slope of the regression of $y$ on $x$ equals the correlation coefficient $r$ and the line passes through the origin $(0,0)$. 
+
+Let us summarize what we have learned so far about the equation of the regression line.  
+
+### Equation of the Regression Line
+
+When working in standard units, the average of $x$ and $y$ are both 0 and the standard deviation of $x$ ($SD_x$) is $1$ and the standard deviation of $y$ is $1$ ($SD_y$). Using what we know, we can recover the equation of the regression line __in original units__. If the slope is $r$ in standard units, then moving 1 unit along the x-axis in standard units is equivalent to moving $SD_x$ units along the x-axis in original units. Similarly, moving $r$ units along the y-axis in standard units is equivalent to moving $r * SD_y$ units along the y-axis in original units. Thus, we have the slope of the regression line in original units: 
+
+$$
+\text{slope} = r * \frac{SD_y}{SD_x}
+$$
+
+Furthermore, if the line passes through the origin in standard units, then the line in original units passes through the point $(\bar{x}, \bar{y})$ , where $\bar{x}$ and $\bar{y}$ is the mean of $x$ and $y$, respectively. So if the equation of the regression line follows:
+
+$$
+\text{estimate of } y = \text{slope} * x + \text{intercept}
+$$
+
+Then the intercept is: 
+
+$$ 
+\text{intercept} = \bar{y} - \text{slope} * \bar{x}
+$$
+
+
+### The line of least squares
+
+We have shown that the "graph of averages" can be modeled using the equation of the regression line. However, how do we know that the regression line is the *best* line that passes through the collection of points? We need to be able to *quantify* the amount of error at each point. 
 
 For this, we introduce the notion of a *residual*, which we define as the vertical distance from the point to the line (which can be positive or negative depending on the location of the point relative to the line). More formally, we say that a residual $e_i$ has the form: 
 
-\[e_i = y_i - (c_0 + c_1 x_i) \]
+$$
+e_i = y_i - (c_0 + c_1 x_i)
+$$
 
 where plugging into $c_0 + c_1 x_i$, the equation of the line, returns the *predicted* value for some observation $i$. We usually call this the *fitted* value. 
 
-We can annotate the above plot with such residuals. 
+We can annotate the plot with the regression line using the residual amounts. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 plot_errors <- function(df, y, x, slope, intercept) {
   ggplot(df) + 
   geom_point(aes(x = {{ x }}, y = {{ y }}), color = "darkcyan", alpha = 0.5) + 
-  geom_abline(aes(slope = slope, intercept = intercept), color = "salmon", size = 1)  +
+  geom_abline(aes(slope = slope, intercept = intercept), color = "purple", size = 1)  +
   geom_segment(aes(x = {{ x }}, y = {{ y }},
                    xend = {{ x }}, yend = slope * {{ x }} + intercept), color = "blue", alpha = 0.4)
 }
-plot_errors(girth_height_su, Girth_su, Height_su, 1, 0)
+plot_errors(girth_height_su, Girth_su, Height_su, 0.5192801, 0) +
+  labs(title = "Residuals for line y = r * x")
 ```
 
-The vertical blue lines show the residual for each point; note how some are small while others are quite large. How do the residuals for this line compare with those for, say, a horizontal line at $y = 0$?
+The vertical blue lines show the residual for each point; note how some are small while others are quite large. How do the residuals for this line compare with those for, say, the line $y = x$ or a horizontal line at $y = 0$?
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
-plot_errors(girth_height_su, Girth_su, Height_su, 0, 0)
+library(patchwork)
+g1 <- plot_errors(girth_height_su, Girth_su, Height_su, 1, 0) +
+  labs(title = "Residuals for the line y = x")
+g2 <- plot_errors(girth_height_su, Girth_su, Height_su, 0, 0) +
+  labs(title = "Residuals for the line y = 0")
+g1 + g2
 ```
 
-If we compare the two plots side-by-side, it becomes clear that the equation $y = x$ has smaller residuals overall than the horizontal line that passes through $y = 0$. This observation is key: to get an overall sense of the error in the model, we can *sum* the residuals for each point. However, there is a problem with such an approach. Some residuals can be positive while others can be negative, so a straightforward sum of the residuals will total to 0! Thus, we take the *square* of each residual and then issue the sum. 
+If we compare these plots side-by-side, it becomes clear that the equation $y = r * x$ has smaller residuals overall than the $y = x$ line and the horizontal line that passes through $y = 0$. This observation is key: to get an overall sense of the error in the model, we can *sum* the residuals for each point. However, there is a problem with such an approach. Some residuals can be positive while others can be negative, so a straightforward sum of the residuals will total to 0! Thus, we take the *square* of each residual and then issue the sum. 
 
 Our goal can now be phrased as follows: we would like to find the line that *minimizes* the **r**esidual **s**um of **s**quares. We normally refer to this quantity as $RSS$. Let us write a function that returns the $RSS$ for a given linear model. This function receives a vector called `params` where the first element is the slope and the second the intercept, and returns the corresponding $RSS$. 
 
@@ -357,61 +548,121 @@ line_rss <- function(params) {
 }
 ```
 
-We can retrieve the $RSS$ for the two lines we played with above. First, for the line $y = x$. 
+We can retrieve the $RSS$ for the two lines we played with above. First, for the line $y = r * x$, where $r$ is the correlation between `Height` and `Girth`.  
+
+```{r}
+params <- c(0.5192, 0)
+line_rss(params)
+```
+
+Next, for the line $y = x$.
 
 ```{r}
 params <- c(1, 0)
 line_rss(params)
 ```
 
-Next, for the horizontal line passing through $y = 0$. Note how the larger $RSS$ for this model confirms what we saw graphically when plotting the vertical distances.  
+Finally, for the horizontal line passing through $y = 0$. Note how the larger $RSS$ for this model confirms what we saw graphically when plotting the vertical distances.  
 
 ```{r}
 params <- c(0, 0)
 line_rss(params)
 ```
 
-We could continue experimenting with values until we found a configuration that seems "good enough". While that would hardly be acceptable to our peers, solving this rigorously involves methods of calculus which are beyond the scope of this course. Fortunately, we can use something called numerical optimization which allows R to do the trial-and-error work for us, "nudging" the above line until it minimizes $RSS$. 
+We could continue experimenting with values until we found a configuration that seems "good enough". While that would hardly be acceptable to our peers, solving this rigorously involves methods of calculus which are beyond the scope of this text. Fortunately, we can use something called numerical optimization which allows R to do the trial-and-error work for us, "nudging" the above line until it minimizes $RSS$. 
 
 ### Numerical optimization 
 
-The `optim` function can be used to accomplish the task of finding the linear model that yields the smallest $RSS$. `optim` takes as arguments an initial vector of values, let us call it the `initial_guess` vector, and a function to be minimized using the initial guess as a starting point -- this is our function `line_rss`. 
+The `optim` function can be used to accomplish the task of finding the linear model that yields the smallest $RSS$. `optim` takes as arguments an initial vector of values and a function to be minimized using an initial guess as a starting point. 
 
-The call `optim(initial_guess, line_rss)` will nudge around the values of slope and intercept inside `initial_guess` until a minimum is reached. 
+Let us see an example of it by finding an input that minimizes the output given by a quadratic curve. Consider the following quadratic equation: 
+
+```{r echo=FALSE}
+my_quadratic_equation <- function(x) {
+  (x - 2) ** 2 + 3
+}
+```
+
+```{r plot000, echo = FALSE, eval = FALSE}
+toy_df <- tibble(
+                 x = seq(1, 3, 0.1),
+                 quadratic = (x - 2) ** 2 + 3) %>%
+  pivot_longer(c(quadratic), 
+               names_to = "dataset", values_to = "y") %>%
+  select(x, y, dataset) %>%
+  arrange(dataset)
+
+toy_df %>% 
+  filter(dataset == "quadratic") %>%
+  ggplot() + 
+  geom_line(aes(x = x, y = y),
+            color = "darkcyan",
+            size = 2) + 
+  geom_point(aes(x = 1, y = my_quadratic_equation(1)),
+             color = "salmon",
+             size = 4) 
+```
+
+Geometrically, we know that the minimum occurs at the bottom of the "bowl", so the answer is 2. 
+
+The orange dot at $x = 1$ shows our first "guess". You can imagine the call `optim(initial_guess, my_quadratic_equation)` nudging this point around until a minimum is reached. Let us try it.
+
+```{r warning=FALSE}
+initial_guess <- c(1)  # start with a guess at x = 1
+best <- optim(initial_guess, my_quadratic_equation)
+```
+
+We can inspect the value found using `pluck` from `purrr`. 
 
 ```{r}
-initial_guess <- c(1,0)  # start with our first guess, the y = x line from above 
+best |>
+  pluck("par")
+```
+
+This value closely approximates the expected value of 2. 
+
+Let us now use the `optim` function to find the linear model that yields the smallest $RSS$. Note that our initial guess now consists of two values, one for the slope and the second for the intercept.
+
+```{r}
+initial_guess <- c(1,0)  # start with a guess, the y = x line 
 best <- optim(initial_guess, line_rss)
 ```
 
-We can now examine the obtained slope and intercept. 
+We can examine the minimized slope and intercept found. 
 
 ```{r}
-best$par
+best |> 
+  pluck("par")
 ```
 
-This means that the best linear model follows the equation 
+This means that the best linear model follows the equation: 
 
-\[\text{Girth} = 0.52 * \text{Height} \]
+$$
+\text{Girth}_{su} = 0.5192 * \text{Height}_{su}
+$$
 
-where the intercept is essentially 0. We can overlay this line on our scatter plot. Compare this line with our original guesses, which are shown in gray. 
+where the intercept is essentially 0. This line is equivalent to the regression line. Therefore, we find that the regression line is also the *line of least squares*. 
+
+Let us overlay the least squares line on our scatter plot. Compare this line with our original guesses, shown in gray. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(girth_height_su) + 
   geom_point(aes(x = Height_su, y = Girth_su), color = "darkcyan") + 
-  geom_abline(aes(slope = best$par[1], intercept = best$par[2]), color = "salmon", size = 1) +
+  geom_abline(aes(slope = best$par[1], intercept = best$par[2]), 
+              color = "purple", size = 1) +
   geom_abline(aes(slope = 1, intercept = 0), color = "gray", alpha = 1) +
   geom_abline(aes(slope = 0, intercept = 0), color = "gray", alpha = 1) +
   geom_segment(aes(x = Height_su, y = Girth_su,
-                   xend = Height_su, yend = 1 * Height_su + 0), color = "blue", alpha = 0)
+                   xend = Height_su, yend = 1 * Height_su + 0), 
+               color = "blue", alpha = 0) 
 ```
 
-Compare the line we have just found (in orange) with the line $y = x$. For trees with heights that are *less* than 0 $SD$s away from the mean, the orange line predicts a *larger* girth than the $y = x$ line. And, for trees with heights that are *more* than 0 $SD$ away from the mean, the orange line predicts a *smaller* girth than the $y = x$ line. The effect should become clearer in the following plot. 
+Compare the line we have just found (in purple) with the line $y = x$. For trees with heights that are *less* than 0 $SD$s away from the mean, the regression line predicts a *larger* girth than the $y = x$ line. And, for trees with heights that are *more* than 0 $SD$ away from the mean, the regression line predicts a *smaller* girth than the $y = x$ line. The effect should become clearer in the following plot. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(girth_height_su) + 
   geom_point(aes(x = Height_su, y = Girth_su), color = "darkcyan") + 
-  geom_abline(aes(slope = best$par[1], intercept = best$par[2]), color = "salmon", size = 1) +
+  geom_abline(aes(slope = best$par[1], intercept = best$par[2]), color = "purple", size = 1) +
   geom_abline(aes(slope = 1, intercept = 0), color = "gray", alpha = 1) +
   geom_abline(aes(slope = 0, intercept = 0), color = "gray", alpha = 1) +
   geom_vline(xintercept = -1, color = "blue") + 
@@ -426,267 +677,56 @@ ggplot(girth_height_su) +
                    xend = Height_su, yend = 1 * Height_su + 0), color = "blue", alpha = 0)
 ```
 
-Observe the position of the orange line relative to $y = x$ at each vertical blue line. Note how the orange line approaches the horizontal line that passes through $y = 0$. The phenomena we are observing is called __"regression towards the mean"__, as the regression line prefers to predict extreme points closer to the mean. We can summarize the effect on the data as follows: 
+Observe the position of the regression line relative to $y = x$ at each vertical blue line. Note how the regression line approaches the horizontal line that passes through $y = 0$. The phenomena we are observing is called __"regression towards the mean"__, as the regression line prefers to predict extreme points closer to the mean. We can summarize the effect on the data as follows: 
 
-> Shorter trees will tend to have larger girths on average, and taller trees will tend to have smaller girths on average.  
+> Shorter trees will have larger girths on average, and taller trees will have smaller girths on average.  
 
-Also recall the value of the correlation coefficient we calculated earlier.  
+### Computing a regression line using base R 
 
-```{r}
-trees %>%
-  summarize(r = cor(Girth, Height))
-```
+Before closing this section, we show how to compute a regression line using functions from base R. Note that you can find the regression line simply by plugging into the formulas we derived above, but it is easier to call a function in R that takes care of the work. 
 
-This is the same value as the slope of the line! Thus, we discover a connection: 
+That function is `lm`, which is the short-hand for "linear model". Running the linear regression function requires two parameters. One parameter is the dataset, which takes the form `data = DATA_SET_NAME`. The other is the response and the regressors, which takes a formula of the form `response ~ regressor_1 + ... + regressor_k`.
 
-> When $x$ and $y$ are scaled to standard units, the slope of the regression of $y$ on $x$ equals the correlation coefficient $r$ and the line passes through the origin $(0,0)$. 
-
-Let us summarize what we have learned and compare it against what the theory tells us. 
-
-### Equation of the Regression Line
-
-Mathematical theory tells us, in general, that the __slope__ of the regression line follows: 
-
-\[ \text{slope} = r * \frac{SD_y}{SD_x}\]
-
-It should be clear that when we put $x$ and $y$ in standard units, the slope is simply $r$. This confirms what we just saw above. 
-
-The __intercept__ of the line has the form:
-
-\[ \text{intercept} = \bar{y} - \text{slope} * \bar{x} \]
-
-where $\bar{x}$ and $\bar{y}$ is the mean of $x$ and $y$, respectively. 
-
-
-## Using Linear Regression
-
-The last section developed a theoretical foundation for understanding linear regression. This section will involve linear regression more practically, and introduce some functions that R provides for doing regression analysis. 
-
-### Prerequisites
-
-We will make use of the tidyverse in this chapter, so let us load it in as usual. 
-
-```{r message = FALSE, warning = FALSE}
-library(tidyverse)
-```
-
-For the running example in this section, we will appeal to the [The MLB Height Weight dataset](http://wiki.stat.ucla.edu/socr/index.php/SOCR_Data_MLB_HeightsWeights) from [UCLA SOCR Statistics](http://ww.socr.ucla.edu/), which is an excellent resource for statistical concepts and tools. The dataset contains 1,034 Major League Baseball players among 30 teams and 9 positions. Let us load this dataset and remove any missing values that may be present. 
-
-```{r message = FALSE}
-mlb <- read_csv("data/mlb.csv") %>%
-  drop_na()
-```
-
-### The `lm` function 
-
-Let us visualize the relationship between `Weight` and `Height`.  
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(mlb) + 
-  geom_point(aes(x = Height, y = Weight), color = "darkcyan")
-```
-
-How much correlation is present between these two variables?
+For a regression of `Girth` on `Height` in standard units, we have the following call. 
 
 ```{r}
-cor(pull(mlb, Weight), pull(mlb, Height))
+lmod <- lm(Girth_su ~ Height_su, data = girth_height_su)
 ```
 
-The high positive correlation suggests that linear regression can be a good fit for the data. Let us run the linear regression, this time making use of R. 
-
-The function is `lm`, which is the short-hand for "linear model". Running the linear regression function requires two parameters. One parameter is the data set, which takes the form `data = DATA_SET_NAME`. The other is the response and the regressors, which takes a formula of the form `response ~ regressor_1 + ... + regressor_k`.
-
-For a regression of `Weight` on `Height`, we have the following call. 
-
-```{r}
-lmod <- lm(Weight ~ Height, data = mlb)
-```
-
-The resulting linear model is stored in a variable `lmod`. We can inspect it by simply typing its name into the console. 
+The resulting linear model is stored in a variable `lmod`. We can inspect it by simply typing its name. 
 
 ```{r}
 lmod
 ```
 
-The resulting values point us to the equation: 
-
-\[\text{Weight} = 4.841 * \text{Height} - 155.09 \]
-
-Let us overlay the linear model atop the scatter plot. 
-
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(mlb) + 
-  geom_point(aes(x = Height, y = Weight), color = "darkcyan") + 
-  geom_abline(aes(slope = lmod$coefficients[2], intercept = lmod$coefficients[1]), 
-              size = 1, color = "salmon")
-```
-
-We sometimes call the line a "graph of averages", as it tells us the average weight of a MLB player for any given height.  
-
-An equivalent, and perhaps more direct, way of plotting this is to use a smooth geom using the `lm` method. 
-
-```{r dpi=80, fig.align="center", eval = FALSE, message = FALSE}
-ggplot(mlb, aes(x = Height, y = Weight)) + 
-  geom_point(color = "darkcyan") + 
-  geom_smooth(method = "lm", color = "salmon", size = 1, se = FALSE)
-```
-
-
-### Making predictions about unknown observations
-
-The power of a linear model lies not in its status of being the "best" fitted line that passes through a collection of points, but because we can use such a model to make predictions about observations that do not exist in our dataset. Put more specifically, we can use `lmod` to make predictions about the expected weight of a MLB baseball player using just one piece of information: their height.  
-
-Making a prediction is easy: just plug into the equation of the linear model! For example, what is the expected weight of a MLB baseball player who is 72 inches tall? 
-
-\[\text{Weight} = 4.841 (72) - 155.09 = 193.46\]
-
-So a MLB baseball player that is 72 inches tall has an expected weight of about 193.46 pounds. 
-
-R can do the work for us with the function `predict`. Note that this function receives a dataset, in the form of a data frame or tibble, with the required inputs. 
+This agrees with our calculations. Let us compute the same regression, this time in *terms of original units*. 
 
 ```{r}
-my.pred <- predict(lmod, newdata = tibble(Height = c(72)))
-my.pred
+lmod_original_units <- lm(Girth ~ Height, data = trees_data)
+lmod_original_units
 ```
 
-The prudent reader may have some suspicions about this result -- *that's it*? Is this something you can take to the bank? 
+So the equation of the line follows: 
 
-Indeed, there is a key element missing from the analysis so far: *confidence*. How confident are we in our predictions? We learned in the statistics unit that data scientists rarely report singular (or pointwise) values because so often they are working with samples of data. The regression line could have turned out differently depending on the sample at hand and, consequently, the predicted value can change as well. 
+$$
+\text{Girth} = 0.2557 * \text{Height} - 6.1884
+$$
 
-Instead, data scientists provide *confidence intervals* that quantify the amount of uncertainty in a prediction. We learned one way of obtaining such intervals in the previous chapters: the bootstrap.  
+Let us reflect briefly on the meaning of the intercept and the slope. First, the intercept is measured __in inches__ as it takes on the units of the response variable. However, its interpretation is nonsensical: a tree with no height is predicted to have a negative diameter.
 
-### Resampling a confidence interval
+The slope of the line is a ratio quantity. It measures the increase in the estimated diameter per unit increase in height. Therefore, the slope of this line is __0.2557 inches per foot__. Note that this slope does not say that the diameter of an individual black cherry tree gets wider as it gets taller. The slope tells us the difference in the *average* diameters of two groups of trees that are 1 foot apart in height. 
 
-We will use the resampling method we learned earlier to estimate a confidence interval for the prediction we just made. To accomplish this, we will: 
-
-* Resample the samples that are present in `mlb` by means of sampling with replacement. 
-* Fit a linear model to the bootstrapped samples. 
-* Generate a prediction from this linear model. 
-* Repeat the process a large number of times, say, 5,000 or 10,000 times. 
-
-Let us define a function that performs one round of the bootstrap. 
+We can also make predictions using the `predict` function.
 
 ```{r}
-one_resample <- function(df, x, y, x.new) {
-  # bootstrap as many samples as the size of the dataset at hand
-  samples <- slice_sample(df, n = nrow(df), replace = TRUE)
-  # fit a linear model
-  fm <- as.formula(paste(y, "~", x))
-  lmod <- lm(fm, data = samples)
-  # generate and return the prediction 
-  pred <- predict(lmod, newdata = x.new)
-  return(pred)
-}
+my_pred <- predict(lmod_original_units, 
+                   newdata = tibble(Height = c(75)))
+my_pred
 ```
 
-Run the following cell a few times and observe the variability in the prediction. 
+So a tree that is 75 feet tall is expected, *on average*, to have a diameter of about 12.9 inches. 
 
-```{r}
-one_resample(mlb, "Height", "Weight", tibble(Height = c(72)))
-```
-
-Let us now repeat the bootstrap a large number of times, say 10,000 times. 
-
-```{r}
-bstrap_predictions <- replicate(n = 10000, one_resample(mlb, "Height", "Weight", tibble(Height = c(72))))
-```
-
-As before, we will identify a 95% confidence interval. Here it is: 
-
-```{r}
-desired_area <- 0.95
-middle <- quantile(bstrap_predictions, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
-middle
-```
-
-Let us plot an sampling histogram of the predictions and annotate the confidence interval on this histogram.
-
-```{r dpi=80, fig.align="center", message = FALSE}
-df <- tibble(bstrap_predictions)
-ggplot(df, aes(x = bstrap_predictions, y = ..density..)) + 
-  geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
-  geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
-                   size = 2, color = "salmon") +
-  geom_point(aes(x = my.pred, y = 0), size = 3, color = "red")
-```
-
-We find that the distribution is approximately normal. Our prediction interval spans between 192.2 and 194.7 pounds. The red dot shows where our original prediction occurs, which falls squarely in the center of the histogram.  
-
-We can use R to give us the prediction interval by amending the call to `predict`. 
-
-```{r}
-lmod <- lm(Weight ~ Height, data = mlb)
-predict(lmod, newdata = tibble(Height = c(72)), interval = "confidence")
-```
-
-`predict` obtains the interval by means of statistical theory, and we can see that the result is very close to what we found using the the bootstrap. Formally, these intervals go by a special name: *confidence intervals for the mean response*. That's a mouthful!
-
-
-### How significant is the slope? 
-
-We showed that the predictions generated by a linear model can vary depending on the samples we have at hand. The slope of the linear model can also turn out differently for the same reasons. But, by how much?
-
-In the same way we used bootstrapping to estimate a confidence interval for the mean response, we can apply bootstrapping to estimate the true slope. Fortunately, we need only to make small modifications to the code we wrote earlier to perform this experiment. The change being that instead of generating a prediction from the linear model, we will return its slope.    
-
-```{r}
-one_resample <- function(df, x, y) {
-  # bootstrap as many samples as the size of the dataset at hand
-  samples <- slice_sample(df, n = nrow(df), replace = TRUE)
-  # fit a linear model
-  fm <- as.formula(paste(y, "~", x))
-  lmod <- lm(fm, data = samples)
-  # return the slope of the model
-  return(lmod$coefficients[2])
-}
-```
-
-Run the following cell a few times and observe how the value of the slope changes.  
-
-```{r}
-one_resample(mlb, "Height", "Weight")
-```
-
-As before, we will repeat the process 10,000 times. 
-
-```{r}
-bstrap_slopes <- replicate(n = 10000, one_resample(mlb, "Height", "Weight"))
-```
-
-Here is the 95% confidence interval.
-
-```{r}
-desired_area <- 0.95
-middle <- quantile(bstrap_slopes, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
-middle
-```
-
-Following is the sampling histogram of the bootstrapped slopes with the annotated confidence interval. We also plot a red dot representing the original slope, which we found to be $4.841$.   
-
-```{r dpi=80, fig.align="center", message = FALSE}
-df <- tibble(bstrap_slopes)
-ggplot(df, aes(x = bstrap_slopes, y = ..density..)) + 
-  geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
-  geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
-                   size = 2, color = "salmon") +
-  geom_point(aes(x = 4.841, y = 0), size = 3, color = "red")
-```
-
-As before, we observe that the distribution is roughly normal. We also see that our original slope value sits right in the middle of the confidence interval, which ranges from about 4.3 to 5.3. 
-
-The normality of this distribution is important since it is the basis for the statistical theory that regression analysis builds up from. This means that our interval should be extremely close to what R reports, which is calculated using such theory. The function `confint` gives us the answer.    
-
-```{r}
-confint(lmod)
-```
-
-Indeed, they are quite close! As a bonus, we also get a confidence interval for the intercept. 
-
-<!-- as a lab or assignment, frame the confidence interval as a hypothesis test to check if slope is 0 -->
-
-
-### The `summary` function 
-
-An important function for doing regression analysis in R is the function `summary`, which we have not covered so far and will likely not cover in the remainder of the course. The function reports a wealth of useful information about the linear model, such as significance of the intercept and slope coefficients. However, to truly appreciate and understand what is presented requires a deeper understanding of statistics than what we have developed so far -- if this sounds at all interesting, we encourage you to take a course in statistical analysis! 
+An important function for doing regression analysis in R is the function `summary`, which we will not cover. The function reports a wealth of useful information about the linear model, such as significance of the intercept and slope coefficients. However, to truly appreciate and understand what is presented requires a deeper understanding of statistics than what we have developed so far -- if this sounds at all interesting, we encourage you to take a course in statistical analysis! 
 
 Nevertheless, for the curious reader, we include the incantation to use. 
 
@@ -694,6 +734,530 @@ Nevertheless, for the curious reader, we include the incantation to use.
 summary(lmod)
 ```
 
+## Using Linear Regression
+
+The last section developed a theoretical foundation for understanding linear regression. We also saw how to fit a regression model using built-in R features such as `lm`. This section will involve linear regression more practically, and we will see how to run a linear regression analysis using tools from a collection of packages called `tidymodels`. 
+
+### Prerequisites
+
+This section introduces a new meta-package called `tidymodels`. This package can be installed from CRAN using `install.packages`. We will also make use of the tidyverse so let us load this in as usual. 
+
+```{r message = FALSE, warning = FALSE}
+library(tidyverse)
+library(tidymodels)
+library(palmerpenguins)
+```
+
+### Palmer Station penguins
+
+For the running example in this section, we appeal to the dataset `penguins` from the `palmerpenguins` package, which contains information on different types of penguins in the Palmer Archipelago, Antarctica. The dataset contains 344 observations and `?penguins` can be used to pull up further information. Let us perform basic preprocessing on this dataset by removing any missing values that may be present.
+
+```{r message = FALSE}
+my_penguins <- penguins |>
+  drop_na()
+my_penguins
+```
+
+We refer to the preprocessed data as `my_penguins`. Let us visualize the relationship between `bill_length_mm` and `bill_depth_mm`.  
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(my_penguins) + 
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm), 
+             color = "darkcyan")
+```
+
+How much correlation is present between the two variables?
+
+```{r}
+my_penguins |>
+  summarize(r = cor(bill_length_mm, 
+                    bill_depth_mm))
+```
+
+The negative correlation is suspicious considering that we should expect to see a positive correlation after viewing the above the scatter plot. Plotting a histogram for each of these variables reveals a distribution where there appears to be two modes in the data, shown geometrically as two "humps". 
+
+```{r dpi=80, fig.asp = 0.4, message=FALSE, echo=FALSE, warning=FALSE, fig.show="hold", out.width="100%", message=FALSE, warning=FALSE, echo=FALSE}
+g1 <- ggplot(penguins,
+       aes(x = bill_length_mm)) + 
+  geom_histogram(aes(y = ..density..), 
+                   fill = "darkcyan", 
+                   bins = 40,
+                   color = "gray") + 
+  geom_density(color = "salmon", size=1)
+
+g2 <- ggplot(penguins,
+       aes(x = bill_depth_mm)) + 
+    geom_histogram(aes(y = ..density..), 
+                   fill = "darkcyan", 
+                   bins = 40,
+                   color = "gray") +
+  geom_density(color = "salmon", size=1)
+
+g1 + g2 
+```
+
+We refer to this as a *bimodal* distribution and here it suggests that there is something about this dataset that we have not yet considered (i.e., the penguin species). For now, we will proceed with the regression analysis. 
+
+### Tidy linear regression
+
+Let us run linear regression, this time using `tidymodels`. The benefit of learning about `tidymodels` is that once you have mastered how to use it for linear regression, you can then use the same functions for trying out different models (e.g., generalized linear models) and other learning techniques (e.g., nearest neighbor classification). 
+
+To fit a linear regression model using `tidymodels`, first provide a specification for it. 
+
+```{r}
+linear_reg()
+```
+
+There are different ways to fit a linear regression model and the method is determined by setting the model *engine*. For a regression line fitted using the least squares method we learned, we use the `"lm"` method. 
+
+```{r}
+linear_reg() |>
+  set_engine("lm") # ordinary least squares 
+```
+
+We then fit the model by specifying `bill_depth_mm` as the response variable and `bill_length_mm` as the predictor variable.  
+
+```{r}
+lmod_parsnip <- linear_reg() |>
+  set_engine("lm") |>
+  fit(bill_depth_mm ~ bill_length_mm, data = penguins)
+lmod_parsnip
+```
+
+The model output is returned as a *parsnip* model object. We can glean the equation of the regression line from its output:
+
+$$\text{Bill Depth} = -0.08502  * \text{Bill Length} +  20.885$$
+
+We can *tidy* the model output using the `tidy` function from the `broom` package (a member of `tidymodels`). This returns the estimates as a *tibble*, a form we can manipulate well in the usual ways. 
+
+```{r}
+linear_reg() %>%
+  set_engine("lm") %>%
+  fit(bill_depth_mm ~ bill_length_mm, data = penguins) %>%
+  tidy() # broom
+```
+
+Note the estimates for the intercept and slope given in the `estimate` column. The `p.value` column indicates the significance of each term; we will return to this shortly.  
+
+We may wish to annotate each observation in the dataset with the predicted (or *fitted*) values and residual amounts. This can be accomplished by *augmenting* the model output. To do this, we extract the `"fit"` element of the model object and then call the function `augment` from the `parsnip` package. 
+
+```{r}
+lmod_augmented <- lmod_parsnip |>
+  pluck("fit") |>
+  augment()
+lmod_augmented
+```
+
+Augmenting model output is useful if you wish to overlay the scatter plot with the regression line.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(lmod_augmented) + 
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm), 
+             color = "darkcyan") + 
+  geom_line(aes(x = bill_length_mm, 
+                y = .fitted), 
+            color = "purple", 
+            size = 2)
+```
+
+Note that we can obtain an equivalent plot using a smooth geom with the `lm` method.  
+
+```{r dpi=80, fig.align="center", eval = FALSE, message = FALSE}
+ggplot(my_penguins,
+       aes(x = bill_length_mm, y = bill_depth_mm)) + 
+  geom_point(color = "darkcyan") + 
+  geom_smooth(method = "lm", color = "purple", se = FALSE)
+```
+
+### Including multiple predictors
+
+As hinted earlier, there appear to be issues with the regression model found. We saw a bimodal distribution when visualizing the bill depths and bill lengths, and the negative slope in the regression model has a dubious interpretation.
+
+We know that the dataset is composed of three different *species* of penguins, yet so far we have excluded this information from the analysis. We will now bring in `species`, a *factor* variable, into the model.  
+
+Let us visualize the scatter again and map the color aesthetic to the `species` variable. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(my_penguins) + 
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm,
+                 color = species))
+```
+
+If we were to fit a regression line with respect to each species, we should expect to see a positive slope. Let us try this out by modifying the linear regression specification to include the factor variable `species`. 
+
+```{r}
+linear_reg() |>
+  set_engine("lm") %>%
+  fit(bill_depth_mm ~ bill_length_mm + species,
+      data = penguins) |>
+  tidy()
+```
+Indeed, we find a positive estimate for the slope, as shown for the `bill_length_mm` term. However, we now have *three* regression lines, one for each category in the variable `species`. The slope of each of these lines is the same, however, the intercepts are different. We can write the equation of this line as follows:  
+
+$$
+\text{Depth} = 0.2 * \text{Length} - 1.93 * \text{Chinstrap} - 5.1 * \text{Gentoo} + 10.6
+$$
+
+The variables $\text{Chinstrap}$ and $\text{Gentoo}$ in the equation should be treated as Boolean variables. If we want to recover the line for "Gentoo" penguins, set $\text{Chinstrap} = 0$ and $\text{Gentoo} = 1$ to obtain the equation $\text{Depth} = 0.2 * \text{Length} + 5.5$. Recovering the line for "Adelie" penguins is curious and requires setting $\text{Chinstrap} = 0$ and $\text{Gentoo} = 0$. This yields the equation $\text{Depth} = 0.2 * \text{Length} + 10.6$. 
+
+We call this a *one-factor model*. Let us overlay the new model atop the scatter plot. First, let us annotate the dataset with the fitted values using the `augment` function on the new parsnip model.
+
+```{r}
+lmod_aug_factor <- lmod_parsnip_factor |>
+  pluck("fit") |>
+  augment()
+lmod_aug_factor
+```
+
+We can use the `.fitted` column in this dataset to plot the new regression line in a line geom layer. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(lmod_aug_factor,
+       aes(x = bill_length_mm)) + 
+  geom_point(aes(y = bill_depth_mm,
+                 color = species)) + 
+  geom_line(aes(y = .fitted, 
+                group = species),
+            color = "purple",
+            size = 1)
+```
+
+Note how the slope of these lines are the same, but the intercepts in each are different. 
+
+### Curse of confounding variables 
+
+Let us reflect for a moment the importance of `species` and the impact this variable has when it is incorporated into the regression model. Let us first show the two models again side-by-side.  
+
+```{r dpi=80, fig.asp = 0.4, message=FALSE, echo=FALSE, warning=FALSE, fig.show="hold", out.width="100%", message=FALSE, warning=FALSE, echo=FALSE}
+g1 <- ggplot(lmod_augmented) + 
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm), 
+             color = "darkcyan") + 
+  geom_line(aes(x = bill_length_mm, 
+                y = .fitted), 
+            color = "purple", 
+            size = 2)
+
+g2 <- ggplot(lmod_aug_factor,
+       aes(x = bill_length_mm)) + 
+  geom_point(aes(y = bill_depth_mm,
+                 color = species)) + 
+  geom_line(aes(y = .fitted, 
+                group = species),
+            color = "purple",
+            size = 1)
+
+g1 + g2
+```
+
+When `species` is *excluded* from the model, we find a negative estimate for the slope. When `species` is included, as in the one-factor model, the sign of the slope is flipped. This effect is also called __Simpson's paradox__.
+
+While the inclusion of `species` seemed obvious for this dataset, we are often unaware of critical variables like these that are "missing" in real-world datasets. These kinds of variables are either neglected from the analysis or were simply not measured. Yet, when included, they can have dramatic effects such as flipping the sign of the slope in a regression model. We call these __confounding variables__ because said variables implicate the relationship between two observed variables. For instance, `species` is *confounding* in the relationship between `bill_depth_mm` and `bill_length_mm`. 
+
+For a variable to be confounding, it must have an association with the two variables of primary interest. We can confirm this for the relationship between `species` and `bill_depth_mm`, as well as for `species` and `bill_length_mm`. Try to think of a visualization we have used that can demonstrate the association. 
+
+It is important to emphasize that confounding variables can occur in any analysis, not just regression. For instance, a hypothesis test may reject a null hypothesis with very high significance when a confounding variable is not accounted for. Yet, when included, the hypothesis test concludes nothing. 
+
+We can summarize the effect of confounding variables as follows: 
+
+* A variable, usually unobserved, that influences the association between the variables of primary interest.
+
+* A predictor variable, not included in the regression, that if included changes the interpretation of the regression model.
+
+* In some cases, a confounding variable can exaggerate the association between two variables of interest (say $A$ and $B$) if, for example, there is a causal relationship between $A$ and $B$. In this way, the relationship between $A$ and $B$ also reflects the influence of the confounding variable and the association is strengthened because of the effect the confounding variable has on both variables $A$ and $B$. 
+
+## Regression and Inference
+
+In this section we examine important properties about the regression model. Specifically, we look at making reliable predictions about unknown observations and how to determine the significance of the slope estimate. 
+
+### Prerequisites
+
+This section will continue using `tidymodels`. We will also make use of the tidyverse and a dataset from the `edsdata` package so let us load these in as well. 
+
+```{r message = FALSE, warning = FALSE}
+library(tidyverse)
+library(tidymodels)
+library(palmerpenguins)
+library(edsdata)
+```
+
+For the running example in this section, we examine the `athletes` dataset from the `edsdata` package. This is a historical dataset that contains bio and medal count information for Olympic athletes from Athens 1896 to Rio 2016. The dataset is sourced from ["120 years of Olympic history: athletes and results"](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results) on Kaggle.  
+
+Let us focus specifically on athletes that competed in recent Summer Olympics after 2008. We will apply some preprocessing to ensure that each row corresponds to a unique athlete as the same athlete can compete in multiple events and in more than one Olympic Games. We accomplish this using the `dplyr` verb `distinct`.   
+
+```{r}
+my_athletes <- athletes |>
+  filter(Year > 2008, Season == "Summer") |>
+  distinct(ID, .keep_all = TRUE)
+my_athletes
+```
+
+The preprocessed dataset contains 3,180 Olympic athletes.
+
+Let us visualize the relationship between their heights and weights.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(my_athletes) + 
+  geom_point(aes(x = Height, y = Weight), 
+             color = "darkcyan")
+```
+
+We also observe a strong positive correlation between the two variables. 
+
+```{r}
+my_athletes |>
+  summarize(r = cor(Height, Weight))
+```
+
+### Assumptions of the regression model
+
+```{r echo=FALSE}
+draw_true_reg_lines <- function(sample_size, 
+                            slope, intercept) {
+  tib <- tibble(
+    x = rnorm(sample_size, 10, 5), 
+    y = slope * x + intercept, 
+    # error ~ normal w. mean 0
+    y_noisy = y + rnorm(sample_size, 0, 6) 
+  )
+  
+  tib %>%
+    ggplot() + 
+    geom_line(aes(x = x, y = y), 
+              lty = "dotted", 
+              size = 1) +
+    geom_point(aes(x = x, 
+                   y = y_noisy),
+               color = "darkcyan") +
+    geom_smooth(aes(x = x, 
+                    y = y_noisy), 
+                method = "lm", 
+                se = FALSE, 
+                color = "purple", 
+                size = 1) +
+    labs(title = paste("sample size:", sample_size))
+}
+```
+
+Before using inference for regression, we note briefly some assumptions of the regression model. In a simple linear regression model, the regression model assumes that the underlying relation between the response $y$ and the predictor $x$ is perfectly linear and follows a __true line__. We cannot see this line. 
+
+The scatter plot that is shown to us is generated by taking points on this line and "pushing" them off the line vertically by some random amount. For each observation, the process is as follows: 
+
+* Find the corresponding point on the __true line__ 
+* Make a random draw with replacement from a population of errors that follows a normal distribution with mean 0 (i.e., `rnorm(1, mean = 0)`) 
+* Draw a point on the scatter with coordinates $(\text{x}, \text{y + error} )$
+
+Let us demonstrate the effect for two scatter plots with two different sample sizes. The broken dashed line shows the "true" line that generated the scatter. The purple line is the regression line fitted using the least squares method we learned. 
+
+```{r dpi=80, fig.asp = 0.4, message=FALSE, echo=FALSE, warning=FALSE, fig.show="hold", out.width="100%", message=FALSE, warning=FALSE, echo=FALSE}
+set.seed(14)
+g1 <- draw_true_reg_lines(10, 4, 25)
+g2 <- draw_true_reg_lines(50, 4, 25)
+g1 + g2
+```
+
+We cannot see the true line, however, we hope to approximate it as closely as possible. For a large enough sample size where the assumptions of the regression model are valid, we find that the regression line provides a good estimate of the true line. 
+
+### Making predictions about unknown observations
+
+The power of a linear model lies not in its ability to provide the best fit through a collection of points, but because we can use such a model to make predictions about observations that do not exist in our dataset. More specifically, we can use linear regression to make predictions about the expected weight of an Olympic athlete using just one piece of information: their height.  
+
+Let us first fit a regression for weight on height using the athlete data.  
+
+```{r}
+lmod_parsnip <- linear_reg() |>
+  set_engine("lm") |>
+  fit(Weight ~ Height, data = my_athletes)
+
+lmod_parsnip |>
+  tidy()
+```
+
+Making a prediction is easy: just plug into the equation of the linear model! For example, what is the expected weight of an Olympic athlete who is 190 centimeters tall? 
+
+$$
+\text{Weight} = 1.0905 * (190) - 120.402 = 86.79
+$$
+
+So an athlete that is 190 centimeters tall has an expected weight of about 86.8 kilograms.  
+
+We can accomplish the working with `tidymodels` using the function `predict`. Note that this function receives a dataset in the form of a data frame or tibble, and returns the prediction(s) as a tibble.  
+
+```{r}
+test_data_tib <- tibble(
+  Height = c(190))
+
+lmod_parsnip |>
+  predict(test_data_tib)
+```
+
+The prudent reader may have some suspicions about this result -- *that's it*? Is this something you can take to the bank? 
+
+Indeed, there is a key element missing from the analysis so far: *confidence*. How confident are we in our predictions? We learned that data scientists rarely report singular (or pointwise) estimates because so often they are working with samples of data. The errors are random under the regression model, so the regression line could have turned out differently depending on the scatter plot we get to see. Consequently, the predicted value can change as well. 
+
+To combat this, we can provide a *confidence interval* that quantifies the amount of uncertainty in a prediction. We hope to capture the prediction that would be given by the true line with this interval. We learned one way of obtaining such intervals in the previous chapters: resampling. 
+
+### Resampling a confidence interval
+
+We will use the resampling method we learned earlier to estimate a confidence interval for the prediction we just made. To accomplish this, we will: 
+
+* Create a resampled scatter plot by resampling the samples present in `my_athletes` by means of sampling with replacement. 
+* Fit a linear model to the bootstrapped scatter plot. 
+* Generate a prediction from this linear model. 
+* Repeat the process a large number of times, say, 1,000 times. 
+
+We could develop the bootstrap using `dplyr` code as we did before. However, this time we will let `tidymodels` take care of the bootstrap work for us. 
+
+First, let us write a function that fits a linear model from a scatter plot and then predicts the expected weight for an athlete who is 190 cm tall. 
+
+```{r}
+predict190_from_scatter <- function(tib) {
+  lmod_parsnip <- linear_reg() |>
+    set_engine("lm") |>
+    fit(Weight ~ Height, data = tib)
+  
+  lmod_parsnip |>
+    predict(tibble(Height = c(190))) |>
+    pull()
+}
+```
+
+We use the function `specify` from the `infer` package to specify which columns in the dataset are the relevant response and predictor variables. 
+
+```{r}
+my_athletes |>
+  specify(Weight ~ Height) # infer package
+```
+
+We form 1,000 resampled scatter plots using the function `generate` with the `"bootstrap"` setting.
+
+```{r}
+resampled_scatter_plots <- my_athletes |>
+  specify(Weight ~ Height) |>
+  generate(reps = 1000, type = "bootstrap") 
+resampled_scatter_plots
+```
+
+Note that this function returns a tidy tibble with one resampled observation per row, where the variable `replicate` designates which bootstrap the resampled observation belongs to. This effectively increases the size of the original dataset by a factor of 1,000. Hence, the returned table contains 3.1M entries. 
+
+Let us make this more compact by applying a transformation so that we have one *resampled dataset* per row. This can be accomplished using the function `nest` which creates a *nested* dataset.  
+
+```{r}
+resampled_scatter_plots |>
+  nest() 
+```
+
+Observe how the number of rows in the nested table (1,000) equals the number of desired bootstraps. We can create a new column that contains a resampled prediction for each scatter plot using the function `predict190_from_scatter` we wrote earlier. We call this function using a `purrr` map. 
+
+```{r}
+bstrap_predictions <- resampled_scatter_plots |>
+  nest() |> 
+  mutate(prediction = map_dbl(data,
+                        predict190_from_scatter))
+bstrap_predictions
+```
+
+We can identify a 95% confidence interval from the 1,000 resampled predictions. We can use the function `get_confidence_interval` from the `infer` package as a shortcut this time. This uses the same percentile method we learned earlier. 
+
+```{r}
+middle <- bstrap_predictions |> 
+  get_confidence_interval(level = 0.95)
+middle
+```
+
+Let us plot a sampling histogram of the predictions and annotate the confidence interval on this histogram.
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(bstrap_predictions, 
+       aes(x = prediction, y = after_stat(density))) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
+  geom_segment(aes(x = middle[1][[1]], y = 0, 
+                   xend = middle[2][[1]], yend = 0), 
+                   size = 2, color = "salmon") 
+```
+
+We find that the distribution is approximately normal. Our prediction interval spans between 86.28 and 87.35 kilograms. 
+
+We can use R to give us the prediction interval by amending the call to `predict`. 
+
+```{r}
+lmod_parsnip |>
+  predict(test_data_tib,
+          type = "conf_int", 
+          level = 0.95)
+```
+
+`predict` obtains the interval by means of statistical theory, and we can see that the result is very close to what we found using the the bootstrap. Formally, these intervals go by a special name: *confidence intervals for the mean response*. That's a mouthful!
+
+### How significant is the slope? 
+
+We showed that the predictions generated by a linear model can vary depending on the sample we have at hand. The slope of the linear model can also turn out differently for the same reasons. This is especially important if our regression model estimates a non-zero slope when the slope of the true line turns out to be 0. 
+
+Let us conduct a hypothesis test to evaluate this claim for the athlete data:
+
+* __Null Hypothesis__: Slope of true line is equal to 0.
+* __Alternative Hypothesis__: Slope of true line is *not* equal to 0.
+
+We can use a confidence interval to test the hypothesis. In the same way we used bootstrapping to estimate a confidence interval for the mean response, we can apply bootstrapping to estimate the slope of the true line. Fortunately, we need only to make small modifications to the code we wrote earlier to perform this experiment. The change being that instead of generating a prediction from the linear model, we will return its slope.  
+
+Here is the modified function we will use. 
+
+```{r}
+slope_from_scatter <- function(tib) {
+  lmod_parsnip <- linear_reg() |>
+    set_engine("lm") |>
+    fit(Weight ~ Height, data = tib)
+  
+  lmod_parsnip |>
+    tidy() |>
+    pull(estimate) |>
+    last() # retrieve slope estimate as a vector
+}
+```
+
+We also modify the bootstrap code to use the new function. The rest of the bootstrap code remains the same. 
+
+```{r}
+bstrap_slopes <- my_athletes |>
+  specify(Weight ~ Height) |>
+  generate(reps = 1000, type = "bootstrap") |>
+  nest() |>
+  mutate(prediction = map_dbl(data, slope_from_scatter))
+bstrap_slopes
+```
+
+Here is the 95% confidence interval.
+
+```{r}
+middle <- bstrap_slopes |>
+  get_confidence_interval(level = 0.95)
+middle
+```
+
+Following is the sampling histogram of the bootstrapped slopes with the annotated confidence interval. 
+
+```{r dpi=80, fig.align="center", message = FALSE}
+ggplot(bstrap_slopes, 
+       aes(x = prediction, y = after_stat(density))) + 
+  geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
+  geom_segment(aes(x = middle[1][[1]], y = 0, 
+                   xend = middle[2][[1]], yend = 0), 
+                   size = 2, color = "salmon") 
+```
+
+As before, we observe that the distribution is roughly normal. Our 95% confidence interval ranges from about 1.06 to 1.12. According to our null hypothesis, the value 0 does *not* sit on this interval. Therefore, we reject the null hypothesis at the 95% significance level and conclude that the slope estimate obtained is non-zero. The benefit of using the confidence interval is that we also have a range of estimates for what the true slope is. 
+
+The normality of this distribution is important since it is the basis for the statistical theory that regression builds on. This means that our interval should be extremely close to what R reports, which is calculated using normal theory. The function `confint` gives us the answer.    
+
+```{r}
+lmod_parsnip |>
+  pluck("fit") |>
+  confint()
+```
+
+Indeed, they are quite close! As a bonus, we also get a confidence interval for the intercept. 
 
 ## Graphical Diagnostics 
 
@@ -703,16 +1267,17 @@ Detecting problems with a regression model is the job of diagnostics. We can bro
 
 ### Prerequisites 
 
-We will make use of the tidyverse in this chapter, so let us load it in as usual. 
+We will make use of the tidyverse and `tidymodels` in this chapter, so let us load these in as usual. We will also use a dataset from the `edsdata` package.
 
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
+library(edsdata)
 ```
 
 To develop the discussion, we will make use of the toy dataset we artificially created when studying correlation. We will study three datasets contained in this tibble: `linear`, `cone`, and `quadratic`. 
 
 ```{r}
-diagnostic_examples <- toy_df %>%
+diagnostic_examples <- corr_tibble |>
   filter(dataset %in% c("linear", "cone", "quadratic"))
 diagnostic_examples
 ```
@@ -724,6 +1289,7 @@ To begin, let us recap on the assumptions we have made about the linear model.
 * The model is of the form $y = c_0 + c_1x$, that is, the data can be modeled linearly. 
 * The variance of the residuals is constant, i.e., it fulfills the property of *homoskedasticity*. 
 
+Recall that the regression model assumes that the scatter is derived from points that start on a straight line and are then "nudged off" by adding random normal noise. 
 
 ### Some instructive examples 
 
@@ -740,8 +1306,8 @@ Assuming we have been tasked with performing regression on these three datasets,
 We use `dplyr` to help us accomplish the task. 
 
 ```{r}
-diagnostic_examples %>%
-  group_by(dataset) %>%
+diagnostic_examples |>
+  group_by(dataset) |>
   summarize(r = cor(x, y))
 ```
 
@@ -749,29 +1315,42 @@ Even without computing the correlation, it should be clear that something is ver
 
 The situation with the other datasets is more complicated. The correlation coefficients are roughly the same and signal a strong positive linear relationship in both. However, we can see a clear difference in how the points are spread in each of the datasets. Something looks "off" about the `cone` dataset.  
 
-Notwithstanding our suspicions, let us proceed with fitting a linear model for each. 
+Notwithstanding our suspicions, let us proceed with fitting a linear model for each. Let us use `tidymodels` to write a function that fits a linear model from a dataset and returns the augmented output. 
 
 ```{r}
-cone <- diagnostic_examples %>% filter(dataset == "cone")
-linear <- diagnostic_examples %>% filter(dataset == "linear")
-quadratic <- diagnostic_examples %>% filter(dataset == "quadratic")
-
-lmod_cone <- lm(y ~ x, cone)
-lmod_linear <- lm(y ~ x, linear)
-lmod_quadratic <- lm(y ~ x, quadratic)
+augmented_from_dataset <- function(dataset_name) {
+  dataset <- diagnostic_examples |>
+    filter(dataset == dataset_name)
+  
+  lmod_parsnip <- linear_reg() |>
+    set_engine("lm") |>
+    fit(y ~ x, data = dataset)
+  
+  lmod_parsnip |>
+    pluck("fit") |>
+    augment()
+}
 ```
 
-Before we proceed any further, we need some new machinery for understanding the appropriateness of our linear model. For that, we turn to the residual plot.
+```{r}
+augmented_cone <- augmented_from_dataset("cone")
+augmented_linear <- augmented_from_dataset("linear")
+augmented_quadratic <- augmented_from_dataset("quadratic")
+```
+
+We need a diagnostic for understanding the appropriateness of our linear model. For that, we turn to the residual plot.
 
 ### The residual plot 
 
 One of the main diagnostic tools we use for studying the fit of a linear model is the residual plot. A *residual plot* can be drawn by plotting the residuals against the fitted values. 
 
-Let us look at the residual plot for `lmod_linear`. 
+This can be accomplish in a straightforward manner using the augmented output. Let us look at the residual plot for `augmented_linear`. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(lmod_linear) + 
-  geom_point(aes(x = .fitted, y = .resid), color = "darkcyan")
+ggplot(augmented_linear) + 
+  geom_point(aes(x = .fitted, y = .resid), color = "red") + 
+  geom_hline(yintercept = 0, color = "gray",
+             lty = "dashed", size = 1)
 ```
 
 This residual plot tells us that the linear model has a good fit. The residuals are distributed roughly the same around the horizontal line at 0, and the width of the plot is not wider in some parts while narrower in others. The resulting shape is "blobbish nonsense" with no tilt.  
@@ -782,11 +1361,13 @@ Thus, our first observation:
 
 ### Detecting lack of homoskedasticity 
 
-Let us now turn to the residual plot for `lmod_cone`, which we suspected had a close resemblance to `lmod_linear`.  
+Let us now turn to the residual plot for `augmented_cone`, which we suspected had a close resemblance to `augmented_linear`.  
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(lmod_cone) + 
-  geom_point(aes(x = .fitted, y = .resid), color = "darkcyan")
+ggplot(augmented_cone) + 
+  geom_point(aes(x = .fitted, y = .resid), color = "red") +
+  geom_hline(yintercept = 0, color = "gray",
+             lty = "dashed", size = 1)
 ```
 
 Observe how the residuals fan out at both ends of the residual plot. Meaning, the variance in the size of the residuals is higher in some places while lower in others -- a clear violation of the linear model assumptions. Note how this problem would be harder to detect with the scatter plot or correlation coefficient alone. 
@@ -798,11 +1379,13 @@ Thus, our second observation:
 
 ### Detecting nonlinearity 
 
-Let us move onto the final model, `lmod_quadratic`. 
+Let us move onto the final model, given by `augmented_quadratic`. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(lmod_quadratic) + 
-  geom_point(aes(x = .fitted, y = .resid), color = "darkcyan")
+ggplot(augmented_quadratic) + 
+  geom_point(aes(x = .fitted, y = .resid), color = "red") +
+  geom_hline(yintercept = 0, color = "gray",
+             lty = "dashed", size = 1)
 ```
 
 This one shows a striking pattern, which bears the shape of a quadratic curve. That is a clear violation of the model assumptions, and indicates that the variables likely do not have a linear relationship. It would have been better to use a curve instead of a straight line to estimate `y` using `x`. 
@@ -813,31 +1396,44 @@ Thus, our final observation:
 
 ### What to do from here? 
 
-The residual plot is helpful in that it is a tell-tale sign of whether a linear model is appropriate for the data. The next question is, of course, what comes next? If a residual plot indicates a poor fit, data scientists will likely look to techniques like transformation to see if they can provide quick remedies. While such methods are certainly beyond the scope of this course, we can demonstrate what the residual plot will look like after the problem is addressed. 
+The residual plot is helpful in that it is a tell-tale sign of whether a linear model is appropriate for the data. The next question is, of course, what comes next? If a residual plot indicates a poor fit, data scientists will likely first look to techniques like transformation to see if a quick fix is possible. While such methods are certainly beyond the scope of this text, we can demonstrate what the residual plot will look like after the problem is addressed using these methods. 
 
-Let us return to the model `lmod_quadratic`. The residual plot signaled a problem of nonlinearity, and the shape of the plot (as well as the original scatter plot) gives a hint that we should try a quadratic curve.  
+Let us return to the model given by `augmented_quadratic`. The residual plot signaled a problem of nonlinearity, and the shape of the plot (as well as the original scatter plot) gives a hint that we should try a quadratic curve.  
 
 We will modify our model to include a new regressor, which contains the term $x^2$. Our model will then have the form:
 
-\[y = c_0 + c_1x + c_2x^2 \]
+$$
+y = c_0 + c_1x + c_2x^2
+$$
 
-which is the standard form of a quadratic curve, as you have likely seen it before. Amending the call to `lm` is straightforward. 
+which is the standard form of a quadratic curve. Let us amend the parsnip model call and re-fit the model.
 
 ```{r}
-lmod_quadratic_revised <- lm(y ~ x + I(x^2), quadratic)
+quadratic_dataset <- corr_tibble |>
+  filter(dataset == "quadratic")
+
+lmod_parsnip <- linear_reg() |>
+    set_engine("lm") |>
+    fit(y ~ x + I(x^2), data = quadratic_dataset)
+  
+augmented_quad_revised <- lmod_parsnip |>
+  pluck("fit") |>
+  augment()
 ```
 
 Let us draw again the residual plot.  
 
 ```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(lmod_quadratic_revised) + 
-  geom_point(aes(x = .fitted, y = .resid), color = "darkcyan")
+ggplot(augmented_quad_revised) + 
+  geom_point(aes(x = .fitted, y = .resid), color = "red") + 
+  geom_hline(yintercept = 0, color = "gray",
+             lty = "dashed", size = 1)
 ```
 
-The residual plot shows no pattern whatsoever and, therefore, we can be confident in our new model :-)
-
+The residual plot shows no pattern whatsoever and, therefore, we can be more confident in this model.
 
 <!--- homework problem for playing with diagnostics  
+
 ```{r dpi=80, fig.align="center", eval = FALSE, message = FALSE}
 library(gapminder)
 a <- filter(gapminder, continent == "Africa")
@@ -846,9 +1442,9 @@ ggplot(a) +
 ggplot(a) +
    geom_point(aes(x = log(gdpPercap), y = log(lifeExp)))
 ggplot(a) +
-  geom_histogram(aes(x = log(gdpPercap), y = ..density..))
+  geom_histogram(aes(x = log(gdpPercap), y = after_stat(density)))
 ggplot(a) +
-  geom_histogram(aes(x = log(lifeExp), y = ..density..))
+  geom_histogram(aes(x = log(lifeExp), y = after_stat(density)))
 
 lmod <- lm(log(lifeExp) ~ log(gdpPercap), data = a)
 summary(lmod)

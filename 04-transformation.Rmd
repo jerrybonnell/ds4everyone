@@ -358,7 +358,9 @@ mtcars_tibble
 
 The main important verbs from `dplyr` that we will cover are shown in the following figure.
 
-![](images/csc100-Page-1.pdf){width=70%}
+```{r, echo=FALSE, fig.align="center", out.width='70%', fig.asp=1/2}
+knitr::include_graphics('images/dplyr_matrix.png')
+```
 
 This section will cover the following:
 

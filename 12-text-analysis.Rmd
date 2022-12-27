@@ -6,7 +6,7 @@ output:
 
 # Text Analysis
 
-A lot of the data that data scientists deal with daily tends to be *quantitative*, that is, data that is numerical. We have seen many examples of this throughout the course: the miles per gallon of car makes, the diameter of oak trees, the height and yardage of top football players, and the number of minutes flight were delayed for departure. We also applied methods from statistical analysis like *resampling* to estimate how much a value can vary and *regression* to make predictions about unknown quantities. All of this has been in the context of data that is quantitative. 
+A lot of the data that data scientists deal with daily tends to be *quantitative*, that is, data that is numerical. We have seen many examples of this throughout the text: the miles per gallon of car makes, the diameter of oak trees, the height and yardage of top football players, and the number of minutes flight were delayed for departure. We also applied methods from statistical analysis like *resampling* to estimate how much a value can vary and *regression* to make predictions about unknown quantities. All of this has been in the context of data that is quantitative. 
 
 Data scientists prefer quantitative data because computing and reasoning with them is straightforward. If we wish to develop an understanding of a numerical sample at hand, we can simply compute a statistic such as its mean or median or visualize its distribution using a histogram. We could also go further and look at confidence intervals to quantify the uncertainty in any statistic we may be interested in. 
 
@@ -54,15 +54,16 @@ gutenberg_works(title == "Moby Dick")
 Using its ID `15`, we can proceed with retrieving the text into a variable called `moby_dick`. Observe how the data returned is in the form of a tibble -- a format we are well familiar with -- with one row per each line of the text.  
 
 ```{r message=FALSE}
-moby_dick <- gutenberg_download(gutenberg_id = 15, mirror = "http://mirrors.xmission.com/gutenberg/")
+moby_dick <- gutenberg_download(gutenberg_id = 15, 
+                  mirror = "http://mirrors.xmission.com/gutenberg/")
 moby_dick
 ```
 
 The function `gutenberg_download` will do its best to strip any irrelevant header or footer information from the text. However, we still see a lot of preface material like the table of contents which is also unnecessary for analysis. To remove these, we will first split the text into its corresponding chapters using a call to the mutate `dplyr` verb. While we are at it, let us also drop the column `gutenberg_id`. 
 
 ```{r}
-by_chapter <- moby_dick %>%
-  select(-gutenberg_id) %>%
+by_chapter <- moby_dick |>
+  select(-gutenberg_id) |>
   mutate(document = 'Moby Dick', 
          linenumber = row_number(),
          chapter = cumsum(str_detect(text, regex('^CHAPTER '))))
@@ -91,7 +92,7 @@ first chapter of Jonah—", regex)  # no match
 Eliminating the preface material becomes straightforward as we need only to filter any rows pertaining to chapter 0.  
 
 ```{r}
-by_chapter <- by_chapter %>%
+by_chapter <- by_chapter |>
   filter(chapter > 0)
 by_chapter
 ```
@@ -105,14 +106,14 @@ The basic meaningful unit in text analysis is the *token*. It is usually a word,
 *Tokenization* is the process of splitting text into tokens. Here is an example using the first few lines from *Moby Dick*. 
 
 ```{r}
-some_moby_df <- by_chapter %>%
+some_moby_df <- by_chapter |>
   slice(4:6)
 some_moby_df
 ```
 
 ```{r}
-tokenized <- some_moby_df %>%
-  pull(text) %>%
+tokenized <- some_moby_df |>
+  pull(text) |>
   str_split(" ")
 tokenized
 ```
@@ -126,7 +127,7 @@ tokenized[[1]][3]
 Text that is tidy is a table with one token per row. Assuming that the text is given to us in tabular form (like `text_df`), we can break text into tokens and transform it to a tidy structure in one go using the function `unnest_tokens`. 
 
 ```{r}
-tidy_df <- some_moby_df %>%
+tidy_df <- some_moby_df |>
   unnest_tokens(word, text)
 tidy_df
 ```
@@ -138,7 +139,7 @@ Note how each row of this table contains just one token, unlike `text_df` which 
 Let us return to the full `by_chapter` tibble and make it tidy using `unnest_tokens`. 
 
 ```{r}
-tidy_moby <- by_chapter %>%
+tidy_moby <- by_chapter |>
   unnest_tokens(word, text)
 tidy_moby
 ```
@@ -146,7 +147,7 @@ tidy_moby
 With our text in this form, we can start answering some basic questions about the text. For example: what are the most popular words in *Moby Dick*? We can answer this by piping `tidy_moby` into the function `count`, which lets us count the number of times each word occurs.
 
 ```{r}
-tidy_moby %>%
+tidy_moby |>
   count(word, sort = TRUE)
 ```
 
@@ -163,7 +164,7 @@ stop_words
 Using the function `anti_join` (think: the opposite of a join), we can filter any rows in `tidy_moby` that match with a stopword in the tibble `stop_words`. 
 
 ```{r message=FALSE}
-tidy_moby_filtered <- tidy_moby %>%
+tidy_moby_filtered <- tidy_moby |>
   anti_join(stop_words)
 tidy_moby_filtered
 ```
@@ -171,17 +172,17 @@ tidy_moby_filtered
 Observe how the total number of rows has decreased dramatically. Let us redo the most popular word list again. 
 
 ```{r}
-tidy_moby_filtered %>%
+tidy_moby_filtered |>
   count(word, sort = TRUE)
 ```
 
 Much better! We can even visualize the spread using a bar geom in `ggplot2`. 
 
 ```{r}
-tidy_moby_filtered %>%
-  count(word, sort = TRUE) %>%
-  filter(n > 200) %>%
-  mutate(word = reorder(word, n)) %>%
+tidy_moby_filtered |>
+  count(word, sort = TRUE) |>
+  filter(n > 200) |>
+  mutate(word = reorder(word, n)) |>
   ggplot() +
   geom_bar(aes(x=n, y=word), stat="identity")
 ```
@@ -201,9 +202,9 @@ some_moby_df
 Here is another example:
 
 ```{r message=FALSE, echo=FALSE}
-some_moby_df %>%
-  unnest_tokens(word, text) %>%
-  count(document, word) %>%
+some_moby_df |>
+  unnest_tokens(word, text) |>
+  count(document, word) |>
   cast_dfm(document, word, n)
 ```
 
@@ -214,8 +215,8 @@ Tidy text is useful in that it plays well with other members of the tidyverse li
 As an example, here is how we can convert tidy text to a format known as a *document term matrix* which is how topic modeling receives its input. Don't worry if all that seems like nonsense jargon -- the part you should care about is that we can convert tidy text to a document term matrix with just one line! 
 
 ```{r message=FALSE}
-tidy_moby_filtered %>%
-  count(document, word) %>%
+tidy_moby_filtered |>
+  count(document, word) |>
   cast_dtm(document, word, n)
 ```
 
@@ -241,36 +242,36 @@ We will study Herman Melville's works again in this section. However, unlike bef
 
 ```{r message=FALSE}
 melville <- gutenberg_download(c(11231, 15, 10712, 1900), 
-                               mirror = "http://mirrors.xmission.com/gutenberg/")
+              mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 We will tidy it up as before and filter the text for stopwords. We will also add one more step to the preprocessing where we extract words that are strictly alphabetical. This is accomplished with a `mutate` call using `str_extract` and the regular expression `[a-z]+`.  
 
 ```{r message=FALSE}
-tidy_melville <- melville %>%
-  unnest_tokens(word, text) %>%
-  anti_join(stop_words) %>%
+tidy_melville <- melville |>
+  unnest_tokens(word, text) |>
+  anti_join(stop_words) |>
   mutate(word = str_extract(word, "[a-z]+"))
 ```
 
 We will not concern ourselves this time with dividing the text into chapters and removing preface material. But it would be helpful to add a column to `tidy_melville` with the title of the work a line comes from, rather than a ID which is hard to understand.  
 
 ```{r}
-tidy_melville <- tidy_melville %>%
+tidy_melville <- tidy_melville |>
   mutate(title = recode(gutenberg_id, 
-                               '15' = 'Moby Dick', 
-                               '11231' = 'Bartleby, the Scrivener',
-                               '10712' = 'White Jacket',
-                               '1900' = 'Typee: A Romance of the South Seas'))
+                            '15' = 'Moby Dick', 
+                            '11231' = 'Bartleby, the Scrivener',
+                            '10712' = 'White Jacket',
+                            '1900' = 'Typee: A Romance of the South Seas'))
 ```
 
 As a quick check, let us count the number of words that appear in each of the texts. 
 
 ```{r}
-tidy_melville %>%
-  group_by(title) %>%
-  count(word, sort = TRUE) %>%
-  summarize(num_words = sum(n)) %>%
+tidy_melville |>
+  group_by(title) |>
+  count(word, sort = TRUE) |>
+  summarize(num_words = sum(n)) |>
   arrange(desc(num_words))
 ```
 
@@ -281,9 +282,9 @@ tidy_melville %>%
 Let us find the most popular words in each of the titles. 
 
 ```{r}
-tidy_melville <- tidy_melville %>%
-  group_by(title) %>%
-  count(word, sort = TRUE) %>%
+tidy_melville <- tidy_melville |>
+  group_by(title) |>
+  count(word, sort = TRUE) |>
   ungroup()
 tidy_melville
 ```
@@ -291,9 +292,9 @@ tidy_melville
 This lends itself well to a bar geom in `ggplot`. We will select out around the 10 most popular, which correspond to words that occur over 300 times.
 
 ```{r}
-tidy_melville %>%
-  filter(n > 250) %>%
-  mutate(word = reorder(word, n)) %>%
+tidy_melville |>
+  filter(n > 250) |>
+  mutate(word = reorder(word, n)) |>
   ggplot() +
   geom_bar(aes(x=n, y=word, fill=title), stat="identity")
 ```
@@ -305,9 +306,9 @@ Instead of looking at word counts, a better approach is to look at word *proport
 Let us add a new column containing these proportions in which a word occurs with respect to the total number of words in the corresponding text.  
 
 ```{r}
-tidy_melville_prop <- tidy_melville %>%
-  group_by(title) %>%
-  mutate(proportion = n / sum(n)) %>%
+tidy_melville_prop <- tidy_melville |>
+  group_by(title) |>
+  mutate(proportion = n / sum(n)) |>
   ungroup()
 tidy_melville_prop
 ```
@@ -315,9 +316,9 @@ tidy_melville_prop
 Let us redo the plot. 
 
 ```{r}
-tidy_melville_prop %>%
-  filter(proportion > 0.005) %>%
-  mutate(word = reorder(word, proportion)) %>%
+tidy_melville_prop |>
+  filter(proportion > 0.005) |>
+  mutate(word = reorder(word, proportion)) |>
   ggplot() +
   geom_bar(aes(x=proportion, y=word, fill=title), 
            stat="identity")
@@ -332,11 +333,11 @@ A possible follow-up question is whether the most popular words in *Moby Dick* a
 We first extract the top 10 word proportions from *Moby Dick* to form a "popular words" list. 
 
 ```{r}
-top_moby <- tidy_melville %>%
-  filter(title == "Moby Dick") %>%
-  mutate(proportion = n / sum(n)) %>%
-  arrange(desc(proportion)) %>%
-  slice(1:10) %>%
+top_moby <- tidy_melville |>
+  filter(title == "Moby Dick") |>
+  mutate(proportion = n / sum(n)) |>
+  arrange(desc(proportion)) |>
+  slice(1:10) |>
   select(word)
 top_moby
 ```
@@ -344,10 +345,10 @@ top_moby
 We compute the word proportions with respect to each of the titles and then join the `top_moby` words list with `tidy_melville` to extract only the top *Moby Dick* words from the other three texts.  
 
 ```{r}
-top_moby_words_other_texts <- tidy_melville %>%
-  group_by(title) %>%
-  mutate(proportion = n / sum(n)) %>%
-  inner_join(top_moby, by="word") %>%
+top_moby_words_other_texts <- tidy_melville |>
+  group_by(title) |>
+  mutate(proportion = n / sum(n)) |>
+  inner_join(top_moby, by="word") |>
   ungroup()
 top_moby_words_other_texts
 ```
@@ -384,17 +385,17 @@ We will continue with our running example of Herman Melville's *Moby Dick*. Let 
 
 ```{r message=FALSE}
 melville <- gutenberg_download(15, 
-                               mirror = "http://mirrors.xmission.com/gutenberg/")
+              mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 We will tidy the text as usual and, this time, partition the text into chapters. 
 
 ```{r}
-melville <- melville %>%
-  select(-gutenberg_id) %>%
+melville <- melville |>
+  select(-gutenberg_id) |>
   mutate(title = 'Moby Dick', 
          linenumber = row_number(),
-         chapter = cumsum(str_detect(text, regex('^CHAPTER ')))) %>%
+         chapter = cumsum(str_detect(text, regex('^CHAPTER ')))) |>
   filter(chapter > 0)
 ```
 
@@ -407,15 +408,16 @@ Since topic modeling is the subject of this section, let us see if we can apply 
 We begin as always: loading the texts, tidying them, splitting according to chapter, and filtering out preface material. Let us start with Whitman's *Leaves of Grass*.
 
 ```{r}
-whitman <- gutenberg_works(title == "Leaves of Grass") %>%
-  gutenberg_download(meta_fields = "title", mirror = "http://mirrors.xmission.com/gutenberg/")
+whitman <- gutenberg_works(title == "Leaves of Grass") |>
+  gutenberg_download(meta_fields = "title", 
+    mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 ```{r}
-whitman <- whitman %>%
-  select(-gutenberg_id) %>%
+whitman <- whitman |>
+  select(-gutenberg_id) |>
   mutate(linenumber = row_number(),
-         chapter = cumsum(str_detect(text, regex('^BOOK ')))) %>%
+         chapter = cumsum(str_detect(text, regex('^BOOK ')))) |>
   filter(chapter > 0)
 ```
 
@@ -424,15 +426,16 @@ Note that we have adjusted the regular expression here so that it is appropriate
 On to Hawthorne's *The Scarlet Letter*. 
 
 ```{r}
-hawthorne <- gutenberg_works(title == "The Scarlet Letter") %>%
-  gutenberg_download(meta_fields = "title", mirror = "http://mirrors.xmission.com/gutenberg/")
+hawthorne <- gutenberg_works(title == "The Scarlet Letter") |>
+  gutenberg_download(meta_fields = "title", 
+    mirror = "http://mirrors.xmission.com/gutenberg/")
 ```
 
 ```{r}
-hawthorne <- hawthorne %>%
-  select(-gutenberg_id) %>%
+hawthorne <- hawthorne |>
+  select(-gutenberg_id) |>
   mutate(linenumber = row_number(),
-         chapter = cumsum(str_detect(text, regex('^[XIV]+\\.')))) %>%
+         chapter = cumsum(str_detect(text, regex('^[XIV]+\\.')))) |>
   filter(chapter > 0)
 ```
 
@@ -446,8 +449,8 @@ books
 As a quick check, we can have a look at the number of chapters in each of the texts. 
 
 ```{r}
-books %>%
-  group_by(title) %>%
+books |>
+  group_by(title) |>
   summarize(num_chapters = max(chapter))
 ```
 
@@ -458,14 +461,14 @@ Before we can create a topic model, we need to do some more preprocessing. Namel
 As mentioned earlier, these documents will be every chapter in each of the books, which we will give a name like `Moby Dick_12` or `Leaves of Grass_1`. This information is already available in `books` in the columns `title` and `chapter`, but we need to unite the two columns together into a single column. The `dplyr` function `unite()` will do the job for us. 
 
 ```{r}
-chapter_documents <- books %>%
+chapter_documents <- books |>
   unite(document, title, chapter)
 ```
 
 We can then tokenize words in each of the documents as follows. 
  
 ```{r}
-documents_tokenized <- chapter_documents %>%
+documents_tokenized <- chapter_documents |>
   unnest_tokens(word, text)
 documents_tokenized
 ```
@@ -473,9 +476,9 @@ documents_tokenized
 We will filter stopwords as usual, and proceed with adding a column containing word counts. 
 
 ```{r message=FALSE}
-document_counts <- documents_tokenized %>%
-  anti_join(stop_words) %>%
-  count(document, word, sort = TRUE) %>%
+document_counts <- documents_tokenized |>
+  anti_join(stop_words) |>
+  count(document, word, sort = TRUE) |>
   ungroup()
 document_counts
 ```
@@ -483,7 +486,7 @@ document_counts
 This just about completes all the tidying we need. The final step is to convert this tidy tibble into a document-term-matrix (DTM) object. 
 
 ```{r}
-chapters_dtm <- document_counts %>%
+chapters_dtm <- document_counts |>
   cast_dtm(document, word, n)
 chapters_dtm
 ```
@@ -502,7 +505,7 @@ Note that the `k` argument given is the desired number of clusters.
 
 ### A bit of LDA vocabulary 
 
-Before we get to seeing what our model did, we need to cover some basics on LDA. While the mathematics of this algorithm is beyond the scope of this course, learning some of its core ideas are important for understanding its results. 
+Before we get to seeing what our model did, we need to cover some basics on LDA. While the mathematics of this algorithm is beyond the scope of this text, learning some of its core ideas are important for understanding its results. 
 
 LDA follows three key ideas: 
 
@@ -532,10 +535,10 @@ The format of this tidy tibble is one-topic-per-term-per-row. While the probabil
 What are the top terms within each topic? Let us use `dplyr` to retrieve the top 5 terms with the highest $\beta$ values in each topic.
 
 ```{r}
-top_terms <- chapter_beta %>%
-  group_by(topic) %>%
-  arrange(topic, -beta) %>%
-  slice(1:5) %>%
+top_terms <- chapter_beta |>
+  group_by(topic) |>
+  arrange(topic, -beta) |>
+  slice(1:5) |>
   ungroup() 
 top_terms
 ```
@@ -543,8 +546,8 @@ top_terms
 It will be easier to visualize this using `ggplot`. Note that the function `reorder_within()` is not one we have used before. It is a handy function that allows us to order the bars *within* a group according to some other value, e.g., its $\beta$ value. For an explanation of how it works, we defer to [this helpful blog post](https://juliasilge.com/blog/reorder-within/) written by Julia Silge.  
 
 ```{r}
-top_terms %>%
-  mutate(term = reorder_within(term, beta, topic)) %>%
+top_terms |>
+  mutate(term = reorder_within(term, beta, topic)) |>
   ggplot() +
   geom_bar(aes(beta, term, fill = factor(topic)), 
            stat="identity", show.legend = FALSE) +
@@ -570,15 +573,16 @@ chapters_gamma
 Let us separate the document "name" back into its corresponding title and chapter columns. We will do so using the `separate()` dplyr verb. 
 
 ```{r}
-chapters_gamma <- chapters_gamma %>%
-  separate(document, c("title", "chapter"), sep = "_", convert = TRUE)
+chapters_gamma <- chapters_gamma |>
+  separate(document, c("title", "chapter"), sep = "_", 
+           convert = TRUE)
 chapters_gamma
 ```
 
 We can find the topic that is most associated with each chapter by taking the topic with the highest $\gamma$ value. For instance:
 
 ```{r}
-chapters_gamma %>%
+chapters_gamma |>
   filter(title == "The Scarlet Letter", chapter == 17)
 ```
 
@@ -587,9 +591,9 @@ That $\gamma$ for this chapter corresponds to topic 3, so we will take this to b
 Let us do this process for all of the chapters. 
 
 ```{r}
-chapter_label <- chapters_gamma %>%
-  group_by(title, chapter) %>%
-  slice_max(gamma) %>%
+chapter_label <- chapters_gamma |>
+  group_by(title, chapter) |>
+  slice_max(gamma) |>
   ungroup()
 chapter_label
 ```
@@ -597,9 +601,9 @@ chapter_label
 How were the documents labeled? The dplyr verb `summarize` can tell us. 
 
 ```{r message=FALSE}
-labels_summarized <- chapter_label %>%
-  group_by(title, topic) %>%
-  summarize(num_chapters = n()) %>%
+labels_summarized <- chapter_label |>
+  group_by(title, topic) |>
+  summarize(num_chapters = n()) |>
   ungroup()
 labels_summarized
 ```
@@ -608,7 +612,9 @@ This lends itself well to a nice bar geom with `ggplot`.
 
 ```{r message=FALSE}
 ggplot(labels_summarized) + 
-  geom_bar(aes(x = num_chapters, y = title, fill = factor(topic)), stat = "identity") +
+  geom_bar(aes(x = num_chapters, 
+               y = title, fill = factor(topic)), 
+           stat = "identity") +
   labs(fill = "topic")
 ```
 
@@ -617,10 +623,10 @@ We can see that all of the chapters in *The Scarlet Letter* and *Leaves of Grass
 To find out, we will label each book with the topic that had a majority of its chapters classified as that topic. 
 
 ```{r}
-book_labels <- labels_summarized %>%
-  group_by(title) %>%
-  slice_max(num_chapters) %>%
-  ungroup() %>% 
+book_labels <- labels_summarized |>
+  group_by(title) |>
+  slice_max(num_chapters) |>
+  ungroup() |> 
   transmute(label = title, topic)
 book_labels
 ```
@@ -628,8 +634,8 @@ book_labels
 We can find the misclassifications by joining `book_labels` with the `chapter_label` table and then filtering chapters where the label does not match the title.  
 
 ```{r}
-chapter_label %>%
-  inner_join(book_labels, by = "topic") %>%
+chapter_label |>
+  inner_join(book_labels, by = "topic") |>
   filter(title != label) 
 ```
 
@@ -653,14 +659,14 @@ This chapter has served as a preview of the analyses that are made possible by t
 possible material for lab/hw; using correlation
 
 ```{r eval=FALSE}
-tidy_melville %>%
+tidy_melville |>
   count(word, sort=TRUE) 
 ```
 
 
 ```{r eval=FALSE}
-tidy_hawthorne %>%
-  count(word, sort = TRUE) %>% 
+tidy_hawthorne |>
+  count(word, sort = TRUE) |> 
   filter(word == "lord")
 ```
 
@@ -672,9 +678,9 @@ hawthorne <- gutenberg_download(c(33, 77, 1900, 508))
 ```
 
 ```{r eval=FALSE, message=FALSE}
-tidy_hawthorne <- hawthorne %>%
-  unnest_tokens(word, text) %>%
-  anti_join(stop_words) %>%
+tidy_hawthorne <- hawthorne |>
+  unnest_tokens(word, text) |>
+  anti_join(stop_words) |>
   mutate(word = str_extract(word, "[a-z]+"))
 ```
 
@@ -690,21 +696,21 @@ whitman <- gutenberg_download(c(1322, 8801, 27494))
 
 
 ```{r eval=FALSE, message=FALSE}
-tidy_whitman <- whitman %>%
-  unnest_tokens(word, text) %>%
-  anti_join(stop_words) %>%
+tidy_whitman <- whitman |>
+  unnest_tokens(word, text) |>
+  anti_join(stop_words) |>
   mutate(word = str_extract(word, "[a-z]+"))
 ```
 
 ```{r eval=FALSE}
 frequency <- bind_rows(mutate(tidy_whitman, author = "Walt Whitman"),
                        mutate(tidy_hawthorne, author = "Nathaniel Hawthorne"), 
-                       mutate(tidy_melville, author = "Herman Melville")) %>% 
-  count(author, word) %>%
-  group_by(author) %>%
-  mutate(proportion = n / sum(n)) %>% 
-  select(-n) %>% 
-  pivot_wider(names_from = author, values_from = proportion) %>% 
+                       mutate(tidy_melville, author = "Herman Melville")) |> 
+  count(author, word) |>
+  group_by(author) |>
+  mutate(proportion = n / sum(n)) |> 
+  select(-n) |> 
+  pivot_wider(names_from = author, values_from = proportion) |> 
   pivot_longer(`Walt Whitman`:`Nathaniel Hawthorne`, 
                names_to = "author", values_to = "proportion")
 
