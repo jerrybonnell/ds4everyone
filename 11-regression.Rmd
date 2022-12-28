@@ -888,10 +888,12 @@ ggplot(my_penguins) +
 If we were to fit a regression line with respect to each species, we should expect to see a positive slope. Let us try this out by modifying the linear regression specification to include the factor variable `species`. 
 
 ```{r}
-linear_reg() |>
+lmod_parsnip_factor <- linear_reg() |>
   set_engine("lm") %>%
   fit(bill_depth_mm ~ bill_length_mm + species,
-      data = penguins) |>
+      data = penguins) 
+
+lmod_parsnip_factor |>
   tidy()
 ```
 Indeed, we find a positive estimate for the slope, as shown for the `bill_length_mm` term. However, we now have *three* regression lines, one for each category in the variable `species`. The slope of each of these lines is the same, however, the intercepts are different. We can write the equation of this line as follows:  

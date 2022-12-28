@@ -735,22 +735,32 @@ estimate_tibble <- tibble(mean_est = mean_estimates,
 estimate_tibble
 ```
 
-We can now visualize the sampling distribution of the two estimators using an overlaid histogram. 
+We can visualize the sampling distribution of the two estimators using an overlaid histogram. We also plot the "balancing point" for each of these distributions (shown using a triangle) by computing the mean of the corresponding simulated statistics.  
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 bins <- seq(0, 22, 1)
+
+dist_mean_tib <- tibble(
+  estimator = c("min_est", "mean_est"),
+  mean = c(min_estimates |> mean(), 
+           mean_estimates |> mean()))
   
 ggplot(estimate_tibble) + 
   geom_histogram(aes(x = estimate, y = after_stat(density),
                      fill = estimator), 
                  position = "identity", alpha = 0.5,
                  color = "gray", breaks = bins) +
+  geom_point(data = dist_mean_tib, 
+             aes(x = mean, y = 0, color = estimator), 
+             shape = "triangle", size = 3) +
   scale_x_continuous(breaks = bins)
 ```
 
-The distribution of each estimator reveals a trade-off between *variance* and *bias*. We observe that the min-based estimator almost always overestimates because, by design, the estimator can only predict a number equal to the lucky number or greater. Therefore, we see that the bulk of its simulated statistics "bottom out" in the $(5, 6]$ bin. In this case, we say that the min-based estimator is *biased* but enjoys low *variability*. 
+Let us examine the min-based estimator. First, observe that its balancing point (in cyan) is a number larger than the lucky number 6. Because this number is *larger* than the true value (the lucky number 6), we conclude that the min-based estimator *overestimates* and is, therefore, *biased*. This should not be surprising considering that, by design, this estimator can only predict a number equal to the lucky number or greater. This is the "bottoming out" effect that we observe in the $(5, 6]$ bin.
 
-In contrast, the mean-based estimator overestimates about as often as it underestimates. This gives rise to a familiar "bell-shaped" curve. This estimator trades off *bias* for more *variability* in the estimates as a result. 
+In contrast, the mean-based estimator appears to overestimate about as often as it underestimates. This gives rise to a familiar "bell-shaped" curve. We can see the effect of this is a balancing point that is about equal to the true value. Therefore, we can say that the estimator is *unbiased*. 
+
+The downside of the mean-based estimator is that it trades off bias for more *variability*. This turns out to be one of the advantages of the min-based estimator: high bias but low variability. This raises an important trade-off between *variance* and *bias* when working with statistics.  
 
 Which estimator would you choose for this problem? Are there other situations where you might prefer one more than the other, given the bias-variance trade-off? 
 
@@ -809,14 +819,22 @@ medians_df <- tibble(medians)
 medians_df
 ```
 
-Of course, it would be much better to visualize these results using a histogram. This histogram displays the *sampling distribution* of the statistic.
+Of course, it would be much better to visualize these results using a histogram. This histogram displays the *sampling distribution* of the statistic. As before, let us also annotate this histogram with the balancing point of the distribution. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE, warning=FALSE}
 ggplot(medians_df) + 
-  geom_histogram(aes(x = medians, y = after_stat(density)), color = "gray", bins = 3)
+  geom_histogram(aes(x = medians, y = after_stat(density)), 
+                 color = "gray", fill = "darkcyan", bins = 3) +
+  geom_point(aes(x = mean(medians), y = 0), 
+             shape = "triangle", 
+             color = "salmon", size = 3)
 ```
 
-The sample median is very likely to be about -2, which is exactly the value of the population median. This is because the sampling distributions of 1,000 flight departure delays are close to the true ones. We know that we generated before looked a lot like the true distribution of flight delays. We can guess that in running the experiment, each sampling distribution with 1,000 flights would have looked like the true one.
+The sample median is very likely to be about -2, which is exactly the value of the population median. This is because the sampling distribution of 1,000 flight departure delays is close to what we know about the true distribution. We can guess that in running the experiment, each sampling distribution with 1,000 flights would have looked like the true one.
+
+We can also observe that the balancing point of this distribution is pulled to the right of the true value. This is likely due to the original distribution having a long right-tail. Hence, we can say that the median statistic is *biased*. However, the bias in this case does not bear much practically as the simulated statistics are so close to the population parameter. This may be a case where we say that the result is "good enough."  
+
+The interested reader can extend the analysis to try a mean-based estimate for this example instead of the median-based used here. Would this estimator also be biased? How about its variability?
 
 ## Convenience Sampling
 
