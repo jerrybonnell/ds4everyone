@@ -1430,6 +1430,7 @@ snew
 `bands` is a character vector in the package `edsdata` that contains some band names:  
 
 ```{r warning=FALSE, message=FALSE}
+library(edsdata)
 bands
 ```
 
