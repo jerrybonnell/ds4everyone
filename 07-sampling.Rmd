@@ -941,3 +941,223 @@ The `mystery_flights` tibble is a contrived example that required careful reorga
 Real-world datasets are rife with patterns. Manufacturing errors due to a particular malfunctioning machine that assemble every $n$-th product; software engineering teams where every tenth member is designated the product manager; university-issued ID's where ID numbers ending in 0 are reserved for faculty members. Any systematic sampling scheme is much more prone to selecting samples that follow (unexpected) patterns than a simple random sample would be. Not unlike like the story with `mystery_flights`, a biased sample can result and lead to misleading (and likely erroneous) findings. Even more, some may be willing to exploit such patterns for the sole possibility of increasing the significance of their results -- we would hardly call them data scientists!  
 
 Sampling strategies demand prudence on the part of the data scientist. It is for this reason that random sampling is the most principled approach.  
+
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+library(gapminder)
+```
+
+**Question 1** Following are some samples of students in a Data Science course named "CSC100": 
+
+1. All CSC100 students who attended office hours in the third week of classes
+2. All undergraduate freshmen in CSC100
+3. Every 11th person starting with the first person in the classroom on a random day of lecture
+4. 11 students picked randomly from the course roster
+
+Which of these samples are *random samples*, if any? 
+
+**Question 2.** The following function `twenty_sided_die_roll()` simulates one roll of a 20-sided die. Run it a few times to see how the rolls vary.  
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+twenty_sided_die_roll <- function() {
+  return(sample(seq(1:20), size = 1))
+}
+twenty_sided_die_roll()
+```
+
+Let us determine the *mean* value of a twenty-sided die by simulation.
+
+* **Question 2.1** Create a vector `sample_rolls` that contains 10,000 simulated rolls of the 20-sided die. Use `replicate()`. 
+
+* **Question 2.2** Compute the mean of the vector `sample_rolls` you computed and assign it to the name `twenty_sided_die_expected_value`. 
+
+* **Question 2.3** Which of the following statements, if any, are true? 
+
+  1. The value of `twenty_sided_die_expected_value` is an element in `sample_rolls`. 
+  2. The distribution of `sample_rolls` is roughly uniform and symmetric around the mean.  
+  3. The value of `twenty_sided_die_expected_value` is at the midpoint between 1 and 20.
+  4. The computed mean does not carry a unit. 
+
+
+**Question 3: Convenience sampling.** The tibble `sf_salary` from the package `edsdata` gives compensation information (names, job titles, salaries) of all employees of the City of San Francisco from 2011 to 2014 at annual intervals. The data is sourced from the Nevada Policy Research Institute's [Transparent California](https://transparentcalifornia.com/salaries/san-francisco/) database and then tidied by [Kaggle](https://www.kaggle.com/datasets/kaggle/sf-salaries).
+
+Let us preview the data: 
+ 
+```{r message=FALSE, warning=FALSE}
+library(edsdata)
+sf_salary
+```
+
+Suppose we are interested in examining the mean total compensation of San Francisco employees in 2011, where total compensation data is available in the variable `TotalPay`.
+
+* **Question 3.1** Apply the following three tidying steps: 
+
+  * Include only those observations from the year 2011. 
+  * Add a new variable `TotalPay (10K)` that contains the total compensation in amounts of tens of thousands.
+  * Add a new variable `dataset` that contains the string `"population"` for all observations. 
+
+  Assign the resulting tibble to the name `sf_salary11`. 
+
+  In most statistical analyses, it is often difficult (if not impossible) to obtain data on every individual from the underlying population. We instead prefer to draw some smaller sample from the population and estimate *parameters* of the larger population using the collected sample. 
+
+* **Question 3.2** Let us treat the 36,159 employees available in `sf_salary11` as the *population* of San Francisco city employees in 2011. What is the annual mean salary according to this tibble (with respect to `TotalPay`)? Assign your answer to the name `pop_mean_salary11`. 
+
+In [Section 7.6](https://ds4world.cs.miami.edu/power-of-sampling.html#sampling-plans) we learned that we need to be careful about the selection of observations when sampling data. One (generally bad) plan is to sample employees that are somehow *convenient* to sample. Suppose you randomly pick two letters from the English alphabet, say "G" and "X", and decide to form two samples: employees whose name starts with "G" and employees whose name starts with "X". Perhaps you are convinced that such a sample should be "random" enough... 
+
+* **Question 3.3** Explain why a sample drawn under this sampling plan would *not* be a *random sample*.  
+
+* **Question 3.4** Add a new variable to `sf_salary11` named `first_letter` that gives the first letter of an employee's name (provided in `EmployeeName`). Assign the resulting tibble to the name `with_first_letter`.
+
+* **Question 3.5** Generate a bar plot using `with_first_letter` that shows the number of employees whose name begins with a given letter. For instance, the names of 2854 employees start with the letter "A". Fill your bars according to whether the bar corresponds to the letters "G" or "X". 
+
+  The following function `plot_salary_histogram()` receives a tibble as an argument and compares the compensation distribution from the sample with the population using an overlaid histogram. No changes are needed in the following chunk; just run the code. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  # an example call using the full data 
+  plot_salary_histogram(with_first_letter) 
+  ```
+
+* **Question 3.6** Write a function `plot_and_compute_mean_stat()` that receives a tibble as an argument and: 
+
+  * Plots an overlaid histogram of the compensation distribution with that of the population. 
+  * Returns the mean salary from the sample in the `TotalPay (10K)` variable as a *double*. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  plot_and_compute_mean_stat(with_first_letter) # an example call 
+  ```
+
+  The value reported by the call `plot_and_compute_mean_stat(with_first_letter)` is the *parameter* (because we computed it directly from the population) we hope to estimate by our sampling plan. 
+
+* **Question 3.7** Write a function `filter_letter()` that receives a character `letter` (e.g., "X") and returns the data consisting of all rows whose `EmployeeName` starts with the uppercase letter matching `letter`. Moreover, the value in the variable `dataset` should be mutated to the string `letter` for all observations in the resulting tibble. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  filter_letter("Z") # an example call
+  ```
+
+* **Question 3.8** Let us now compare the convenience sample salaries with the full data salaries by calling your function `plot_compute_mean_stat()`. Call this function twice, once for the sample corresponding to "G" and another for the sample corresponding to "X". 
+
+* **Question 3.9** We have now examined two convenience samples. Do these give an accurate representation of the compensation distribution of the population of San Francisco employees? Why or why not? 
+
+* **Question 3.10** As we learned, a more principled approach is to use random sampling. Let us form a simple random sample by sampling at random *without replacement*. Target 1% of the observations in the population. The value in the variable `dataset` should be mutated to the string `"sample 1"` for all observations. Assign the resulting tibble to the name `random_sample1`.
+
+* **Question 3.11** Repeat **Question 3.10**, but now target 5% of the rows. This time, rename the values in the variable `dataset` to the string `"sample 2"`. Assign the resulting tibble to the name `random_sample2`. 
+
+* **Question 3.12** Call your function `plot_compute_mean_stat()` on the two random samples you have formed.   
+
+  You should repeat **Question 3.10** through **Question 3.12** a few times to get a sense of how much the statistic changes with each random sample.    
+
+* **Question 3.13** Do the statistics vary more or less in random samples that target 1% of the observations than in samples that target 5%? Do the random samples offer a better estimate of the mean salary value than the convenience samples we tried? Are these results surprising or is this what you expected? Explain your answer. 
+
+**Question 4** The tibble `penguins` from the package `palmerpenguins` includes measurements for penguin species, island in Palmer Archipelago, size, and sex. Suppose you are part of a conservation effort interested in surveying annually the population of penguins on Dream island. You have been tasked with estimating the number of penguins currently residing on the island.
+
+To make the analysis easier, we will assume that each penguin has already been identified through some attached ID chip. This identifier starts at $1$ and counts up to $N$, where $N$ is the total number of observations. We will also examine the data only for one of the recorded years, 2007.    
+
+* **Question 4.1** Apply the following tidying steps to `penguins`: 
+
+  * Filter the data to include only those observations from Dream island in the year 2007.
+  * Create a new variable named `penguin_id` that assigns an identifier to the resulting observations using the above scheme.  (Hint: you can use `seq()`). 
+
+  Assign the resulting tibble to the name `dream_with_id`. 
+
+**Question 4.2** In each survey you stop after observing 20 penguins and writing down their ID. It is possible for a penguin to be observed more than once. Generate a *vector* named `one_sample` that consists of the penguin IDs observed after one survey. Simulate this sample from the tibble `dream_with_id`. 
+
+* **Question 4.3** Generate a histogram in *density scale* of the observed IDs from the sample you found in `one_sample`. We suggest using the bins `seq(1,46, 1)`. 
+
+  We will try to estimate the population of penguins on Dream island from this sample. More specifically, we would like to estimate $N$, where $N$ is the largest ID number (recall this number is unknown to us!). We will try to estimate this value by trying two different statistics: a *max*-based estimator and a *mean*-based estimator.  
+
+* **Question 4.4** A max-based estimator simply returns the largest ID observed from the sample. Write a function called `max_based_estimate` that receives a vector $x$, computes the *max*-based estimate, and returns this value. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  max_based_estimate(one_sample) # an example call
+  ```
+
+* **Question 4.5** The mean of the observed penguin IDs is likely halfway between 1 and $N$. We have that the midpoint between any two numbers is $\frac{1+N}{2}$. Solving this for $N$ yields our mean-based estimate. Using this, write a function called `mean_based_estimate` that receives a vector $x$, computes the *mean*-based estimate, and returns the computed value. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  mean_based_estimate(one_sample) # an example call
+  ```
+
+* **Question 4.6** Analyze several samples and histograms by repeating **Question 7.2** through **Question 7.5**. Which estimates, if any, capture the correct value for $N$?  
+
+* **Question 4.7** Write a function `simulate_one_stat` that receives two arguments, a tibble `tib` and a function `estimator` (that can be either be your `mean_based_estimate()` or `max_based_estimate()`). The function simulates a survey using `tib`, computes the statistic from this sample using the function `estimator`, and returns the computed statistic as a double.  
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  simulate_one_stat(dream_with_id, mean_based_estimate) # an example call 
+  ```
+
+* **Question 4.8**  Simulate 10,000 *max* estimates and 10,000 *mean* estimates. Store the results in the vectors `max_estimates` and `mean_estimates`, respectively.
+
+* **Question 4.9**  The following code creates a tibble named `stats_tibble` using the estimates you generated in **Question 4.8.** 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  stats_tibble <- tibble(max_est = max_estimates, 
+                        mean_est = mean_estimates) |>
+    pivot_longer(c(max_est, mean_est), 
+                 names_to = "estimator", values_to = "estimate")
+  stats_tibble
+  ```
+
+Generate a histogram of the *sampling distributions* of both statistics. This should be a single plot containing *two* histograms. You will need to use a positional adjustment to see both distributions together.  
+
+* **Question 4.10**  How come the mean-based estimator has estimates larger than 46 while the max-based estimator doesn't? 
+
+* **Question 4.11** Consider the following statements about the two estimators. For each of these statements, state whether or not you think it is correct and explain your reasoning.
+
+  1. The max-based estimator is *biased*, that is, it almost always underestimates.
+  2. The max-based estimator has *higher* variability than the mean-based estimator.
+  3. The mean-based estimator is *unbiased*, that is, it overestimates about as often as it underestimates. 
+
+**Question 5** This question is a continuation of the City of San Francisco compensation data from *Question 3* and assumes that the function `filter_letter()` exists and that the names `sf_salary11` and `pop_mean_salary11` have already been assigned.  
+
+* **Question 5.1** Let us write a function `sim_random_sample()` that samples `size` rows from tibble `tib` by sampling at random *with replacement*. The function returns a tibble containing the sample.
+
+* **Question 5.2** Write a function `mean_stat_from_sample()` that receives a sample tibble `tib`. The function computes the mean of the variable `TotalPay (10K)` and returns this value as a double. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  mean_stat_from_sample(sf_salary11) # an example call using the full data
+  ```
+
+* **Question 5.3** Generate 10,000 simulated mean statistics using `sim_random_sample()` and `mean_stat_from_sample()`. Each simulated mean statistic should be generated from the tibble `sf_salary11` using a sample size of 100.   
+
+  The following code chunk puts the simulated values you found into a tibble named `stat_tibble`. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  stat_tibble <- tibble(rep=1:10000,
+                        mean=mean_stats)
+  ```
+
+* **Question 5.4** Generate a histogram showing the sampling distribution of these simulated mean statistics. Then, attach, to the histogram, a square at the population mean for 2011 at $y=0$, with a size 2 square as the point. 
+
+  We see that the population mean lies in the "bulk" of the simulated mean statistics. Now that we have learned about different sampling plans, we can compare the statistics generated by these plans with this histogram. 
+
+* **Question 5.5** Compute a mean statistic called `head_stat` using the *first* 1,000 rows of `sf_salary`. Then compute a mean statistic called `tail_stat` using the *last* 1,000 rows. 
+
+* **Question 5.6** We saw that we can form *convenience* samples by partitioning the observations using the first letter of `EmployeeName`. Using a `purrr` map function, generate a *list* of tibbles (each corresponding to all employees whose name starts with a given letter) by mapping the 26 letters of the English alphabet to the function `filter_letter()`. Assign the resulting list to the name `by_letter`. 
+
+  __Hint:__ `LETTERS` is a vector containing the letters of the English alphabet in uppercase. 
+
+* **Question 5.7** Use another `purrr` map function to map the list of tibbles `by_letter` to the function `mean_stat_from_sample` to obtain a vector of mean statistics for each sample. Assign the result to the name `letter_group_stats`.  
+
+  The following code chunk organizes your results into a tibble `letter_tibble`. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  letter_tibble <- tibble(
+    letter = LETTERS[1:26],
+    stat = letter_group_stats)
+  ```
+
+* **Question 5.8** Augment your histogram from **Question 5.2** with the computed statistics you found from the head sample, tail sample, and the convenience samples. Use a point geom for each statistic. 
+
+* **Question 5.9** Do you notice that some of the averages among the 26 letter samples are very close to the population mean while others are quite far away? How about for the statistics generated using the tail and head samples? Why does this happen?

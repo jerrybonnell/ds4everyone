@@ -653,6 +653,181 @@ This chapter has served as a preview of the analyses that are made possible by t
 
 * [__Distant Reading__](https://www.google.com/books/edition/Distant_Reading/YKMCy9I3PG4C?hl=en) by Franco Moretti. This is a seminal work by Moretti, a literary historian, which expounds on the purpose and tools for literary history. He attempts to redefine the lessons of literature with confident reliance on computational tools. It has been consequential in shaping the methods that form research in Digital Humanities today.      
 
+## Exercises 
+
+Answering questions for the exercises in Chapter 12 requires some additional packages beyond the tidyverse. Let us load them. Make sure you have installed them before loading them.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+library(tidytext)
+library(gutenbergr)
+library(topicmodels)
+```
+
+**Question 1. Jane Austen Letters** Jane Austen (December 17, 1775 - July 18, 1817) was an English novelist. Her well-known novels include "Pride and Prejudice" and "Sense and Sensibility". The Project Gutenberg has all her novels as well as a collection of her letters. The collection, "The Letters of Jane Austen, " is from the compilation by her great nephew "Edward Lord Bradbourne".
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+gutenberg_works(author == "Austen, Jane")
+```
+
+The project ID for the letter collection is 42078. Using the ID, load the project text as `austen_letters`.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+austen_letters <- gutenberg_download(gutenberg_id = 42078,
+  "http://mirrors.xmission.com/gutenberg/")
+austen_letters
+```
+
+The tibble has only two variables, `gutenberg_id`, which is 42078 for all rows, and `text`, which is the line-by-line text.
+
+Let us examine some rows of the tibble. First, unlike "Moby Dick," each letter in the collection appears with Greek numerals as the header. The sixth line of the segment below shows the first letter with the header "I." 
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+(austen_letters |> pull(text))[241:250]
+```
+
+Next, some letters contain a footnote, which is not part of the original letter. The fifth and the seventh lines of the segment below show the header for a footnote and a footnote with a sequential number "[39]"
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+(austen_letters |> pull(text))[6445:6454]
+```
+
+Footnotes can appear in groups. The segment below shows two footnotes. Thus, the header is "FOOTNOTES:" instead of "FOOTNOTE:".
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+(austen_letters |> pull(text))[3216:3225]
+```
+
+The letter sequence concludes with the header "THE END." as shown below.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+(austen_letters |> pull(text))[8531:8540]
+```
+
+* **Question 1.1** Suppose we have the the following vector `test_vector`:
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  test_vector <- c( "I.", "    I.", "VII.", 
+                    "THE END.", "FOOTNOTE:", 
+                    "FOOTNOTES:", 
+                    "ds", "    world")
+  ```
+
+  Let us filter out the unwanted footnote headers from this vector. Create a regular expression `regex_foot` that detects any line starting with "FOOTNOTE". Test the regular expression on `test_vector` using `str_detect` function and ensure that your regular expression functions correctly.
+
+* **Question 1.2** Using the regular expression `regex_foot`, remove all lines matching the regular expression in the tibble `austen_letters`. Also, remove the variable `gutenberg_id`. Store the result in `letters`. Check out the rows 351-360 of the original and then in the revised version.
+
+* **Question 1.3** Next, find out the location of the start line and the end line. The start line is the one that begins with "I.", and the end line is the one that begins with "THE END.". Create a regular expression `regex_start` for the start and a regular expression `regex_end` for the end. Test the expression on `test_vector`.
+
+* **Question 1.4** Apply the regular expressions to the variable `text` of `letters` using the `stringr` function `str_which`. The result of the first is the start line. The result of the second minus 1 is the very end. Store these indices in `start_no` and `end_no`, respectively. 
+
+  The following code chunk filters the text tibble to select only those lines between `start_no` and `end_no`. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  letters_clean <- letters |> 
+    slice(start_no:end_no)
+  letters_clean
+  ```
+
+* **Question 1.5** Now, as with the textbook example using "Moby Dick", accumulate the lines that correspond to each individual letter. The following regular expression can be used to detect a letter index. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  regex_index <- regex('^[IVXLCDM]++\\.')
+  str_which(letters$text, regex_index)
+  ```
+
+  Apply this regular expression, as we did for "Moby Dick", to `letters_clean`. Add the letter index as `letter` and the `row_number()` as `linenumber`. Store the result in `letters_with_num`.
+
+**Question 2.** This is a continuation from the previous question. The previous question has prepared us to investigate the letters in `letters_with_num`.
+
+* **Question 2.1** First, extract tokens from `letters_with_num` using `unnest_tokens`, and store it in `letter_tokens`. Then, from `letter_tokens` remove `stop_words` using `anti_join` and store it in a name `letter_tokens_nostop`.
+
+* **Question 2.2** Let us obtain the counts of the words in these two tibbles using `count`. Store the result in `letter_tokens_ranked` and `letter_tokens_nostop_ranked`, respectively.
+
+* **Question 2.3** As in the textbook, use a lower bound of 60 to collect the words and show a bar plot.
+
+* **Question 2.4** Now generate word counts with respect to each letter. The source is `letter_tokens_nostop`. The counting is by executing `count(letter, word, sort = TRUE)`. Store the result in `word_counts`.
+
+* **Question 2.5** Generate, from the letter-wise word counts `word_counts`, a document-term matrix `letters_dtm`.
+
+* **Question 2.6** From the document-term matrix, generate an LDA model with 2 classes. Store it in `lda_model`.
+
+* **Question 2.7** Transform the model output into a tibble. Use the function `tidy()` and set the variable "beta" using the matrix entries.
+
+* **Question 2.8** Select the top 15 terms from each topic as we did for "Moby Dick". Store it in `top_terms`.
+
+* **Question 2.9** Now plot the top terms as we did in the textbook.
+
+**Question 3.** The previous attempt to create topic models may not have worked well, possibly because of the existence of frequent non-stop-words that may dominate the term-frequency matrix. Here we attempt to revise the analysis after removing such non-stop-words.
+
+* **Question 3.1** We generated a ranked tibble of words, `letter_tokens_nostop_ranked`.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  letter_tokens_nostop_ranked
+  ```
+
+  The first few words on the list appear generic, so let us remove these words from consideration.
+  Let us form a character vector named `add_stop` that captures the first 10 words that appear in the tibble `letter_tokens_nostop_ranked`. You can use the `slice()` and `pull()` `dplyr` verbs to accomplish this.
+
+* **Question 3.2** Let us remove the rows of `word_counts` where the `word` is one of the words in `add_stop`. Store it in `word_counts_revised`.
+
+* **Question 3.3** Generate, from the letter-wise word counts `word_counts_revised`, a document-term matrix `letters_dtm_revised`.
+
+* **Question 3.4** From this document-term matrix, generate an LDA model with 2 classes. Store it in `lda_model_revised`.
+
+* **Question 3.5** Transform the model output back into a tibble. Use the function `tidy()` and set the variable "beta" using the matrix entries.
+
+* **Question 3.6** Select the top 15 terms and store it in `top_terms_revised`.
+
+* **Question 3.7** Now plot the top terms of the two classes. Also, show the plot without excluding the common words. In that matter, we should be able to compare the two topic models side by side.
+
+* **Question 3.8** What differences do you observe between the two topics in the bar plot for `top_terms_revised`? Are these differences more or less apparent (or about the same) when comparing the differences in the original bar plot for `top_terms`?
+
+**Question 4. Chesterton Essays** G. K. Chesterton (29 May 1874 – 14 June 1936) was a British writer, who is the best known for his "Father Brown" works. The Gutenbrerg Project ID 8092 is a collection of his essays "Tremendous Trifles".
+
+* **Question 4.1** Load the work in `trifles`. Then remove the unwanted variable and store the result in `trifles0`.
+
+* **Question 4.2** Each essay in the collection has a Greek number header. As we did before, using the Greek number header to capture the start of an essay and add that index as the variable `letter`. Store the mutated table in `tifles1`.
+
+* **Question 4.3** First, extract tokens from `trifles1` using `unnest_tokens`, and store it in `trifles_tokens`. Then, from `trifles_tokens` remove `stop_words` using `anti_join` and store it in `trifles_tokens_nostop`.
+
+* **Question 4.4** Let us obtain the counts of the words in the two token lists using `count`. Store the result in `trifles_tokens_ranked` and `trifles_tokens_nostop_ranked`, respectively.
+
+* **Question 4.5** Use a lower bound of 35 to collect the words and show a bar plot.
+
+* **Question 4.6** Now generate word counts letter-wise. The source is `trifles_tokens_nostop`. The counting is by executing `count(letter, word, sort = TRUE)`. Store the result in `trifles_word_counts`.
+
+* **Question 4.7** Generate, from the letter-wise word counts `trifles_word_counts`, a document-term matrix `trifles_dtm`.
+
+* **Question 4.8** From the document-term matrix, generate an LDA model with 4 classes. Store it in `trifles_lda_model`.
+
+* **Question 4.9** Take the model and turn it into a data frame. Use the function `tidy()` and set the variable "beta" using the matrix entries.
+
+* **Question 4.10** If you run the top-term map, you notice that the words are much similar among the four classes. So, let us skip the first 5 and select the words that are ranked 6th to the 15th. Select the top 10 terms from each topic and store it in `trifles_top_terms`.
+
+* **Question 4.11** Now plot the top terms.
+
+* **Question 4.12** What differences do you observe, if any, among the above four topics? 
+
+**Question 5** In this question, we explore the relationship between the Chesterton essays and the Jane Austen letter collection. This question assumes you have already formed the tibbles `word_counts_revised` and `trifles_word_counts`. 
+
+* **Question 5.1** Using `bind_rows`, merge the datasets `word_counts_revised` and `trifles_word_counts`. However, before merging, discard the `letter` variable present in each tibble and create a new column `author` that gives the author name together with each word count. Assign the resulting tibble to the name `merged_frequencies`. 
+
+* **Question 5.2** The current word counts given in `merged_frequencies` are with respect to each letter/essay, but we would like to obtain these counts with respect to each *author*. Using `group_by` and `summarize` from `dplyr`, obtain updated counts for each word by summing the counts over its respective texts. The resulting tibble should contain three variables: `author`, `word`, and `n` (the updated word count). 
+
+* **Question 5.3** Instead of reporting word counts, we would like to report word *proportions* so that we can make comparisons between the two authors. Create a new variable `prop` that, with respect to each *author*, reports the proportion of times a word appears over the total count of words for that author. The resulting tibble should contain three variables: `author`, `word`, and `prop`. Assign the resulting tibble to the name `freq_by_author_prop`.
+
+* **Question 5.4** Apply a pivot transformation so that three variables materialize in the `freq_by_author_prop` tibble: `word`, `G. K. Chesterton` (giving the word proportion for Chesterton essays), and `Jane Austen` (giving the word proportion for Jane Austen letters). Drop any resulting missing values after the transformation. Assign the resulting tibble to the name `freq_by_author_prop_long`.
+
+* **Question 5.5** Using `freq_by_author_prop_long`, fit a linear regression model of the G. K. Chesterton proportions on the Jane Austen proportions. 
+
+* **Question 5.6** How significant is the estimated slope of the regression line you found? Use `confint()` with the linear model you developed. 
+
+* **Question 5.7** The following scatter plot shows the Chesterton word proportions against the Jane Austen word proportions; the color shown is the absolute difference between the two. Also given is a dashed line that follows $y = x$. 
+
+  Amend this `ggplot` visualization by adding another geom layer that visualizes the equation of the linear model you found. 
+
+* **Question 5.8** What does it mean for words to be close to the $y=x$ line?  Also, briefly comment on the relationship between the regression line you found and the $y=x$ line -- what does it mean that the slope of your line is relatively smaller? 
+
 
 <!---
 

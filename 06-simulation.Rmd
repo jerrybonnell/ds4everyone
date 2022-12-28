@@ -1103,6 +1103,314 @@ ggplot(results) +
 
 We see that the histogram looks symmetric and centered around 0.51 (see the orange dot), as expected. Neat!
 
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+library(gapminder)
+```
+
+**Question 1.** Every day Alana, an amateur [transcendentalist](https://en.wikipedia.org/wiki/Transcendentalism) and photographer, walks by a pond for one hour, rain or shine. During the walk she sometimes sees some animals. Notable ones among them: jumping fish, great blue heron, and squirrels. Over the past 80 days she has witnessed these 40 times, 40 times, and 40 times, respectively.
+
+* **Question 1.1** What are the probabilities that she witnesses jumping fish, that she witnesses a blue heron, and that she witnesses a squirrel on any particular day individually? Write down three expressions that provide these probabilities and assign them to names `wit_fish`, `wit_heron`, and `wit_squirrel` respectively.
+
+  Alana is suspect that when she observes a jumping fish on a given day, she is more likely to also encounter the other two animals on the same day. Likewise if she first sees a great blue heron or a squirrel.    
+  
+  The tibble `alana` from the `edsdata` package is the actual record of Alana's witnessing events. 
+  
+  ```{r message=FALSE, warning=FALSE}
+  alana
+  ```
+  
+  The rows are the 80 days and the columns are witness (1) or non-witness (0) of the three animals. 
+
+* **Question 1.2**  If the observational unit is an individual observation made by Alana during her walk, then the tidy data guidelines tell us that each row contains multiple observations. Let us tidy the `alana` tibble using a `tidyr` function so that the three variables become materialized: `day`, `animal_observed`, and `witness`. Call the resulting tibble `alana_tidy`.
+
+* **Question 1.3**  Form a tibble called `summarized_observations` that gives the total number of times that Alana saw each of the three animals during her trip (or, more technically, the total number of `1` witnessing events for each animal). The tibble should have two variables named `animal_observed` and `n`. Do the values match the stated counts of 40? 
+
+* **Question 1.4** From your tibble `alana_tidy`, extract the number of days in which Alana witnessed *all* three animals. Store your answer (a single double value) in the name `observed_witness3`. 
+
+**Question 2** We can now apply *simulation* to help address Alana's question. That is, we will assume that the true probability of observing any of the three animals follows what you found in **Question 1** and that the observation of one animal has no influence on the observation of any of the other two animals (i.e., each observation is *independent* of the other). 
+
+We can then simulate Alana's 80-day trip a great number of times. More specifically, we will simulate the number of days Alana saw all three animals during the said "artificial" trip. If the actual record of observing all three animals is different from what our simulation shows, we have evidence that supports Alana's claim that the probability of observing some animal may be *dependent* on the probability of first observing any of the other two. That would be welcome news -- no more waiting around for the great blue heron! 
+
+Let us approach this simulation in parts, using the same recipe for simulation we learned. Be sure you have read and understood the examples from the textbook before proceeding.  
+
+* **Question 2.1** Write a function `findings_from_one_walk` that takes a double `day` as an argument and returns a tibble giving the results after one simulated walk in Alana's trip. Here is what this tibble looks like after one possible run for day 5. 
+
+  | day | animal_observed | witness |
+  |-----|-----------------|---------|
+  | 5   | heron           | 1       |
+  | 5   | fish            | 0       |
+  | 5   | squirrel        | 1       |
+  
+  __NOTE:__ The values in the `witness` column should be different every time this function is called! How to generate these values? See the `sample` function we saw in class.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  
+  findings_from_one_walk(5) # an example call for a simulated "day 5"
+  ```
+
+  Using your function `findings_from_one_walk`, we can simulate a full 80-day trip as follows: 
+  
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  map(1:80, findings_from_one_walk) |>
+    bind_rows()
+  ```
+
+* **Question 2.2** Write a function `one_alana_trial` that takes no arguments, simulates a full 80-day trip, and returns the number of days that all three animals were witnessed. The result should vary each time it is run.
+
+  __HINT:__ To complete this, you can re-use code you have already written, i.e., from Question 4 in Part I.   
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  
+  one_alana_trial() # an example call
+  ```
+
+  The returned value from your function `one_alana_trial()` composes one simulated value in our simulation. 
+
+* **Question 2.3** We are now ready to put everything together and run the simulation. Set a name `num_repetitions` to 1,000. Run your function `one_alana_trial()` `num_repetitions` number of times and store the simulated values in a vector named `witness3_trials`.
+
+  __NOTE:__ This may take a few seconds to run. 
+
+* **Question 2.4**  Construct a tibble named `results` by aligning `num_repetitions` (create a sequence from 1 to `num_repetitions`) and `witness3_trials` with the column names `repetition` and `witness3_trial`, respectively. 
+
+* **Question 2.5** Using `ggplot2`, generate a histogram of `witness3_trial` from the tibble `results`. Remember to plot in density scale; you may also wish to lower the number of bins to a smaller value, say, 10. Your plots should label all axes appropriately and include a title informing what is being visualized.   
+
+* **Question 2.6** Compare your histogram with the value `observed_witness3` computed earlier. Where does it fall in this histogram? Is it close to the center where the "bulk" of the simulated values are?  
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  observed_witness3
+  ```
+
+* **Question 2.7**  Based on what you see in the above histogram and how it compares with `observed_witness3`, what would you say to the following statement: "since each animal is observed 40 out of 80, the chance of seeing all three animals after first seeing one of them is still 50-50, about the same as the chance of heads or tails after a fair coin toss"?
+
+**Question 3.** A friend recently gave Cathy a replica dollar-coin. Cathy noticed that the coin has a slight bias towards "Heads". She tossed it a few times to find that the Heads/Tails ratio is like 3 to 2; that is, if she tosses the coin five times, she would observe three Heads and two Tails among the five outcomes. Noticing the curious behavior, Cathy asked a friend Jodie to play the following game with her. For preparation, Cathy and Jodie each prepare a pile of ten lollipops. Then they would repeat the following __ten times__.
+
+* Jodie predicts Heads or Tails and Cathy tosses the coin. If the prediction matches the outcome, Jodie takes one lollipop from Cathy's pile; if the prediction does not match the outcome, Cathy takes one lollipop from Jodie's pile.
+
+Let us do some analysis of the game.
+
+* **Question 3.1** We have collected the results from one round of the game in the vectors `jodie_predictions` and `outcomes`. How many lollipops does Jodie have now? 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  jodie_predictions <- c("Tails", "Tails", "Heads", 
+                         "Heads", "Tails", "Tails", 
+                         "Heads", "Tails", "Tails", 
+                         "Heads")
+  outcomes          <- c("Tails", "Heads", "Heads", 
+                         "Heads", "Heads", "Tails", 
+                         "Heads", "Heads", "Heads", 
+                         "Tails")
+  ```
+
+* **Question 3.2** Suppose Jodie selects either side of the coin with equal chance, i.e., she does not favor "Heads" anymore than she does "Tails" and vice versa. Based on the observation that Cathy's coin follows a "Heads"/"Tails" ratio of 3:2, after one round of the game how many lollipops is Jodie expected to lose to Cathy?    
+  Let us use simulation to check our analysis of the problem. We will define two functions, `simulate_cathy_coin()` and `simulate_jodie_prediction()`, that simulates a single flip of Cathy's coin and Jodie's prediction of the side a coin lands on, respectively. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  simulate_jodie_prediction <- function() {
+    # Jodie chooses either side of a coin with equal chance. 
+    sample(c("Heads", "Tails"), prob = c(1/2, 1/2), size = 1)
+  }
+  simulate_cathy_coin <- function() {
+    # Cathy's coin is known to be biased towards "Heads" in a 3:2 ratio. 
+    sample(c("Heads", "Tails"), prob = c(3/5, 2/5), size = 1)
+  }
+  ```
+
+* **Question 3.3** Write a function called `one_flip_lollipop_wins` that simulates the number of lollipops Jodie wins after one flip of Cathy's coin. The function receives two arguments, a prediction function `coin_flip_func` and a coin flip function `prediction_func`; these should be called in the duration of the function to simulate a flip of Cathy's coin and Jodie's prediction of that coin. The function returns either `1` or `-1`. We can interpret `1` to be Jodie winning one lollipop and `-1` to be Jodie losing one lollipop.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  
+  # An example call using the functions corresponding 
+  # to the game Cathy and Jodie are playing. 
+  one_flip_lollipop_wins(simulate_cathy_coin, simulate_jodie_prediction)
+  ```
+
+* **Question 3.4** One round of the game Cathy and Jodie are playing consists of 10 coin flips. Write a function named `gains_after_one_round()` that simulates the number of lollipops Jodie wins after one round of the game. The function receives three arguments, `flips`, the number of flips in a round, `coin_flip_func`, and `prediction_func`. The function returns the number of lollipops Jodie wins after the round is over. Use the `replicate` construct to call `one_flip_lollipop_wins()` a number of times. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  # One round consists of 10 coin flips. 
+  gains_after_one_round(10, simulate_cathy_coin, 
+                        simulate_jodie_prediction)
+  ```
+
+* **Question 3.5** Let us now simulate the game a large number of times. Using the `replicate` construct with the function `gains_after_one_round()`, simulate 10,000 games. Collect the lollipops won from each simulated game in a vector named `simulated_gains`.  
+
+The following function `hist_from_simulation()` produces a histogram of the simulated gains you generated. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  hist_from_simulation <- function(simulated_results) {
+    wins_tibble <- tibble(
+      repetition = 1:length(simulated_results),
+      gain = simulated_results
+    )
+    
+    g <- ggplot(wins_tibble) +
+      geom_histogram(aes(x = gain, y = after_stat(density)),
+                     bins=12,
+                     color = "gray", fill = "darkcyan")
+    return(g)
+  }
+  
+  hist_from_simulation(simulated_gains)
+  ```
+
+* **Question 3.6** What value does the bulk of the data center around? Does this agree with or contradict our earlier analysis in **Question 3.2**? 
+
+* **Question 3.7** Cathy proposes to switch roles. In other words, Jodie will toss the coin, and Cathy will predict. Knowing about the bias of her coin, Cathy bets on predicting "Tails" every time. Write a function `simulate_cathy_prediction` that receives no arguments and simulates Cathy's prediction under this scheme.
+
+* **Question 3.8** Repeat **Question 3.5** but now using `simulate_cathy_prediction()`. Assign your simulated values to the name `simulated_gains_switched_roles`. Then generate a histogram of the results using `hist_from_simulation()`. 
+
+* **Question 3.9** Where is the bulk of the data centered around now? Is the prior knowledge of the coin's bias helpful for winning more lollipops in the long run? Or does Cathy come out the same regardless of who is making the predictions? Explain your reasoning. 
+
+* **Question 3.10** It will be helpful to visualize the two histograms in the same plot. Using `simulated_gains` and `simulated_gains_switched_roles`, generate an overlaid histogram showing the simulated results when Jodie predicts the coin flip together with the results when Cathy predicts the coin flip. Your plot should include a legend showing which histogram corresponds to which player making the predictions. 
+
+  __HINT:__ Before writing any `ggplot2` code, you will need to develop a tibble that contains the results from both. See the code in `hist_from_simulation()` for some hints on how to accomplish this.
+
+**Question 4** This question is a continuation of **Question 3**. 
+
+Suppose we make a further change to the rule of the game so that the game will continue until either player loses all their lollipops. If one round is defined as a single coin toss, how many rounds will it take for them to complete the game? Let us compute the number of rounds by simulation.
+
+Suppose that Jodie and Cathy each begin with 10 lollipops in their pile. There are two different ways the game ends.
+
+* One is by Jodie losing all her lollipops, 
+* The other is by Cathy losing all her lollipops.
+
+We have seen that the present strategy (Cathy always predicts "Tails") slightly favors Cathy winning. The histogram that follows this strategy clusters around a small negative value, approximately `-2`. We thus use a positive round number if Jodie loses the lollipops and the round number with the sign flipped if Cathy loses the lollipops.
+
+We can accomplish the simulation scheme using the incantation:
+
+```{r eval=FALSE}
+gains_after_one_round(1, simulate_cathy_coin, simulate_cathy_prediction)
+```
+
+We can then use the `accumulate` construct shown in Sections 6.3 and 6.4. Recall that we can use this to call some function repeatedly, each time using the result of the previous application as the argument. 
+
+* **Question 4.1** First, write a function `total_lollipops_after_play` that takes a single argument `jodie_lollipops` that gives the current number of lollipops __in Jodie's pile__. This function:
+
+  * Checks if Jodie lost all her lollipops (Jodie's pile contains 0 lollipops) or Cathy lost all her lollipops (Jodie's pile contains 20 lollipops). If this condition succeeds, the game should be terminated by calling `done()` in a return call, i.e., `return(done())`
+  * Otherwise, simulate one round of the game as shown above. Save the result to a name `gains`. The function returns the addition of `gains` and the argument `lollipops`.
+
+  ```{r}
+  total_lollipops_after_play <- function(jodie_lollipops) {
+  
+  }
+  ```
+
+* **Question 4.2** Write another function `play_until_empty_pile` that takes no arguments. This function will: 
+
+  * Simulate `total_lollipops_after_play` using the `accumulate` function. Call `accumulate` for a maximum of 1,000 rounds (e.g., using the input sequence `1:1000`) using the number of lollipops Jodie starts with as the initial value. 
+  * Determine how many lollipops remain in Jodie's pile after the game is over. This can be done by inspecting the *last* value in the vector returned by `accumulate`. Call this `num_remaining`.
+  * If Jodie lost (how can you tell?), the function returns the number of rounds played. 
+  * Otherwise, if Jodie won (how can you tell?), then the functions the *negative* of the round number. 
+
+  ```{r eval=FALSE}
+  play_until_empty_pile <- function() {
+  
+  }
+  ```
+
+  The following is an example call of your function. The total number of rounds played will be different each time the function is called. Most of the time you will observe a positive value.
+  
+  ```{r eval=FALSE}
+  play_until_empty_pile()
+  ```
+
+* **Question 4.3** Simulate the game 10,000 times and collect the results into a vector named `simulated_durations`.
+
+* **Question 4.4**  What are the maximum and the minimum of `simulated_durations`? How about the mean? According to these results, who is the winner in the long run? Is it true that Cathy always wins when she predicts "Tails"? 
+
+* **Question 4.5** Plot a histogram of the simulated duration values. Set the number of bins equal to 25.
+
+* **Question 4.6** What does the shape of the distribution you found tell you about who wins in the long run? Can this histogram be used to draw such a conclusion? 
+
+**Question 5: The Paradox of the Chevalier De Méré** French people used to love (maybe still do) gambling with dice. In the 17th century, Antoine Gombaud Chevalier De Méré stated that the following two events are equally probable.
+
+* throwing a dice four times in a row and `1` turning up at least once, and 
+* throwing a pair of dice 24 times in a row and two `1`'s simultaneously turning up at least once.
+
+His logic was as follows:
+
+* There are six faces to a dice. The chance of observing the first event is $4*(1/6) = 2/3$ because there is a $1/6$ probability of a `1` turning up on a single roll and the dice is rolled 4 times. 
+* There are six faces to each dice. The chance of observing the second event is $24*(1/36) = 2/3$ because there is a $1/36$ probability of two `1`'s turning up after a single roll and the pair is rolled 24 times.   
+Unfortunately, there is a flaw in his logic. Using a bit of probability analysis, we have:
+
+* There are six faces to a dice, so the chances of observing the first event is the *opposite* of seeing anything but `1` four times in a row, which is $1 - (5^4 / 6^4) = 0.517746...$.
+* There are 35 outcomes that are not a double 1's when rolling a pair of dice (out of 36 possible). Thus, the chance of observing the second event is the *opposite* of seeing any of those 35 outcomes 24 times. So we have: $1 - (35^24/36^24) = 0.491403...$.
+
+Not only the two values are different from each other, but also they are different from $2/3$. 
+
+We are lucky that the theoretical analysis here has been straightforward. That is because we are able to take advantage of the fact that the events "at least one `1` turns up" and "no `1`s turns up" are *complementary*. This is also sometimes called the "rule of subtraction" or the "1 minus rule".
+
+However, theoretical analysis can be cumbersome and, depending on the problem, is not always possible. Sometimes it is easier to find the answer using *simulation*! Let us try to disprove the Chevalier's estimation by means of simulation. 
+
+Following is a function `simulate_dice_roll` that simulates one dice roll: 
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+simulate_dice_roll <- function() {
+  sample(1:6, size = 1)
+}
+simulate_dice_roll()
+```
+
+* **Question 5.1** Write a function `has_one_appeared` that simulates whether a `1` appears after a six-sided dice roll. The function takes no arguments and returns `TRUE` if the simulated roll turns up 1 and `FALSE` otherwise.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  has_one_appeared() # an example call 
+  ```
+
+
+* **Question 5.2** Write another function called `has_double_ones_appeared` that simulates whether two `1`s appear after rolling a pair of six-sided dice. The function takes no arguments and returns `TRUE` if double `1`s turn up after the simulated rolls and `FALSE` otherwise. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  
+  has_double_ones_appeared() # an example call
+  ```
+
+
+* **Question 5.3** Write a function `chavalier_first_event` that simulates the Chavalier's first event. The function takes no arguments. It should execute `has_one_appeared` four times and return a *Boolean* indicating whether a `1` has appeared.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  chavalier_first_event() # example call
+  ```
+
+* **Question 5.4** Write a function `chavalier_second_event` that simulates the Chavalier's second event. This function takes no arguments. It should execute `has_double_ones_appeared` 24 times and return a *Boolean* indicating whether a pair of dice both turned up `1`. 
+
+* **Question 5.5** Simulate each of the Chavalier's two events 10,000 times. Store the resulting values from each of the simulations into two vectors named `simulated_values_first_event` and  `simulated_values_second_event`, respectively. 
+
+  The following code chunk puts together your results into a tibble named `sim_results`.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  sim_results <- tibble(
+    first_event = simulated_values_first_event, 
+    second_event = simulated_values_second_event)
+  sim_results
+  ```
+
+* **Question 5.6** Tidy the tibble `sim_results` using a `tidyr` function so that each observation in the tibble refers to the outcome of a single simulation and materializes two variables: `event` (referring to either the first or second event) and `outcome` (the outcome of that event). The resulting tibble should contain 20,000 observations. Assign this tibble to the name `sim_results_tidy`.  
+
+* **Question 5.7** Generate a bar chart using `sim_results_tidy`. Fill your bars according to the event in the variable `event`. We recommend using the "dodge" positional adjustment so that comparisons are easier to make.
+
+Repeat **Question 5.5** through **Question 5.7** to observe differences in the resulting histogram, if any. Then proceed to the following question:
+
+* **Question 5.8** A fellow classmate claims that the above simulation is unable to disprove the Chavalier's flawed reasoning. He cites two reasons for his claim:
+
+  1. The "first event" and "second event" bars are too close to each other to say anything with confidence. 
+  2. Because we repeated the simulation a large number of times, there is too much variability in the results. 
+
+  Which of his reasons, if any, are valid? Explain your reasoning. 
+
 <!--
 
 ## The Monty Hall Problem

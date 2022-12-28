@@ -1835,6 +1835,246 @@ with_disparity |>
   mapview(zcol = "tuition_to_income", col.regions = color_palette)
 ```
 
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+library(gapminder)
+library(lterdatasampler)
+library(palmerpenguins)
+```
+
+**Question 1** The tibble `storms` from the `dplyr` package includes the positions and attributes of storms from 1975-2020, measured every six hours during the lifetime of a storm. Following are visualizations that show a histogram of wind speeds with color mapped to the storm category. However, there is something wrong with each of the visualizations. Explain what went wrong and how the `ggplot2` code should be corrected. 
+
+* **Figure 1** 
+
+  ```{r eval=FALSE}
+  ggplot(storms) +
+    geom_bar(aes(x=wind,fill=category))
+  ```
+
+* **Figure 2** 
+
+  ```{r eval=FALSE}
+  ggplot(storms) + 
+    geom_bar(aes(x=category,
+                 y=wind), 
+             stat="identity")
+  ```
+
+* **Figure 3** 
+
+  ```{r eval=FALSE}
+  ggplot(storms) + 
+    geom_bar(aes(x=category, 
+                 fill=as_factor(wind)))
+  ```
+
+* **Figure 4** 
+
+  ```{r eval=FALSE}
+  ggplot(storms) + 
+    geom_histogram(aes(x = as.factor(wind), 
+                       y = "Count", 
+                       fill = as.factor(category)), 
+                   stat='identity')
+  ```
+
+**Question 2** The tibble `penguins` from the package `palmerpenguins` includes measurements for penguin species, island in Palmer Archipelago, size, and sex. 
+
+* **Question 2.1** Are any of these categorical variables and, if so, what kind (e.g., nominal, ordinal, binary)? Are there any numerical variables and, if so, what kind (e.g., continuous, discrete)? 
+
+* **Question 2.2** Generate a `ggplot` visualization that shows the number of penguins on each island. Fill your bars according to penguin species. Do the islands contain roughly the same proportion of each species? 
+
+* **Question 2.3** By default, `ggplot` uses the "stack" positional adjustment. Modify your code from **Question 2.2** to use different positional adjustments. Try "dodge" and then "identity" with an amount of alpha. Which adjustment allows you to address **Question 2.2** most effectively?  
+
+**Question 3** The dataset `longjump` from the package `edsdata` contains results from the qualifier and finals in the men's long jump event in the 2012 Summer Olympic Games. 
+
+```{r message=FALSE, warning=FALSE}
+longjump
+```
+
+* **Question 3.1** Form a tibble called that contains only the results for the London 2012 Olympic Games. 
+
+* **Question 3.2** Create a histogram of the distances in the qualifier event for the London 2012 Olympic Games. Fill your bars using the `status` variable so you can see the bands of color corresponding to qualification status. Missing values correspond to participants who did not qualify. 
+
+* **Question 3.3**  Repeat *Question 3.2* but make a histogram of the distances in the final event. 
+
+* **Question 3.4**  Adjust your code in **Question 3.2** and **Question 3.3** to include the `identity` positional adjustment. You may wish to set an [alpha](https://ggplot2.tidyverse.org/reference/aes_colour_fill_alpha.html#alpha) as well to better distinguish the differences. What do you observe when including/not including this adjustment? 
+
+* **Question 3.5** Following are some statements about the above two distributions. Select those that are *FALSE* by including its corresponding number in the following *vector* `jump_answers`. 
+
+  1. We used histograms because both of these variables are categorical. 
+  2. Both of these distributions are skewed. 
+  3. We observe the histogram for the qualifier event follows a left-tailed distribution. 
+  4. We can color the different category storms using the variable `status` 
+     because it is a numerical variable. 
+
+* **Question 3.6** The following code visualizes a map of the world. Annotate this map with the countries that participated in the men's long jump event in the London 2012 Games using a point or polygon geom (use `long` for x and `lat` for y). You will first need to join the map data in `world` with `longjump2012`. Then extend the plot in the name `world_map` by adding a new geom layer; set the data for this new layer to use the joined data.   
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+world <- map_data("world") |>
+  mutate(name = region) |>
+  select(long, lat, group, name)
+
+world_map <- ggplot(world) +
+  geom_polygon(aes(x = long, y = lat, group = group),
+               fill = "white", color = "grey50") +
+  coord_quickmap()
+world_map
+```
+
+* **Question 3.7** Which country in South America participated in the men's long jump in the 2012 London Games? Indicate your answer by setting the name `north_america_participant` to the appropriate thing. 
+
+**Question 4** In **Question 7** from Chapter 4 we computed the average  annual compensation of New York local authorities. However, the average does not tell us everything about the amounts employees are paid. It is possible that only a few employees make the bulk of the money, even among this select group. We can use a *histogram* to visualize information about a set of numbers. We have prepared a tibble `nysalary_cleaned` that already contains the cleaned compensation data; recall the the `Total Compensation ($)` variable is in *tens of thousands* of dollars. 
+
+```{r message=FALSE, warning=FALSE}
+nysalary_cleaned
+```
+
+* **Question 4.1** Make a histogram of the compensation of employees in `nysalary_cleaned` in *density scale*. Use the sequence `c(seq(0, 10,2), 15, 20, 40)` for your bin `breaks`. Assign the resulting `ggplot` object to a name `g`. 
+
+The later bins have very few individuals so the bar heights become too short to make out visually. The following code chunk overlays your histogram with a geom text layer that annotates each bin with the corresponding density in that bin. 
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+g +
+  geom_text(stat = "bin", aes(y = stat(density), 
+                              label = round(stat(density),5)),
+            vjust = -0.2, size=2, breaks=c(seq(0, 10,2), 15, 20, 40))
+```
+
+* **Question 4.2** Using the histogram, how many employees had a total compensation of more than 100K in the 2020 fiscal year?  Answer the question manually using the density formulas presented in the textbook. You will need to do some arithmetic to find the answer; R can be used as a calculator.
+
+* **Question 4.3** Answer the same question using `dplyr` code. Give your answer as a tibble containing a single row and a single column named `n`. Store this in a tibble called `employees_more_than_100k`. 
+
+* **Question 4.4** Do most New York employees make around the same amount, or are there some who make a lot more than the rest?
+
+**Question 5** The tibble `gapminder` from the `gapminder` library gives data on life expectancy, GDP per capita, and population by country. In this exercise we will visualize the relationship between life expectancy and GDP per capita. 
+
+* **Question 5.1** Form a tibble called `gapminder_relevant` that contains data only for Asia and Europe in the year 1987.  
+
+* **Question 5.2**  On one graph, create a scatter plot of life expectancy versus GDP per capita. Color the points according to continent and vary the size of the points according to population. 
+
+* **Question 5.3** The textbook discussed using numeric position scales to transform an axis in a plot. Modify your `ggplot2` code from **Question 5.2** to include a log transformation on the x-axis using `scale_x_log10()`.
+
+* **Question 5.4**  Using the above two visualizations, select which of the following statements can be correctly inferred by including them in the following *vector* `gap_answers`. For those that you did not select, if any, explain why the statement cannot be made.
+
+  1. We observe more populous countries in the "Europe" cluster than in the "Asia" cluster. 
+  2. Countries with higher GDP per capita are associated with higher life expectancies, and we can also observe that countries in Asia are more correlated with lower GDP per capita than countries in Europe in 1987.  
+  3. Moving a unit of distance along the x-axis has the same effect in both visualizations.    
+  4. The GDP per capita for the majority of countries in Asia are practically 0 according to the first visualization. 
+
+* **Question 5.5**  The tibble `gapminder` contains five variables: `country`, `continent`, `year`, `lifeExp`, and `pop`. Are any of these categorical variables and, if so, what kind (e.g., nominal, ordinal, binary)? Are there any numerical variables and, if so, what kind (e.g., continuous, discrete)? 
+
+**Question 6** This question is a continuation of the [2017 Australian Marriage Law Postal Survey](https://www.abs.gov.au/ausstats/abs@.nsf/mf/1800.0) examined in **Question 10** from Chapter 4.
+
+* **Question 6.1** After forming the tibble `with_response`, give `ggplot2` code that reproduces the following plot.  
+
+  ![](images/abs_ggplot.png)
+
+* **Question 6.2**  Based on this figure, how would you respond to the statement: 
+
+  > "Because support for same-sex couples increases in areas with higher percentage of holders with at least Bachelor's degrees, we can say that if a state/territory has a higher percentage of holders with at least a Bachelor's degree, then the more that state/territory will support same-sex marriage."
+
+Is this a fair statement? Why or why not? 
+
+**Question 7** The dataset `ntl_icecover` from the package `lterdatasampler` gives data on ice freeze and thaw dates for lakes in the Madison, Wisconsin area from 1853 to 2019. The data includes lake names, dates of freeze-up and thaw, and duration of ice cover for Lakes Mendota and Monona. Pull up the help (`?ntl_icecover`) for more information on this dataset. 
+
+* **Question 7.1** The variable `ice_on` gives the freeze date for a given lake. Add a new variable to the tibble `ntl_icecover` called `days_to_freeze` that gives the number of days to the freeze date from the start of the calendar year. Assign the resulting tibble to the name `with_freeze`. 
+
+__HINT:__ The functions `year()` and `yday()` from the package `lubridate` can be helpful for determining the year and the day of the year from a date, respectively. Also note that for some years the freeze date may not occur until the next calendar year, e.g., the freeze date in Lake Mendota in 1875 was January 10, 1876. Calling `yday()` on this date would yield 10 when the correct figure is actually 375. Adjust the expression used in your `mutate()` call accordingly. 
+
+* **Question 7.2** Generate line plots showing days to the freeze date versus year, one for Lake Mendota and another for Lake Monona. The line plots should be given in a single overlaid figure and colored accordingly. Does there appear to be an association between the two variables? 
+
+* **Question 7.3** Let us place an arbitrary marker at the year 1936, approximately the half-way point between the year when data collection started and ended. Add a Boolean variable to `icecover_with_temp` called `before1936` that flags whether the year is before 1936. Then generate an overlaid histogram showing the distribution of annual mean air temperature for the periods 1853-1936 and 1937-2019. 
+
+* **Question 7.4** By comparing the "bulk" of the data in the distributions following the periods 1853-1936 and 1937-2019, does it appear that there are more days until the freezing date in recent history? Or is it more or less the same across both periods? 
+
+**Question 8** Economists John R. Lott and Carlisle E. Moody published a [widely circulated article in March 2020](https://econjwatch.org/articles/brought-into-the-open-how-the-us-compares-to-other-countries-in-the-rate-of-public-mass-shooters) on mass gun violence in the United States and the rest of the world. Its appendix references the following figure: 
+
+![](images/lott_moody_2020_figure3a.png)
+
+Read Lott and Moody's [paper](https://econjwatch.org/articles/brought-into-the-open-how-the-us-compares-to-other-countries-in-the-rate-of-public-mass-shooters) and then [the response paper](https://econjwatch.org/articles/the-importance-of-analyzing-public-mass-shooters-separately-from-other-attackers-when-estimating-the-prevalence-of-their-behavior-worldwide) written by economist Lankford on potential flaws in the data, specifically regarding whether public mass shootings and other types of attacks, e.g., acts of terrorism, can be viewed as a single form of violence. We will try to recreate this plot as well as we can, and then address some questions about the reasonableness of this visualization.
+
+* **Question 8.1** Use Lankford's spreadsheet data made available [here](https://econjwatch.org/file_download/1131/LankfordMar2020AppendixB.xlsx) in [his response paper](https://econjwatch.org/articles/the-importance-of-analyzing-public-mass-shooters-separately-from-other-attackers-when-estimating-the-prevalence-of-their-behavior-worldwide). This is the Lott and Moody data annotated with additional variables by Lankford. 
+
+Load the sheets "Foreign Cases 1448" and ""US Cases_43" into a tibble using the `read_xlsx()` function from the `readxl` package. Assign these tibbles to the names `foreign` and `usa` which correspond to the foreign and United States figures, respectively.  
+
+* **Question 8.2** What is the observational unit in each of these datasets? Note briefly some of the measurements corresponding to this observational unit. 
+
+* **Question 8.3** Form a tibble named `usa_relevant` from the United States figures that gives the year of the incident, the country, and Lankford's two Boolean variables indicating (1) if the perpetrator killed 4 or more victims and (2) if the attack was committed by member(s) of a terrorist organization or genocidal group. 
+
+* **Question 8.4** Repeat **Question 8.3**, but this time for the figures corresponding to the rest of the world. Assign the resulting tibble to the name `foreign_relevant`.
+
+Run the following code chunk. It applies some basic preprocessing necessary to complete the following steps:
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+foreign_relevant <- foreign_relevant |> 
+  drop_na(Year) |>
+  filter(if_any(everything(), function(x) x != "x")) |>
+  mutate(
+    Country = as.factor(Country),
+    across(where(is.character), as.numeric))
+usa_relevant <- usa_relevant |>
+  drop_na(Year)
+```
+
+* **Question 8.5** Form a tibble named `full_relevant` that contains both the figures corresponding to the United States (in `usa_relevant`) and the rest of the world (in `foreign_relevant`). 
+
+* **Question 8.6** Lott and Moody's visualization draws a comparison between the United States and the rest of the world. Add a new column to `full_relevant` called `is_usa` where each value in the column is `TRUE` if the country is "United States" and `FALSE` otherwise. Assign the resulting tibble back to the name `full_relevant`.
+
+* **Question 8.7** Form a tibble named `summarized_attacks` that gives the number of incidents that occurred in each year, with respect to the location of the incident (in the United States or in the rest of the world). Three variables should be present in the resulting tibble:  `Year`, `is_usa`, and `n` (the count). 
+
+* **Question 8.8** Finally, time to visualize! We have everything we need to recreate Lott and Moody's visualization. Using what you know about `ggplot` and the layered grammar of graphics, recreate their plot.
+
+* **Question 8.9** Let us now bring in Lankford's analysis. Filter the data to include (1) only those incidents that are known to have at least one perpetrator who killed 4 or more victims, and then (2) incidents known to have at least one perpetrator who killed 4 or more victims, *and* the attack was not committed by member(s) of a terrorist organization or genocidal group. For each case, repeat **Question 8.7** and **Question 8.8**. What do you observe? 
+
+* **Question 8.10** From your observations, do you find Lott and Moody's original visualization to be reasonable? Moreover, can it be used to say, in general terms, that the United States is a safer country when compared to the rest of the world? 
+
+**Question 9** This question is a continuation of *Question 10* from Chapter 4. 
+
+* **Question 9.1** Using the tibble `top_10`, generate a bar chart that visualizes the top 10 states with the highest average unemployment rate; the bars should be presented in order of increasing unemployment rate. Fill your bars according to the candidate winner for that state. Consider using a position scale to avoid any overlap in text labels. 
+
+* **Question 9.2** Does the bar chart reveal any possible associations between average unemployment rate and the candidate that received the most votes in the top 10 states with the highest average unemployment rates? 
+
+**Question 10: Visualizing commutes using `tidycensus`.** In this exercise, we will examine the way people commute for work using the census data and visualize the result. Let us begin by loading the libraries we need for the exercise.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(viridisLite)
+library(viridis)
+library(tidycensus)
+```
+
+As before, let us load the variables available for the 2019 1-year dataset. The destination is `acs1vars1, as shown next.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+acs1vars <- load_variables(year = 2019, dataset = "acs1")
+acs1vars
+```
+
+* **Question 10.1** Since our purpose is to explore the way people commute to work, let us guess what is necessary to get to the data. Let us collect all the rows where the concept contains the word "TRANSPORTATION" and store it in the name`trans0`.
+
+* **Question 10.2** By using `View()` to open the data frame `trans0`, you can visually examine the collection of all the variables related to `TRANSPORTATION`. By scrolling in the `View` window, you see that the first group with the prefix `B08006`is the general population broken down with the means of transportation and with the gender. So, let us collect all the variables whose name starts with `B08006` and store the variables in `trans1`. Do you have 51 rows in `trans1`?
+
+* **Question 10.3** Let us further screen this by collecting those whose label *ends* with `":"`. Let us store it in the name `trans2`.
+
+* **Question 10.4** Now we have a more manageable set of variables with just four in the three (male+female, male, and female) categories. Let us use the first four of the 12 collected. Store the four names in `trans_names`. You can pull the variable and take the prefix of size 4 or directly type the elements with the list construct `c`.
+
+* **Question 10.5** Query the census data for California at the county level with the names in `trans_names` with 2019 as the year and store it in `ca_trans`. Specify "B08006_001" as the summary variable.
+
+* **Question 10.6** Let us take the ratio of the four by dividing them by the summary variable. Save the result in a name `ca_trans0`. 
+
+* **Question 10.7** The suffix "002" is for transportation by cars. Let us generate a geographical presentation of how much of each county has workers "commuting by car". Use the color option "inferno" with scaled filling in a `scale_fill_viridis_c` layer. Add a title "People Commuting to/from Work by Car" to the plot.
+
+* **Question 10.8** The suffix "004" is for car-pooling. Let us generate a geographical presentation of how much of each county has workers commuting by car. Use the color option "inferno" with scaled filling in `scale_fill_viridis_c`. Add a title "People Commuting to/from Work by Car-pooling" to the plot.
+
+* **Question 10.9** Finally, the suffix "008" is for using public transportation. Let us generate a geographical presentation of how much of each county has workers "commuting by car. Use the color option "inferno" with scaled filling in `scale_fill_viridis_c`. Add a title "People Commuting to/from Work by Public Transportation" to the plot.
+
+* **Question 10.10** Do your visualizations reveal any relationships between geographical area and the census variable examined (e.g., commuting by car, public transportation, car-pooling)? 
+
 
 
 <!--

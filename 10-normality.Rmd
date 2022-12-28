@@ -923,4 +923,217 @@ The interested reader should confirm this visually by looking for the inflection
 
 It turns out this formula is a component of the Central Limit Theorem. We will explore this in more detail in the exercise set.  
 
+## Exercises 
 
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+```
+
+**Question 1** Suppose in the town of Raines, the rain falls throughout the year. A student created a record of 30 consecutive days whether there was a precipitation of at least a quarter inch. The observations are stored in a tibble named `rain_record`.
+
+```{r message=FALSE, warning=FALSE}
+rain_record <- tibble(had_rain = c(1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 
+                                   1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 
+                                   0, 0, 0, 0, 1, 0))
+rain_record
+```
+
+In the variable `had_rain`, `1` represents the day in which there was enough precipitation and `0` represents the day in which there was not enough precipitation.
+
+The Central Limit Theorem (CLT) tells us that the probability distribution of the *sum* or *average* of a large random sample drawn __with replacement__ will look roughly normal (i.e., bell-shaped), *regardless of the distribution of the population from which the sample is drawn*.
+
+* **Question 1.1** Let us visualize the precipitation distribution in Raines (given by `had_rain`) using a histogram. Plot the histogram under density scale so that the y-axis shows the chance of the event. Use only 2 bins.  
+
+
+  It looks like there is about a 40% chance of rain and a 60% chance of no rain, which definitely does not look like a normal distribution. The proportion of rainy days in a month is equal to the average number of `1`s that appear, so the CLT should apply if we compute the sample proportion of rainy days in a month many times.
+
+* **Question 1.2** Let us examine the Central Limit Theorem using `rain_record`. Write a function called `rainy_proportion_after_period` that takes a `period` number of days to simulate as input. The function simulates `period` number of days by sampling from the variable `had_rain` in `rain_record` *with replacement*. It then returns the *proportion* of rainy days (i.e., `1`) in this sample as a double.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  rainy_proportion_after_period(5) # an example call
+  ```
+
+* **Question 1.3** Write a function `rainy_experiment()` that receives two arguments, `days` and `sample_size`, where `days` is the number of days in Raines to simulate and `sample_size` is the number of times to repeat the experiment. It executes the function `rainy_proportion_after_period(days)` you just wrote `sample_size` number of times. The function returns a tibble with the following variables:  
+
+  * `iteration`, for the rounds `1:sample_size`
+  * `sample_proportion`, which gives the sample proportion of rainy days in each experiment 
+
+* **Question 1.4** Here is one example call of your function. We simulate 30 days following the same regimen the student did in the town of Raines, and repeat the experiment for 5 times.     
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  rainy_experiment(30, 5)
+  ```
+
+  The CLT only applies when sample sizes are "sufficiently large." Let us try a simulation to develop a sense for how the distribution of the sample proportion changes as the sample size is increased.
+
+  The following function `draw_ggplot_for_rainy_experiment()` takes a single argument `sample_size`. It calls your `rainy_experiment()` with the argument `sample_size` and then plots a histogram from the sample proportions generated.   
+
+  ```{r eval=FALSE}
+  draw_ggplot_for_rainy_experiment <- function(sample_size) {
+    g <- rainy_experiment(30,sample_size) |> 
+      ggplot(aes(x = sample_proportion)) +
+      geom_histogram(aes(y = after_stat(density)),
+                     fill = "darkcyan", 
+                     color="gray", 
+                     bins=50)
+    return(g)
+  }
+  draw_ggplot_for_rainy_experiment(10)
+  ```
+
+  Play with different calls to `draw_ggplot_for_rainy_experiment()` by passing in different sample size values. For what value of `sample_size` do you begin to observe the application of the CLT? What does the shape of the histogram look like for the value you found?    
+
+**Question 2** The CLT states that the standard deviation of a *normal distribution* is given by: 
+
+$$
+\frac{\text{SD of distribution}}{\sqrt{\text{sample size}}}
+$$
+
+Let us test that the *SD of the sample mean* follows the above formula using flight delays from the tibble `flights` in the `nycflights13` package. 
+
+```{r eval=FALSE}
+nycflights_sd <- flights |>
+  summarize(sd = sd(dep_delay, na.rm = TRUE)) |> 
+  pull(sd)
+nycflights_sd
+```
+
+* **Question 2.1**  Write a function called `theory_sd` that takes a sample size `sample_size` as its single argument. It returns the theoretical standard deviation of the mean for samples of size `sample_size` from the flight delays according to the Central Limit Theorem. 
+
+  ```{r eval=FALSE}
+  
+  theory_sd(10) # an example call
+  ```
+
+* **Question 2.2** The following function `one_sample_mean()` simulates one sample mean of size `sample_size` from the `flights` data. 
+
+  ```{r eval=FALSE}
+  one_sample_mean <- function(sample_size) {
+    one_sample_mean <- flights |>
+      slice_sample(n = sample_size, replace = FALSE) |>
+      summarize(mean = mean(dep_delay, na.rm = TRUE)) |>
+      pull(mean)
+    return(one_sample_mean)
+  }
+  
+  one_sample_mean(10) # an example call
+  ```
+
+  Write a function named `sample_sd` that receives a single argument: a sample size `sample_size`. The function simulates 200 samples of size `sample_size` from `flights`. The function returns the standard deviation of the 200 sample means. This function should make repeated use of the `one_sample_mean()` function above. 
+
+* **Question 2.3** The chunk below puts together the theoretical and sample SDs for flight delays for various sample sizes into a tibble called `sd_tibble`.
+
+  ```{r eval=FALSE}
+  sd_tibble <- tibble(
+      sample_size = seq(10, 100, 5),
+      theory_sds = map_dbl(sample_size, theory_sd),
+      sample_sds = map_dbl(sample_size, sample_sd)
+      ) |>
+    pivot_longer(c(theory_sds,sample_sds), 
+                 names_to = "category", 
+                 values_to = "sd")
+    
+  sd_tibble
+  ```
+
+  Plot these theoretical and sample SD quantities from `sd_tibble` using either a line plot or scatter plot with `ggplot2`. A line plot may be easier to spot differences between the two quantities, but feel free to use whichever visualization makes most sense to you. Regardless, your visualization should show both quantities in a single plot.  
+
+* **Question 2.4**  As the sample size increases, do the theory and sample SDs change in a way that is consistent with what we know about the Central Limit Theorem?
+
+**Question 3.** In the textbook, we examined judges' evaluations of contestants. We have another example here with a slightly bigger dataset. The data is from the evaluation of applicants to a scholarship program by four judges. Each judge evaluated each applicant on a scale of 5 points. The applicants have already gone through a tough screening process and, in general, they are already high achievers. 
+
+To begin, let us load the data into `applications` from the `edsdata` package.
+
+```{r message=FALSE, warning=FALSE}
+library(edsdata)
+applications
+```
+
+* **Question 3.1** If the observational unit is defined as the score an applicant received by some judge, then the current presentation of the data are not tidy (why?). Apply a pivot transformation to `applications` so that three variables are apparent in the dataset: `Last` (last name of the student), `Judge`(the judge who scored the student), and `Score` (the score the student received). Assign the resulting tibble to the name `app_tidy`. 
+
+* **Question 3.2** Use the `scale` function to obtain the scaled version of the scores with respect to each judge. Add a new variable to `app_tidy` called `Scaled` that contains these scaled scores. Assign the resulting tibble to the name `with_scaled`.
+
+* **Question 3.3** Which of the following statements, if any, are accurate based on the tibble `with_scaled`? 
+
+  1. Arnold's scaled Judge Mary score is about 1.9 standard deviations higher than the mean score Arnold received from the four different judges.  
+  2. The score Judge Mary gave to Baxter is roughly 0.02 standard deviations below Judge Mary's mean score over all applicants. 
+  3. Based on the raw score alone, we can tell the score Arnold received from Judge Mary is higher than the average score Judy Mary gave. 
+  4. The standard deviation of Judge Mary's scaled scores is higher than the standard deviation of Judge Olivia's scaled scores. 
+
+* **Question 3.4** Add two new variables to `with_scaled`, `Total Raw` and `Total Scaled`, that gives the total raw score and total scaled score, respectively, for each applicant. Save the resulting tibble to the name `total_scores`. 
+
+* **Question 3.5** Sort the rows of the data in `total_scores` in descending order of `Total Raw` and create a variable `Raw Rank` that gives the index of the sorted rows. Store the resulting tibble in the name `app_raw_sorted`. Then use `total_scores` to sort the rows in descending order of `Total Scaled` and, likewise, create a variable `Scaled Rank` that gives the index of the row when sorted this way. Store the result in `app_scaled_sorted`.
+
+* **Question 3.6** Join the results from `app_raw_sorted` with `app_scaled_sorted` using an appropriate join function. The resulting tibble should contain five variables: the applicant's last name, their total raw score, total scaled score, the raw "rank", and the scaled "rank". Assign the resulting tibble to the name `ranks_together`. 
+
+* **Question 3.7** Create a new variable `Rank difference` that gives the difference between the raw rank and the scaled rank. Assign the resulting tibble back to the name `ranks_together`. 
+
+* **Question 3.8** For which applicant does the first rank difference occur? For which applicant does the largest rank difference occur? 
+
+* **Question 3.9** Why do you think there are differences in the rankings given by the raw and scaled scores? Does the use of scaling bring any benefit when making a decision about which applicant should be granted admission? Which one would you choose? 
+
+* **Question 3.10** How does the ranking change when removing applicants with large discrepancies in ranking? Remove Baxter from the dataset and then repeat all above steps. What differences do you observe in the ranking? Do the new findings change your answer to **Question 3.9**? 
+
+**Question 4.** Recall that the Central Limit Theorem states that the distribution of the average of independent and identically distributed samples gets closer to a normal distribution as we increase the number of samples. We have used the sample mean for examining the phenomenon, but let us try a different statistic -- the sample variance -- and see if the phenomenon holds. Moreover, we will compute this statistic using some quantity we will make up that is not normally distributed, and see if the Central Limit Theorem still applies regardless of the underlying quantity we are using. 
+
+For this exploration, we will continue our examination of departure delays in the `flights` tibble from `nycflights13`. 
+
+__Note:__ Be careful when dealing with missing values for this problem! For this problem, it is enough to simply eliminate missing values in the `arr_delay` and `dep_delay` variables. 
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+library(nycflights13)
+flights <- flights |> 
+  drop_na()
+```
+
+* **Question 4.1** The quantity we will examine here is the *absolute difference* in departure delay (`dep_delay`) and arrive delay (`arr_delay`). Add a new variable called `dep_arr_abs_diff` that gives this new quantity. Assign the resulting tibble to the name `flights_with_diff`. 
+
+* **Question 4.2** Assuming that we can treat the `flights_with_diff` tibble as the *population* of all flights that departed NYC, compute the population variance of the `dep_arr_abs_diff` variable. Assign the resulting double to the name `pop_var_abs_diff`.   
+
+* **Question 4.3** What is the max of the absolute differences in `dep_arr_abs_diff`? What is the mean of them? Store the answers in the names `max_diff` and `mean_diff`, respectively. How about the quantile values at 0.5, 0.15, 0.35, 0.50, 0.65, 0.85, 0.95, and 0.99? Store the quantile values in `quantile_values`.
+
+* **Question 4.4** Plot a histogram of `dep_arr_abs_diff` from `flights_with_diff` in density scale with 30 bins. Add to the histogram the point on the x-axis indicating the max, the mean, the 0.5 quantile, and the 0.99 quantile. Use `"black"` for the 0.99 quantile and `"red"` for the max. Use two other different colors for the mean and the median.
+
+* **Question 4.5** Write a function `var_from_sample` that receives a single argument `n_sample`. The function samples `n_samples` from the the tibble `flights_with_diff` without replacement, and computes the *sample variance* in the new variable `dep_arr_abs_diff` we created. The sample variance is then returned. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  # example calls
+  var_from_sample(10)
+  var_from_sample(100)
+  var_from_sample(1000)
+  ```
+
+* **Question 4.6** Write a function called `hist_for_sample` that receives a single argument `sample_size`. This function should accomplish the following: 
+
+  1. Call repeatedly the function `var_from_sample` with the given `sample_size`, say, 1,000 times. 
+  2. Generate a histogram of the simulated sample statistics under density scale. 
+  3. Annotate this histogram with (1) a vertical blue line showing where the population parameter is (`pop_var_abs_diff`) and (2) a red point indicating the *mean* of the generated sample statistics. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  hist_for_sample <- function(sample_size) {
+  
+  }
+  ```
+
+  The following code calls your function with different sample sizes: 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  map(c(10, 20, 50, 100, 1000, 10000), hist_for_sample)
+  ```
+
+* **Question 4.7** As the sample size is increased, does the variance of the simulated statistics increase or decrease? How can you tell?
+
+* **Question 4.8** As the sample size is increased, the red point moves closer and closer to the vertical blue line. Is this observation a coincidence due to the data we used? If not, what does it suggest about the mean computed from our sample and the population parameter? 
+
+* **Question 4.9** Alex, Bob, and Jeffrey are grumbling about whether we can use the Central Limit Theorem (CLT) to help think about what the histograms should look like in the above parts. 
+
+  * Alex believes we cannot use the CLT since we are looking at the sampling histogram of the test statistic and we do not know what the probability distribution looks like.
+  * Bob believes the CLT does not apply because the distribution of `dep_arr_abs_diff` is not normally distributed. 
+  * Jeffrey believes that both of these concerns are invalid, and the CLT is helpful.
+
+  Who is right? Are they all wrong? Explain your reasoning. 

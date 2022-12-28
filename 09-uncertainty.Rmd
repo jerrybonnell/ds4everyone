@@ -762,3 +762,348 @@ We end this section with some points to keep in mind when applying resampling.
 * Resampling does not work well when estimating extreme values, for instance, estimating the minimum or maximum value of a population.
 * The distribution of the statistic should look roughly "bell" shaped. The histogram of the resampled statistics will be a hint.  
 
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+**Question 1.** The following vector `lucky_numbers` contains several numbers: 
+
+```{r message=FALSE, warning=FALSE}
+lucky_numbers <- c(5, 10, 17, 25, 31, 36, 43)
+lucky_numbers
+```
+
+Using the function `quantile` as shown in the textbook, determine the lucky number that results from the order statistics: (1) min, (2) max, and (3) median. 
+
+**Question 2** The University of Lost World has conducted a staff and faculty survey regarding their most favorite rock bands. The university received 200 votes, which are summarized as follows:
+
+* Pink Floyd (35%)
+* Led Zeppelin (22%)
+* Allman Brothers Band (20%)
+* Yes (12%)
+* Uncertain (11%)
+
+In the following, we will use `"P"`, `"L"`, `"A"`, `"Y"`, and `"U"` to refer to the artists. The following tibble `rock_bands` summarizes the information: 
+
+```{r message=FALSE, warning=FALSE}
+rock_bands <- tibble(
+  band_initial = c("P", "L", "A", "Y", "U"),
+  proportion = c(0.35, 0.22, 0.20, 0.12, 0.11), 
+  votes = proportion * 200
+)
+rock_bands
+```
+
+These proportions represent just a *sample* of the population of University of Lost World. We will attempt to estimate the corresponding population parameters - the *proportion* of listening preference for each rock band in the population of University of Lost World staff and faculty. We will use confidence intervals to compute a range of values that reflects the uncertainty of our estimate.
+
+* **Question 2.1** Using `rock_bands`, generate a tibble `votes` containing 200 rows corresponding to the votes. You can group by `band_initial` and repeat each band's row `votes` number of times by using `rep(1, each = votes)` within a `slice()` call (remember computing *within groups*?). Then form a tibble with a single column named `vote`. 
+
+  Here is what the first few rows of this tibble should look like:
+
+  | vote |
+  |------|
+  | A    |
+  | A    |
+  | A    |
+  | A    |
+  | A    |
+  | ...  |
+
+
+  We will conduct bootstrapping using the tibble `votes`.
+
+* **Question 2.2** Write a function `one_resampled_statistic(num_resamples)` that receives the number of samples to sample *with replacement* (why not without?) from `votes`. The function resamples from the tibble `votes` `num_resamples` number of times and then computes the proportion of votes for each of the 5 rock bands. It returns the result as a  *tibble* in the same form as `rock_bands`, but containing the resampled votes and proportions from the bootstrap. 
+
+  Here is one possible tibble after running `one_resampled_statistic(100)`. The answer will be different each time you run this! 
+
+  | vote | votes | proportion |
+  |------|-------|------------|
+  | A    | 23    | 0.23       |
+  | L    | 19    | 0.19       |
+  | P    | 40    | 0.40       |
+  | U    | 7     | 0.07       |
+  | Y    | 11    | 0.11       |
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  one_resampled_statistic <- function(num_resamples) {
+  
+  }
+  
+  one_resampled_statistic(100) # a sample call
+  ```
+
+* **Question 2.3**  Let us set two names, `num_resamples` and `trials`, to use when conducting the bootstrapping. `trials` is the desired number of resampled proportions to simulate for each of the bands. This can be set to some large value; let us say 1,000 for this experiment. But what value should `num_resamples` be set to, which will be the argument passed to `one_resampled_statistic(num_resamples)` in the next step? 
+
+  The following code chunk conducts the bootstrapping using your `one_resampled_statistic()` function and the names `trials` and `num_resamples` you created above. It stores the results in a vector `bstrap_props_tibble`.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  bstrap_props_tibble <- replicate(n = trials, 
+                                   one_resampled_statistic(num_resamples), 
+                                   simplify = FALSE) |>
+                         bind_rows()
+  bstrap_props_tibble
+  ```
+
+* **Question 2.4** Generate an overlaid histogram using `bstrap_props_tibble`, showing the five distributions for each band. Be sure to use a positional adjustment to avoid stacking in the bars. You may also wish to set an alpha to see each distribution better. Use 20 for the number of bins.  
+
+  We can see significant difference in the popularity between some bands. For instance, we see that the bootstrapped proportions for $P$ is significantly higher than $Y$'s by virtue of no overlap between their two distributions; conversely, $U$ and $Y$ overlap each other completely showing no significant preference for $U$ over $Y$ and vice versa. Let us formalize this intuition for these three bands using an approximate 95% confidence interval. 
+
+* **Question 2.5**  Define a function `cf95` that receives a *vector* `vec` and returns the approximate "middle 95%" using `quantile`. 
+
+  Let us examine the 95% confidence intervals of the bands $P$, $Y$, and $U$, respectively.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  bstrap_props_tibble |>
+    filter(vote %in% c("P", "Y", "U")) |>
+    group_by(vote) |>
+    summarize(ci = list(cf95(proportion))) |>
+    unnest_wider(ci)
+  ```
+
+* **Question 2.6**  By looking at the upper and lower endpoints of each interval, and the overlap between intervals (if any), can you say whether $P$ is more popular than $Y$ or $U$? How about for $Y$, is $Y$ more popular than $U$?   
+
+* **Question 2.7** Suppose you computed the following approximate 95% confidence interval for the proportion of band $P$ votes. 
+
+  $$
+  [.285, .42]
+  $$
+
+  Is it true that 95% of the population of faculty lies in the range $[.285, .42]$? Explain your answer.
+
+* **Question 2.8**  Can we say that there is a 95% probability that the interval $[.285, .42]$ contains the *true* proportion of the population who listens to band $P$? Explain your answer.
+
+* **Question 2.9**  Suppose that you created 80%, 90%, and 99% confidence intervals from one sample for the popularity of band $P$, but forgot to label which confidence interval represented which percentages. Match the following intervals to the percent of confidence the interval represents.
+
+  * $[0.265, 0.440]$
+  * $[0.305, 0.395]$
+  * $[0.285, 0.420]$
+
+**Question 3.** Recall the tibble `penguins` from the package `palmerpenguins` includes measurements for 344 penguins in the Palmer Archipelago. Let us try using the method of resampling to estimate using confidence intervals some useful parameters of the population.
+
+```{r message=FALSE, warning=FALSE}
+library(palmerpenguins)
+penguins
+```
+
+* **Question 3.1** First, let us focus on estimating the *mean* body mass of the penguins, available in the variable `body_mass_g`. Form a tibble named `penguins_pop_df` that is identical to `penguins` but does not contain any missing values in the variable `body_mass_g`. 
+
+  We will imagine the 342 penguins in `penguins_pop_df` to be the *population* of penguins of interest. Of course, direct access to the population is almost never possible in a real-world setting. However, for the purposes of this question, we will claim clairvoyance and see how close the method of resampling approximates some population *parameter*, i.e., the mean body mass of penguins in the Palmer Archipelago.  
+
+* **Question 3.2** What is the mean body mass of penguins in `penguins_pop_df`? Store it in `pop_mean`.
+
+* **Question 3.3** Draw a sample *without replacement* from the population in `penguins_pop_df`. Because samples can be expensive to collect in real settings, set the sample size to 50.  
+
+
+  The sample in `one_sample` is what we will use to *resample* from a large number of times. We saw in the textbook a function that resamples from a tibble, computes a statistic from it, and returns it. Following is the function: 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  one_sample_value <- function(df, label, statistic) {
+    sample_value <- df |> 
+      pull({{label}}) |>
+      sample(replace = TRUE) |>
+      statistic()
+    return(sample_value)
+  }
+  ```
+
+* **Question 3.4** What is the size of the resampled tibble when `one_sample` is passed as an argument? Assign your answer to the name `resampled_size_answer`.
+
+  1. 342 
+  2. 684 
+  3. 50
+  4. 100 
+  5. 1
+
+* **Question 3.5** Using `replicate`, create 1,000 resampled mean statistics from `one_sample` using the variable `body_mass_g`. Assign your answer to the name `resampled_means`.
+
+* **Question 3.6** Let us combine the steps **Question 3.4** and **Question 3.5** into a function. Write a function `resample_mean_procedure` that takes no arguments. The function draws a sample of size 50 from the population (**Question 3.4**), and then generates 1,000 resampled means from it (**Question 3.5**) which are then returned. 
+
+* **Question 3.7** Write a function `get_mean_quantile` that takes a single argument `desired_area`. The function performs the resampling procedure using `resample_mean_procedure` and returns the middle `desired_area` interval (e.g., 90% or 95%) as a vector. 
+
+  Here is an example call that obtains an approximate 90% confidence interval. Also shown is the population mean. Does your computed interval capture the parameter? Try running the cell a few times. The interval printed should be different each time you run the code chunk.  
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  print(get_mean_quantile(0.9))
+  print(pop_mean)
+  ```
+
+* **Question 3.8** Repeat the `get_mean_quantile` procedure to obtain 100 different approximate 90% confidence intervals. Assign the intervals to the name `mean_intervals`. 
+
+  The following code chunk organizes your results into a tibble named `interval_df`. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  interval_df <- tibble(
+    replication = 1:100,
+    left = mean_intervals[1,],
+    right = mean_intervals[2,]
+  )
+  interval_df
+  ```
+
+* **Question 3.9** Under an approximate 90% confidence interval, how many of the above 100 intervals do you expect captures the population mean? Use what you know about confidence intervals to answer this; do not write any code to determine the answer. 
+
+  The following code chunk visualizes your intervals with a vertical line showing the parameter:
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  ggplot(interval_df) + 
+    geom_segment(aes(x = left, y = replication, 
+                     xend = right, yend = replication), 
+                 color = "magenta") +
+    geom_vline(xintercept = pop_mean, color = "red")
+  ```
+
+* **Question 3.10** Now feed the tibble `interval_df` to a filter that keeps only those rows whose approximate 90% confidence interval includes `pop_mean`. How many of those intervals actually captured the parameter? Store the number in `number_captured`.
+
+**Question 4.** This problem is a continuation of *Question 3*. We will now streamline the previous analysis by generalizing the functions we wrote. This way we can try estimating different parameters and compare the results.  
+
+* **Question 4.1** Let us first generalize the `resample_mean_procedure` from **Question 3.6**. Call the new function `resample_procedure`. The function should receive the following arguments:  
+
+  * `pop_df`, a tibble 
+  * `label`, the variable under examination. Recall the use of `{{` to refer to it properly. 
+  * `initial_sample_size`, the sample size to use for the initial draw from the population
+  * `n_resamples`, the number of resampled statistics to generate 
+  * `stat`, the statistic function 
+
+  The function returns a vector containing the resampled statistics. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  resample_procedure <- function(pop_df, 
+                                 label, 
+                                 initial_sample_size, 
+                                 n_resamples, 
+                                 stat) {
+  
+  }
+  ```
+
+* **Question 4.2** Generalize the function `get_mean_quantile` from **Question 3.7**. Call the new function `get_quantile`. This function receives the same arguments as `resample_mean_procedure` with the addition of one more argument, `desired_area`, the interval width. The function then calls `resample_procedure` to obtain the resampled statistics. The function returns the middle quantile range of these statistics according to `desired_area`, e.g., the "middle 90%" if `desired_area` is 0.9. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  get_quantile <- function(pop_df, 
+                           label, 
+                           initial_sample_size, 
+                           n_resamples,
+                           stat, 
+                           desired_area) {
+  
+  } 
+  ```
+
+* **Question 4.3** We can now package all the actions into one function. Call the function `conf_interval_test`. The function receives the same arguments as `get_quantile` with one new argument, `num_intervals`, the number of confidence intervals to generate. The function performs the following actions (in order):
+
+  * Compute the population parameter from `pop_df` (assuming access to the population is possible in `pop_df`) by running the function `stat_func` on the variable `label`. Recall the use of `{{` to refer to `label` properly. Assign this number to the name `pop_stat`.   
+  * Obtain `num_intervals` many confidence intervals by repeated calls to the function `get_quantile`. Assign the resulting intervals to the name `intervals`.
+  * Arrange the results in `intervals` into a tibble named `interval_df` with three variables: `replication`, `left`, and `right`.
+  * Print the number of confidence intervals that capture the parameter `pop_stat`. 
+  * Visualize the intervals with a vertical red line showing where the parameter is. 
+
+  __NOTE__: If writing this function seems daunting, don't worry! All of the code you need is already written. You should be able to simply copy your work from this question and from the steps in **Question 3**.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  conf_interval_test <- function(pop_df, 
+                                 label, 
+                                 init_samp_size, 
+                                 n_resamples, stat_func, 
+                                 desired_area, num_intervals) {
+  
+  }
+  ```
+
+  Let us now try some experiments. 
+
+* **Question 4.4** Run `conf_interval_test` on `penguins_pop_df` to estimate the mean body mass in the population using the variable `body_mass_g`. Set the initial draw size to 50 and number of resampled statistics to 1000. Generate 100 different approximate 90% confidence intervals.   
+
+* **Question 4.5** Repeat **Question 4.4**, this time estimating the *max* body mass in the population instead of the *mean*. 
+
+* **Question 4.6** Repeat **Question 4.4**, this time increasing the initial draw size. First try 100, then 200, and 300. 
+
+* **Question 4.7** For the max-based estimates, why is it that so many of the 90% confidence intervals are unsuccessful in capturing the parameter?  
+
+* **Question 4.8** For the mean-based estimates, at some point when increasing the initial draw size from 50 to 300, all of the 100 differently generated confidence intervals capture the parameter. Given what we know about 90% confidence intervals, how can this be possible? 
+
+**Question 5** Let's return to the College of Groundhog CSC1234 simulation from **Question 6** in Chapter 8. We evaluated the claim that the final scores of students from Section B were significantly lower than those from Sections A and C by means of a *permutation test*. Permutation analysis seeks to quantify what the null distribution looks like. For this reason, it tries to *break* whatever structure may be present in the dataset and quantify the patterns we would expect to see under a chance model. 
+
+Recall the tibble `csc1234` from the `edsdata` package: 
+
+```{r message=FALSE, warning=FALSE}
+library(edsdata)
+csc1234
+```
+
+* **Question 5.1** How many students are in each section? Form a tibble that gives an answer and assign the resulting tibble to the name `section_counts`. 
+
+  There is another way we can approach the analysis. We can quantify the uncertainty in the mean score difference between two sections by estimating a *confidence interval* with the *resampling* technique. Under this scheme, we assume that each section performs identically and that the student scores available in each section (116 from `A`, 128 from `B`, and 144 from `C`) is a sample from some larger population of student scores for the CSC1234 course, which we do not have access to. 
+
+  Thus, we will sample *with* replacement from each section. Then, as with the permutation exercise, we can compute the mean difference in scores for each pair of sections ("A-B", "C-B", "C-A") using the bootstrapped sample. The interval we obtain from this process can be used to test the hypothesis that the average score difference is different from chance.
+
+* **Question 5.2** Recall the work from **Question 6** in Chapter 8. Copy over your work for creating the function `mean_differences` and the observed group mean differences in `observed_differences`. 
+
+* **Question 5.3** Generate an overlaid histogram for `Score` from `csc1234` showing three distributions in the same plot, the scores for Section A, for Section B, and for Section C. Use 10 bins and a `dodge` positional adjustment this time to compare the distributions.
+
+  Resampling calls for sampling *with replacement*. Suppose that we are to resample scores with replacement from the "Section A" group, then likewise for the "Section B" group, and finally, the "Section C" group. Then we compute the difference in means between the groups (`A`-`B`, `C`-`B`, `C`-`A`). Would the bulk of this distribution be centered around 0? Let's find out! 
+
+* **Question 5.4**  State a null and alternative hypothesis for this problem. 
+
+  Let us use resampling to build a confidence interval and address the hypothesis. 
+
+* **Question 5.5**  Write a function `resample_tibble` that takes a tibble as its single argument, e.g., `csc1234`. The function samples `Score` __with replacement WITHIN each group__ in `Section`. It overwrites the variable `Score` with the result of the sampling. The resampled tibble is returned.  
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  resample_tibble(csc1234)  # an example call
+  ```
+
+* **Question 5.6**  Write a function `csc1234_one_resample` that takes no arguments. The function resamples from `csc1234` using the function `resample_tibble`. It then computes the mean difference in scores using the `mean_differences` function you wrote from the permutation test. The function returns a one-element *list* containing a vector with the computed differences. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  csc1234_one_resample()  # an example call
+  ```
+
+* **Question 5.7**  Using `replicate`, generate 10,000 resampled mean differences. Store the resulting vector in the name `resampled_differences`. 
+
+  The following code chunk organizes your results into a tibble `differences_tibble`: 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  differences_tibble <- tibble(
+          `A-B` = map_dbl(resampled_differences, function(x) x[1]), 
+          `C-B` = map_dbl(resampled_differences, function(x) x[2]),
+          `C-A` = map_dbl(resampled_differences, function(x) x[3])) |>
+    pivot_longer(`A-B`:`C-A`, 
+                 names_to = "Section Pair", 
+                 values_to = "Statistic")  |>
+    mutate(`Section Pair` = 
+             factor(`Section Pair`, levels=c("A-B", "C-B", "C-A")))
+  differences_tibble
+  ```
+
+* **Question 5.8**  Form a tibble named `section_intervals` that gives an approximate 95% confidence interval for each pair of course sections in `resampled_differences`. The resulting tibble should look like: 
+
+  | Section Pair | left | right |
+  |--------------|------|-------|
+  | A-B          | ...  | ...   |
+  | C-A          | ...  | ...   |
+  | C-B          | ...  | ...   |
+
+  To accomplish this, use `quantile` to summarize a grouped tibble and then a pivot function. Don't forget to `ungroup`!
+
+  The following plots a histogram of your results for each course section pair. It then annotates each histogram with the approximate 95% confidence interval you found. 
+
+  ```{r eval=FALSE}
+  print(observed_differences)
+  differences_tibble |>
+    ggplot() +
+    geom_histogram(aes(x = Statistic, y = after_stat(density)),
+                       color = "gray", fill = "darkcyan", bins = 20) + 
+    geom_segment(data = section_intervals, 
+                 aes(x = left, y = 0, xend = right, yend = 0), 
+                     size = 2, color = "salmon") + 
+    facet_wrap(~`Section Pair`)
+  ```
+
+  Note how the observed mean score differences in `observed_differences` fall squarely in its respective interval (if you like, plot the points on your visualization!). 
+
+* **Question 5.9** Draw the conclusion of the hypothesis test for each of the three confidence intervals. Do we reject the null hypothesis? If not, what conclusion can we make?  
+
+* **Question 5.10**  Suppose that the 95% confidence interval you found for "A-B" is $[-9.35, -1.95]$. Does this mean that 95% of the student scores were between $[-9.35, -1.95]$? Why or why not? 
+

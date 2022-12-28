@@ -1276,3 +1276,265 @@ str_sub(birds[1], end = last_dash - 1)
 ```
 
 What would the answer be for extracting `Little-egret`? Try it out!
+
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+library(gapminder)
+```
+
+**Question 1.** Let us explore the limit of the double data type. According to the textbook, the largest double value is greater than or equal to `1.79e+308`. Can you find the largest digit $d$ (d must be one of $\{0..9\}$) such that `1.79de+308` is not `Inf`? Let us do this with a simple trial. Type `1.79de+308` with the `d` substituted with the values $0, 1, 2, 3, ...$ in this order, and stop when the value presented after pressing the return key becomes `Inf`.
+
+After examining the values, store in a variable `the_digit` the value of `d` you have found.
+
+**Question 2.** Let us learn how to convert data types. Recall `as.character`, `as.double`, and `as.integer` convert a given value to a string, a double, and an integer, respectively. We can also test to see if a value is a certain data type by replacing `as` with `is`. Recall also that to specify a string with its character sequence we can use either a matching pair of double quotation marks or a matching pair of single quotation marks sandwiching the sequence.
+
+Following is a string called `a_happy_string` and a double named `double_trouble`: 
+
+```{r warning=FALSE, message=FALSE}
+a_happy_string <- "-4.5"
+double_trouble <- 81.9
+```
+
+Here are some findings based on the above functions. Which of the following statements are `TRUE`? 
+
+1. `as.double(a_happy_string)` produces an error because we cannot covert a string to a double. 
+2. `as.integer(a_happy_string)`  returns the value $-4.5$. 
+3. `as.character(double_trouble)` returns the value $"81.9"$. 
+4. `is.integer(1)` returns `TRUE`. 
+
+**Question 3.** Let us extract some information from strings. Following are three strings stored in three separate names. 
+
+```{r warning=FALSE, message=FALSE}
+str1 <- "State"
+str2 <- "Department"
+str3 <- "Office"
+```
+
+Do the following three tasks with these three strings:
+
+* Inquire the length of each string, and store the three length values to `l1`, `l2`, and `l3`, respectively.
+* Connect the three strings in the order of `str1`, `str2`, and `str3` using `paste` and `paste0`, and store the two results in `join1` and `join2`.
+* Obtain the substrings of `join1` between position pairs $(4,10)$, $(-7, -1)$, and $(8, 8)$. Store the substrings in `sub1`, `sub2`, and `sub3`, respectively.
+
+
+**Question 4.** Let us execute some operations to generate Boolean values. Use two variables `val1` and `val2` and assign them to the values `12.3` and `45.6`, respectively. Then put the two values in the six comparisons "equals", "not equals", "greater than", "greater than or equal to", "less than", and "less than or equal to". Store the six results in the variables `test1`, `test2`, `test3`, `test4`, `test5`, and `test6`, respectively.
+
+**Question 5.** Let us play with Boolean operations. Let `str4` be a string variable. Assign the value of `hammerhead` to `str4`. Then create three Boolean variables `check1`, `check2`, and `check3` and assign, to these variables, the results of testing if the length of `str4` is equal to 10, if the length of `str4` is less than 5, and if the substring of `str4` from positions 10 to 10 is equal to `"a"`. Print the three Boolean value, and then compute the "or" of the three values and the "and" of the three values, and store these results in the names `the_OR` and `the_AND`, respectively.
+
+**Question 6.** Suppose we have three Boolean names `tf1`, `tf2`, and `tf3`. Suppose we assign the following eight value pairs to them.
+
+* `FALSE`, `FALSE`, and `FALSE`
+* `FALSE`, `FALSE`, and `TRUE`
+* `FALSE`, `TRUE`, and `FALSE`
+* `FALSE`, `TRUE`, and `TRUE`
+* `TRUE`, `FALSE`, and `FALSE`
+* `TRUE`, `FALSE`, and `TRUE`
+* `TRUE`, `TRUE`, and `FALSE`
+* `TRUE`, `TRUE`, and `TRUE`
+
+Answer the value of `tf1 | !tf2 & tf3` in the four combinations, and store them in eight names `bool1`, `bool2`, ..., `bool8`.
+
+**Question 7.** Following are three Boolean expressions that evaluate to either `TRUE` or `FALSE`. Explain every step in the evaluation process before `TRUE` or `FALSE` is ultimately returned. 
+
+```{r warning=FALSE, message=FALSE}
+(2 - 1) == ((TRUE == TRUE) != FALSE)
+(10 - (FALSE/2 + max(TRUE, FALSE))) >= (TRUE + 1)
+(Inf > 5) == ((Inf > Inf) | (Inf >= Inf))
+```
+
+**Question 8.**  A student is diligently studying Boolean data types and is stumped by the following: 
+
+> I don't understand why `"Zoo" > "Napping"` is `TRUE` when "Napping" has more characters than "Zoo". But when I do `"ZZZ" > "ZZZping"`, it returns `FALSE` which makes sense because "ZZZping" has more characters than "ZZZ". So shouldn't the first expression evaluate to `FALSE` as well for the same reason `2 > 5` is `FALSE`? 
+
+What would you tell this student? Should we file a bug report to the R maintainers? 
+
+**Question 9.** Suppose we have four names `s1`, `s2`, `s3`, and `s4` that are defined as follows:
+
+```{r warning=FALSE, message=FALSE}
+s1 <- "Fine"
+s2 <- "Dine"
+s3 <- "Sine"
+s4 <- "Wine"
+```
+
+We then apply the following function and store the result in the name `snew`:
+
+```{r warning=FALSE, message=FALSE}
+snew <- paste(s1, s2, s3, s4)
+snew
+```
+
+* **Question 9.1**  What is the length of `snew`? Do not compute this manually! Use an R function. Store your answer in the name `snewlen`.
+
+* **Question 9.2**  How many times does `"in"` appear in `snew`? You may find this manually or by using an R function. Assign your answer to the name `intimes`.
+
+* **Question 9.3** Recall `str_sub( snew, a, b)` from `stringr` produces the substring of `snew` from position `a` to position `b`. Answer the combination of `a` and `b` that produces `"in"` such that `a` is the largest. This is also sometimes called a "right find" because the search is done from the right rather than the left. Store the combination of `a` and `b` you found in the names  `a` and `b`.
+
+**Question 10: Vector manipulations.** In this exercise we practice some basic construction and manipulation of vector data types.  
+
+* **Question 10.1.** Form a vector that contains the numbers 3, $\pi$, 4, 9, and $e$ (Euler's constant), in that order. Your solution should reference the constants $\pi$ and $e$ without having to define them explicitly. Assign it to the name `vec1`.
+
+* **Question 10.2.** Form a vector that contains the nine strings `"Dear"`, `"string"`, `","`, `"this"`, `"is"`, `"much"`, `"ado"`, `"about"`, and `" "`. Note that the last element is a string containing a single whitespace. Name this `vec2`.
+
+* **Question 10.3.** Form a vector that *appends* `vec2` after `vec1`. Call it `vec3`. What is the data type of this new vector `vec3`? Use an R function to determine this and assign that answer to the name `vec3_type`. Then observe the difference in data types between `vec1`, `vec2`, and `vec3`. 
+
+**Question 11: Sequences.** This exercise explores the use of vectors to form various sequences using the `seq()` function. Each of these questions should require only one line of code to compute the answer.
+
+* **Question 11.1** Form a vector that generates a sequence of numbers from 0 to 20 in steps of 2, e.g., 0, 2, 4, 6, 8, ..., 20. Assign this vector to the name `steps2`. 
+
+* **Question 11.2** Form a vector that generates a sequence containing multiples of 11 from 0 up to and including 1221. Assign this vector to the name `mult11`. 
+
+* **Question 11.3**  Form a vector that generates a sequence containing the first 20 powers of 4, e.g., $4^0 = 1$, $4^1 = 4$, $4^2 = 16$, etc. Assign your answer to the name `powers4`. 
+
+**Question 12: Element-wise operations.** A benefit of working with vectors is that we can use vectors to accomplish *element-wise* operations, that is, some operation that is applied to every element of a vector. What makes element-wise operations attractive to use is that they can be applied with a single line of code. This exercise explores some element-wise operations.  
+
+* **Question 12.1**  Let us compute the interest on several loans at once. 
+
+    - **Question 12.1.1** The vector `bank_loans` from the package `edsdata` contains 100,000 different loans. Here are the first few:  
+
+      ```{r eval=FALSE, warning=FALSE, message=FALSE}
+      bank_loans[1:14]
+      ```
+    - __Question 12.1.2__ Assuming an annual simple interest rate of 4%, compute the amount each borrower would owe after one year if no payments were made during that time toward the loan. That means we can multiply the loan amount by $1.04$ to get the amount owed after one year. Compute the amount owed for each loan in `bank_loans` after one year. Assign your answer to the name `amount_owed`.
+
+    - __Question 12.1.3__ What is the total amount of *interest* collected by the bank from all these loans after one year? Assign your answer to `total_interest_amount`. 
+
+* **Question 12.2** Suppose the population of Datatopia is growing steadily at 3% annually. On 1/1/2021, Datatopia had 1,821,411,277 people. Calculate the expected population of the country for the next 20 years. 
+
+    * **Question 12.2.1** Compute the expected population for the next 20 years as a 20-element vector, and store it in `p`. You can do this by first creating a sequence of 20 values `1..20`, powering 1.03 with the 20 values, and multiplying it by the initial population.
+
+    * **Question 12.2.2** Set `pop_2025` and `pop_2040` to the population estimates for 2025 and 2040, respectively. Then set `pop_2025_to_2040` to a vector containing the estimates from 2025 to 2040 (the years 2025 and 2040 are both inclusive). 
+
+    * **Question 12.2.3** What happens when you try to access the following element in the vector `pop_2025_to_2040`? 
+
+      ```{r eval=FALSE, warning=FALSE, message=FALSE}
+      pop_2025_to_2040[17]
+      ```
+    Are you surprised by the result? Should you expect an error when trying this? Why or why not? 
+    * **Question 12.2.4** Set `pop_2025_to_2040_reverse` to a vector containing the populations in `pop_2025_to_2040`, but in reverse order. That is, starting first from 2040 and ending with 2025. To do this, use an index sequence. 
+
+    * **Question 12.2.5**  Suppose that our population estimates for the years 2033 and 2034 are too unreliable to be useful and we would like to raise this error somehow. Flag this error in `pop_2025_to_2040` by setting the appropriate indices in `pop_2025_to_2040` to `NA`. `NA` is a special name that stands for "not a number". 
+
+    * **Question 12.2.6** The numbers in `pop_2025_to_2040` are large, which can sometimes be hard to interpret. Report the figures as *numbers in billions* instead. Accomplish this work using element-wise operation using a single line of R code and assign your answer to the name `pop_2025_to_2040_billions`.
+
+    * **Question 12.2.7** How many years had a population exceeding 3 billion? Use your vector `pop_2025_to_2040_billions` to answer this. You will need to use another element-wise operation. Assign the number to the name `more_than_3_bill`. If your answer is coming out as `NA`, be sure to read the help and look at any arguments you can use. 
+
+
+**Question 13: Exploring `stringr`.**  We have already learned how to do basic tasks with strings like inquiring about the number of characters in the string and finding substrings. But data science work often involves doing much more advanced tasks, e.g., splitting strings, replacing certain characters that match some pattern, etc. The `stringr` package from the tidyverse brings a suite of modern tools to use for working with strings in data science. Let's explore some of them in this second part. Be sure to bookmark [its cheatsheet for reference](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf). 
+
+`bands` is a character vector in the package `edsdata` that contains some band names:  
+
+```{r warning=FALSE, message=FALSE}
+bands
+```
+
+* **Question 13.1**  Obtain two copies of `bands`, one with every character in uppercase (e.g., LIKE THIS) and another with every character in lowercase (e.g., like this). Store the results in `upper` and `lower`, respectively. Use a `stringr` function. 
+
+* **Question 13.2** Here is another character vector, `bird_in_a_hand` , that looks a bit different from `bands`. Even though both are seen as *character vectors* in R, what is the difference between `bird_in_a_hand` and `bands`? 
+
+  ```{r warning=FALSE, message=FALSE}
+  bird_in_a_hand <- c("b","i","r","d",
+                      "","i","n","","a","",
+                      "h","a","n","d")
+  bird_in_a_hand
+  ```
+
+* **Question 13.3**  Repeat **Question 17.1**, but for `bird_in_a_hand`. Assign your answers to the names `upper_bird` and `lower_bird`, respectively.  
+
+* **Question 13.4** The `stringr` function `str_remove_all()` can be used to remove matched patterns in a string. For instance, we could remove all lowercase a's and b's from the character vector `bird_in_a_hand` as follows: 
+
+  ```{r warning=FALSE, message=FALSE}
+  str_remove_all(bird_in_a_hand, "[ab]")
+  ```
+
+Now take `bands` and modify it by removing each occurrence of a vowel in lowercase (`'a', 'e', 'i', 'o', 'u'`). Store the result in `devoweled`.
+
+**Question 14: Lists.** This exercise gives practice with the `list` data type. 
+
+* **Question 14.1** Using the function `list` create a list `courses` whose elements are `"MTH118"`, `"GEG2490"`, `"CSC160"`, `"CSC353"`, `"ACC419"`, `"PSC356"`, and `"BIL155"`. Then:
+
+* Sort the list using the function `str_sort()` and store the result in `courses_sorted`.
+* Apply `str_sub` from position 4 to position 6 to the elements of `courses` and apply `str_sort` to the result. Store it in `numbers_sorted`.
+
+* **Question 14.2** The name `fruits` is a character vector with some fruits.  
+
+  ```{r warning=FALSE, message=FALSE}
+  fruits <- c(
+    "apples and oranges and pears and bananas",
+    "pineapples and mangos and guavas"
+  )
+  ```
+
+  * **Question 14.2.1** Accomplish the following tasks: 
+
+    * Create a list `fruits_list` from `fruits` using the `list` function.
+    * Create a vector `fruits_unlisted` by applying `unlist` to `fruits_list`.
+    * Try executing:
+    
+      ```{r eval=FALSE}
+      str_split(fruits, "[and]")
+      str_split(fruits_list, "[and]")
+      str_split(fruits_unlisted, "and")
+      ```
+      The middle one presents a warning message. Store the last result in `split_fruits`.
+    * Print `split_fruits`.
+  
+  * **Question 14.2.2** Let's recap what just happened: 
+
+    * What is the difference between `fruits`, `fruits_list`, `fruits_unlisted`, and `split_fruits`? Note the data type stored in each of these names (e.g., list, character vector, integer, etc.). 
+    * Why did you get a warning when trying `str_split(fruits_list, "[and]")`? Read the help for `str_split` to help you answer this. 
+    * Why does the word "and" no longer appear in the elements inside `split_fruits`?  
+
+
+**Question 15: More `stringr`.** Let's return to `stringr` again, this time looking at a few more functions that work with *regular expressions*. We actually saw one already when we worked on "devoweling" band names. Be sure you have read the textbook section on `stringr` before continuing with this part.  
+
+As a real-world example, here is a string about the ["Band of the Hour"](https://en.wikipedia.org/wiki/Band_of_the_Hour) at the University of Miami. The string is available in the `edsdata` package.
+
+* **Question 15.1**   The function `str_match( s, p )` finds the first occurrence of the pattern `p` in the string `s`. Find the following patterns in `band_of_the_hour` using `str_match` and store the results in variables `m1`, ..., `m3`: 
+
+1. any uppercase alphabet `"[A-Z]"`, 
+2. any series of lowercase alphabetical characters `"[a-z]+"`,
+3. any numeral `"[0-9]"`.
+
+* **Question 15.2**   Now use `str_match_all()` to find the occurrences of the following two patterns and store them in `ma1` and `ma2`: (a) any series of numerals and (b) any word that begins with an uppercase letter (e.g., "Fiesta", "Band", "University", etc.). Verify your answer by examining the contents of `ma1` and `ma2`.
+
+* **Question 15.3**  Now use `str_count()` to count the occurrences of `"Arrow"` and store in `arrow_count` and then use `str_split()` to split `band_of_the_hour` at each white space and store it in `band_of_the_hour_split`.
+
+* **Question 15.4**  The `stringr` function `str_subset()` keeps strings that match a pattern. For example:
+
+```{r warning=FALSE, message=FALSE}
+str_subset(c("x", "y", "xx", "yy"), "x")
+```
+
+Now answer how you might obtain the elements in the list `band_of_the_hour_split` that have 
+a `"0"` in it. Store the result in `zero_elements`.
+
+**Question 16.** Suppose we have a vector of course IDs:
+
+```{r warning=FALSE, message=FALSE}
+badly_formed_ids <- c("CSC_100", "BIO 111", "MTH161H", 
+                      "ECO--220", "MUS..160A")
+badly_formed_ids
+```
+
+The school codes their IDs as follows:
+
+* An ID starts with three uppercase letters.
+* An ID has three numerals after the uppercase letters.
+* Between the letters and the numerals, an ID may contain symbols that are neither letters nor numerals.
+* An ID may have an additional alphabet character at the end.
+
+Unfortunately, this format is not very good for data science. While it allows for a wide range of possible IDs, the flexibility is an obstacle to any analysis using R, e.g., how to tell which courses are offered through Computer Science (CSC)? How to find how many 200-level courses the school offers? 
+
+Let us "standardize" these course IDs into a uniform format consisting solely of the initial three letters followed by three numerals. After application of the function, the above IDs should look like:
+
+```{r warning=FALSE, message=FALSE}
+c("CSC100", "BIO111", "MTH161", "ECO220", "MUS160")
+```
+
+Answer how you might obtain this with a single line of R code using a *single* `stringr` function. 

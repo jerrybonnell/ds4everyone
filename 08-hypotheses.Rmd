@@ -915,3 +915,453 @@ sum(differences >= observed_statistic) / 10000
 ```
 
 The chance of obtaining a mean absolute difference of $1.29$ is roughly 0.1%. We can safely reject the null hypothesis at a significance level over 99%. This confirms that, assuming our dataset is representative of the population of Olympic athletes, the weight information between Summer and Winter Olympic players are likely, on average, to be different. 
+
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+library(gapminder)
+```
+
+**Question 1** The College of Galaxy makes available applicant acceptance information for different ethnicities: White ("White"), American Indian or Alaska Native ("AI/AN"), Asian ("Asian"), Black ("Black"), Hispanic ("Hispanic"), and Native Hawaiian or Other Pacific Islander ("NH/OPI"). The tibble `galaxy_acceptance` gives the acceptance result from one year. 
+
+```{r message=FALSE, warning=FALSE}
+galaxy_acceptance <- tribble(
+  ~Ethnicity, ~Applied, ~Accepted,
+  "White",  925, 811, 
+  "NH/OPI", 50, 7, 
+  "Hispanic", 601, 348, 
+  "Black", 331, 236, 
+  "Asian", 237, 101, 
+  "AI/AN", 84, 30)
+galaxy_acceptance
+```
+
+* **Question 1.1** What proportion of total accepted applicants are of some ethnicity? Add a new variable named `prop_accepted` that gives the proportion of each ethnicity with respect to the total number of accepted candidates. Assign the resulting tibble to the name `galaxy_distribution`. 
+
+  Based on these observations, you may be convinced that the college is biased in favor of enrolling White applicants. Is it justifiable? 
+
+  To explore the question, you conduct a *hypothesis test* by comparing the ethnicity distribution at the college to that of degree-granting institutions in the United States. You decide to test the hypothesis that the ethnicity distribution at the College of Galaxy looks like a random sample from the population of accepted applicants in universities across the United States. Using simulation, this is what the data would look like if *the hypothesis were true*. If it doesn't, you reject the hypothesis. 
+
+  Thus, you offer the null hypothesis: 
+
+  > **Null hypothesis:** "The distribution of ethnicities of accepted applicants at the College of Galaxy was a random sample from the population of accepted applicants at degree-granting institutions in the United States."
+
+  **Question 1.2** With every *null hypothesis* we write down a corresponding **alternative hypothesis**. What is the alternative hypothesis in this case? 
+
+  We have that there are 1533 accepted applicants at the College of Galaxy. Imagine drawing a random sample of 1533 students from among the admitted students at universities across the United States. This is one student admissible pool we could see if the null hypothesis were true.
+
+  The [Integrated Postsecondary Education Data System (IPEDS)](https://nces.ed.gov/ipeds) at the National Center for Education Statistics gives data on U.S. colleges, universities, and technical and vocational institutions. As of Fall 2020, they reported the following ethnicity information about admitted applicants at Title IV degree-granting institutions in the U.S:
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  ipeds2020 <- tribble(~Ethnicity, ~`2020`,
+      "White", 9316458,
+      "NH/OPI", 46144,
+      "Hispanic", 3538778,
+      "Black", 2254757,	
+      "Asian", 1285154,
+      "AI/AN",  115951)
+  ```
+
+* **Question 1.3** Repeat **Question 1.1** for `ipeds2020`. Assign the resulting tibble to the name `ipeds2020_dist`. 
+
+  Under the null hypothesis, we can simulate one "admissible pool" from the population of students in the U.S as follows: 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  total_admitted <- galaxy_distribution |> pull(Accepted) |> sum()
+  prop_accepted <- ipeds2020_dist |> pull(prop_accepted)
+  rmultinom(n = 1, size = total_admitted, prob = prop_accepted) 
+  ```
+
+  The first element in this vector contains the number of White students in this sample pool, the second element the number of Native Hawaiian or Other Pacific Islander students, and so on. 
+
+* **Question 1.4** For the ethnicity distribution in our sample, we are interested in the *proportion* of ethnicities that appear in the admissible pool. Write a function `prop_from_sample()` that takes as an argument some distribution (e.g., `ipeds2020_distribution`) and returns a vector containing the proportion of ethnicities that appear in the sample of 1533 people.
+
+* **Question 1.5** Call `prop_from_sample()` to create one vector called `one_sample` that represents one sample of 1533 people from among the admissible students in the United States. 
+
+  The *total variation distance* (TVD) is a useful test statistic when comparing two distributions. This distance should be small if the null hypothesis is true because samples will have similar proportions of ethnicities as the population from which the sample is drawn.  
+
+* **Question 1.6** Write a function called `compute_tvd()`.  It takes as an argument a vector of proportions of ethnicities. The first element in the vector is the proportion of White students, the second element the proportion of Native Hawaiian or Other Pacific Islander students, and so on. The function returns the TVD between the given ethnicity distribution and that of the national population.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  compute_tvd(galaxy_distribution |> pull(prop_accepted)) # example call 
+  ```
+
+* **Question 1.7** Write a function called `one_simulated_tvd()`. This function takes no arguments. It  generates a "sample pool" under the null hypothesis, computes the test statistic, and then return it. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  one_simulated_tvd()  # an example call
+  ```
+
+* **Question 1.8** Using `replicate()`, run the simulation **10,000** times to produce **10,000** test statistics. Assign the results to a vector called `sample_tvds`. 
+
+  The following chunk shows your simulation augmented with an orange dot that shows the TVD between the ethnicity distribution at College of Galaxy and that of the national population.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  ggplot(tibble(sample_tvds)) +
+    geom_histogram(aes(x = sample_tvds, y = after_stat(density)), 
+                   bins = 15,
+                   fill = "darkcyan", color = 'gray') +
+    geom_point(aes(
+      x = compute_tvd(galaxy_distribution |> pull(prop_accepted)), 
+                   y = 0), size = 3, color = "salmon")
+  ```
+
+* **Question 1.9**  Determine whether the following conclusions can be drawn from these data. Explain your answer. 
+
+  1. The ethnicity distribution of the admitted applicant pool at the College of Galaxy does not look like that of U.S. universities. 
+  2. The ethnicity distribution of the admitted applicant pool at the College of Galaxy is biased toward white applicants. 
+
+**Question 2: A strange dice.** Your friend Jerry invites you to a game of dice. He asks you to roll a dice 10 times and says that he wins \$1 each time a `3` turns up and loses \$1 on any other face. Jerry's dice is six-sided, however, the `"2"` and `"4"` faces have been replaced with `"3"`'s. The following code chunk simulates the results after one game:  
+
+```{r message=FALSE, warning=FALSE}
+weird_dice_probs <- c(1/6, 0/6, 3/6, 0/6, 1/6, 1/6)
+rmultinom(n = 1, size = 10, prob = weird_dice_probs)
+```
+
+While the game seems like an obvious scam, Jerry claims that his dice is no different than a fair dice in the long run. Can you disprove his claim using a hypothesis test?  
+
+* **Question 2.1** Write a function `sample_prop` that receives two arguments `distribution` (e.g., `weird_dice_probs`) and `size` (e.g., 10 rolls). The function simulates the game using a dice where the probability of each face is given by `distribution` and the dice is rolled `size` many times. The proportion of each face that appeared after the simulation is returned. 
+
+  The following code chunk simulates the result after playing one round of Jerry's game. You record the sample proportions of the faces that appeared in a tibble named `jerry_die_dist`. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  set.seed(2022)
+  jerry_die_dist <- tibble(
+    face = 1:6, 
+    prob = sample_prop(weird_dice_probs, 10)
+  )
+  jerry_die_dist
+  ```
+
+  Let us define the distribution for what we know is a *fair* six-sided die. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  fair_die_dist <- tibble(
+    face = seq(1:6),
+    prob = rep(1/6, 6)
+  )
+  fair_die_dist
+  ```
+
+  Here is what the `jerry_die_dist` distribution looks like when visualized:
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  ggplot(jerry_die_dist) + 
+    geom_bar(aes(x = as.factor(face), y = prob), stat = "identity")
+  ```
+
+* **Question 2.2** Define a null hypothesis and an alternative hypothesis for this question.
+
+  We saw in Section 7.4 that the mean is equivalent to weighing each face by the proportion of times it appears. The mean of `jerry_die_dist` can be computed as follows:
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  jerry_die_dist |>
+    summarize(mean = sum(face * prob))
+  ```
+
+  For reference, here is the mean of a *fair* six-sided dice. Observe how close this value is to the mean of Jerry's dice: 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  fair_die_dist |>
+    summarize(mean = sum(face * prob))
+  ```
+
+  The following function `mystery_test_stat1()` takes a single tibble `dist` (e.g., `jerry_die_dist`) as its argument and computes a test statistic by comparing it to `fair_die_dist`.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  mystery_test_stat1 <- function(dist) {
+    x <- dist |>
+      summarize(mean = sum(face * prob)) |>
+      pull(mean)
+    y <- fair_die_dist |>
+      summarize(mean = sum(face * prob)) |>
+      pull(mean)
+    return(abs(x-y))
+  }
+  ```
+
+* **Question 2.3** What test statistic is being used in `mystery_test_stat1`? 
+
+* **Question 2.4** Write a function called `one_simulated_stat`. The function receives a single argument `stat_func`. The function generates sample proportions after one round of Jerry's game *under the assumption of the null hypothesis*, computes the test statistic from this sample using the argument `stat_func`, and returns it. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  one_simulated_stat(mystery_test_stat1) # an example call
+  ```
+
+* **Question 2.5** Complete the following function called `simulate_dice_experiment`. The function receives two arguments, an `observed_dist` (e.g., `jerry_die_dist`) and a `stat_func`. The function computes the observed value of the test statistic using `observed_dist`. It then simulates the game **10,000** times to produce **10,000** different test statistics. The function then prints the p-value and plots a histogram of your simulated test statistics. Also shown is where the observed value falls on this histogram (orange dot) and the cut-off for the 95% significance level.    
+ 
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  simulate_dice_experiment <- function(observed_dist, stat_func) {
+  
+    p_value_cutoff <- 0.05
+    print(paste("P-value: ", 
+            (sum(test_stats >= observed_stat) / length(test_stats))))
+    ggplot(tibble(test_stats)) +
+      geom_histogram(aes(x = test_stats, y = after_stat(density)), 
+                     bins=10, color = "gray", fill='darkcyan') +
+      geom_vline(aes(xintercept=quantile(test_stats, 1-p_value_cutoff)),
+                 color='red') +
+      geom_point(aes(x=observed_stat,y=0),size=4,color='orange')
+  }
+  ```
+
+* **Question 2.6** Run the experiment using your function `simulate_dice_experiment` using the observed distribution from `jerry_die_dist` and the mystery test statistic. 
+
+  The evidence so far has been unsuccessful in refuting Jerry's claim. Maybe you should stop playing games with Jerry...
+
+  As a desperate final attempt before giving up and agreeing to play Jerry's game, you try using a different test statistic to simulate called `mystery_test_stat2`.    
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  mystery_test_stat2 <- function(dist) {
+    sum(abs((dist |> pull(prob)) - 
+              (fair_die_dist |> pull(prob))) /2)
+  }
+  
+  mystery_test_stat2(jerry_die_dist) # an example call
+  ```
+
+* **Question 2.7** Repeat **Question 2.6**, this time using `mystery_test_stat2` instead. 
+
+* **Question 2.8** At a significance level of 95%, what do we conclude from the first experiment? How about the second experiment? 
+
+* **Question 2.9** Examine the difference between the test statistics in `mystery_test_stat1` and `mystery_test_stat2`. Why is it that the conclusion of the test is different depending on the test statistic selected? 
+
+* **Question 2.10** Which of the following statements are __FALSE__? Indicate them by including its number in the following vector `pvalue_answers`.  
+
+  1. The p-value printed is the probability that the die is fair.
+  2. The p-value printed is the probability that the die is NOT fair.
+  3. The p-value cutoff (5%) is the probability that the die is NOT fair.
+  4. The p-value cutoff (5%) is the probability of seeing a test statistic as extreme or more extreme than this one if the null hypothesis were true.
+
+* **Question 2.11** For the statements you selected to be FALSE, explain why they are wrong.  
+
+**Question 3** This question is a continuation of **Question 2**. The following incomplete function `experiment_rejects_null` receives four arguments: a tibble describing the probability distribution of a dice, a function to compute a test statistic, a p-value cutoff, and a number of repetitions to use. The function simulates 10 rolls of the given dice, and tests the null hypothesis about that dice using the test statistic given by `stat_func`. The function returns a Boolean: `TRUE` if the experiment *rejects* the null hypothesis at `p_value_cutoff`, and `FALSE` otherwise. 
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+experiment_rejects_null <- function(die_probs, 
+                      stat_func, p_value_cutoff, num_repetitions) {
+  observed_dist <- tibble(
+    face = 1:6, 
+    prob = sample_prop(die_probs, 10)
+  )
+
+
+  p_value <- sum(test_stats >= observed_stat) / num_repetitions
+  return(p_value < p_value_cutoff)
+}
+```
+
+* **Question 3.1** Read and understand the above function. Then complete the missing portion that computes the observed value of the test statistic and simulates `num_repetitions` many test statistics under the null hypothesis.  
+
+  The following code chunk simulates the result after testing Jerry's dice with `mystery_test_stat1` at the P-value cut-off of 5%. Run it a few times to get a rough sense of the results. 
+
+* **Question 3.2** Repeat the experiment `experiment_rejects_null(weird_dice_probs, mystery_test_stat1, 0.05, 250)` 300 times using `replicate`. Assign `experiment_results` to a vector that stores the result of each experiment.
+
+  __Note__: This code chunk will need some time to finish (approximately a few minutes).  This will be a little slow. 300 repetitions of the simulation should require a minute or so of computation, and should be enough to get an answer that is roughly correct.
+
+* **Question 3.3** Compute the proportion of times the function returned `TRUE` in `experiment_results`. Assign your answer to `prop_reject`. 
+
+* **Question 3.4** Does your answer to **Question 3.3** make sense? What value did you expect to get? Put another way, what is the probability that the null hypothesis is *rejected* when the dice is actually fair? 
+
+* **Question 3.5** What does it mean for the function to return `TRUE` when `weird_dice_probs` is passed as an argument? From the perspective of finding the truth about Jerry's (phony) claim, is the experiment successful? What if the function returned `TRUE` when `fair_die_dist` is passed as an argument instead? 
+
+**Question 4.** The United States House of Representatives in the 116th Congress (2019-2021) had 435 members. According to the [Center for American Women and Politics (CAWP)](https://cawp.rutgers.edu/facts/levels-office/congress/history-women-us-congress), 101 were women and 334 men. The following tibble `house` gives the head counts:  
+
+```{r message=FALSE, warning=FALSE}
+house <- tribble(~gender, ~num_members,
+                 "Female", 101, 
+                 "Male",   334)
+house
+```
+
+In this question, we will examine whether women are underrepresented in the chamber. 
+
+* **Question 4.1** If men and women are equally represented in the chamber, then the chance of either gender occupying any seat should be like that of a fair coin flip. For instance, if the chamber consisted of just 10 seats, then one "House of Representatives" might look like: 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  sample(c("Female", "Male"), size = 10, 
+         replace = TRUE, prob = c(0.5, 0.5))
+  ```
+
+  Using this, write a *null* and *alternative* hypothesis for this problem. 
+
+* **Question 4.2** Using **Question 4.1**, write a function called `one_sample_house` that simulates one "House" under the null hypothesis. The function  receives two arguments, `gender_prop` and `house_size`. The function samples `"Female"` or `"Male"` `house_size` many times where the chance of either gender appearing is given by `gender_prop`. The function then returns a tibble with the gender head counts in the simulated sample. Following is one possible returned tibble: 
+
+  | Gender | num_members |
+  |--------|-------------|
+  | Female | 207         |
+  | Male   | 228         |
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  one_sample_house <- function(gender_prop, house_size) {
+  
+    
+  }
+  
+  total_seats <- house |> pull(num_members) |> sum() 
+  one_sample_house(c(0.5, 0.5), total_seats) # an example call 
+  ```
+
+* **Question 4.3** A good test statistic for this problem is the *difference* in the head count of males from the head count of females. Write a function that takes a tibble `head_count_tib` as an argument (that has the format as in **Question 4.2**). The function computes and returns the test statistic from this tibble. 
+
+* **Question 4.4** Compute the *observed value* of the test statistic using your `one_diff_stat()`. Assign the resulting value to the name `observed_value_house`.
+
+* **Question 4.5** Write a function called `simulate_one_stat` that simulates one test statistic. The function receives two arguments, the gender proportions `prop` and the total seats (`total_seats`) to fill in the simulated "House". The function simulates a sample under the null hypothesis, and computes and returns the test statistic from the sample. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  simulate_one_stat(c(0.5, 0.5), 100) # an example call
+  ```
+
+* **Question 4.6** Simulate 10,000 different test statistics under the null hypothesis. Store the results to a vector named `test_stats`. 
+
+The following `ggplot2` code visualizes your results: 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  ggplot(tibble(test_stats)) + 
+    geom_histogram(aes(x = test_stats), bins=18, color="gray") + 
+    geom_point(aes(x = observed_value_house, y = 0), size=2, color="red")
+  ```
+
+* **Question 4.7** Based on the experiment, what can you say about the representation of women in the House?
+
+  Let us now approach the analysis another another way. Instead of assuming equal representation, let us base the comparison by using the representation of women candidates in the preceding 2018 U.S. House Primary elections. The tibble `house_primary` from the `edsdata` package compiles primary election results for Democratic and Republican U.S. House candidates running in elections from 2012 to 2018. The data is prepared by the [Michael G. Miller Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/CXVMSY) part of the [Harvard Dataverse](https://dataverse.harvard.edu/).   
+
+  ```{r message=FALSE, warning=FALSE}
+  library(edsdata)
+  house_primary
+  ```
+
+* **Question 4.8** Form a two-element vector named `primary_prop` that gives the proportion of female and male candidates, respectively, in the 2018 U.S. House Primary elections. This can be accomplished as follows:
+
+  * Filter the data to the year `2018`. The data should not contain the results for any elections that resulted in a runoff (where `runoff = 1`). 
+  * Summarize and count each gender that appears in `gender` in the resulting tibble. 
+  * Add a variable that computes the proportions from these counts.  
+  * Pull the proportions as a vector and assign it to `primary_prop`. 
+
+* **Question 4.9** Repeat **Question 4.6** this time using the proportions given by `primary_prop`. 
+
+  The following code visualizes the revised result: 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  ggplot(tibble(test_stats)) + 
+    geom_histogram(aes(x = test_stats), bins=18, color="gray") + 
+    geom_point(aes(x = observed_value_house, y = 0), size=2, color="red")
+  ```
+
+* **Question 4.10**  Compute the p-value using the `test_stats` you generated by comparing it with `observed_value_house`. Assign your answer to `p_value`. 
+
+**Question 4.11** Why is it that in the first histogram the simulated test statistics cluster around 0 and in the second histogram the simulated values cluster around a value much greater? Is the statement of the null hypothesis the same in both cases? 
+
+* **Question 4.12** Now that we have analyzed the data in two ways, are women equally represented in the House? Why or why not? 
+
+* **Question 5.** Cathy recently received from a friend a replica dollar coin which appears to be slightly biased towards "Heads". Cathy tosses the coin 20 times in a row counts how many times "Heads" turns up. She repeats this for 10 trials. Her results are summarized in the following tibble: 
+
+```{r message=FALSE, warning=FALSE}
+cathy_heads_game <- tibble(
+  trial = 1:10, 
+  num_heads = c(12, 13, 13, 11, 17, 10, 10, 14, 9, 15),
+  num_tails = 20 - num_heads 
+) 
+cathy_heads_game
+```
+
+* **Question 5.1** What is the total heads observed? Assign your result to a double named `total_heads_observed`.
+
+  Let us write an experiment and check how plausible it is for this coin to be fair.
+
+* **Question 5.2** Given the outcome of 20 trials, which of the following test statistics would be reasonable for this hypothesis test?
+
+  1. The total number of heads.
+  2. The total number of heads minus the total number of tails.
+  3. Whether there is at least one head.
+  4. Whether there is at least one tail.
+  5. The total variation distance between the probability distribution of a fair coin and the observed distribution of heads and tails.
+  6. The trial with the minimum number of heads.
+
+  Assign the name `good_test_stats` to a vector of integers corresponding to these test statistics.
+
+* **Question 5.3** Let us write a code that simulates tossing a fair coin. Write a function called `one_test_stat` that receives a parameter `num_trials`. The function simulates a fair coin toss 20 times, records the number of heads, and repeats this procedure `num_trials` many times. The function returns the total number of heads over the given number of trials. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  one_test_stat(10) # an example call after cathy's 10 trials
+  ```
+
+* **Question 5.4** Repeat Cathy's experiment 10,000 times. Store the results in `total_head_stats`.
+
+* **Question 5.5** Compute a p-value using `total_head_stats`. Assign the result to `p_value`. 
+
+* **Question 5.6** From the experiment how plausible do you say Cathy's coin is fair?
+
+**Question 6.** A popular course in the College of Groundhog is an undergraduate programming course CSC1234. In the spring semester of 2022, the course had three sections, A, B, and C. The sections were taught by different instructors. The course had the same textbook, the same assignments, and the same exams. One same formula was applied to determine the final grade. At the end of a semester, some students in Sections A and C came to their instructors and asked if the instructors had been harsher than the instructor for Section B, because several buddies of theirs in Section B did better in the course. Time for a hypothesis test! 
+
+The section and score information for the semester is available in the tibble `csc1234` from the `edsdata` package. 
+
+```{r message=FALSE, warning=FALSE}
+library(edsdata)
+csc1234
+```
+
+We will use a permutation test to see if the scores for Sections A and C are indeed significantly lower than the scores for Section B. That is, we will compare three groups: Section A with B, Section A with C, and Section B with C. 
+
+* **Question 6.1** Compute the group-wise mean for each section of the course. The tibble should contain two variables: the section name and the mean of that section. Assign the resulting tibble to the name `section_means`. 
+
+* **Question 6.2** Visualize a histogram of the scores in `csc1234`. Use a facet wrap on `Section` so that you can view the three distributions together separately. We suggest using 10 bins.
+
+  We can develop a chance model by hypothesizing that any section's scores looks like a random sample out of all of the student scores across all three sections. We can then see the difference in mean scores for each of the three pairs of randomly drawn "sections". This is a specified chance model we can use to simulate and, therefore, is the __null hypothesis__. 
+
+* **Question 6.3** Define a good **alternative** hypothesis for this problem. 
+
+* **Question 6.4** Write a function called `mean_differences` that takes a tibble as its single argument. It then summarizes this tibble by computing the average mean score (in `Score`) for each section (in `Section`). The function returns a *three-element vector* of mean differences for each pair: the difference in mean scores between A and B ("A-B"), C and B ("C-B"), and C and A ("C-A"). 
+
+* **Question 6.5** Compute the observed differences in the means of the three sections using `mean_differences`. Store the results in `observed_differences`.
+
+  The following code chunk puts your observed values into a tibble named `observed_diff_tibble`. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  observed_diff_tibble <- tibble(
+    pair = c("A-B", "C-B", "C-A"),
+    test_stat = observed_differences
+  )
+  observed_diff_tibble
+  ```
+
+* **Question 6.6**  Write a function `scores_permute_test` that does the following:
+
+* From `csc1234` form a new variable that shuffles the values in `Score` using `sample`. Overwrite the variable `Score` with the shuffled values. 
+* Call `mean_differences` on this shuffled tibble. 
+* Return the vector of differences. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  
+  scores_permute_test() # an example call 
+  ```
+
+* **Question 6.7** Use `replicate` on the `scores_permute_test` function you wrote to generate 1,000 sample differences. 
+
+  The following code chunk creates a tibble named `differences_tibble` from the simulated test statistics you generated above.
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  differences_tibble <- tibble(
+              `A-B` = test_stat_differences[1,], 
+              `C-B` = test_stat_differences[2,],
+              `C-A` = test_stat_differences[3,])
+  differences_tibble
+  ```
+
+* **Question 6.8**  Generate three histograms using the results in `differences_tibble`. As with **Question 6.2**, use a facet wrap on each pairing (i.e., `A-B`, `C-B`, and `C-A`). Then attach a red point to each histogram indicating the observed value of the test statistic (use `observed_diff_tibble`). We suggest using 20 bins for the histograms.    
+
+* **Question 6.9** The bulk of the distribution in each of the three histograms is centered around 0. Using what you know about the stated null hypothesis, why do the distributions turn out this way?
+
+* **Question 6.10** By examining the above three histograms and where the observed value of the test statistic falls, which difference among the three do you think is the most egregious?
+
+* **Question 6.11** Based on your answer to **Question 6.10**, can we say that the hypothesis test brings enough evidence to show that the drop in student scores was deliberate and that the instructor was unfair in grading? 

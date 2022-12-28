@@ -1434,6 +1434,277 @@ ggplot(augmented_quad_revised) +
 
 The residual plot shows no pattern whatsoever and, therefore, we can be more confident in this model.
 
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+library(gapminder)
+```
+
+Answering questions for this chapter can be done using the linear modeling functions already available in base R (e.g., `lm`) or by using the `tidymodels` package as shown in the textbook. Let us load this package. If you do not have it, then be sure to install it first.  
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+library(tidymodels)
+```
+
+**Question 1** You are deciding what Halloween candy to give out this year. To help make good decisions, you defer to FiveThirtyEight's [Ultimate Halloween Candy Power Ranking](https://fivethirtyeight.com/features/the-ultimate-halloween-candy-power-ranking/) survey that collected a sample of people's preferences for 269,000 randomly generated matchups.
+
+To measure popularity of candy, you try to describe the popularity of a candy in terms of a single attribute, the amount of sugar a candy has. That way, when you are shopping at the supermarket for treats, you can predict the popularity of a candy just by looking at the amount of sugar it has!
+
+We have collected the results into a tibble `candy` in the `edsdata` package. We will use this dataset to see if we can make such predictions accurately using linear regression.
+
+Let's have a look at the data:
+
+```{r message=FALSE, warning=FALSE}
+library(edsdata)
+candy
+```
+
+* **Question 1.1** Filter this dataset to contain only the variables `winpercent` and `sugarpercent`. Assign the resulting tibble to the name `candy_relevant`.
+
+* **Question 1.2** Have a look at the [data dictionary](https://github.com/fivethirtyeight/data/tree/master/candy-power-ranking) given for this dataset. What does `sugarpercent` and `winpercent` mean? What type of data are these (doubles, factors, etc.)?
+
+  Before we can use linear regression to make predictions, we must first determine if the data are roughly linearly associated. Otherwise, our model will not work well.  
+
+* **Question 1.3** Make a scatter plot of `winpercent` versus `sugarpercent`. By convention, the variable we will try to predict is on the vertical axis and the other variable -- the *predictor* -- is on the horizontal axis.
+
+* **Question 1.4** Is the percentile of sugar and the overall win percentage roughly linearly associated?  Do you observe a correlation that is positive, negative, or neither? Moreover, would you guess that correlation to be closer to 1, -1, or 0? 
+
+* **Question 1.5** Create a tibble called `candy_standard` containing the percentile of sugar and the overall win percentage *in standard units*. There should be two variables in this tibble: `winpercent_su` and `sugarpercent_su`. 
+
+* **Question 1.6** Repeat **Question 1.3**, but this time in standard units. Assign your `ggplot` object to the name `g_candy_plot`. 
+
+* **Question 1.7** Compute the correlation `r` using `candy_standard`. Do *NOT* try to shortcut this step by using `cor()`! You should use the same approach as shown in [Section 11.1](https://ds4world.cs.miami.edu/regression.html#correlation). Assign your answer to the name `r`.
+
+* **Question 1.8** Recall that the correlation is the *slope* of the regression line when the data are put in standard units. Here is that regression line overlaid atop your visualization in `g_candy_plot`:
+
+  ```{r eval=FALSE, message = FALSE}
+  g_candy_plot +
+    geom_smooth(aes(x = sugarpercent_su, y = winpercent_su),
+                method = "lm", se = FALSE)
+  ```
+
+  What is the slope of the above regression line in *original units*? Use `dplyr` code and the tibble `candy` to answer this. Assign your answer (a double value) to the name `candy_slope`. 
+
+* **Question 1.9** After rearranging that equation, what is the intercept *in original units*? Assign your answer (a double value) to the name `candy_intercept`. 
+
+  __Hint:__ Recall that the regression line passes through the point `(sugarpercent_mean, winpercent_mean)` and, therefore, the equation for the line follows the form: 
+
+  $$
+  \text{win percent} - \text{winpercent mean} = \texttt{slope} \times (\text{sugar percent} - \text{sugarpercent mean})
+  $$
+
+* **Question 1.10** Compute the predicted win percentage for a candy whose amount of sugar is at the 30th percentile and then for a candy whose sugar amount is at the 70th percentile. Assign the resulting predictions to the names `candy_pred10` and `candy_pred70`, respectively. 
+
+  The next code chunk plots the regression line and your two predictions (in purple).
+
+  ```{r eval=FALSE, message = FALSE}
+  ggplot(candy, 
+         aes(x = sugarpercent, y = winpercent)) + 
+    geom_point(color = "darkcyan") + 
+    geom_abline(aes(slope = candy_slope, 
+                    intercept = candy_intercept), 
+                size = 1, color = "salmon") + 
+    geom_point(aes(x = 0.3, 
+                   y = candy_pred30), 
+               size = 3, color = "purple") + 
+    geom_point(aes(x = 0.7, 
+                   y = candy_pred70),
+               size = 3, color = "purple")
+  ```
+
+* **Question 1.11** Make predictions for the win percentage for each candy in the `candy_relevant` tibble. Put these predictions into a new variable called `prediction` and assign the resulting tibble to a name `candy_predictions`. This tibble should contain three variables: `winpercent`, `sugarpercent`, and `prediction` (which contains the prediction for that candy). 
+
+* **Question 1.12**  Compute the *residual* for each candy in the dataset. Add the residuals to `candy_predictions` as a new variable called `residual`, naming the resulting tibble `candy_residuals`.
+
+* **Question 1.13**  Following is a residual plot. Each point shows one candy and the over- or under-estimation of the predicted win percentage.
+
+  ```{r eval=FALSE, message = FALSE}
+  ggplot(candy_residuals, 
+         aes(x = sugarpercent, y = residual)) + 
+    geom_point(color = "darkred")
+  ```
+
+  Do you observe any pattern in the residuals? Describe what you see. 
+
+* **Question 1.14**  In `candy_relevant`, there is no candy whose sugar amount is at the 1st, median, and 100th percentile.  Under the regression line you found, what is the predicted win percentage for a candy whose sugar amount is at these three percentiles? Assign your answers to the names `percentile_0_win`, `percentile_median_win`, and `percentile_100_win`, respectively. 
+
+* **Question 1.15** Are these values, if any, reliable predictions? Explain why or why not. 
+
+**Question 2** This question is a continuation of the linear regression analysis of the `candy` tibble in **Question 1**.   
+
+Let us see if we can obtain an overall better model by including another attribute in the analysis. After looking at the results from **Question 1**, you have a hunch that whether or not a candy includes chocolate is an important aspect in determining the most popular candy.
+
+This time we will use functions from R and `tidymodels` to perform the statistical analysis, rather than rolling our own regression model as we did in **Question 1**.  
+
+* **Question 2.1**  Convert the variable `chocolate` in `candy` to a *factor* variable. Then select three variables from the dataset: `winpercent`, `sugarpercent`, and the factor `chocolate`. Assign the resulting tibble to the name `with_chocolate`. 
+
+* **Question 2.2**  Use a `parsnip` model to fit a simple linear regression model of `winpercent` on `sugarpercent` on the `with_chocolate` data. Assign the model to the name `lmod_simple`. 
+
+  __NOTE:__ The slope and intercept you get should be the same as the slope and intercept you found during lab -- just this time we are letting R do the work. 
+
+* **Question 2.3** Using a `parsnip` model again, fit another regression model of `winpercent` on `sugarpercent`, this time adding a new regressor which is the factor `chocolate`. Use the `with_chocolate` data. Assign this model to the name `lmod_with_factor`. 
+
+* **Question 2.4** Using the function `augment`, *augment* the model output from `lmod_with_factor` so that each candy in the dataset is given information about its predicted (or *fitted*) value, residual, etc. Assign the resulting tibble to the name `lmod_augmented`.
+
+  The following code chunk uses your `lmod_augmented` tibble to plot the data and overlays the predicted values from `lmod_with_factor` in the `.fitted` variable -- two different regression lines! The slope of each line is actually the same. The only difference is the intercept.  
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  lmod_augmented |> 
+    ggplot(aes(x = sugarpercent, y = winpercent, color = chocolate)) +
+    geom_point() + 
+    geom_line(aes(y = .fitted)) 
+  ```
+
+  Is the `lmod_with_factor` model any better than `lmod_simple`? One way to check is by computing the $RSS$ for each model and seeing which model has a lower $RSS$. 
+
+* **Question 2.5** The augmented tibble has a variable `.resid` that contains the residual for each candy in the dataset; this can be used to compute the $RSS$. Compute the $RSS$ for each model and assign the result to the appropriate name below. 
+
+  ```{r eval=FALSE, message=FALSE, warning=FALSE} 
+  
+  print(paste("simple linear regression RSS :",
+              lmod_simple_rss))
+  print(paste("linear regression with factor RSS :", 
+              lmod_with_factor_rss))
+  ```
+
+* **Question 2.6** Based on what you found, do you think the predictions produced by `lmod_with_factor` would be more or less accurate than the predictions from `lmod_simple`? Explain your answer.  
+
+**Question 3** This question is a continuation of the linear regression analysis of the `candy` tibble in **Question 1**.   
+
+Before we can be confident in using our linear model for the `candy` dataset, we would like to know whether or not there truly exists a relationship between the popularity of a candy and the amount of sugar the candy contains. If there is no relationship between the two, we expect the correlation between them to be 0. Therefore, the slope of the regression line would also be 0. 
+
+Let us use a hypothesis test to confirm the true slope of regression line. Here is the __null hypothesis__ statement: 
+
+> The true slope of the regression line that predicts candy popularity from the amount of sugar it contains, computed using a dataset that contains the entire population of all candies that have ever been matched up, is 0. Any difference we observed in the slope of our regression line is because of chance variation.
+
+* **Question 3.1** What would be a good **alternative hypothesis** for this problem? 
+
+  The following function `slope_from_scatter` is adapted from the textbook. It receives a dataset as input, fits a regression of `winpercent` on `sugarpercent`, and returns the slope of the fitted line:
+
+  ```{r eval=FALSE}
+  slope_from_scatter <- function(tib) {
+    lmod_parsnip <- linear_reg() |>
+      set_engine("lm") |>
+      fit(winpercent ~ sugarpercent, data = tib)
+    
+    lmod_parsnip |>
+      tidy() |>
+      pull(estimate) |>
+      last() # retrieve slope estimate as a vector
+  }
+  ```
+
+* **Question 3.2** Using the `infer` package, create 1,000 resampled slopes from `candy` using a regression of `winpercent` on `sugarpercent`. You should make use of the function `slope_from_scatter` in your code. Assign your answer to the name `resampled_slopes`.
+
+* **Question 3.3** Derive the approximate 95% confidence interval for the true slope using `resampled_slopes`. Assign this interval to the name `middle`. 
+
+* **Question 3.4**  Based on this confidence interval, would you accept or reject the null hypothesis that the true slope is 0?  Why? 
+
+* **Question 3.5** Just in time for Halloween, Reese's Pieces released a new candy this year called Reese's Chunks. We are told its sugar content places the candy at the 64th percentile of sugar within the dataset. We would like to use our linear model `lmod_simple` from **Question 1** to make a prediction about its popularity. However, we know that we can't give an exact estimate because our prediction depends on a sample of 85 different candies being matched up! 
+
+  Instead, we can provide an approximate 95% confidence interval for the prediction using the resampling approach in Section 11.3. Recall that such an interval goes by a special name: *confidence interval for the mean response*. 
+
+  Suppose we find this interval to be $[48.7, 55.8]$. Does this interval cover around 95 percent of the candies in `candy` whose sugar amount is at the 64th percentile? Why or why not?
+
+**Question 4** Linear regression may not be the best method for describing the relationship between two variables. We would like to have techniques that can help us decide whether or not to use a linear model to predict one variable from another.
+
+If a regression fits a scatter plot well, then the residuals from our regression model should show no pattern when plotted against the predictor variable. This is called the *residual plot*. [Section 11.4](https://ds4world.cs.miami.edu/regression.html#the-residual-plot) shows how we can use `ggplot` to generate a residual plot from a `parsnip` linear model.
+
+```{r message=FALSE, warning=FALSE}
+library(lterdatasampler)
+```
+
+The tibble `and_vertebrates` from the package `lterdatasampler` contains length and weight observations for Coastal Cutthroat Trout and two salamander species (Coastal Giant Salamander, and Cascade Torrent Salamander) in HJ Andrews Experimental Forest, Willamette National Forest, Oregon. See the [dataset description](https://lter.github.io/lterdatasampler/articles/and_vertebrates_vignette.html) for more information. 
+
+```{r message=FALSE, warning=FALSE}
+and_vertebrates
+```
+
+Let us try to predict the weight (in grams) of Coastal Giant Salamanders based on their snout-vent length (in millimeters). 
+
+* **Question 4.1** Filter the tibble `and_vertebrates` to contain only those observations that pertain to Coastal Giant Salamanders. Assign the resulting tibble to the name `and_salamanders`. 
+
+* **Question 4.2** Generate a scatter plot of `weight_g` versus `length_1_mm`.
+
+* **Question 4.3** Generate the residual plot for a linear regression of `weight_g` on `length_1_mm`.
+
+* **Question 4.4** Following are some statements that can be made about the above residual plot. For each of these statements, state whether or not the statement is correct and explain your reasoning.
+
+  1. The residuals are distributed roughly the same around the horizontal line passing through 0. Because there is no visible pattern in the residual plot, the linear model is a good fit. 
+  2. The residual plot shows uneven variation around the horizontal line passing through 0. 
+  3. The residual plot shows a pattern, which points to nonlinearity between the variables.
+
+* **Question 4.5** For the problem(s) you found in **Question 4.3**, try applying transformations as shown in [Section 11.4](https://ds4world.cs.miami.edu/regression.html#what-to-do-from-here) to see if they can be corrected. If you did not find any problems, suggest some ways to improve the linear model. 
+
+**Question 5** The tibble `mango_exams` from the `edsdata` package contains exam scores from four different offerings of a course taught at the University of Mango. The course contained two midterm assessments and a final exam administered at the end of the semester. Here is a preview of the data:
+
+```{r message=FALSE, warning=FALSE}
+library(edsdata)
+mango_exams
+```
+
+* **Question 5.1** Following are some questions you would like to address about the data: 
+
+  1. Is there a difference in Final exam performance between the offerings in `2001` and `2002`?
+  2. How high will student scores on the Final be on average, given a Midterm 1 score of 75? 
+  3. What is the estimated range of mean Midterm 2 scores in the population of University of Mango students who have taken the course?
+
+  Here are four techniques we have learned:
+
+  1. Hypothesis test
+  2. Bootstrapping 
+  3. Linear Regression 
+  4. Central Limit Theorem
+
+  Choose the *best* one to address each of the above questions. __For each question, select only one technique.__ 
+
+* **Question 5.2** Using an appropriate geom from `ggplot2`, visualize the distribution of scores in `Midterm1`. Then generate another visualization showing the distribution of scores in `Final`. Do the distributions appear to be symmetrical and roughly normally distributed? Explain your reasoning. 
+
+* **Question 5.3** Visualize the relationship between `Midterm1` and `Final` using an appropriate geom with `ggplot2`. Then answer in English: do these variables appear to be associated? Are they *linearly* related? 
+
+* **Question 5.4** Fit a regression line to this scatter plot. Write down the equation of this line. Does the intercept have a sensible interpretation? Then, augment your visualization from **Question 5.3** with this line.
+
+  __Note:__ it is tempting to use `geom_smooth` but `geom_smooth` computes its own linear regression; you must find another way so that the visualization shows *your* regression line. 
+
+* **Question 5.5**  Generate a residual plot for this regression. Does the association between final and midterm scores appear linear? Or does the plot suggest problems with the regression? Why or why not? 
+
+* **Question 5.6** You want to know how students who scored a 80 on the first midterm will perform on the final exam, on average. Assuming the regression model holds for this data, what could plausibly be the predicted final exam score? 
+
+* **Question 5.7** Following are some statements about the prediction you just generated. Which of these are valid statements that can be made about this prediction? In English, explain why or why not each is a valid claim. 
+
+  1. This is the score an individual student can expect to receive on the final exam after scoring a 80 on the first midterm. 
+  2. A possible interpretation of this prediction is that a student who scored a 80 on the first midterm cannot possibly score a 90 or higher on the final exam.  
+  3. This is an estimate of the height of the true line at $x = 80$. Therefore, we can confidently report this result. 
+  4. A prediction cannot be determined using a linear regression model fitted on this data. 
+
+* **Question 5.8**  An alternative to transformation is to set aside data that appears inconsistent with the rest of the dataset and apply linear regression only to the subset. For instance, teaching style and content may change with each course offering and it can be fruitful to focus first on those offerings that share similar characteristics (e.g., the slope and intercept of the fitted regression line on each individual offering is similar). We may also consider cut-offs and set aside exam scores that are too low or high. 
+
+  Using `dplyr` and your findings so far, craft a subset of `mango_exams` scores that seems appropriate for a linear regression of `Final` on `Midterm1`. Explain why your subset makes sense. Then perform the linear regression using this subset and show `ggplot2` visualizations that demonstrate whether the model fitted on this subset is any better than the model fitted on the full data. 
+
+**Question 6** This question is a continuation of **Question 7** from Chapter 5. [There is evidence suggesting](http://hpkx.cnjournals.com/uploadfile/news_images/hpkx/2019-03-14/s41558-018-0393-56789.pdf) that mean annual temperature is a primary factor for the change observed in lake ice formation. Let us explore the role of air temperature as a *confounding variable* in the relationship between year and ice cover duration. We will bring in another data source: daily average temperature data from 1869 to 2019 in Madison, Wisconsin. These data are available in the tibble `ntl_airtemp`, also sourced from the `lterdatasampler` package. 
+
+* **Question 6.1** Form a tibble named `by_year_avg` that reports the mean annual temperature. According to the documentation, data prior to (and including) 1884 should be filtered as we are told data for these dates contain biases.
+
+* **Question 6.2** Create a tibble named `icecover_with_temp` that contains __both__ the ice cover duration (from `ntl_icecover`) and the air temperature data (`by_year_avg`). The resulting tibble should not contain any data before 1885.
+
+* **Question 6.3** Generate a scatter plot showing ice duration versus mean annual temperature.
+
+* **Question 6.4** Generate a line plot showing mean annual air temperature versus year.
+
+* **Question 6.5** Fit a regression model for `ice_duration` on `year`. Then fit another regression model for `ice_duration` on `year` and `avg_air_temp_year`. Note if the sign of the estimate given for `year` changes when including the additional `avg_air_temp_year` regressor.
+
+* **Question 6.6** We have now visualized the relationship between mean annual air temperature and year and between mean annual air temperature and ice duration. We also generated two regression models where the only difference is inclusion of the variable `avg_air_temp_year`. Based on these, which of the following conclusions can be correctly drawn about the data? Explain which visualization and/or model gives evidence for each statement.
+
+  1. There is a positive correlation between year and mean annual temperature. 
+  2. There is a negative correlation between ice duration and mean annual temperature. 
+  3. Mean annual air temperature is a confounding variable in the relationship between year and ice cover duration.
+  4. The relationship between year and ice cover duration is spurious.
+
+
 <!--- homework problem for playing with diagnostics  
 
 ```{r dpi=80, fig.align="center", eval = FALSE, message = FALSE}

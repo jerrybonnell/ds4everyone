@@ -448,3 +448,191 @@ The [tidyverse](https://www.tidyverse.org) is a collection of packages, each hav
 The list seems quite long, but don't worry; we will introduce them gradually throughout the text and only as needed. Each package should be thought of as building blocks that "stick" together and work in unison with other members in the tidyverse. Together they build a complex data science pipeline, transforming raw data into insights and knowledge that can be communicated.  
 
 Note that once we have loaded the tidyverse, we can call any of the functions from the individual packages. 
+
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+```
+
+**Question 1** Suppose we manipulate two variables `a` and `b` to which we store the values 210 and 5, respectively. 
+
+```{r message=FALSE, warning=FALSE}
+a <- 210
+b <- 5
+```
+
+We compute a series of values in the variables `c1`, `c2`, `c3`, and `c4` as follows:
+
+* Give the value of `a` divided by `b` to `c1`. 
+* Set `c2` to the maximum of either the subtraction of `b` from `c1` or the
+  subtraction of `c1` from `b`. 
+* Set `c3` by summing `c2` and the result of raising the value of `a` to the power of 3.
+* The value of `c3` is too large! Set `c4` to the natural logarithm of `c3`. 
+
+Write the code for doing the calculation. After completing the assignments to all of `c1`, `c2`, and `c3`, print the values of the three variables.
+
+**Question 2: Names, expressions, and error messages** This question lists some R code chunks that produce error messages. Also given are some explanations of what's wrong with the code. Choose the explanation that best explains each problem. Comment on your answer. 
+
+* **Question 2.1** 
+
+  ```{r eval=FALSE}
+  4 <- 2 + 1
+  ```
+
+  1. `4` is not `2 + 1` so R does not allow us to assign `2 + 1` to `4`.
+  2. The issue is that this needs to be rewritten as `2 + 1 <- 4` because the code is trying to say that `4` is the result of adding together the numbers `2` and `1`. 
+  3. `4` is a number, and we cannot make a number a name for some quantity. 
+  4. `<-` is not valid here. We need to replace the `<-` symbol with `=` because we are trying to show that `4` is equivalent to the expression `2 + 1`.
+
+* **Question 2.2**
+
+  ```{r eval=FALSE}
+  fifty <- 50
+  ten <- 9
+  eight <- fifty divides ten
+  ```
+
+1. On the third line, the name `fifty` cannot be followed directly by another name.
+2. Fifty divides ten is five, not eight.
+3. The `divides` operation only applies to numbers; it does not work for the names "fifty" and "ten".
+4. On the second line, the name "ten" can only be assigned to the number 10; it cannot be assigned to another number, e.g., 9.
+
+**Question 3: A Smoothie Difference** Suppose you'd like to *quantify* how *dissimilar* two Smoothie Queen drinks (20 oz.) are, using three quantitative characteristics. We are told the following important traits about these smoothies (among many others). 
+
+| Trait                 | Peanut Power Banana | Ironman Vanilla  |
+|-----------------------|-------------------|------------------|
+| Price ($)             | 5.29              | 5.29             |
+| Added sugar amount (g)| 49                | 65               |
+| Protein (g)           | 16                | 24               |
+
+You decide to define the dissimilarity between two smoothies as the maximum of the absolute values of the 3 differences in their respective trait values. The built-in functions `max()` and `abs()` can help you. 
+
+* **Question 3.1**  Using this method, compute the dissimilarity between Peanut Power Banana and Ironman Vanilla. Name the result `dissimilarity_smoothie`. Use a single expression (a single line of code) to compute the answer. Let R perform all arithmetic, e.g., `10 - 2`, rather than simplifying the expression yourself, e.g., `8`.
+
+* **Question 3.2**  [The American Heart Association (AHA) suggests](https://www.hsph.harvard.edu/nutritionsource/carbohydrates/added-sugar-in-the-diet/) an added-sugar limit of no more than 36 grams of sugar for most men. If the added sugar amount in the table above was measured as a *percentage* of the added-sugar limit for men rather than an amount in grams, what would be the dissimilarity between these two smoothies? Assign either 1, 2, 3, or 4 to the name `smoothies_q2` below.
+
+  1. 0
+  2. 8
+  3. 16
+  4. 141
+
+* **Question 4: Signing a Loan** Suppose you are signing a loan in the amount of $1,000 with a 3% monthly interest rate. On the day you received the borrowed money, the loan starts. At each monthly anniversary the money you own is updated with the multiplication by 1.03. You may choose to pay money at that point, and, if so, your payment is subtracted from the updated amount. Naturally, if you choose to make no payments, the amount you owe keeps growing.
+
+* Suppose you skip payments for two full years. How much will you own? Calculate your answer in a variable `owed` and print its value.
+
+* Compute also how much more the *owed* money is from the original money you are borrowing, store it in a variable `pure_interest`, and show its value.
+
+**Question 5: Half-life** Radioactive elements decay over time by losing their radioactivity. Each such element has its rate of decay. We use the term 'half-life' to refer to the speed. The half-life of an element is the time that it takes for a radio-active element to lose half of its radio-activity.
+
+* **Question 5.1** Carbon-14 is an isotope of a radioactive element Carbon. The most prominent Carbon has mass of 12, while Carbon-14 has mass of 14. The natural abundance of Carbon-14 is one in trillion. Its half-life is 5730 years. Store the half-life in a name `half_life_years` and then, assuming that one year has 365 days, calculate a whole number `half_life_seconds` representing how many seconds are equal to the half-life of Carbon-14.
+
+* **Question 5.2** Continuing on the previous question, the radioactivity of Carbon-14 is reduced from 1.0 to how much in 100 thousand years? Note that at every half-life anniversary, the amount is reduced to a half of its previous value. So, with $x$ repetitions of half-life, the amount is reduced to $(\frac{1}{2})^x$, where $x$ can be a real number. Write a single expression that computes the amount in question and store the answer in a name `how_much_100k`.  
+
+* **Question 5.3** Continuing on the previous question, the radio-activity of Carbon-14 is reduced from 1.0 to how much in 2 thousand years? Write a single expression that computes the answer and store the result in the name `how_much_2k`. 
+
+* **Question 5.4** By reversing the calculation from the previous question, you can identify the age of a carbon compound from the proportion of Carbon-14. Let's say the number of years $y$ is $\mathrm{age}$ divided by $h$, where $h$ is the half life. The proportion $r$ of the remaining Carbon-14 is $0.5^y$. Now, the age of the compound, $\mathrm{age}$ can be obtained as:
+
+$$
+age = - \log_2(1/r) * h
+$$
+
+where $\log_2$ is the logarithm base 2.
+
+Now, assuming that the proportion of Carbon-14 has been reduced to one-fiftieth of the naturally occurring proportion, how much do you estimate the age of the compound is? Give a single expression to compute the number and store this in a name `age`.
+
+**Question 6: Walk the Earth** The Earth is almost a sphere. Its radius is approximately 3958.8 miles. Suppose two points A and B on the surface of the Earth has angle $d$. The surface distance between A and B is $d/360$ of the circumference of the Earth. The circumference of a sphere with radius $r$ is $2\pi r$. After consulting with an app on your smartphone, you learn that the angular distance between the two points is 4.5, which is stored in the following name: 
+
+```{r message=FALSE, warning=FALSE}
+a_to_b_ang_dist <- 4.5 
+```
+
+* **Question 6.1** Compute in a name `c` the circumference of the Earth using a single expression. In your expression, refer to the constant $\pi$ without having to define it explicitly as the non-repeating number 3.141593.. 
+
+* **Question 6.2** Write an expression to compute the surface distance between the two points and store the result in a name `d1`.
+
+* **Question 6.3** A mile is equal to 1610 meters. How many meters are equal to this distance? Write an expression to compute the answer and store the value in a name `m1`.
+
+* **Question 6.4** Suppose you walk 80 meters per minute. How long does it take for you to walk straight from A to B in minutes and in hours? Write an expression to compute this and store the result in the names `minutes` and `hours`, respectively.
+
+* **Question 6.5** Suppose you plan to walk 10 hours on average per day to travel from A and B, finding some lodging on the way each night. How many days will it take for you to make the trip? Write an expression to find the answer. Also, round your answer up to turn it to a whole number (not by hand, use an R function!) and store the value in a name `days`.
+
+* **Question 6.6** Assuming that your daily expense is $65 dollars, how much will the trip cost you (the daily cost applies even to the last day of the trip). Store the result in `cost`.
+
+* **Question 6.7** Develop a *single* expression that computes the total expense of your trip from points A to B using as input the angular distance known between the two points, walking speed in meters per minute, average number of hours per day planned for travel by walking, and your daily expense.     
+
+* **Question 6.8** Frustrated with the total time your trip will take, you opt to rent an electric bike instead of walking. This increases your speed to a brisk 210 meters per minute, but also brings up your daily expenses to $160. If you are still willing to set aside 10 hours on average per day for travel, will the total expense of the bike trip end up being less than the walking itinerary? Use the expression you gave from **Question 4.7** to help answer this. You should not need to make any auxiliary calculations.    
+
+
+**Question 7: A mysterious sighting** A group of scientists found a mysterious object suspended midair over Lake Inferior, which they suspect to be extra-terrestrial. The scientists want to pinpoint the location of the object without having to go near it. After some debate, they decide to send one of them to the northernmost point, $N$, of the lake and another to the southernmost point, $S$. The two points have a straight-line distance of 1,234 meters. Coincidentally, the drop point, $C$, of the object, that is, the point on the surface of the lake that the object would land if it fell, happens to be on the straight-line connecting the two points. The two scientists have measured the view angle of the object, which was found to be 40 degrees and 65 degrees. Let us use $O$ to refer to the location of the object. To summarize, the scientists have learned that:
+
+* the line $NS$ has length 1,234 meters,
+* the point $C$ is on the line $NS$,
+* the angle $ONC$ is 40 degrees,
+* the angle $OSC$ is 65 degrees, and
+* the triangles $ONC$ and $OSC$ are right-angle triangles where their right angles appear at $C$.
+
+They record their findings using the following names: 
+
+```{r message=FALSE, warning=FALSE}
+NS <- 1234 # the line NS has length 1,234 meters
+ONC <- 40 # the angle ONC is 40 degrees
+OSC <- 65 # the angle OSC is 65 degrees
+```
+
+From the information, we can compute the distance $OC$, which is the height of the object. We wish to compute the distances $NO$ and $SO$ by means of an R expression.
+
+* **Question 7.1** Recall that the unit of angle in R is radian, where 180 degrees is equivalent to $\pi$ radian. Let us first convert the two angles to their respective radian values. For an angle $d$ in degrees, its radian is
+
+  $$
+  radian\_d = (d / 180.0) * \pi 
+  $$
+
+  Compute the two radian angles, `radianN` for the angle $ONC$ and `radianS` for the angle $OSC$. 
+
+* **Question 7.2** Let $h$ be the height of the object (that is, the distance OC). The distance $NC$, then, is:
+
+  $$
+  \mathrm{NC} = h / \mathrm{tan}(\mathrm{radianN})
+  $$
+  
+  and the distance $SC$ is:
+  
+  $$
+  \mathrm{SC} = h / \mathrm{tan}(\mathrm{radianS})
+  $$
+  
+  The sum of the two distances is equal to $NS$, which is `NS` meters. We thus have:
+  
+  $$
+  h(1/\mathrm{tan}(\mathrm{radianN}) + 1/\mathrm{tan}(\mathrm{radianS})) = \mathrm{NS}
+  $$
+  
+  Solving this for $h$, we get:
+  
+  $$
+  h = \frac{\mathrm{NS}}{(1/\mathrm{tan}(\mathrm{radianN}) + 1/\mathrm{tan}(\mathrm{radianS}))}
+  $$
+  
+  Use this formula to obtain the value of `h` and store it in the name `height`.
+
+
+* **Question 7.3** Now we are ready to compute the distances $NO$ and $SO$ as follows:
+
+  $$
+  \mathrm{NO} = \mathrm{height} / \mathrm{sin(radianN)} 
+  $$
+
+  $$
+  \mathrm{SO} = \mathrm{height} / \mathrm{sin(radianS)} 
+  $$
+
+  Compute these quantities and store the results in the names `distanceNO` and `distanceSO`, respectively.
+
+
+* **Question 7.4** Using the computations developed from the above parts, form a single R expression that computes the *minimum* view distance to the object. __Hint:__ Your answer should use just one line of code! 
+
+* **Question 7.5** After several hours, the scientists find the object to be closer to falling in the lake. The same two scientists quickly remeasure the angles from before and find $ONC$ to be 30 degrees and $OSC$ 50 degrees. Adjust the single expression given for **Question 7.4** accordingly. What is the minimum view distance to the object now? 

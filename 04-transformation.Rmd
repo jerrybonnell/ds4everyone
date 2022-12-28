@@ -304,9 +304,13 @@ Usually data scientists need to load data from files. The package `readr` of `ti
 To read files, we specify a string the location of the file and then use the function for reading the file, `read_csv` if it is a CSV file and `read_tab` if it is a TSV file. If you have a file that uses another delimiter, a more general `read_delim` function exists as well.  
 Here is an example of reading a CSV file from a URL available on the internet.
 
-```{r message=FALSE, warning = FALSE}
+```{r eval=FALSE, message=FALSE, warning = FALSE}
 path <- "https://data.bloomington.in.gov/dataset/117733fb-31cb-480a-8b30-fbf425a690cd/resource/2b2a4280-964c-4845-b397-3105e227a1ae/download/pedestrian-and-bicyclist-counts.csv"
 bloom <- read_csv(path)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+bloom <- read_csv("data/sneaky_bloom.csv")
 ```
 
 The data set shows the traffic in the city of Bloomington, the hometown of the Indiana University at Bloomington, Indiana.
@@ -1578,6 +1582,400 @@ We can see that a public institution, Miami Dade College, appears toward the top
 Because ZIP codes correspond to geographic locations, a possibility for further study would be to overlay the net tuition dataset with spatial information. We could then plot a map of the South Florida and Miami areas and see if the plot reveals any "hot spots", i.e., areas with unusually high annual costs relative to neighboring ZIP codes. This would add a geographical context for our data points which could suggest new questions for data exploration.  
 
 Learning how to plot maps and generate visualizations of tibbles is the subject of the next chapter. 
+
+## Exercises 
+
+Be sure to install and load the following packages into your R environment before beginning this exercise set.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(edsdata)
+library(gapminder)
+```
+
+**Question 1** Recall from the textbook that data is *tidy* when it satisfies four conditions:
+
+1.  Each variable forms a column.
+2.  Each observation forms a row.
+3.  Each value must have its own cell.
+4.  Each type of observational unit forms a table.
+
+```{r warning=FALSE, message=FALSE}
+is_it_tidy <- list(table5, table1, table3, table2)
+```
+
+`is_it_tidy` is a list containing 4 tibbles, with each dataset showing the same values of the four variables *country*, *year*, *population*, and *cases*, but each dataset organizing the values in a different way. All display the number of Tuberculosis (TB) cases documented by the World Health Organization in Afghanistan, Brazil, and China between 1999 and 2000.
+
+**Table 1**
+
+```{r eval=FALSE}
+is_it_tidy[[1]]  # Table 1 
+```
+
+**Table 2**
+
+```{r eval=FALSE}
+is_it_tidy[[2]] # Table 2
+```
+
+**Table 3**
+
+```{r eval=FALSE}
+is_it_tidy[[3]] # Table 3
+```
+
+**Table 4**
+
+```{r eval=FALSE}
+is_it_tidy[[4]] # Table 4
+```
+
+* **Question 1.1** Have a look at each of the four tibbles. What is the observational unit being measured?
+
+* **Question 1.2**  Using the observational unit you have defined, which of these tibbles, if any, fulfills the properties of *tidy data*? For this question, it is enough to state simply whether each tibble is tidy or not.  
+
+* **Question 1.3** Select one of the tibbles you found not to be tidy and explain which of the tidy data guidelines are violated.
+
+**Question 2**  Gapminder is an independent educational non-profit project that identifies systematic misconceptions about important global trends. In this question we will explore an excerpt of the Gapminder data on life expectancy, GDP per capita, and population by country. This data is available in the tibble `gapminder` from the library `gapminder`. 
+
+Let us have a look at the data. We will make an explicit copy of the data called `gap` to prevent any worry of modifying the original data.
+
+```{r eval=FALSE, warning=FALSE, message=FALSE}
+gap <- gapminder
+gap
+```
+
+* **Question 2.1** Create a new variable called `gdp` that gives each country's GDP. This can be accomplished by multiplying the figures in population (`pop`) with GDP per capita (`gdpPercap`). Assign the resulting new tibble to the name `gap`.
+
+* **Question 2.2** It can be helpful to report GDP per capita relative to some benchmark. Because the United States is the country where the authors reside, let us choose this as the reference country.
+
+Filter down `gap` to rows that pertain to United States. Extract the `gdpPercap` variable from the resulting tibble as a *vector* and assign it to a name called `usa_gdpPercap`. 
+
+* **Question 2.3** Obtain a tibble of unique country names that are in the variable `country`. We can accomplish this using the `dplyr` verb `distinct()`. Pipe your `gap` tibble into this function and store the resulting *tibble* into a name called `countries`. 
+
+* **Question 2.4** Replicate `usa_gdpPercap` once per each unique country in the dataset and store the resulting *vector* into a name called `usa_gdpPercap_rep`. Use the function `rep()`. 
+
+* **Question 2.5** Add a new column to `gap` called `gdpPercap_relative` which divides `gdpPercap` by this United States figure. Store the resulting tibble into the name `gap`. 
+
+* **Question 2.6** Relative to the United States, which country had the highest GDP per capita? And, in what year? Assign your answers to the names `highest_gdp_rel_to_us` and `year`, respectively. You should use a `dplyr` verb to help you answer this; do not attempt to find the answer manually. 
+
+* **Question 2.7** The last question made it seem that a majority of countries have a higher GDP per capita relative to the U.S. But that is just a tiny slice of the data and intuition may tell us otherwise. The *median* is a good measure for the central tendency of the data. Find the median of the variable `gdpPercap_relative` and assign your answer to the name `the_median`. Your answer should be a single double value. 
+
+* **Question 2.8** Think about the value of the median you just found and give an interpretation for it when compared to the bulk of the data. Is it true that the majority of countries have a higher GDP per capita compared to the United States?
+
+__HINT:__ Remember that the median is the GDP per capita *relative to the United States*. If the median value was 1, what would that mean? If it was *greater* than 1? How about *less* than 1? 
+
+**Question 3** In this question we will continue exploring the `gapminder` data to further practice `dplyr` verbs. As before, we will keep an explicit copy of the Gapminder data in a variable called `gap`. 
+
+```{r eval=FALSE, warning=FALSE, message=FALSE}
+gap <- gapminder
+```
+
+* **Question 3.1** How many observations are there __per continent__? Store the resulting tibble in a name called `continent_counts` with two variables: `continent` (the continents) and `n` (the counts). 
+
+* **Question 3.2**  Let's have a look at the life expectancy in the continent Africa. What is the minimum, maximum, and average life expectancy in each year? You will need to use the pair `group_by()` and `summarize()` to answer this. Store the resulting tibble in a variable called `summarized_years`. 
+
+The first few rows of this tibble should look like:
+
+| year   | min_life_exp | max_life_exp | avg_life_exp |
+|--------|--------------|--------------|--------------|
+| 1952   |     30.0     |   52.724     | 39.13550     |
+| 1957   |     31.57    |   58.089     | 41.26635     |
+| ...    |      ...     |    ...       | ...          |
+
+
+* **Question 3.3** From `gap`, create a new variable named `amount_increase` which gives the amount life expectancy increased by when compared to 1952, __for each country.__ Select only the variables `country`, `year`, `lifeExp`, and `life_exp_gain`. Store the resulting tibble into a name `from_1952`. 
+
+__HINT:__ Recall the *grouped mutate* construct discussed in the textbook: sometimes we wish to keep the groups after a `group_by()` and compute *within* them. Moreover, don't forget to `ungroup()` when you are done. Finally, the function `first()` can be used to extract the first value from something, e.g.,
+
+```{r warning=FALSE, message=FALSE}
+first(c(10, 4, 9, 42, -2))
+```
+
+* **Question 3.4**  Which country had the *highest* life expectancy when compared to 1952 and in what year? Which country had the *lowest* and, similarly, what year did that occur? Use a `dplyr` verb to help you answer this. Assign your answers to the names `highest_country`, `highest_year`, `lowest_country`, and `lowest_year`.
+
+**Question 4** The Connecticut Department of Housing (DOH) publishes data about affordable housing. We've obtained data on affordable housing by town from 2011-2020 and collected this into a tibble named `affordable`, available in the `edsdata` package. Pull up the help for information about this dataset.  
+
+```{r warning=FALSE, message=FALSE}
+affordable
+```
+
+* **Question 4.1**  Sort the data in *increasing* order by percent affordable, naming the sorted tibble `by_percent`.  Create another tibble called `by_census` that is sorted in *decreasing* order by number of 2010 census units instead.
+
+* **Question 4.2** Let us define "most affordable housing" as towns with housing affordability at least 30%. Create a tibble named `most_affordable` that gives the most affordable towns in the year 2020. 
+
+* **Question 4.3** Create a tibble named `affordable_by_year` that gives the number of towns with "most affordable housing" broken down by year. For instance, three towns had most affordable housing in the year 2015. This tibble should contain two variables named `Year` and `Number of Towns`.  
+
+* **Question 4.4** Based on this tibble, what would you say to the statement: 
+
+> "It appears that the percent of most affordable housing in Connecticut towns, as defined as towns with housing affordability at least 30%, decreases over time when compared to 2011."
+
+Is this a fair claim to make? Why or why not? 
+
+* **Question 4.5** It is usually a good idea to perform "sanity" checks on your data to make sure the data follows your intuition (or doesn't). For instance, we expect that by summing the variables `Government Assisted`, `Tenant Rental Assistance`, `Single Family CHFA/ USDA Mortgages`, and `Deed Restricted Units`, and then dividing this figure by the total number of 2010 census units, the percentage should equal the value in `Percent Affordable`. 
+
+Let us create two new columns in `affordable` that give: 
+
+* Our own percent affordability variable named `my_affordable` that reports the above figure, *rounded to two decimal places*.  
+* A variable named `equal_figures` that reports whether the two figures, `my_affordable` and `Percent Affordable` are equal. 
+
+Name the resulting tibble `with_my_affordable`. 
+
+* **Question 4.6** Do any of these figures differ? Form a tibble named `is_equal` using `with_my_affordable` that contains one row and one variable named `all_equal`. The single value in this tibble is a Boolean expressing whether there are any differences between the percent affordability figures. 
+
+**Question 5** The [U.S. Department of Agriculture (USDA) Economic Research Service](https://www.ers.usda.gov/data-products/county-level-data-sets/) publishes data on unemployment rates in the USA. The data is available in `unemp_usda` from `edsdata`, and gives county-level socioeconomic indicators from 2000 to 2020. We will use this dataset to examine the average yearly unemployment rate in each state in the USA during the recorded years. 
+
+* **Question 5.1** Select the state (`State`) and county (`Area_name`) columns and then only those columns that pertain to unemployment rate, that is, columns of the form `Unemployment_rate_X`, where `X` is some year. Store the resulting tibble in the name `unemp_usda_relevant`.
+
+* **Question 5.2** If our statistical question is about the average yearly unemployment rate in the USA from 2000 to 2020, does the data in `unemp_usda_relevant` fulfill the properties of tidy data? If so, why? If not, what tidy data principles are violated? Then, in English, describe what a tidy representation of the data would look like.   
+
+* **Question 5.3** Apply a pivot transformation to `unemp_usda_relevant` so that the four variables appear in the transformed table: `State`, `Area_name ` (the county), `year`, and `unemployment_rate`. Store the resulting tibble in the name `unemp_usda_tidy`.
+
+* **Question 5.4** The current form of the `year` variable in `unemp_usda_tidy` is awkward because we expect "year" to be a number, but "year" is prefixed by some string; this may be surprising to potential customers of this tibble. Tidy the column `year` by extracting only the year, e.g., `"2008"` from `"Unemployment_rate_2008"`. You will need to combine a function from `stringr` with a `dplyr` verb to accomplish this. Then convert `year` to a numerical column using `as.double()`. Store the resulting tibble in `unemp_usda_tidy`.
+
+__HINT:__ A prerequisite to answering this question is to first write `stringr` code that can extract the string "2009" from the string "Unemployment_rate_2009". Once you have figured this sub-problem, then incorporate your `stringr` work into a `dplyr` verb.  
+
+* **Question 5.5** Form a tibble named `top_unemp_by_state` that gives the year with the highest unemployment rate for each state that appears in `unemp_usda_tidy`. This tibble should contain three columns (the state, the average unemployment rate, and the year where that unemployment rate occurred) and a single observation for each state reporting the figure.
+
+__HINT:__ You will need to aggregate the county-level figures in order to compute a state-level average unemployment rate. Moreover, if you find `NA` in your solution, be sure to filter any missing values before computing the mean. Check the documentation for `mean` for hints on how to accomplish this. 
+
+* **Question 5.6** Based on these figures, can you say which year(s) saw the highest unemployment rates? Use a `dplyr` verb to help you answer this. 
+
+**Question 6.** Let's practice how to write and use functions. 
+
+* **Question 6.1**  Complete the function below that converts a proportion to a percentage. For example, the value of `to_percent(0.5)` should be 50, i.e., 50%. 
+
+  ```{r eval=FALSE, warning=FALSE, message=FALSE}
+  to_percent <- function(prop) {
+    scale <- 100
+  
+  }
+  ```
+
+* **Question 6.2** Try referring to the value of `scale` (1) inside the function and (2) outside the function by printing its value. For each case, what value is shown? Is an error produced? Why or why not? 
+
+* **Question 6.3** Consider the vowels in the English language. These are the five characters "a", "e", "i", "o", and "u".
+
+  * **Question 6.3.1** Define a function called `vowel_remover`.  It should take a single string as its argument and return a copy of that string, but with all vowels removed. You should use a `stringr` function to help you accomplish this. 
+
+  * **Question 6.3.2**  Write a function called `num_non_vowels`. It should take a string as its argument and return a number. The number should be the number of characters in the argument string that are not vowels. One way to do that is to remove all the vowels and count the size of the remaining string.
+
+* **Question 6.4** Recall that an important use of functions is that we can use it in a `purrr` *map*. Suppose that we have the following vector of fruits: 
+
+  ```{r warning=FALSE, message=FALSE}
+  fruit_basket <- c("lychee", "banana", "mango")
+  ```
+
+Using a call to a `purrr` map function with the vector `fruit_basket`, create a copy of the vector `fruit_basket`, but with all the characters that are vowels removed from each element. Assign your answer to the vector `fruit_basket_nonvowels`. 
+
+**Question 7**  Let us examine annual compensation data reported by New York Local Authorities, available in `nysalary` from `edsdata`. Public authorities are required to regularly report salary and compensation information. This data is published through [Open Data NY](https://data.ny.gov/Transparency/Salary-Information-for-Local-Authorities/fx93-cifz). We have subsetted the data to include salary information for employees where the fiscal year ended on 12/31/2020. Let us have a look at this data.
+
+```{r warning=FALSE, message=FALSE}
+nysalary
+```
+
+* **Question 7.1** We tried to compute the average annual compensation like this:
+
+  ```{r eval=FALSE, warning=FALSE, message=FALSE}
+  nysalary |>
+    summarize(avg_compensation = mean(`Total Compensation`))
+  ```
+
+Explain why this does not work. It may be helpful to inspect some values in the `Total Compensation` column.
+
+* **Question 7.2** Extract the first value in the "Total Compensation" variable corresponding to Ellen Addington's annual compensation in the 2020 fiscal year. Call it `addington_string`.
+
+* **Question 7.3** Convert `addington_string` to a number in *tens of thousands*. The `stringr` function `str_remove_all()` will be useful for removing non-numerical characters. For example, the value of `str_remove_all("$100", "[$]")` is the string `"100"`. You will also need the function `as.double()`, which converts a string that looks like a number to an actual number. Assign the result to a name `addington_number`.
+
+To compute the average annual compensation, we would need to do this work for every employee in the dataset. This would be incredibly tedious to complete for 1,676  different employees! Instead, we can use functionals and the *map* construct to do the work for us.  
+
+* **Question 7.4** Define a function `string_to_number` that converts pay strings to pay numbers in *tens of thousands*. Your function should convert a pay string like `"$137,000.00` to a number of dollars in tens of thousands, i.e., `13.7`. 
+
+* **Question 7.5** Now apply the function `string_to_number` to every row in the tibble `nysalary`. Using a *map* and a `dplyr` verb, make a new tibble that is a copy of `nysalary` with one more variable called `"Total Compensation ($)"`. It should be the result of applying `string_to_number` to the "Total Compensation" variable. Call this new tibble `nysalary_cleaned`.
+
+* **Question 7.6** Try again to compute the average annual compensation using the cleaned dataset. Assign your answer to the name `average_annual_comp`.
+
+**Question 8** In 2017, the [Australian Bureau of Statistics (ABS)](https://www.abs.gov.au/) published the results of the [Australian Marriage Law Postal Survey](https://www.abs.gov.au/ausstats/abs@.nsf/mf/1800.0) in response to the question: *should the law be changed to allow same-sex couples to marry?* The majority of participating Australians voted in favor of same-sex couples. The ABS released data on responses and participation broken down by various criteria. This exercise will focus on the latter, and examine participation by state and territory, broken down by age. Following is a snapshot of a subset of the data:     
+
+```{r echo=FALSE, out.width="80%"}
+knitr::include_graphics("images/abs.png")
+```
+
+Unfortunately, as can be seen by the annotations we made, these data are not tidy; we show three different issues with the data. This exercise will practice how to bring this dataset into a tidy format so that it can be subject to analysis. The relevant data is available in the tibble `abs_partp2017` from the `edsdata` package. 
+
+```{r warning=FALSE, message=FALSE}
+abs_partp2017
+```
+
+* **Question 8.1** If the observational unit is the 2017 participation of an Australian age bracket in a territory and we collect 5 measurements per this unit ("Territory/State", "age group", "total participants", "eligible participants", and "participation rate"), cite at least 2 more violations of the tidy data guidelines. Your answer should note violations other than the missing values caused by the issues raised in the above figure. 
+
+* **Question 8.2** Let us first deal with the missing values. These steps can be followed in order: 
+
+* The unnamed columns (`...1` and `...2`) should be relabeled to "Territory/State" and "Participation Type", respectively. 
+* For merged cells, missing values should be filled by looking at the first non-`NA` neighbor above, e.g., the second row should take on the value "New South Wales". 
+* Missing rows should be discarded. This is a reasonable strategy based on what we know about the structure of the data. 
+
+The resulting filled-in tibble should be assigned to a name `abs_partp_filled`. 
+
+* **Question 8.3** Apply pivot transformation(s) to bring `abs_partp_filled` into tidy format; the resulting tibble after this step should fulfill all tidy data guidelines. Assign this tibble to the name `abs_partp_tidy`.
+
+* **Question 8.4** What proportion of results had a participation rate less than 60%?  
+
+* **Question 8.5** Which territory/state had the third smallest eligible voting population in the 18-19 age bracket? 
+
+* **Question 8.6** In the different territories surveyed, what is/are the most frequent age bracket(s) with the lowest participation rates in the survey? Your answer should be expressed as a tibble with two variables named `Age group` and `n`.
+
+**Question 9** This question is a continuation of **Question 8**. We will now analyze the [2017 Australian Marriage Law Postal Survey](https://www.abs.gov.au/ausstats/abs@.nsf/mf/1800.0) another way by looking at the response data. To enrich the analysis, we will overlay the responses with educational qualification data from the [2016 Australian census of population and housing](https://www.abs.gov.au/AUSSTATS/abs@.nsf/Lookup/2071.0Main+Features100012016?OpenDocument), also released through ABS. We have prepared these data for you, available in the tibbles `abs_resp2017` and `abs_census2016` from the `edsdata` package. 
+
+```{r warning=FALSE, message=FALSE}
+abs_resp2017
+abs_census2016
+```
+
+Note that these data are at the Territory/State level, while the participation data in **Question 8** was broken down further into age brackets.  
+
+* **Question 9.1** Let us explore the relationship between education level and survey response. Using the census data, form a tibble that gives the percentage of Australians that hold at least a bachelor's degree, i.e., a qualification level that is either "Bachelor Degree Level", "Graduate Diploma and Graduate Certificate Level", or "Postgraduate Degree Level." These designations are based on the [Australian Standard Classification of Education (ASCED)](https://www.abs.gov.au/ausstats/abs@.nsf/0/F148CC2C8F5EA951CA256AAF001FCA39?opendocument). The resulting tibble should have two variables, `Territory/State` and `At least Bachelor (%)`, and be assigned to a name `bachelor_by_territory`. 
+
+* **Question 9.2** Annotate `bachelor_by_territory` with the survey response data by joining `bachelor_by_territory` with `abs_resp2017`. Assign the resulting joined tibble to the name `with_response`.  
+
+* **Question 9.3** Note briefly the reason for selecting the join function you used. For instance, if you used `inner_join()`, why not `left_join()` or `right_join()`? 
+
+* **Question 9.4** Form a subset of `with_response` that has two rows giving the territory with the highest and lowest support for same-sex couples. Assign this tibble to the name `highest_lowest_support`.   
+
+* **Question 9.5** According to your findings, does there appear to be an association between survey response and territories with larger percentages of advanced degree holders? Why or why not? 
+
+**Question 10**  Consider the tibbles `election` and `unemp_usda` from the `edsdata` package. 
+
+These datasets give county-level results for presidential elections in the USA and the population and unemployment rate of all counties in the US, respectively. The data in `election` was made available by the [MIT Election Data and Science Lab (MEDSL)](https://doi.org/10.7910/DVN/VOQCHQ) and contains county-level returns for presidential elections from 2000 to 2020. The data in `unemp_usda` was prepared by [USDA, Economic Research Service](https://www.ers.usda.gov/data-products/county-level-data-sets/) and gives county-level socioeconomic indicators for unemployment rates. 
+
+An important variable in both datasets is the FIPS code. FIPS codes are numbers which uniquely identify geographic areas. Every county has a unique five-digit FIPS code. For instance, `12086` is the FIPS code that identifies Miami-Dade, Florida. 
+
+* **Question 10.1** Select the relevant unemployment and voting returns data specifically for 2008. The resulting unemployment tibble should contain three columns: FIPS code, state, and the unemployment rate as of 2008. Store these tibbles in the names `election2008` and `unemp2008`.  
+
+* **Question 10.2** Some observations in `election2008` contain a missing FIPS code. Why might that be?
+
+* **Question 10.3**  Locate these rows and then filter them from your `election2008`. Assign the resulting tibble back to `election2008`. 
+
+* **Question 10.4** Suppose that we want to create a new tibble that contains __both__ the election results and the unemployment data. More specifically, we would like to add unemployment information to the election data by *joining* `election2008` with `unemp2008`. Assign the resulting tibble to the name `election_unemp2008`. 
+
+  __HINT:__ What is the key we can use to join these two tables? Note that the column names may be different for the key in each table. For example: we would like to join on the key `student_id` but one table has a column `studentID` and the other `student_id`. In the join function we use, we can say `???_join(tibble_a, tibble_b, by = c("studentID" = "student_id"))`. 
+
+* **Question 10.5** Explain why the join function you selected (e.g., right join, left join, etc.) is appropriate for this problem. Why not choose another join function instead?  
+
+Let us explore the relationship between candidate votes and unemployment rate for each state. 
+
+* **Question 10.6** Create a tibble from `election_unemp2008` that contains, __for each state__, only the candidate that received the most amount of votes. Assign the resulting tibble to the name `state_candidate_winner2008`. It should contain three variables: `state`, `candidate`, and `votes`. Here is what the first few rows of `state_candidate_winner2008` looks like: 
+
+  | state                 | candidate    | votes            |
+  |-----------------------|--------------|------------------|
+  | ALABAMA               | JOHN MCCAIN  |  1266546         |       
+  | ALASKA                | JOHN MCCAIN  |  193841          |
+  | ARIZONA               | JOHN MCCAIN  |  1230111         |
+  | ...                   |  ...         |   ...            | 
+
+
+* **Question 10.7** The following tibble `unemp_by_state2008` gives an average unemployment rate for each state by averaging the unemployment rate over the respective counties. 
+
+```{r eval=FALSE, warning=FALSE, message=FALSE}
+unemp_by_state2008 <- election_unemp2008 |>
+  group_by(state) |>
+  summarize(avg_unemp_rate = mean(Unemployment_rate_2008, na.rm = TRUE))
+unemp_by_state2008
+```
+
+Create a new tibble that contains __both__ the candidate winner voting data and the state-level average unemployment data. More specifically, we would like to add the state-level average unemployment data *to* the winner voting data by joining `state_candidate_winner2008` with `unemp_by_state2008`. Assign the resulting tibble to the name `state_candidate_winner_unemp2008`. 
+
+* **Question 10.8** Using `state_candidate_winner_unemp2008`, generate a tibble that gives the top 10 states with the highest average unemployment rate. Assign this tibble to the name `top_10`.
+
+**Question 11** At the College of Pluto, the six most popular majors are Astronomy, Biology, Chemistry, Data Science, Economics, and Finances. The applicants to the college specify their preference for a major, and the college selects the student with some criteria. The tibble `pluto` in the `edsdata` package gives the selection result from one year. 
+
+```{r warning=FALSE, message=FALSE}
+pluto
+```
+
+* **Question 11.1** Add a new variable `Proportion` that, for each gender, gives the *proportion* of accepted applicants to some major. Assign the resulting tibble to the name `pluto_with_prop`.
+
+* **Question 11.2** Which major saw the highest proportion of accepted *male* applicants? How about accepted *woman* applicants? Use a `dplyr` verb to answer this. Your resulting tibble should have two rows, one for each gender, that gives the corresponding major with the *largest* proportion of accepted applicants. 
+
+* **Question 11.3** Using `pluto_with_prop`, write `dplyr` code that gives the top *two* majors with the largest *gap* in acceptance percentage between men and women. The resulting tibble should have two variables: the major and the quantity of the difference. 
+
+__HINT:__ The function `diff()` may be helpful for computing the difference within a group. 
+
+**Question 12: Examining racial breakdown in the College Scorecard.**  Section 4.8 presented a case study of how to tidy the College Scorecard dataset. Let us play some more with the dataset. The table is available in the name `scorecard_fl` from the `edsdata` package.
+
+```{r eval=FALSE}
+scorecard_fl
+``` 
+
+We will be using the variables appearing on `relevant_cols`.
+
+```{r warning=FALSE, message=FALSE}
+relevant_cols <- c("INSTNM", "CITY", "ZIP", "UGDS", 
+                   "NPT4_PUB", "NPT4_PRIV", 
+                   "UGDS_WHITE", "UGDS_BLACK", 
+                   "UGDS_HISP", "UGDS_ASIAN", "UGDS_AIAN")
+```
+
+* **Question 12.1** First, collect the variables appearing only in `mylist` and store the data in `with_race`. For this action, you can use the dplyr helper function `all_of` together with `select`.
+
+* **Question 12.2** Of the variables we have selected, `UGDS` represents the total number of enrolled students (as a string). We already know what `NPT4_PUB` and `NPT4_PRIV` represent. What do `UGDS_WHITE` and `UGDS_AIAN` refer to? Have a look at the [glossary](https://collegescorecard.ed.gov/data/glossary/) and [data dictionary](https://collegescorecard.ed.gov/data/documentation/) to determine what these variables mean. 
+
+* **Question 12.3** As in the textbook, we will remove the four-digit route number in `ZIP` by replacing the part with the empty string. Call the new variable `ZIP5` and insert it after the `CITY` variable. Store the new data frame back in the name `with_race`.
+
+* **Question 12.4** In the textbook, we looked at generating a Boolean column representing whether or not a college is a private or public institution. We also looked at generating from a string-valued column representing a number to a new column representing a number using `as.double`.
+
+  Let's perform the following steps: 
+  
+  * Create a new Boolean variable called `public` that indicates whether or not the college is a public institution, to be added before `ZIP5`. 
+  * The variables `UGDS`, `UGDS_WHITE`, `UGDS_BLACK`, `UGDS_HISP`, `UGDS_ASIAN`, and `UGDS_AIAN` are currently expressed as strings. Convert these columns to proper numeric columns using `as.double`. The operation can be performed in one step by using `across` within the `mutate` call. 
+  
+  Store the resulting data frame in `with_race`.
+
+* **Question 12.5** By multiplying `UGDS` by each of the five ratios, you can calculate the number of students in each of the categories. Call the number  `n_XYZ` where `XYZ` represents the category, and add the five numbers you can calculate from them after `UGDS`. Call the new tibble `student_counts`.
+
+* **Question 12.6** You may observe that the five categories do not cover the entire racial composition. Let's create a new variable `n_others` by subtracting the five numbers from the total (`UGDS`). Add it after `n_aian`. Call the new tibble `student_counts_others`.
+
+* **Question 12.7** Based on what you have calculated, find out which institution has the largest number of ...
+
+  * Black students?
+  * Hispanic students?
+  * Asian students? 
+
+You can find the answer by reordering the rows in the descending order of the ethnicity.
+
+* **Question 12.8** Let us see which 5-digit ZIP code corresponds to the institutions with the largest number of White students. Group by ZIP code and compute the total count of `n_white` as `total`. Then form a single row that contains the ZIP code with the largest number of White students, along with the corresponding count. 
+
+* **Question 12.9** Which institution(s) correspond to the ZIP code that you found? Use a `dplyr` verb to help you answer this. 
+
+* **Question 12.10**  Let us write a function `examine_by_zip` that accomplishes the task of finding the schools with the highest number of a student group broken down by some ethnicity (e.g., `n_white`) with the ZIP code aggregation.
+
+  This function: 
+  
+  * Receives a parameter representing a variable in `student_counts_others` (e.g., `n_white`), generates a summarized table, computes the total, and arranges the rows in the descending order of the total, in the same manner as **Question 12.8**.   
+  * The function then examines the first element of the `ZIP5` variable and uses it to obtain the schools whose ZIP matches the ZIP code, in the same manner as **Question 12.9**.
+  
+  After writing the function, run it with `examine_by_zip(n_white)` to ensure that the result matches the answer you obtained in the previous question.
+
+  __Note:__ Referencing the variable `column_label` requires a double curly-bracketing when used within the function. This is an advanced `dplyr` usage that we will learn more about later. Here is an example usage of the incantation for the purpose of this exercise: 
+
+  ```{r eval=FALSE}
+  embraced <- function(column_label) {
+    student_counts_others |>
+      summarize(mean_num = 
+                  mean({{ column_label }}, na.rm=TRUE))
+  }
+  embraced(n_white)
+  embraced(n_others)
+  ```
+
+  ```{r eval=FALSE, warning=FALSE, message=FALSE}
+  examine_by_zip <- function(column_label) {
+  
+    
+  }
+  
+  examine_by_zip(n_white)
+  ```
 
 <!---
 In summary, to access the columns and the rows, here are the rules we should follow:
