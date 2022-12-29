@@ -67,6 +67,7 @@ We are now ready to provide a definition of tidy data. We defer to [Hadley Wickh
 |       3. Each value must have its own cell.
 |       4. Each type of observational unit forms a table. 
 
+
 Data that exists in any other arrangement is, consequently, *messy*. A critical aspect in distinguishing between tidy and messy data forms is defining the __observational unit__. This can look different depending on the statistical question being asked. In fact, defining the observational unit is so important because data that is "tidy" in one application can be "messy" in another.  
 
 The goal of this chapter is to learn about methods for *transforming* "messy" data into "tidy" data, with some help from R and the tidyverse. 

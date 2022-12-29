@@ -1677,7 +1677,7 @@ mango_exams
 * **Question 5.7** Following are some statements about the prediction you just generated. Which of these are valid statements that can be made about this prediction? In English, explain why or why not each is a valid claim. 
 
   * This is the score an individual student can expect to receive on the final exam after scoring a 80 on the first midterm. 
-  * A possible interpretation of this prediction is that a student who scored a 80 on the first midterm cannot possibly score a 90 or higher on the final exam.  
+  * A possible interpretation of this prediction is that a student who scored a 80 on the first midterm cannot possibly score a 90 or higher on the final exam.
   * This is an estimate of the height of the true line at $x = 80$. Therefore, we can confidently report this result. 
   * A prediction cannot be determined using a linear regression model fitted on this data. 
 
