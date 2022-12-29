@@ -998,7 +998,7 @@ galaxy_acceptance
 
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
   
-  compute_tvd(galaxy_distribution |> pull(prop_accepted)) # example call 
+  compute_tvd(galaxy_distribution |> pull(prop_accepted)) # example 
   ```
 
 * **Question 1.7** Write a function called `one_simulated_tvd()`. This function takes no arguments. It  generates a "sample pool" under the null hypothesis, computes the test statistic, and then return it. 
@@ -1116,7 +1116,8 @@ While the game seems like an obvious scam, Jerry claims that his dice is no diff
     ggplot(tibble(test_stats)) +
       geom_histogram(aes(x = test_stats, y = after_stat(density)), 
                      bins=10, color = "gray", fill='darkcyan') +
-      geom_vline(aes(xintercept=quantile(test_stats, 1-p_value_cutoff)),
+      geom_vline(aes(xintercept=quantile(test_stats, 
+                                         1-p_value_cutoff)),
                  color='red') +
       geom_point(aes(x=observed_stat,y=0),size=4,color='orange')
   }
@@ -1238,7 +1239,8 @@ In this question, we will examine whether women are underrepresented in the cham
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
   ggplot(tibble(test_stats)) + 
     geom_histogram(aes(x = test_stats), bins=18, color="gray") + 
-    geom_point(aes(x = observed_value_house, y = 0), size=2, color="red")
+    geom_point(aes(x = observed_value_house, y = 0), 
+               size=2, color="red")
   ```
 
 * **Question 4.7** Based on the experiment, what can you say about the representation of women in the House?
@@ -1252,10 +1254,10 @@ In this question, we will examine whether women are underrepresented in the cham
 
 * **Question 4.8** Form a two-element vector named `primary_prop` that gives the proportion of female and male candidates, respectively, in the 2018 U.S. House Primary elections. This can be accomplished as follows:
 
-  * Filter the data to the year `2018`. The data should not contain the results for any elections that resulted in a runoff (where `runoff = 1`). 
-  * Summarize and count each gender that appears in `gender` in the resulting tibble. 
-  * Add a variable that computes the proportions from these counts.  
-  * Pull the proportions as a vector and assign it to `primary_prop`. 
+  * Filter the data to the year `2018`. The data should not contain the results for any elections that resulted in a runoff (where `runoff = 1`).
+  * Summarize and count each gender that appears in `gender` in the resulting tibble.
+  * Add a variable that computes the proportions from these counts.
+  * Pull the proportions as a vector and assign it to `primary_prop`.
 
 * **Question 4.9** Repeat **Question 4.6** this time using the proportions given by `primary_prop`. 
 

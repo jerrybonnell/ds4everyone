@@ -584,10 +584,10 @@ Before we close this section, we end with a quick summary on how to perform a bo
 
 __Goal:__ To estimate some population parameter we do not know about, e.g., the mean air time of New York City flights. 
 
-* Select a sampling plan. A safe bet is to sample at *random* without replacement from the population. Be sure the sample drawn is *large* in size and remember that in reality sampling is an expensive process. It is likely you will get only one chance to draw a sample from the population.  
-* Bootstrap the random sample (this time, *with* replacement) and compute the desired statistic from it. 
+* Select a sampling plan. A safe bet is to sample at *random* without replacement from the population. Be sure the sample drawn is *large* in size and remember that in reality sampling is an expensive process. It is likely you will get only one chance to draw a sample from the population.
+* Bootstrap the random sample (this time, *with* replacement) and compute the desired statistic from it.
 * Replicate this process a great number of times to obtain many bootstrapped samples.
-* Find the "middle 95%" interval of the bootstrapped samples. 
+* Find the "middle 95%" interval of the bootstrapped samples.
 
 ## Confidence Intervals 
 
@@ -763,12 +763,12 @@ The basis for using confidence intervals as a hypothesis test is rooted in stati
 
 ### Final remarks: resampling with care 
 
-We end this section with some points to keep in mind when applying resampling. 
+We end this section with some points to keep in mind when applying resampling.
 
-* Avoid introducing bias into the sample that is used as input for resampling. The sampling plan of simple random sampling will usually work best. And, even with simple random samples, it is possible to draw a "weird" original sample such that the confidence interval generated using it fails to capture the parameter.  
-* When the size of a random sample is moderately sized enough, the chance of the bootstrapped sample being identical to it is extremely rare. Therefore, you should aim to work with large random samples. 
+* Avoid introducing bias into the sample that is used as input for resampling. The sampling plan of simple random sampling will usually work best. And, even with simple random samples, it is possible to draw a "weird" original sample such that the confidence interval generated using it fails to capture the parameter.
+* When the size of a random sample is moderately sized enough, the chance of the bootstrapped sample being identical to it is extremely rare. Therefore, you should aim to work with large random samples.
 * Resampling does not work well when estimating extreme values, for instance, estimating the minimum or maximum value of a population.
-* The distribution of the statistic should look roughly "bell" shaped. The histogram of the resampled statistics will be a hint.  
+* The distribution of the statistic should look roughly "bell" shaped. The histogram of the resampled statistics will be a hint.
 
 ## Exercises 
 

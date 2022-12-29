@@ -998,7 +998,7 @@ mtcars_tibble
 
 We can spot two areas that require transformation: 
 
-* Convert the `wt` column from pounds to kilograms.  
+* Convert the `wt` column from pounds to kilograms.
 * Cut off the values in `displ` so that no car model has a value larger than `400`.
 
 We can address the first one by writing a function that multiples each value in the argument received by the conversion factor for kilograms. Let us test it out first with a simple vector.
@@ -1784,7 +1784,7 @@ Name the resulting tibble `with_my_affordable`.
   fruit_basket <- c("lychee", "banana", "mango")
   ```
 
-Using a call to a `purrr` map function with the vector `fruit_basket`, create a copy of the vector `fruit_basket`, but with all the characters that are vowels removed from each element. Assign your answer to the vector `fruit_basket_nonvowels`. 
+  Using a call to a `purrr` map function with the vector `fruit_basket`, create a copy of the vector `fruit_basket`, but with all the characters that are vowels removed from each element. Assign your answer to the vector `fruit_basket_nonvowels`. 
 
 **Question 7**  Let us examine annual compensation data reported by New York Local Authorities, available in `nysalary` from `edsdata`. Public authorities are required to regularly report salary and compensation information. This data is published through [Open Data NY](https://data.ny.gov/Transparency/Salary-Information-for-Local-Authorities/fx93-cifz). We have subsetted the data to include salary information for employees where the fiscal year ended on 12/31/2020. Let us have a look at this data.
 
@@ -1897,7 +1897,8 @@ An important variable in both datasets is the FIPS code. FIPS codes are numbers 
   ```{r eval=FALSE, warning=FALSE, message=FALSE}
   unemp_by_state2008 <- election_unemp2008 |>
     group_by(state) |>
-    summarize(avg_unemp_rate = mean(Unemployment_rate_2008, na.rm = TRUE))
+    summarize(avg_unemp_rate = mean(Unemployment_rate_2008, 
+                                    na.rm = TRUE))
   unemp_by_state2008
   ```
 

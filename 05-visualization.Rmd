@@ -783,32 +783,32 @@ The stacking is performed by the position adjustment specified by the `position`
 
 * `position = "fill"` makes each bar the same height. This way we can compare proportions across groups. 
 
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as_factor(love)), 
-           position = "fill")  +
-  labs(fill = "love")
-```
+  ```{r dpi=80, fig.align="center", message = FALSE}
+  ggplot(happy) +
+    geom_bar(aes(x = happy, fill = as_factor(love)), 
+             position = "fill")  +
+    labs(fill = "love")
+  ```
 
 * `position = "dodge"` places the stacked bars directly *beside* one another. This makes it easier to compare individual values. 
 
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as_factor(love)), 
-           position = "dodge")+
-  labs(fill = "love")
-```
+  ```{r dpi=80, fig.align="center", message = FALSE}
+  ggplot(happy) +
+    geom_bar(aes(x = happy, fill = as_factor(love)), 
+             position = "dodge")+
+    labs(fill = "love")
+  ```
 
-We can adjust the values of the x-axis to whole numbers using `as_factor` again. We can also the title "relation between happiness and love".
+  We can adjust the values of the x-axis to whole numbers using `as_factor` again. We can also the title "relation between happiness and love".
 
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(happy) +
-  geom_bar(aes(x = as_factor(happy), fill = as_factor(love)), 
-           position = "dodge") +
-  labs(x = "Happy Score", 
-       fill = "love",
-       title = "relation between happiness and love") 
-```
+  ```{r dpi=80, fig.align="center", message = FALSE}
+  ggplot(happy) +
+    geom_bar(aes(x = as_factor(happy), fill = as_factor(love)), 
+             position = "dodge") +
+    labs(x = "Happy Score", 
+         fill = "love",
+         title = "relation between happiness and love") 
+  ```
 
 Bar charts are intended as visualizations of categorical variables. When the variable is numerical, the numerical relations between its values have to be taken into account when we create visualizations. That is the topic of the next section. Before ending the discussion here, we turn to one more important piece of `ggplot2` magic.  
 
@@ -820,60 +820,60 @@ This is not the only coordinate system offered by `ggplot2`, and learning about 
 
 * `coord_flip()` flips the `x` and `y` axes. For instance, this can be useful when the x-axis labels on a bar chart overlap each other.  
 
-```{r dpi=80, fig.align="center", message = FALSE}
-ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as_factor(love))) + 
-  coord_flip()
-```
+  ```{r dpi=80, fig.align="center", message = FALSE}
+  ggplot(happy) +
+    geom_bar(aes(x = happy, fill = as_factor(love))) + 
+    coord_flip()
+  ```
 
 * `coord_polar()` uses polar coordinates. It is useful for plotting a Coxcomb chart. Note the connection between this and a bar chart.
 
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as_factor(love))) + 
-  coord_polar()
-```
+  ```{r dpi=80,  fig.align="center", message = FALSE}
+  ggplot(happy) +
+    geom_bar(aes(x = happy, fill = as_factor(love))) + 
+    coord_polar()
+  ```
 
 * `coord_cartesian(xlim, ylim)` can be passed arguments for "zooming in" the plot. For instance, we may want to limit the height of very tall bars (and, similarly, the effect of very small bars) in a bar chart by passing in a range of possible y-values to `ylim`.   
 
-```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as_factor(love))) + 
-  coord_flip() +
-  coord_cartesian(ylim=c(1,10))
-```
+  ```{r dpi=80,  fig.align="center", message = FALSE}
+  ggplot(happy) +
+    geom_bar(aes(x = happy, fill = as_factor(love))) + 
+    coord_flip() +
+    coord_cartesian(ylim=c(1,10))
+  ```
 
-This can also be used as a trick for eliminating the (awkward) gap between the bars and the x-axis. 
+  This can also be used as a trick for eliminating the (awkward) gap between the bars and the x-axis. 
 
 * `scale_x_log10()` and `scale_y_log10()` are numeric position scales that can be used to transform an axis on a plot. It can be very useful when you have data spread over a large range and concentrated over a relatively smaller interval. 
 
-As an example, consider the dataset `and_salamanders` sourced from the package `lterdatasampler` that contains measurements on Coastal giant salamanders.
+  As an example, consider the dataset `and_salamanders` sourced from the package `lterdatasampler` that contains measurements on Coastal giant salamanders.
 
-```{r}
-library(lterdatasampler)
+  ```{r}
+  library(lterdatasampler)
+  
+  and_salamanders <- and_vertebrates |>
+    filter(species == "Coastal giant salamander")
+  and_salamanders
+  ```
 
-and_salamanders <- and_vertebrates |>
-  filter(species == "Coastal giant salamander")
-and_salamanders
-```
+  We can plot the relationship between salamander mass and length.  
 
-We can plot the relationship between salamander mass and length.  
+  ```{r dpi=80,  fig.align="center", message = FALSE, warning=FALSE}
+  ggplot(and_salamanders) +
+    geom_point(aes(x = length_1_mm, y = weight_g), alpha = 0.4) 
+  ```
 
-```{r dpi=80,  fig.align="center", message = FALSE, warning=FALSE}
-ggplot(and_salamanders) +
-  geom_point(aes(x = length_1_mm, y = weight_g), alpha = 0.4) 
-```
+  As illustrated by the alpha, we can observe most observations are concentrated where length is in the range $[19, 100]$ and that observations are more dispersed in the range $[100, 181]$. A log transformation can help distribute the observations more evenly along the axis. We can apply this transformation to both axes as follows. 
 
-As illustrated by the alpha, we can observe most observations are concentrated where length is in the range $[19, 100]$ and that observations are more dispersed in the range $[100, 181]$. A log transformation can help distribute the observations more evenly along the axis. We can apply this transformation to both axes as follows. 
+  ```{r dpi=80,  fig.align="center", message = FALSE, warning=FALSE}
+  ggplot(and_salamanders) +
+    geom_point(aes(x = length_1_mm, y = weight_g), alpha = 0.4) +
+    scale_x_log10() + 
+    scale_y_log10()
+  ```
 
-```{r dpi=80,  fig.align="center", message = FALSE, warning=FALSE}
-ggplot(and_salamanders) +
-  geom_point(aes(x = length_1_mm, y = weight_g), alpha = 0.4) +
-  scale_x_log10() + 
-  scale_y_log10()
-```
-
-Observe how observations are now more evenly distributed across both axes. However, tread carefully when applying transformations (logarithmic or other) to an axis. Moving one unit along the log-axis does __not__ have the same meaning as moving one unit along the original axis!    
+  Observe how observations are now more evenly distributed across both axes. However, tread carefully when applying transformations (logarithmic or other) to an axis. Moving one unit along the log-axis does __not__ have the same meaning as moving one unit along the original axis!    
 
 ## Numerical Variables 
 
@@ -1191,14 +1191,14 @@ g1 <- ggplot(first_subset, aes(x = hwy)) +
                  fill = "darkcyan", 
                  color = "grey", 
                  breaks = bin_choices) +
-  labs(title = "minivan, midsize, and suv")
+  labs(title = "minivan, midsize, suv")
 
 g2 <- ggplot(second_subset, aes(x = hwy)) +
   geom_histogram(aes(y = after_stat(density)), 
                  fill = "darkcyan", 
                  color = "grey", 
                  breaks = bin_choices) +
-  labs(title = "compact, subcompact, and 2seater")
+  labs(title = "compact, subcompact, 2seater")
 
 g1 + g2
 ```
@@ -1212,13 +1212,15 @@ g1 <- ggplot(first_subset, aes(x = hwy)) +
   geom_histogram(aes(y = after_stat(density)), 
                    fill = "white", color = "grey", 
                    breaks = bin_choices) +
-  geom_density(adjust = 3, fill = "purple", alpha = 0.3)
+  geom_density(adjust = 3, fill = "purple", alpha = 0.3) +
+  labs(title = "minivan, midsize, suv")
 
 g2 <- ggplot(second_subset, aes(x = hwy)) +
   geom_histogram(aes(y = after_stat(density)), 
                    fill = "white", color = "grey", 
                    breaks = bin_choices) +
-  geom_density(adjust = 3, fill = "purple", alpha = 0.3)
+  geom_density(adjust = 3, fill = "purple", alpha = 0.3) + 
+  labs(title = "compact, subcompact, 2seater")
 
 g1 + g2
 ```
@@ -1972,14 +1974,14 @@ nysalary_cleaned
 
 * **Question 4.1** Make a histogram of the compensation of employees in `nysalary_cleaned` in *density scale*. Use the sequence `c(seq(0, 10,2), 15, 20, 40)` for your bin `breaks`. Assign the resulting `ggplot` object to a name `g`. 
 
-The later bins have very few individuals so the bar heights become too short to make out visually. The following code chunk overlays your histogram with a geom text layer that annotates each bin with the corresponding density in that bin. 
+  The later bins have very few individuals so the bar heights become too short to make out visually. The following code chunk overlays your histogram with a geom text layer that annotates each bin with the corresponding density in that bin. 
 
-```{r eval=FALSE, message=FALSE, warning=FALSE}
-g +
-  geom_text(stat = "bin", aes(y = stat(density), 
-                              label = round(stat(density),5)),
-            vjust = -0.2, size=2, breaks=c(seq(0, 10,2), 15, 20, 40))
-```
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  g +
+    geom_text(stat = "bin", aes(y = stat(density), 
+                                label = round(stat(density),5)),
+              vjust = -0.2, size=2, breaks=c(seq(0, 10,2), 15, 20, 40))
+  ```
 
 * **Question 4.2** Using the histogram, how many employees had a total compensation of more than 100K in the 2020 fiscal year?  Answer the question manually using the density formulas presented in the textbook. You will need to do some arithmetic to find the answer; R can be used as a calculator.
 
@@ -1997,10 +1999,10 @@ g +
 
 * **Question 5.4**  Using the above two visualizations, select which of the following statements can be correctly inferred by including them in the following *vector* `gap_answers`. For those that you did not select, if any, explain why the statement cannot be made.
 
-  * We observe more populous countries in the "Europe" cluster than in the "Asia" cluster. 
-  * Countries with higher GDP per capita are associated with higher life expectancies, and we can also observe that countries in Asia are more correlated with lower GDP per capita than countries in Europe in 1987.  
-  * Moving a unit of distance along the x-axis has the same effect in both visualizations.    
-  * The GDP per capita for the majority of countries in Asia are practically 0 according to the first visualization. 
+  * We observe more populous countries in the "Europe" cluster than in the "Asia" cluster.
+  * Countries with higher GDP per capita are associated with higher life expectancies, and we can also observe that countries in Asia are more correlated with lower GDP per capita than countries in Europe in 1987.
+  * Moving a unit of distance along the x-axis has the same effect in both visualizations.
+  * The GDP per capita for the majority of countries in Asia are practically 0 according to the first visualization.
 
 * **Question 5.5**  The tibble `gapminder` contains five variables: `country`, `continent`, `year`, `lifeExp`, and `pop`. Are any of these categorical variables and, if so, what kind (e.g., nominal, ordinal, binary)? Are there any numerical variables and, if so, what kind (e.g., continuous, discrete)? 
 

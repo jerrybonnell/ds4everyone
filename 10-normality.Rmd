@@ -447,9 +447,9 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
 The values on the x-axis are in *standard units* (or *z*-scored values). We observe that the curve is symmetric around 0 where the "bulk" of the data is close to the mean. Following are some properties about the curve: 
 
 * The total area under the curve is 1.
-* The curve is symmetric so it inherits a property we know about symmetric distributions: the mean and median are both 0. 
-* The SD is 1 which, fortunately for us, is clearly identifiable on the x-axis.   
-* The curve has two *points of inflection* at -1 and +1, which are annotated on the following plot.  
+* The curve is symmetric so it inherits a property we know about symmetric distributions: the mean and median are both 0.
+* The SD is 1 which, fortunately for us, is clearly identifiable on the x-axis.
+* The curve has two *points of inflection* at -1 and +1, which are annotated on the following plot.
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
 ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +

@@ -910,7 +910,7 @@ knitr::include_graphics('images/list_visual.png')
 ```
 
 * `a` is a list
-* `a[2]` is also a list, this time containing a single element\
+* `a[2]` is also a list, this time containing a single element
 * `a[[2]]` is the second component of the list, a vector
 * `a[[2]][1]` is the first element of that vector
 
@@ -1125,66 +1125,63 @@ str_trim("   abc    ", side="both")
 
 The first three functions execute substitutions to parts of each string.
 
--   `str_sub() <- VALUE`: Here the `str_sub()` part follows the syntax of the method we earlier discussed - the substrings with specific range of indexes inside strings. After this action, each substring will become `VALUE`.
+* `str_sub() <- VALUE`: Here the `str_sub()` part follows the syntax of the method we earlier discussed - the substrings with specific range of indexes inside strings. After this action, each substring will become `VALUE`.
 
-```{r}
-s <- c("5/17/2019", "Certified mail", "FL 33333", 
-       "Oppa Locka", "to Mr. Haan", "arrived")
-```
+  ```{r}
+  s <- c("5/17/2019", "Certified mail", "FL 33333", 
+         "Oppa Locka", "to Mr. Haan", "arrived")
+  ```
 
-Since the `str_sub() <- VALUE` modifies the original, let us copy `s` to `scopy` and then execute the action on the copy, not the original.
-In that manner, we can preserve the original.
-Note the use of 0 and 0 in the second instance, the position range of 0 through 0 corresponds to the part before the start of the string.
+  Since the `str_sub() <- VALUE` modifies the original, let us copy `s` to `scopy` and then execute the action on the copy, not the original. In that manner, we can preserve the original. Note the use of 0 and 0 in the second instance, the position range of 0 through 0 corresponds to the part before the start of the string.
 
-```{r}
-scopy <- s
-str_sub(scopy, 1, 3) <- "I am "
-scopy
-scopy <- s
-str_sub(scopy, 0, 0) <- "I am "
-scopy
-s
-```
+  ```{r}
+  scopy <- s
+  str_sub(scopy, 1, 3) <- "I am "
+  scopy
+  scopy <- s
+  str_sub(scopy, 0, 0) <- "I am "
+  scopy
+  s
+  ```
 
--   `str_replace(STRING, PATTERN, REPLACEMENT)`: Replaces the first occurrence of `PATTERN` with `REPLACEMENT`.
--   `str_replace_all(STRING, PATTERN, REPLACEMENT)`: Replaces all occurrences of `PATTERN` with `REPLACEMENT`. Like `str_locate_all` the function finds a set of non-overlapping occurrences and then replaces all the occurrences it has identified.
+* `str_replace(STRING, PATTERN, REPLACEMENT)`: Replaces the first occurrence of `PATTERN` with `REPLACEMENT`.
+* `str_replace_all(STRING, PATTERN, REPLACEMENT)`: Replaces all occurrences of `PATTERN` with `REPLACEMENT`. Like `str_locate_all` the function finds a set of non-overlapping occurrences and then replaces all the occurrences it has identified.
 
-Both functions return the vector resulting from their action.
-The original remains intact.
+  Both functions return the vector resulting from their action. The original remains intact.
 
-```{r}
-t <- s
-str_replace(t, "a", "oo")
-t <- s
-str_replace_all(s, "a", "oo")
-t <- s
-str_replace_all(s,"[0-9][0-9]", "##")
-```
+  ```{r}
+  t <- s
+  str_replace(t, "a", "oo")
+  t <- s
+  str_replace_all(s, "a", "oo")
+  t <- s
+  str_replace_all(s,"[0-9][0-9]", "##")
+  ```
 
 There are three more string mutation functions.
 
--   `str_to_lower(STRING)`: This converts each uppercase letter to its corresponding lowercase letter.
--   `str_to_upper(STRING)`: This converts each lowercase letter to its corresponding uppercase letter.
--   `str_to_title(STRING)`: This converts each string to a title-like format.
+* `str_to_lower(STRING)`: This converts each uppercase letter to its corresponding lowercase letter.
+* `str_to_upper(STRING)`: This converts each lowercase letter to its corresponding uppercase letter.
+* `str_to_title(STRING)`: This converts each string to a title-like format.
 
-Each fo the three methods returns a new vector.
+  Each of the three methods returns a new vector.
 
-```{r}
-t <- s
-str_to_lower(s)
-t <- s
-str_to_upper(s)
-t <- s
-str_to_title(s)
-```
+  ```{r}
+  t <- s
+  str_to_lower(s)
+  t <- s
+  str_to_upper(s)
+  t <- s
+  str_to_title(s)
+  ```
 
 ### Join and split
 
 We only show two functions in this category.
 
--   `str_dup(STRING, TIMES)`: Create from a vector `STRING`, a new vector where each element appears consecutively, without a gap, `TIMES` times.
--   `str_c(STRING)`: Collpoase the elements column-wise into a single dimensional vector.
--   `str_c(STRING, collapse=X)`: Concatenate the elements column-wise with `X` in between and then concatenate the elements row-wise with `X` in between, thereby generating a single-element vector.
+* `str_dup(STRING, TIMES)`: Create from a vector `STRING`, a new vector where each element appears consecutively, without a gap, `TIMES` times.
+* `str_c(STRING)`: Collpoase the elements column-wise into a single dimensional vector.
+* `str_c(STRING, collapse=X)`: Concatenate the elements column-wise with `X` in between and then concatenate the elements row-wise with `X` in between, thereby generating a single-element vector.
 
 Below are examples.
 

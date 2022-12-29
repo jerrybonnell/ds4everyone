@@ -269,7 +269,7 @@ slice(die, -selected_face) |>
 
 If we were to sample again from this die, the probability of rolling any of the faces is no longer the same as when we rolled the 2. For one thing, the probability of rolling the faces $1, 3, 4, 5, 6$ has increased to 20% (or $1/5$) and it is impossible to roll a 2. The underlying distribution has fundamentally changed, confirmed by the above ggplot. 
 
-Recall that a prerequisite for the Law of Averages to work is that the drawing of samples must be done "independently and under identical conditions". Sampling without replacement is a clear violation of this assumption. And yet, the story does not end there. In our example, there were only 6 individuals to choose from -- the faces of a 6-sided die. If we were to increase the number of individuals that we could sample from, say the entire U.S. population, then the effect observed here actually becomes negligible. Sampling without replacement remains an important method for sampling, especially in drug studies with treatment/control groups where it is physically not possible to sample with replacement. Cloning people remains the imagination of science fiction, at least for now :-) Therefore, our hope is that both sampling plans will generate similar results in practice.  
+Recall that a prerequisite for the Law of Averages to work is that the drawing of samples must be done "independently and under identical conditions". Sampling without replacement is a clear violation of this assumption. And yet, the story does not end there. In our example, there were only 6 individuals to choose from -- the faces of a 6-sided die. If we were to increase the number of individuals that we could sample from, say the entire U.S. population, then the effect observed here actually becomes negligible. Sampling without replacement remains an important method for sampling, especially in drug studies with treatment/control groups where it is physically not possible to sample with replacement. Cloning people remains the imagination of science fiction, at least for now. Therefore, our hope is that both sampling plans will generate similar results in practice.  
 
 ## Populations
 
@@ -418,22 +418,22 @@ mean(some_numbers)
 
 We can note some properties of the mean based on this example. 
 
-* The mean is not necessarily an element in the vector. 
-* The mean must be between the smallest and largest values in the vector and it need not be exactly in the middle between these two extremes. 
+* The mean is not necessarily an element in the vector.
+* The mean must be between the smallest and largest values in the vector and it need not be exactly in the middle between these two extremes.
 * If the vector is measured in some unit (e.g. $ft^2$), the mean carries the same unit.
-* The mean is a "smoother". For instance, imagine that the numbers in the vector above are dollar amounts owned by five friends. They pool the money together and deal out the money in even amounts among the friends. The amount each person will have is given in the above output: \$6.6.    
-* Proportions are means. If a vector consists of only 1s and 0s, the sum of the vector is the number of 1s in it, and the mean is the *proportion* of 1s in the vector. Following is an example: 
+* The mean is a "smoother". For instance, imagine that the numbers in the vector above are dollar amounts owned by five friends. They pool the money together and deal out the money in even amounts among the friends. The amount each person will have is given in the above output: \$6.6.
+* Proportions are means. If a vector consists of only 1s and 0s, the sum of the vector is the number of 1s in it, and the mean is the *proportion* of 1s in the vector. Following is an example:
 
-```{r}
-ones_and_zeros <- c(1, 1, 0, 0)
-sum(ones_and_zeros)
-```
+  ```{r}
+  ones_and_zeros <- c(1, 1, 0, 0)
+  sum(ones_and_zeros)
+  ```
 
-```{r}
-mean(ones_and_zeros)
-```
+  ```{r}
+  mean(ones_and_zeros)
+  ```
 
-Thus, the mean tells us that 50\% of the values in `ones_and_zeros` are 1s. 
+  Thus, the mean tells us that 50\% of the values in `ones_and_zeros` are 1s. 
 
 ### The mean: a measure of central tendency 
 
