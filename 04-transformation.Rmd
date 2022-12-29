@@ -32,11 +32,16 @@ A dataset is a collection of *values*, which can be either a number or string. L
 
 We can inspect it simply by typing its name. 
 
-```{r}
+```{r eval=FALSE}
 mtcars
 ```
 
-You can pull up more information about the dataset by typing the name of it with a single question mark in front of it.
+```{r echo=FALSE}
+mtcars |>
+  slice_head(n=3)
+```
+
+Only the first few rows are shown here. You can pull up more information about the dataset by typing the name of it with a single question mark in front of it.
 
 ```{r eval = FALSE}
 ?mtcars
@@ -113,7 +118,8 @@ A tidy version of the dataset appears as follows. Compare this with the tables f
 
 ```{r}
 bakery_tidy <- bakery1 |>
-  pivot_longer(gingerbread:`macadamia nut`, names_to = "type", values_to = "sales")
+  pivot_longer(gingerbread:`macadamia nut`, 
+               names_to = "type", values_to = "sales")
 bakery_tidy
 ```
 
@@ -150,8 +156,13 @@ library(tidyverse)
 
 Let us recall the `mtcars` dataset we visited in the last section. 
 
-```{r}
+```{r eval=FALSE}
 mtcars
+```
+
+```{r echo=FALSE}
+mtcars |>
+  slice_head(n=3)
 ```
 
 *Data frame* is a term R uses to refer to data formats like the `mtcars` data set.
@@ -262,8 +273,8 @@ __Pop quiz:__ is the tibble `class` we just created an example of tidy data? Why
 Let us see how we can query some basic information from this tibble. 
 
 ```{r}
-pull(class, chemistry_grades) # retrieve all grades in chemistry
-min(pull(class, chemistry_grades))  # retrieve the minimum chemistry score
+pull(class, chemistry_grades) # all grades in chemistry
+min(pull(class, chemistry_grades))  # minimum chemistry score
 ```
 
 For small tables of data, we can also create a `tibble` using an easy row-by-row layout.  
@@ -280,7 +291,7 @@ class
 We can also form tibbles using sequences as follows. 
 
 ```{r}
-tibble(x=1:10, 
+tibble(x=1:5, 
        y=x*x, 
        z = 1.5*x - 0.2)
 ```
@@ -290,7 +301,7 @@ The `seq` that is native of R allows us to create a sequence. The syntax is `seq
 Here is another example. 
 
 ```{r}
-tibble(x = seq(1,10,0.5), 
+tibble(x = seq(1,4,0.5), 
        y = sin(x), 
        z = cos(x), 
        w = x^3 - 10*x^2 + x - 2)
@@ -305,7 +316,10 @@ To read files, we specify a string the location of the file and then use the fun
 Here is an example of reading a CSV file from a URL available on the internet.
 
 ```{r eval=FALSE, message=FALSE, warning = FALSE}
-path <- "https://data.bloomington.in.gov/dataset/117733fb-31cb-480a-8b30-fbf425a690cd/resource/2b2a4280-964c-4845-b397-3105e227a1ae/download/pedestrian-and-bicyclist-counts.csv"
+path <- str_c("https://data.bloomington.in.gov/",
+              "dataset/117733fb-31cb-480a-8b30-fbf425a690cd/",
+              "resource/2b2a4280-964c-4845-b397-3105e227a1ae/",
+              "download/pedestrian-and-bicyclist-counts.csv")
 bloom <- read_csv(path)
 ```
 
@@ -318,7 +332,7 @@ The data set shows the traffic in the city of Bloomington, the hometown of the I
 We can inspect the first few rows of the tibble using the function `slice_head`.
 
 ```{r}
-slice_head(bloom, n = 5)
+slice_head(bloom, n = 3)
 ```
 
 Note that some columns have spaces in them. To access the column corresponding to the attribute, we cannot simply type the column because of the white space. To access these columns, we surround the attribute with backticks (`). 
@@ -578,8 +592,8 @@ The function `transmute` is a variant of `mutate` where we keep only the new col
 
 ```{r}
 only_the_new_stuff <- transmute(mtcars_tibble, 
-                                cyl_gear_ratio = cyl / gear,
-                                make = str_replace(model_name, " .*", ""))
+                          cyl_gear_ratio = cyl / gear,
+                          make = str_replace(model_name, " .*", ""))
 only_the_new_stuff
 ```
 
@@ -837,18 +851,19 @@ Note how this simply undoes what we have done, returning us to the original `sco
 
 ```{r}
 scores_long |>
-  pivot_wider(names_from = assessment, values_from = score, names_prefix = "assess_")
+  pivot_wider(names_from = assessment, 
+              values_from = score, names_prefix = "assess_")
 ```
 
 There are two details to note when working with the pivot functions. 
 
-* `pivot_wider()` should not be thought of as an "undo" operation. Like `pivot_longer()` its primary purpose is also to make data tidy. Consider the following table and observe how each observation is scattered across two rows. The appropriate means to bring this data into tidiness is through an application of `pivot_wider()`.   
+* `pivot_wider` should not be thought of as an "undo" operation. Like `pivot_longer` its primary purpose is also to make data tidy. Consider the following table and observe how each observation is scattered across two rows. The appropriate means to bring this data into tidiness is through an application of `pivot_wider`.   
 
 ```{r}
 slice_head(table2, n = 5)
 ```
 
-* `pivot_longer()` and `pivot_wider()` are not perfectly symmetrical operations. That is, there are cases where applying `pivot_wider()`, followed by `pivot_longer()`, will not reproduce the exact same dataset. Consider such an application on the following dataset. Keep in mind the column names and how the column data types change at each pivot step.
+* `pivot_longer` and `pivot_wider` are not perfectly symmetrical operations. That is, there are cases where applying `pivot_wider`, followed by `pivot_longer`, will not reproduce the exact same dataset. Consider such an application on the following dataset. Keep in mind the column names and how the column data types change at each pivot step.
 
 ```{r}
 sales <- tibble(
@@ -920,13 +935,13 @@ Here is what happens when you call the function.
 one_to_ten()
 ```
 
-The new behavior of `one_to_ten()` substitutes the old one, and you cannot replay the behavior of the previous version (until, of course, you modify the function again). 
+The new behavior of `one_to_ten` substitutes the old one, and you cannot replay the behavior of the previous version (until, of course, you modify the function again). 
 
 ### Functions that compute a value
 
-To make a function compute a value, you add a line `return(VALUE)` at the end of the code in the brackets. The function `my_family()` returns a list of names for persons. 
+To make a function compute a value, you add a line `return(VALUE)` at the end of the code in the brackets. The function `my_family` returns a list of names for persons. 
 
-Remember the `c()` function? The function creates a vector with 19 names as strings and returns the vector.
+Remember the `c` function? The function creates a vector with 19 names as strings and returns the vector.
 
 ```{r}
 my_family <- function() {
@@ -1130,7 +1145,8 @@ library(tidyverse)
 The tibble `trouble_temps` contains temperatures from four cities across three consecutive weeks in the summer.
 
 ```{r}
-trouble_temps <- tibble(city = c("Miami", "Boston", "Seattle", "Arlington"),
+trouble_temps <- tibble(city = c("Miami", "Boston", 
+                                 "Seattle", "Arlington"),
                         week1 = c(89, 88, 87, NA), 
                         week2 = c(91, NA, 86, 75), 
                         week3 = c(88, 85, 88, NA))
@@ -1311,7 +1327,8 @@ We will now resolve our fourth stated problem. To overcome this, we can use the 
 
 ```{r}
 csc_course_merged <- csc_course_merged |>
-  pivot_longer(starts_with("hw") | starts_with("lab") | starts_with("qz"), 
+  pivot_longer(starts_with("hw") | 
+                 starts_with("lab") | starts_with("qz"), 
                names_to = "assessment", values_to = "score")
 csc_course_merged
 ```
@@ -1649,7 +1666,7 @@ gap
 
 * **Question 2.2** It can be helpful to report GDP per capita relative to some benchmark. Because the United States is the country where the authors reside, let us choose this as the reference country.
 
-Filter down `gap` to rows that pertain to United States. Extract the `gdpPercap` variable from the resulting tibble as a *vector* and assign it to a name called `usa_gdpPercap`. 
+  Filter down `gap` to rows that pertain to United States. Extract the `gdpPercap` variable from the resulting tibble as a *vector* and assign it to a name called `usa_gdpPercap`. 
 
 * **Question 2.3** Obtain a tibble of unique country names that are in the variable `country`. We can accomplish this using the `dplyr` verb `distinct()`. Pipe your `gap` tibble into this function and store the resulting *tibble* into a name called `countries`. 
 
@@ -1663,7 +1680,7 @@ Filter down `gap` to rows that pertain to United States. Extract the `gdpPercap`
 
 * **Question 2.8** Think about the value of the median you just found and give an interpretation for it when compared to the bulk of the data. Is it true that the majority of countries have a higher GDP per capita compared to the United States?
 
-__HINT:__ Remember that the median is the GDP per capita *relative to the United States*. If the median value was 1, what would that mean? If it was *greater* than 1? How about *less* than 1? 
+  __HINT:__ Remember that the median is the GDP per capita *relative to the United States*. If the median value was 1, what would that mean? If it was *greater* than 1? How about *less* than 1? 
 
 **Question 3** In this question we will continue exploring the `gapminder` data to further practice `dplyr` verbs. As before, we will keep an explicit copy of the Gapminder data in a variable called `gap`. 
 
@@ -1675,22 +1692,22 @@ gap <- gapminder
 
 * **Question 3.2**  Let's have a look at the life expectancy in the continent Africa. What is the minimum, maximum, and average life expectancy in each year? You will need to use the pair `group_by()` and `summarize()` to answer this. Store the resulting tibble in a variable called `summarized_years`. 
 
-The first few rows of this tibble should look like:
-
-| year   | min_life_exp | max_life_exp | avg_life_exp |
-|--------|--------------|--------------|--------------|
-| 1952   |     30.0     |   52.724     | 39.13550     |
-| 1957   |     31.57    |   58.089     | 41.26635     |
-| ...    |      ...     |    ...       | ...          |
+  The first few rows of this tibble should look like:
+  
+  | year   | min_life_exp | max_life_exp | avg_life_exp |
+  |--------|--------------|--------------|--------------|
+  | 1952   |     30.0     |   52.724     | 39.13550     |
+  | 1957   |     31.57    |   58.089     | 41.26635     |
+  | ...    |      ...     |    ...       | ...          |
 
 
 * **Question 3.3** From `gap`, create a new variable named `amount_increase` which gives the amount life expectancy increased by when compared to 1952, __for each country.__ Select only the variables `country`, `year`, `lifeExp`, and `life_exp_gain`. Store the resulting tibble into a name `from_1952`. 
 
-__HINT:__ Recall the *grouped mutate* construct discussed in the textbook: sometimes we wish to keep the groups after a `group_by()` and compute *within* them. Moreover, don't forget to `ungroup()` when you are done. Finally, the function `first()` can be used to extract the first value from something, e.g.,
+  __HINT:__ Recall the *grouped mutate* construct discussed in the textbook: sometimes we wish to keep the groups after a `group_by()` and compute *within* them. Moreover, don't forget to `ungroup()` when you are done. Finally, the function `first()` can be used to extract the first value from something, e.g.,
 
-```{r warning=FALSE, message=FALSE}
-first(c(10, 4, 9, 42, -2))
-```
+  ```{r eval=FALSE, warning=FALSE, message=FALSE}
+  first(c(10, 4, 9, 42, -2))
+  ```
 
 * **Question 3.4**  Which country had the *highest* life expectancy when compared to 1952 and in what year? Which country had the *lowest* and, similarly, what year did that occur? Use a `dplyr` verb to help you answer this. Assign your answers to the names `highest_country`, `highest_year`, `lowest_country`, and `lowest_year`.
 
@@ -1708,16 +1725,16 @@ affordable
 
 * **Question 4.4** Based on this tibble, what would you say to the statement: 
 
-> "It appears that the percent of most affordable housing in Connecticut towns, as defined as towns with housing affordability at least 30%, decreases over time when compared to 2011."
+  > "It appears that the percent of most affordable housing in Connecticut towns, as defined as towns with housing affordability at least 30%, decreases over time when compared to 2011."
 
-Is this a fair claim to make? Why or why not? 
+  Is this a fair claim to make? Why or why not? 
 
 * **Question 4.5** It is usually a good idea to perform "sanity" checks on your data to make sure the data follows your intuition (or doesn't). For instance, we expect that by summing the variables `Government Assisted`, `Tenant Rental Assistance`, `Single Family CHFA/ USDA Mortgages`, and `Deed Restricted Units`, and then dividing this figure by the total number of 2010 census units, the percentage should equal the value in `Percent Affordable`. 
 
-Let us create two new columns in `affordable` that give: 
+  Let us create two new columns in `affordable` that give: 
 
-* Our own percent affordability variable named `my_affordable` that reports the above figure, *rounded to two decimal places*.  
-* A variable named `equal_figures` that reports whether the two figures, `my_affordable` and `Percent Affordable` are equal. 
+  * Our own percent affordability variable named `my_affordable` that reports the above figure, *rounded to two decimal places*.  
+  * A variable named `equal_figures` that reports whether the two figures, `my_affordable` and `Percent Affordable` are equal. 
 
 Name the resulting tibble `with_my_affordable`. 
 
@@ -1733,11 +1750,11 @@ Name the resulting tibble `with_my_affordable`.
 
 * **Question 5.4** The current form of the `year` variable in `unemp_usda_tidy` is awkward because we expect "year" to be a number, but "year" is prefixed by some string; this may be surprising to potential customers of this tibble. Tidy the column `year` by extracting only the year, e.g., `"2008"` from `"Unemployment_rate_2008"`. You will need to combine a function from `stringr` with a `dplyr` verb to accomplish this. Then convert `year` to a numerical column using `as.double()`. Store the resulting tibble in `unemp_usda_tidy`.
 
-__HINT:__ A prerequisite to answering this question is to first write `stringr` code that can extract the string "2009" from the string "Unemployment_rate_2009". Once you have figured this sub-problem, then incorporate your `stringr` work into a `dplyr` verb.  
+  __HINT:__ A prerequisite to answering this question is to first write `stringr` code that can extract the string "2009" from the string "Unemployment_rate_2009". Once you have figured this sub-problem, then incorporate your `stringr` work into a `dplyr` verb.  
 
 * **Question 5.5** Form a tibble named `top_unemp_by_state` that gives the year with the highest unemployment rate for each state that appears in `unemp_usda_tidy`. This tibble should contain three columns (the state, the average unemployment rate, and the year where that unemployment rate occurred) and a single observation for each state reporting the figure.
 
-__HINT:__ You will need to aggregate the county-level figures in order to compute a state-level average unemployment rate. Moreover, if you find `NA` in your solution, be sure to filter any missing values before computing the mean. Check the documentation for `mean` for hints on how to accomplish this. 
+  __HINT:__ You will need to aggregate the county-level figures in order to compute a state-level average unemployment rate. Moreover, if you find `NA` in your solution, be sure to filter any missing values before computing the mean. Check the documentation for `mean` for hints on how to accomplish this. 
 
 * **Question 5.6** Based on these figures, can you say which year(s) saw the highest unemployment rates? Use a `dplyr` verb to help you answer this. 
 
@@ -1787,7 +1804,7 @@ Explain why this does not work. It may be helpful to inspect some values in the 
 
 * **Question 7.3** Convert `addington_string` to a number in *tens of thousands*. The `stringr` function `str_remove_all()` will be useful for removing non-numerical characters. For example, the value of `str_remove_all("$100", "[$]")` is the string `"100"`. You will also need the function `as.double()`, which converts a string that looks like a number to an actual number. Assign the result to a name `addington_number`.
 
-To compute the average annual compensation, we would need to do this work for every employee in the dataset. This would be incredibly tedious to complete for 1,676  different employees! Instead, we can use functionals and the *map* construct to do the work for us.  
+  To compute the average annual compensation, we would need to do this work for every employee in the dataset. This would be incredibly tedious to complete for 1,676  different employees! Instead, we can use functionals and the *map* construct to do the work for us.  
 
 * **Question 7.4** Define a function `string_to_number` that converts pay strings to pay numbers in *tens of thousands*. Your function should convert a pay string like `"$137,000.00` to a number of dollars in tens of thousands, i.e., `13.7`. 
 
@@ -1797,7 +1814,7 @@ To compute the average annual compensation, we would need to do this work for ev
 
 **Question 8** In 2017, the [Australian Bureau of Statistics (ABS)](https://www.abs.gov.au/) published the results of the [Australian Marriage Law Postal Survey](https://www.abs.gov.au/ausstats/abs@.nsf/mf/1800.0) in response to the question: *should the law be changed to allow same-sex couples to marry?* The majority of participating Australians voted in favor of same-sex couples. The ABS released data on responses and participation broken down by various criteria. This exercise will focus on the latter, and examine participation by state and territory, broken down by age. Following is a snapshot of a subset of the data:     
 
-```{r echo=FALSE, out.width="80%"}
+```{r echo=FALSE, out.width="83%"}
 knitr::include_graphics("images/abs.png")
 ```
 
@@ -1811,11 +1828,11 @@ abs_partp2017
 
 * **Question 8.2** Let us first deal with the missing values. These steps can be followed in order: 
 
-* The unnamed columns (`...1` and `...2`) should be relabeled to "Territory/State" and "Participation Type", respectively. 
-* For merged cells, missing values should be filled by looking at the first non-`NA` neighbor above, e.g., the second row should take on the value "New South Wales". 
-* Missing rows should be discarded. This is a reasonable strategy based on what we know about the structure of the data. 
+  * The unnamed columns (`...1` and `...2`) should be relabeled to "Territory/State" and "Participation Type", respectively. 
+  * For merged cells, missing values should be filled by looking at the first non-`NA` neighbor above, e.g., the second row should take on the value "New South Wales". 
+  * Missing rows should be discarded. This is a reasonable strategy based on what we know about the structure of the data. 
 
-The resulting filled-in tibble should be assigned to a name `abs_partp_filled`. 
+  The resulting filled-in tibble should be assigned to a name `abs_partp_filled`. 
 
 * **Question 8.3** Apply pivot transformation(s) to bring `abs_partp_filled` into tidy format; the resulting tibble after this step should fulfill all tidy data guidelines. Assign this tibble to the name `abs_partp_tidy`.
 
@@ -1862,7 +1879,7 @@ An important variable in both datasets is the FIPS code. FIPS codes are numbers 
 
 * **Question 10.5** Explain why the join function you selected (e.g., right join, left join, etc.) is appropriate for this problem. Why not choose another join function instead?  
 
-Let us explore the relationship between candidate votes and unemployment rate for each state. 
+  Let us explore the relationship between candidate votes and unemployment rate for each state. 
 
 * **Question 10.6** Create a tibble from `election_unemp2008` that contains, __for each state__, only the candidate that received the most amount of votes. Assign the resulting tibble to the name `state_candidate_winner2008`. It should contain three variables: `state`, `candidate`, and `votes`. Here is what the first few rows of `state_candidate_winner2008` looks like: 
 
@@ -1876,14 +1893,14 @@ Let us explore the relationship between candidate votes and unemployment rate fo
 
 * **Question 10.7** The following tibble `unemp_by_state2008` gives an average unemployment rate for each state by averaging the unemployment rate over the respective counties. 
 
-```{r eval=FALSE, warning=FALSE, message=FALSE}
-unemp_by_state2008 <- election_unemp2008 |>
-  group_by(state) |>
-  summarize(avg_unemp_rate = mean(Unemployment_rate_2008, na.rm = TRUE))
-unemp_by_state2008
-```
+  ```{r eval=FALSE, warning=FALSE, message=FALSE}
+  unemp_by_state2008 <- election_unemp2008 |>
+    group_by(state) |>
+    summarize(avg_unemp_rate = mean(Unemployment_rate_2008, na.rm = TRUE))
+  unemp_by_state2008
+  ```
 
-Create a new tibble that contains __both__ the candidate winner voting data and the state-level average unemployment data. More specifically, we would like to add the state-level average unemployment data *to* the winner voting data by joining `state_candidate_winner2008` with `unemp_by_state2008`. Assign the resulting tibble to the name `state_candidate_winner_unemp2008`. 
+  Create a new tibble that contains __both__ the candidate winner voting data and the state-level average unemployment data. More specifically, we would like to add the state-level average unemployment data *to* the winner voting data by joining `state_candidate_winner2008` with `unemp_by_state2008`. Assign the resulting tibble to the name `state_candidate_winner_unemp2008`. 
 
 * **Question 10.8** Using `state_candidate_winner_unemp2008`, generate a tibble that gives the top 10 states with the highest average unemployment rate. Assign this tibble to the name `top_10`.
 
@@ -1899,7 +1916,7 @@ pluto
 
 * **Question 11.3** Using `pluto_with_prop`, write `dplyr` code that gives the top *two* majors with the largest *gap* in acceptance percentage between men and women. The resulting tibble should have two variables: the major and the quantity of the difference. 
 
-__HINT:__ The function `diff()` may be helpful for computing the difference within a group. 
+  __HINT:__ The function `diff()` may be helpful for computing the difference within a group. 
 
 **Question 12: Examining racial breakdown in the College Scorecard.**  Section 4.8 presented a case study of how to tidy the College Scorecard dataset. Let us play some more with the dataset. The table is available in the name `scorecard_fl` from the `edsdata` package.
 
@@ -1941,7 +1958,7 @@ relevant_cols <- c("INSTNM", "CITY", "ZIP", "UGDS",
   * Hispanic students?
   * Asian students? 
 
-You can find the answer by reordering the rows in the descending order of the ethnicity.
+  You can find the answer by reordering the rows in the descending order of the ethnicity.
 
 * **Question 12.8** Let us see which 5-digit ZIP code corresponds to the institutions with the largest number of White students. Group by ZIP code and compute the total count of `n_white` as `total`. Then form a single row that contains the ZIP code with the largest number of White students, along with the corresponding count. 
 

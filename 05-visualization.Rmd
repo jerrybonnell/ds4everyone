@@ -229,7 +229,8 @@ This one reveals a *positive association* in the data, as opposed to the *negati
 Observe that there are two points that seem to be very far off to the right and one point off to the left. We may call such data points *outliers* meaning that they do not appear to conform to the associations that other observations are following. Let us isolate these points using `filter`. 
 
 ```{r}
-no_sports_cars |> filter(cty < 10 | cty > 32.5) |> 
+no_sports_cars |> 
+  filter(cty < 10 | cty > 32.5) |> 
   relocate(cty, .after = year) |>
   relocate(hwy, .before = cyl)
 ```
@@ -310,7 +311,8 @@ To jitter, we add a positional argument `position = "jitter"` to `geom_point`. N
 
 ```{r, fig.align="center", dpi=80}
 ggplot(no_sports_cars) +
-  geom_point(mapping = aes(x = cty, y = hwy, color = class), position = "jitter")
+  geom_point(mapping = aes(x = cty, y = hwy, color = class), 
+             position = "jitter")
 ```
 
 ### One more scatter plot
@@ -333,7 +335,8 @@ Then we can plot `efficency` against `displ` by showing `eff_type` using the sha
 
 ```{r warning = FALSE, fig.align="center", dpi=80}
 ggplot(no_sports_cars_pivot) +
-  geom_point(aes(x = displ, y = efficiency, alpha = eff_type, shape = class), 
+  geom_point(aes(x = displ, y = efficiency, 
+                 alpha = eff_type, shape = class), 
              position = "jitter")
 ```
 
@@ -341,7 +344,8 @@ The "jitter" option makes the visualization quite busy. Let us take it away.
 
 ```{r, warning=FALSE, fig.align="center", dpi=80}
 ggplot(no_sports_cars_pivot) +
-  geom_point(aes(x = displ, y = efficiency, alpha = eff_type, shape = class))
+  geom_point(aes(x = displ, y = efficiency, 
+                 alpha = eff_type, shape = class))
 ```
 
 Note the pattern in the fill strength of points as dictated by `eff_type` -- the upper region of the plot is shaded more boldly and the lower region very lightly. We leave it as an exercise to the reader to come up with some explanations as to why such a visible pattern emerges. 
@@ -699,18 +703,20 @@ We can now use this table, along with the graphing skills that we acquired above
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy_students) + 
-  geom_bar(aes(x = happiness, y = number), stat = "identity") +
-  xlab("Happy score") + 
-  ylab("Count")
+  geom_bar(aes(x = happiness, y = number), 
+           stat = "identity") +
+  labs(x = "Happy score", 
+       y = "Count")
 ```
 
 Here R treats the happy score as numerical values. That is the reason that we see 2.5, 5.0, 7.5, and 10.0 on the x-axis. Let us inform R that these are indeed categories by treating `happiness` as a factor. 
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy_students) + 
-  geom_bar(aes(x = as_factor(happiness), y = number), stat = "identity") +
-  xlab("Happy score") + 
-  ylab("Count")
+  geom_bar(aes(x = as_factor(happiness), y = number), 
+           stat = "identity") +
+  labs(x = "Happy score", 
+       y = "Count")
 ```
 
 We can also reorder the bars in the descending order of `number`.
@@ -719,8 +725,8 @@ We can also reorder the bars in the descending order of `number`.
 ggplot(happy_students) + 
   geom_bar(aes(x = reorder(happiness, desc(number)), y = number), 
            stat = "identity") +
-  xlab("Happy score") + 
-  ylab("Count")
+  labs(x = "Happy score", 
+       y = "Count")
 ```
 
 There is something unsettling about this chart. Though it does answer the question of which "happy" scores appear most frequently among the students, it doesn't list the scores in chronological order.
@@ -729,8 +735,10 @@ Let us return to the first plot.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy_students) + 
-  geom_bar(aes(x = as_factor(happiness), y = number), stat = "identity") +
-  xlab("Happy score") + ylab("Count")
+  geom_bar(aes(x = as_factor(happiness), y = number), 
+           stat = "identity") +
+  labs(x = "Happy score", 
+       y = "Count")
 ```
 
 Now the scores are in increasing order.
@@ -777,7 +785,8 @@ The stacking is performed by the position adjustment specified by the `position`
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as_factor(love)), position = "fill")  +
+  geom_bar(aes(x = happy, fill = as_factor(love)), 
+           position = "fill")  +
   labs(fill = "love")
 ```
 
@@ -785,7 +794,8 @@ ggplot(happy) +
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
-  geom_bar(aes(x = happy, fill = as_factor(love)), position = "dodge")+
+  geom_bar(aes(x = happy, fill = as_factor(love)), 
+           position = "dodge")+
   labs(fill = "love")
 ```
 
@@ -793,10 +803,11 @@ We can adjust the values of the x-axis to whole numbers using `as_factor` again.
 
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(happy) +
-  geom_bar(aes(x = as_factor(happy), fill = as_factor(love)), position = "dodge") +
-  xlab("Happy Score") +
-  labs(fill = "love") +
-  labs(title = "relation between happiness and love")
+  geom_bar(aes(x = as_factor(happy), fill = as_factor(love)), 
+           position = "dodge") +
+  labs(x = "Happy Score", 
+       fill = "love",
+       title = "relation between happiness and love") 
 ```
 
 Bar charts are intended as visualizations of categorical variables. When the variable is numerical, the numerical relations between its values have to be taken into account when we create visualizations. That is the topic of the next section. Before ending the discussion here, we turn to one more important piece of `ggplot2` magic.  
@@ -1064,42 +1075,42 @@ More specifically, we execute the following steps.
 
 1. Using `bin_width` as a parameter, we create a sequence `bins` of bin boundaries from 10 to 50.
 
-```{r}
-bins <- seq(10, 50, bin_width)
-```
+  ```{r}
+  bins <- seq(10, 50, bin_width)
+  ```
 
 2. Like before, when we "cut" the `hwy` values using `bins` as break points, we get the bins and their counts under variables `bin` and `n`, respectively.
 
-```{r}
-binned <- mpg_sub |>
-  mutate(bin = cut(hwy, breaks = bins)) |>
-  count(bin, .drop = TRUE)
-binned
-```
+  ```{r}
+  binned <- mpg_sub |>
+    mutate(bin = cut(hwy, breaks = bins)) |>
+    count(bin, .drop = TRUE)
+  binned
+  ```
 
 3. We obtain the proportions of the counts in the entire cars appearing in the tibble `mpg_sub` by dividing the counts by `nrow(mpg_sub)`.
 
-```{r}
-binned <- binned |>
-  mutate(proportion = n/nrow(mpg_sub)) 
-binned
-```
+  ```{r}
+  binned <- binned |>
+    mutate(proportion = n/nrow(mpg_sub)) 
+  binned
+  ```
 
 4. For each bin, split the proportion in the bin among the 5 units the bin contains.
 
-```{r}
-binned <- binned |>
-  mutate(density = proportion/bin_width) 
-binned
-```
+  ```{r}
+  binned <- binned |>
+    mutate(density = proportion/bin_width) 
+  binned
+  ```
 
 5. Plot `density` against `bin`, and done! 
 
-```{r dpi=80,  fig.align="center", warning=FALSE, message = FALSE}
-ggplot(binned, aes(x = bin, y = density)) +
-  geom_histogram(fill = "darkcyan", color = "gray", 
-                 stat = "identity")
-```
+  ```{r dpi=80,  fig.align="center", warning=FALSE, message = FALSE}
+  ggplot(binned, aes(x = bin, y = density)) +
+    geom_histogram(fill = "darkcyan", color = "gray", 
+                   stat = "identity")
+  ```
 
 That was a lot of work and, fortunately, `ggplot` can take care of all that for us. The following code is a rewriting of the above where we omit the `identity` stat and instead map `y` onto `density` after being subject to the function `after_stat`. 
 
@@ -1123,7 +1134,8 @@ Suppose the values in `hwy` are binned into three uneven categories.
 ```{r dpi=80, fig.align="center", message = FALSE}
 uneven_bins <- c(10, 15, 30, 45)
 ggplot(mpg, aes(x = hwy)) +
-  geom_histogram(aes(y = after_stat(density)), fill = "darkcyan", color = "grey", 
+  geom_histogram(aes(y = after_stat(density)), 
+                 fill = "darkcyan", color = "grey", 
                  breaks = uneven_bins, position = "identity")
 ```
 
@@ -1140,16 +1152,18 @@ mpg_sub |>
 Let us compare the following two histograms that use `uneven_bins`. 
 
 ```{r dpi=80,  fig.align="center", message = FALSE}
-ggplot(mpg, aes(x = hwy)) +
+g1 <- ggplot(mpg, aes(x = hwy)) +
   geom_histogram(fill = "darkcyan", color = "grey", 
                  breaks = uneven_bins, position = "identity")
-```
 
-```{r dpi=80,  fig.align="center", message = FALSE}
 uneven_bins <- c(10, 15, 30, 45)
-ggplot(mpg, aes(x = hwy)) +
-  geom_histogram(aes(y = after_stat(density)), fill = "darkcyan", color = "grey", 
-                 breaks = uneven_bins, position = "identity")
+
+g2 <- ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(aes(y = after_stat(density)), 
+                 fill = "darkcyan", color = "grey", 
+                 breaks = uneven_bins, position = "identity") 
+
+g1 + g2
 ```
 
 Note how the histogram in count scale *exaggerates* the height of the $(30, 45]$ bar. The height shown is simply the number of car models in that bin with no regard to the width of the bin. While both the $[10, 15]$ and $(30, 45]$ bars may have the same number of car models in the bin, the *density* of the $[10, 15]$ bar is greater because there are more elements contained by a smaller bin width. Put another way, the $(30, 45]$ bar can provide more coverage because it is so "spread out", i.e., its bin width is much larger than that of the $[10, 15]$ bar. 
@@ -1299,8 +1313,12 @@ states_sf <- states(cb = TRUE)
 
 The function defaults to retrieving data from the most recent year available (currently, 2020). The result is a "simple feature collection" expressed as a data frame. 
 
-```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+```{r eval=FALSE}
 states_sf
+```
+
+```{r echo=FALSE}
+states_sf |> slice_head(n=2)
 ```
 
 The data frame gives one row per state/territory. The shape information in the variable `geometry` is a polygon corresponding to that geographical area. It is a representation of a shape by a clockwise enumeration of the corner location. By drawing a straight line between each pair of neighboring points in the enumeration between the last and the first, you can draw a shape and that shape is an approximation of the region of interest.
@@ -1332,8 +1350,13 @@ The Census Bureau makes available cartographic boundary shape data, which often 
 
 Here is a preview of the county-level data. 
 
-```{r}
+```{r eval=FALSE}
 fl_county_sf
+```
+
+```{r echo=FALSE}
+fl_county_sf |>
+  slice_head(n=2)
 ```
 
 This time, the data frame gives one row per Florida county. We can use the same `ggplot` code to visualize the county-level shape data.  
@@ -1362,7 +1385,8 @@ fl_election_returns
 We apply some `dplyr` work to determine the candidate winner in each county. We convert the `candidate` variable to a *factor* so that the colors appear consistently with respect to political party in the following visualization. 
 
 ```{r}
-candidates_levels <- c("DONALD J TRUMP", "JOHN MCCAIN", "BARACK OBAMA", "JOSEPH R BIDEN JR")
+candidates_levels <- c("DONALD J TRUMP", "JOHN MCCAIN", 
+                       "BARACK OBAMA", "JOSEPH R BIDEN JR")
 
 fl_county_winner <- fl_election_returns |> 
   group_by(year, county_name) |>
@@ -1393,7 +1417,7 @@ with_election |>
 
 How do these results compare with the 2008 presidential election? The `patchwork` library allows us to panel two `ggplot` figures side-by-side. 
 
-```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+```{r mapview2, dpi=80, fig.asp = 0.4, message=FALSE, echo=FALSE, warning=FALSE, fig.show="hold", out.width="100%", message=FALSE, warning=FALSE, echo=FALSE}
 election2008_g <- with_election |>
   filter(year == 2008) |>
   ggplot() + 
@@ -1413,7 +1437,7 @@ election2008_g + election2020_g
 
 `mapview` is a powerful package that can be used to generate an interactive map. We can use it to visualize the county-level data annotated with the 2020 election returns. 
 
-```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+```{r mapview3, message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 with_election |>
   filter(year == 2020) |>
   mapview(zcol = "candidate")
@@ -1423,7 +1447,7 @@ with_election |>
 <br />
 Unfortunately, the default color palette used will likely be unfamiliar to users of our visualization who expect the standard colors associated with political affiliation ("red" for Republican party and "blue" for Democratic party). We can toggle the colors used by setting the the `col.regions` argument. 
 
-```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+```{r mapview4, message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 political_palette <- colorRampPalette(c('red', 'blue'))
 
 with_election |>
@@ -1435,7 +1459,7 @@ with_election |>
 <br />
 We can also zoom in on a particular county and show the results for just those areas. 
 
-```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+```{r mapview5, message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 with_election |>
   filter(year == 2020, NAME %in% c("HILLSBOROUGH", "MANATEE")) |>
   mapview(zcol = "candidate", col.regions = political_palette)
@@ -1645,7 +1669,7 @@ fl_races_county
 
 When the option `geometry = TRUE` is included at the query call, the output includes additional "shape" information of each geographical area. Let us modify the racial composition query so that we can supply this geometry argument. 
 
-```{r results="hide"}
+```{r results="hide", message=FALSE, warning=FALSE}
 fl_races_county_geo <- get_acs(
   year = 2019,
   geography = "county",
@@ -1654,8 +1678,13 @@ fl_races_county_geo <- get_acs(
   geometry = TRUE)
 ```
 
-```{r}
+```{r eval=FALSE}
 fl_races_county_geo
+```
+
+```{r echo=FALSE}
+fl_races_county_geo |>
+  slice_head(n=2)
 ```
 
 To avoid downloading the shape data each time, the following code chunk saves or *caches* the shape data to your machine.
@@ -1681,8 +1710,13 @@ fl_races_county_geo <- get_acs(
 
 We can examine the new results generated. 
 
-```{r}
+```{r eval=FALSE}
 fl_races_county_geo
+```
+
+```{r echo=FALSE}
+fl_races_county_geo |>
+  slice_head(n=2)
 ```
 
 Let us compute the percentage of each `estimate` relative to `summary_est` and add the percentage value as a new column named `percent`.
@@ -1827,12 +1861,13 @@ We can identify a pocket of ZIP codes where the net tuition exceeds the median f
 
 An interactive map can make the exact pinpointing of these areas easier to see.  
 
-```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
+```{r mapview323, message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 color_palette <- colorRampPalette(inferno(20))
 
 with_disparity |> 
   filter(str_detect(ZIP, "^331")) |>
-  mapview(zcol = "tuition_to_income", col.regions = color_palette)
+  mapview(zcol = "tuition_to_income", col.regions = color_palette,
+          layer.name = 'tuition to income')
 ```
 
 ## Exercises 
@@ -1914,17 +1949,17 @@ longjump
      because it is a numerical variable. 
 
 * **Question 3.6** The following code visualizes a map of the world. Annotate this map with the countries that participated in the men's long jump event in the London 2012 Games using a point or polygon geom (use `long` for x and `lat` for y). You will first need to join the map data in `world` with `longjump2012`. Then extend the plot in the name `world_map` by adding a new geom layer; set the data for this new layer to use the joined data.   
-```{r eval=FALSE, message=FALSE, warning=FALSE}
-world <- map_data("world") |>
-  mutate(name = region) |>
-  select(long, lat, group, name)
-
-world_map <- ggplot(world) +
-  geom_polygon(aes(x = long, y = lat, group = group),
-               fill = "white", color = "grey50") +
-  coord_quickmap()
-world_map
-```
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  world <- map_data("world") |>
+    mutate(name = region) |>
+    select(long, lat, group, name)
+  
+  world_map <- ggplot(world) +
+    geom_polygon(aes(x = long, y = lat, group = group),
+                 fill = "white", color = "grey50") +
+    coord_quickmap()
+  world_map
+  ```
 
 * **Question 3.7** Which country in South America participated in the men's long jump in the 2012 London Games? Indicate your answer by setting the name `north_america_participant` to the appropriate thing. 
 
@@ -1972,19 +2007,21 @@ g +
 
 * **Question 6.1** After forming the tibble `with_response`, give `ggplot2` code that reproduces the following plot.  
 
-  ![](images/abs_ggplot.png)
+  ```{r, echo=FALSE, fig.align="center", out.width='70%', fig.asp=1/2}
+  knitr::include_graphics('images/abs_ggplot.png')
+  ```
 
 * **Question 6.2**  Based on this figure, how would you respond to the statement: 
 
   > "Because support for same-sex couples increases in areas with higher percentage of holders with at least Bachelor's degrees, we can say that if a state/territory has a higher percentage of holders with at least a Bachelor's degree, then the more that state/territory will support same-sex marriage."
 
-Is this a fair statement? Why or why not? 
+  Is this a fair statement? Why or why not? 
 
 **Question 7** The dataset `ntl_icecover` from the package `lterdatasampler` gives data on ice freeze and thaw dates for lakes in the Madison, Wisconsin area from 1853 to 2019. The data includes lake names, dates of freeze-up and thaw, and duration of ice cover for Lakes Mendota and Monona. Pull up the help (`?ntl_icecover`) for more information on this dataset. 
 
 * **Question 7.1** The variable `ice_on` gives the freeze date for a given lake. Add a new variable to the tibble `ntl_icecover` called `days_to_freeze` that gives the number of days to the freeze date from the start of the calendar year. Assign the resulting tibble to the name `with_freeze`. 
 
-__HINT:__ The functions `year()` and `yday()` from the package `lubridate` can be helpful for determining the year and the day of the year from a date, respectively. Also note that for some years the freeze date may not occur until the next calendar year, e.g., the freeze date in Lake Mendota in 1875 was January 10, 1876. Calling `yday()` on this date would yield 10 when the correct figure is actually 375. Adjust the expression used in your `mutate()` call accordingly. 
+  __HINT:__ The functions `year` and `yday` from the package `lubridate` can be helpful for determining the year and the day of the year from a date, respectively. Also note that for some years the freeze date may not occur until the next calendar year, e.g., the freeze date in Lake Mendota in 1875 was January 10, 1876. Calling `yday()` on this date would yield 10 when the correct figure is actually 375. Adjust the expression used in your `mutate()` call accordingly. 
 
 * **Question 7.2** Generate line plots showing days to the freeze date versus year, one for Lake Mendota and another for Lake Monona. The line plots should be given in a single overlaid figure and colored accordingly. Does there appear to be an association between the two variables? 
 
@@ -1994,13 +2031,15 @@ __HINT:__ The functions `year()` and `yday()` from the package `lubridate` can b
 
 **Question 8** Economists John R. Lott and Carlisle E. Moody published a [widely circulated article in March 2020](https://econjwatch.org/articles/brought-into-the-open-how-the-us-compares-to-other-countries-in-the-rate-of-public-mass-shooters) on mass gun violence in the United States and the rest of the world. Its appendix references the following figure: 
 
-![](images/lott_moody_2020_figure3a.png)
+  ```{r, echo=FALSE, fig.align="center", out.width='60%', fig.asp=1/2}
+  knitr::include_graphics('images/lott_moody_2020_figure3a.png')
+  ```
 
 Read Lott and Moody's [paper](https://econjwatch.org/articles/brought-into-the-open-how-the-us-compares-to-other-countries-in-the-rate-of-public-mass-shooters) and then [the response paper](https://econjwatch.org/articles/the-importance-of-analyzing-public-mass-shooters-separately-from-other-attackers-when-estimating-the-prevalence-of-their-behavior-worldwide) written by economist Lankford on potential flaws in the data, specifically regarding whether public mass shootings and other types of attacks, e.g., acts of terrorism, can be viewed as a single form of violence. We will try to recreate this plot as well as we can, and then address some questions about the reasonableness of this visualization.
 
 * **Question 8.1** Use Lankford's spreadsheet data made available [here](https://econjwatch.org/file_download/1131/LankfordMar2020AppendixB.xlsx) in [his response paper](https://econjwatch.org/articles/the-importance-of-analyzing-public-mass-shooters-separately-from-other-attackers-when-estimating-the-prevalence-of-their-behavior-worldwide). This is the Lott and Moody data annotated with additional variables by Lankford. 
 
-Load the sheets "Foreign Cases 1448" and ""US Cases_43" into a tibble using the `read_xlsx()` function from the `readxl` package. Assign these tibbles to the names `foreign` and `usa` which correspond to the foreign and United States figures, respectively.  
+  Load the sheets "Foreign Cases 1448" and ""US Cases_43" into a tibble using the `read_xlsx()` function from the `readxl` package. Assign these tibbles to the names `foreign` and `usa` which correspond to the foreign and United States figures, respectively.  
 
 * **Question 8.2** What is the observational unit in each of these datasets? Note briefly some of the measurements corresponding to this observational unit. 
 
@@ -2008,18 +2047,18 @@ Load the sheets "Foreign Cases 1448" and ""US Cases_43" into a tibble using the 
 
 * **Question 8.4** Repeat **Question 8.3**, but this time for the figures corresponding to the rest of the world. Assign the resulting tibble to the name `foreign_relevant`.
 
-Run the following code chunk. It applies some basic preprocessing necessary to complete the following steps:
+  Run the following code chunk. It applies some basic preprocessing necessary to complete the following steps:
 
-```{r eval=FALSE, message=FALSE, warning=FALSE}
-foreign_relevant <- foreign_relevant |> 
-  drop_na(Year) |>
-  filter(if_any(everything(), function(x) x != "x")) |>
-  mutate(
-    Country = as.factor(Country),
-    across(where(is.character), as.numeric))
-usa_relevant <- usa_relevant |>
-  drop_na(Year)
-```
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  foreign_relevant <- foreign_relevant |> 
+    drop_na(Year) |>
+    filter(if_any(everything(), function(x) x != "x")) |>
+    mutate(
+      Country = as.factor(Country),
+      across(where(is.character), as.numeric))
+  usa_relevant <- usa_relevant |>
+    drop_na(Year)
+  ```
 
 * **Question 8.5** Form a tibble named `full_relevant` that contains both the figures corresponding to the United States (in `usa_relevant`) and the rest of the world (in `foreign_relevant`). 
 

@@ -201,12 +201,14 @@ some_moby_df
 
 Here is another example:
 
-```{r message=FALSE, echo=FALSE}
+```{r eval=FALSE, message=FALSE, warning=FALSE}
 some_moby_df |>
   unnest_tokens(word, text) |>
   count(document, word) |>
   cast_dfm(document, word, n)
 ```
+
+![](images/moby_dfm.png){width=100%}
 
 This table is structured as one token per *column*, where the value shown is its frequency. This is sometimes called a *document-feature matrix* (do not worry about the technical jargon). Would this be considered tidy text?  
 
@@ -259,10 +261,10 @@ We will not concern ourselves this time with dividing the text into chapters and
 ```{r}
 tidy_melville <- tidy_melville |>
   mutate(title = recode(gutenberg_id, 
-                            '15' = 'Moby Dick', 
-                            '11231' = 'Bartleby, the Scrivener',
-                            '10712' = 'White Jacket',
-                            '1900' = 'Typee: A Romance of the South Seas'))
+                    '15' = 'Moby Dick', 
+                    '11231' = 'Bartleby, the Scrivener',
+                    '10712' = 'White Jacket',
+                    '1900' = 'Typee: A Romance of the South Seas'))
 ```
 
 As a quick check, let us count the number of words that appear in each of the texts. 
@@ -639,7 +641,7 @@ chapter_label |>
   filter(title != label) 
 ```
 
-### The glue: Towards Digital Humanities 
+### The glue: Digital Humanities 
 
 Sometimes "errors" when a model goes wrong can be more revealing than where it found success. The conflation we see in some of the *Moby Dick* chapters with *The Scarlet Letter* and *Leaves of Grass* points to a connection among the three authors. In fact, Melville and Hawthorne shared [such a close writing relationship](https://scholarworks.boisestate.edu/cgi/viewcontent.cgi?article=1164&context=mcnair_journal) that it was Hawthorne's influence on Melville that led him to evolve *Moby Dick* from adventure tale into a creative, philosophically rich story. So it is interesting to see so many of the *Moby Dick* chapters mislabeled as *The Scarlet Letter*.  
 
@@ -825,6 +827,16 @@ The letter sequence concludes with the header "THE END." as shown below.
 * **Question 5.7** The following scatter plot shows the Chesterton word proportions against the Jane Austen word proportions; the color shown is the absolute difference between the two. Also given is a dashed line that follows $y = x$. 
 
   Amend this `ggplot` visualization by adding another geom layer that visualizes the equation of the linear model you found. 
+  
+  ```{r eval=FALSE, message=FALSE, warning=FALSE}
+  ggplot(freq_by_author_prop_long,
+         aes(x = `Jane Austen`, y = `G. K. Chesterton`, 
+             color = abs(`G. K. Chesterton` - `Jane Austen`))) + 
+    geom_abline(color = "gray", lty = 2) +
+    geom_text(aes(label = word), check_overlap = TRUE) +
+    theme(legend.position="none") 
+
+  ```
 
 * **Question 5.8** What does it mean for words to be close to the $y=x$ line?  Also, briefly comment on the relationship between the regression line you found and the $y=x$ line -- what does it mean that the slope of your line is relatively smaller? 
 

@@ -35,7 +35,8 @@ In our prior exploration of this data frame, we generated empirical distribution
 
 ```{r dpi=80,  fig.align="center", message = FALSE, warning = FALSE}
 ggplot(flights) + 
-  geom_histogram(aes(x = dep_delay, y = after_stat(density)), col="grey", bins = 30)
+  geom_histogram(aes(x = dep_delay, y = after_stat(density)), 
+                 color="grey", bins = 30)
 ```
 
 As before, we are interested in the bulk of the data here, so we can ignore the 1.83% of flights with delays of more than 150 minutes.
@@ -47,7 +48,8 @@ flights150 <- flights |>
 
 ```{r dpi=80,  fig.align="center", warning = FALSE}
 ggplot(flights150) + 
-  geom_histogram(aes(x = dep_delay, y = after_stat(density)), col="grey", bins = 30)
+  geom_histogram(aes(x = dep_delay, y = after_stat(density)), 
+                 color="grey", bins = 30)
 ```
 
 Let's extract the departure delay column as a vector. 
@@ -100,7 +102,7 @@ flights |>
   max(na.rm = TRUE)
 ```
 
-That is almost a *22 hour* delay -- better book a hotel room! 
+That is almost a *22 hour* delay -- better get a sleeping bag!
 
 ## Percentiles 
 
@@ -391,7 +393,7 @@ We now have all the pieces in place to perform the bootstrap. We will replicate 
 
 ```{r}
 bstrap_means <- replicate(n = 10000, 
-                          one_sample_value(flights_sample, air_time, mean))
+                    one_sample_value(flights_sample, air_time, mean))
 ```
 
 Let us visualize the bootstrapped sample means using a histogram. 
@@ -422,7 +424,8 @@ df <- tibble(bstrap_means)
 
 ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 8) +
-  geom_segment(aes(x = middle95[1], y = 0, xend = middle95[2], yend = 0), 
+  geom_segment(aes(x = middle95[1], y = 0, 
+                   xend = middle95[2], yend = 0), 
                    size = 2, color = "salmon") 
 ```
 
@@ -470,7 +473,7 @@ We have done all the hard work already in setting up the bootstrap. To redo the 
 
 ```{r}
 bstrap_means <- replicate(n = 10000, 
-                          one_sample_value(flights_sample, air_time, mean))
+                  one_sample_value(flights_sample, air_time, mean))
 ```
 
 We will identify the "middle 95%". Here is the interval:
@@ -489,7 +492,8 @@ df <- tibble(bstrap_means)
 
 ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 8) +
-  geom_segment(aes(x = middle95[1], y = 0, xend = middle95[2], yend = 0), 
+  geom_segment(aes(x = middle95[1], y = 0, 
+                   xend = middle95[2], yend = 0), 
                    size = 2, color = "salmon") +
   geom_point(aes(x = pop_mean, y = 0), color = "red", size = 3)
 ```
@@ -514,7 +518,7 @@ all_the_bootstraps <- function() {
     slice_sample(n = 10000, replace = FALSE)
   
   bstrap_means <- replicate(n = 10000, 
-                            one_sample_value(flights_sample, air_time, mean))
+                    one_sample_value(flights_sample, air_time, mean))
   middle95 <- quantile(bstrap_means, 
                        0.5 + (desired_area / 2) * c(-1, 1), type = 1)
   return(middle95)
@@ -525,7 +529,7 @@ all_the_bootstraps <- function() {
 intervals <- replicate(n = 100, all_the_bootstraps())
 ```
 
-> NOTE: This simulation will take awhile (> 20 minutes). Grab a coffee!
+Note that this simulation will take awhile (> 20 minutes). Grab a coffee!
 
 Let's examine some of the intervals of bootstrapped means. 
 
@@ -566,7 +570,8 @@ We can visualize these intervals by stacking them on top of each other verticall
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(interval_df) + 
   geom_segment(aes(x = left, y = replication, 
-                   xend = right, yend = replication), color = "salmon") +
+                   xend = right, yend = replication), 
+               color = "salmon") +
   geom_vline(xintercept = pop_mean, color = "red") + 
   labs(x = "Air time (minutes)")
 ```
@@ -669,14 +674,15 @@ We are now ready to bootstrap from this random sample. Recall that `one_sample_v
 ```{r}
 # Do the bootstrap!
 bstrap_means <- replicate(n = 10000, 
-                        one_sample_value(NHANES_relevant, healthy_sleep, mean))
+                one_sample_value(NHANES_relevant, healthy_sleep, mean))
 ```
 
 As before, we will identify the 95% confidence interval. Here is the interval:
 
 ```{r}
 desired_area <- 0.95
-middle <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle <- quantile(bstrap_means, 
+                   0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle
 ```
 
@@ -701,7 +707,8 @@ So far we have examined the 95% confidence interval. Let us see what happens to 
 
 ```{r}
 desired_area <- 0.99
-middle <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle <- quantile(bstrap_means, 
+                   0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle
 ```
 
@@ -720,7 +727,8 @@ Let us move in the other direction and try a 80% confidence interval.
 
 ```{r}
 desired_area <- 0.80
-middle <- quantile(bstrap_means, 0.5 + (desired_area / 2) * c(-1, 1), type = 1)
+middle <- quantile(bstrap_means, 
+                   0.5 + (desired_area / 2) * c(-1, 1), type = 1)
 middle
 ```
 
@@ -838,8 +846,8 @@ These proportions represent just a *sample* of the population of University of L
 
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
   bstrap_props_tibble <- replicate(n = trials, 
-                                   one_resampled_statistic(num_resamples), 
-                                   simplify = FALSE) |>
+                            one_resampled_statistic(num_resamples), 
+                            simplify = FALSE) |>
                          bind_rows()
   bstrap_props_tibble
   ```

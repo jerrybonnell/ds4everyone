@@ -400,7 +400,8 @@ datasaurus_dozen |>
   filter(dataset == "star" | dataset == "bullseye") |>
   ggplot() + 
   geom_histogram(aes(x = x, y = after_stat(density), fill = dataset),
-                 color = "gray", alpha = 0.9, bins = 10) + 
+                 color = "gray", position = "identity",
+                 alpha = 0.7, bins = 10) + 
   scale_x_continuous(breaks = seq(15, 90, 5))
 ```
 
@@ -608,7 +609,8 @@ height_norm <- dnorm(athletes |> pull(Height),
 ```{r dpi=80,  fig.align="center", message = FALSE}
 ggplot(athletes, aes(x = Height, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins=14) +
-  geom_line(mapping = aes(x = Height, y = height_norm), color = "salmon") +
+  geom_line(mapping = aes(x = Height, y = height_norm), 
+            color = "salmon") +
   labs(x = "Height") +
   ggtitle("Normal curve and the histogram") 
 ```
@@ -689,7 +691,8 @@ The number of grain allotments received after 64 days is the *sum* of draws made
 Using `sample` we can see the result of the grain allotment on any given day. 
 
 ```{r}
-allotment <- sample(c(0, 1, 2), prob = c(1/3, 2/3, 1/3), replace = TRUE, size = 1) 
+allotment <- sample(c(0, 1, 2), prob = c(1/3, 2/3, 1/3), 
+                    replace = TRUE, size = 1) 
 allotment
 ```
 
@@ -700,7 +703,8 @@ We are now ready to simulate one value of the statistic. Let us put our work int
 ```{r}
 one_simulation <- function() {
   allotments <- sample(c(0, 1, 2), 
-                       prob = c(1/4, 2/4, 1/4), replace = TRUE, size = 64)
+                       prob = c(1/4, 2/4, 1/4), 
+                       replace = TRUE, size = 64)
   return(sum(allotments))
 } 
 one_simulation()
@@ -749,7 +753,8 @@ curve <- dnorm(net_allotments, mean = 64, sd = 5.66)
 ggplot(results) + 
   geom_histogram(aes(x = net_allotments, y = after_stat(density)), 
                  color = "gray", fill = "darkcyan", bins = 15) +
-  geom_line(mapping = aes(x = net_allotments, y = curve), color = "salmon") 
+  geom_line(mapping = aes(x = net_allotments, y = curve), 
+            color = "salmon") 
 ```
 
 ### Central Limit Theorem 

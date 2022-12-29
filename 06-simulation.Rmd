@@ -121,7 +121,7 @@ sign <- function(x) {
 }
 sign(0)
 sign(0.1)
-print(sign(-0.1))  # force a print regardless whether the return value exists
+print(sign(-0.1))  # force a print
 ```
 
 We can put a series of conditional statements in a function. If a conditional statement contains a `return` statement and R executes that statement, R skips the remainder of the code in the function.
@@ -319,7 +319,7 @@ Previously, we split the game into two actions: a function `one_flip` computing 
 ```{r}
 betting_one_round <- function() {
   # Net gain on one bet
-  x <- sample(c("heads","tails"), size = 1) # flip a fair coin once and record the side
+  x <- sample(c("heads","tails"), size = 1) 
   if (x == "heads") {
     return(2)
   } else if (x == "tails") {
@@ -402,7 +402,7 @@ We create an integer vector to store the results, where the vector has the same 
 
 ```{r}
 rounds <- 10
-outcomes <- vector("integer", rounds)  # create a vector with length rounds
+outcomes <- vector("integer", rounds)
 for (i in 1:rounds) {
   outcomes[i] <- betting_one_round()
 }
@@ -626,7 +626,8 @@ results
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) + 
   geom_histogram(aes(x = num_heads, y = after_stat(density)), 
-                 color = "gray", fill = "darkcyan", breaks = seq(30.5, 69.6, 1))
+                 color = "gray", fill = "darkcyan", 
+                 breaks = seq(30.5, 69.6, 1))
 ```
 
 In this histogram, each bin has width 1 and we place it centered on the value.
@@ -856,7 +857,8 @@ accumulate(delicious_fruits, \(acc, nxt) str_c(acc, nxt, sep = ":")) |>
 We can also set an initial value to use to begin the accumulation. 
 
 ```{r}
-accumulate(delicious_fruits, \(acc, nxt) str_c(acc, nxt, sep = ":"), .init = "a")
+accumulate(delicious_fruits, \(acc, nxt) str_c(acc, nxt, sep = ":"), 
+           .init = "a")
 ```
 
 This has the effect of extending the resulting vector length by 1. 
@@ -1097,7 +1099,8 @@ Finally, we visualize our results.
 ```{r dpi=80, fig.align="center", message = FALSE}
 ggplot(results) + 
   geom_histogram(aes(x = proportions, y = after_stat(density)), 
-                 color = "gray", fill = "darkcyan", breaks = seq(0.35, 0.65, 0.01)) + 
+                 color = "gray", fill = "darkcyan", 
+                 breaks = seq(0.35, 0.65, 0.01)) + 
   geom_point(aes(x = 0.51, y = 0), color = "salmon", size = 3)
 ```
 
@@ -1210,6 +1213,7 @@ Let us do some analysis of the game.
   ```
 
 * **Question 3.2** Suppose Jodie selects either side of the coin with equal chance, i.e., she does not favor "Heads" anymore than she does "Tails" and vice versa. Based on the observation that Cathy's coin follows a "Heads"/"Tails" ratio of 3:2, after one round of the game how many lollipops is Jodie expected to lose to Cathy?    
+
   Let us use simulation to check our analysis of the problem. We will define two functions, `simulate_cathy_coin()` and `simulate_jodie_prediction()`, that simulates a single flip of Cathy's coin and Jodie's prediction of the side a coin lands on, respectively. 
 
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
@@ -1244,7 +1248,7 @@ Let us do some analysis of the game.
 
 * **Question 3.5** Let us now simulate the game a large number of times. Using the `replicate` construct with the function `gains_after_one_round()`, simulate 10,000 games. Collect the lollipops won from each simulated game in a vector named `simulated_gains`.  
 
-The following function `hist_from_simulation()` produces a histogram of the simulated gains you generated. 
+  The following function `hist_from_simulation()` produces a histogram of the simulated gains you generated. 
 
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
   hist_from_simulation <- function(simulated_results) {
@@ -1402,7 +1406,7 @@ simulate_dice_roll()
 
 * **Question 5.7** Generate a bar chart using `sim_results_tidy`. Fill your bars according to the event in the variable `event`. We recommend using the "dodge" positional adjustment so that comparisons are easier to make.
 
-Repeat **Question 5.5** through **Question 5.7** to observe differences in the resulting histogram, if any. Then proceed to the following question:
+  Repeat **Question 5.5** through **Question 5.7** to observe differences in the resulting histogram, if any. Then proceed to the following question:
 
 * **Question 5.8** A fellow classmate claims that the above simulation is unable to disprove the Chavalier's flawed reasoning. He cites two reasons for his claim:
 

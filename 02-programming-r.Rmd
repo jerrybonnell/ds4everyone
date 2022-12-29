@@ -337,7 +337,8 @@ If you fail to repay, the same series of actions will happen after another month
 Let us see how this process balloons your account if you __DO NOT__ pay for one year.
 
 ```{r}
-1000 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01
+1000 * 1.01 * 1.01 * 1.01 * 1.01 * 
+  1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01
 ```
 
 The loan accumulate a little over 126 dollars in interest.
@@ -345,7 +346,8 @@ The loan accumulate a little over 126 dollars in interest.
 The amount does not appear to be much. However, if the "principal amount* is large, the effect is substantial. For example, consider what happens in a loan of \$200,000.
 
 ```{r}
-200000 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01
+200000 * 1.01 * 1.01 * 1.01 * 1.01 * 
+  1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01 * 1.01
 ```
 
 That's \$25,365 dollars in interest! 
@@ -520,7 +522,7 @@ You decide to define the dissimilarity between two smoothies as the maximum of t
   3. 16
   4. 141
 
-* **Question 4: Signing a Loan** Suppose you are signing a loan in the amount of $1,000 with a 3% monthly interest rate. On the day you received the borrowed money, the loan starts. At each monthly anniversary the money you own is updated with the multiplication by 1.03. You may choose to pay money at that point, and, if so, your payment is subtracted from the updated amount. Naturally, if you choose to make no payments, the amount you owe keeps growing.
+**Question 4: Signing a Loan** Suppose you are signing a loan in the amount of $1,000 with a 3% monthly interest rate. On the day you received the borrowed money, the loan starts. At each monthly anniversary the money you own is updated with the multiplication by 1.03. You may choose to pay money at that point, and, if so, your payment is subtracted from the updated amount. Naturally, if you choose to make no payments, the amount you owe keeps growing.
 
 * Suppose you skip payments for two full years. How much will you own? Calculate your answer in a variable `owed` and print its value.
 
@@ -536,13 +538,13 @@ You decide to define the dissimilarity between two smoothies as the maximum of t
 
 * **Question 5.4** By reversing the calculation from the previous question, you can identify the age of a carbon compound from the proportion of Carbon-14. Let's say the number of years $y$ is $\mathrm{age}$ divided by $h$, where $h$ is the half life. The proportion $r$ of the remaining Carbon-14 is $0.5^y$. Now, the age of the compound, $\mathrm{age}$ can be obtained as:
 
-$$
-age = - \log_2(1/r) * h
-$$
+  $$
+  age = - \log_2(1/r) * h
+  $$
 
-where $\log_2$ is the logarithm base 2.
+  where $\log_2$ is the logarithm base 2.
 
-Now, assuming that the proportion of Carbon-14 has been reduced to one-fiftieth of the naturally occurring proportion, how much do you estimate the age of the compound is? Give a single expression to compute the number and store this in a name `age`.
+  Now, assuming that the proportion of Carbon-14 has been reduced to one-fiftieth of the naturally occurring proportion, how much do you estimate the age of the compound is? Give a single expression to compute the number and store this in a name `age`.
 
 **Question 6: Walk the Earth** The Earth is almost a sphere. Its radius is approximately 3958.8 miles. Suppose two points A and B on the surface of the Earth has angle $d$. The surface distance between A and B is $d/360$ of the circumference of the Earth. The circumference of a sphere with radius $r$ is $2\pi r$. After consulting with an app on your smartphone, you learn that the angular distance between the two points is 4.5, which is stored in the following name: 
 

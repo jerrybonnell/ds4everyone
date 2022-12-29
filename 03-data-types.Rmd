@@ -255,7 +255,7 @@ If you know the contents of the string, you can count the characters in the sequ
 However, if you do not know or if the string is very long, you can rely on R to do the counting for you using `str_length` from the `stringr` package.
 
 ```{r}
-str_length("310A Ungar Building, 1365 Memorial Drive, Coral Gables, Florida 33146")
+str_length("310A Ungar, 1365 Memorial Drive, Coral Gables, Florida")
 ```
 
 ### Substrings
@@ -841,7 +841,9 @@ str(mixed)
 Lists hold just about anything; they can even contain vectors...
 
 ```{r}
-mixed2 <- list(c("asparagus", "arrowroot", "tomato"), c("mango", "kumquat"), 3.14159)
+mixed2 <- list(c("asparagus", "arrowroot", "tomato"), 
+               c("mango", "kumquat"), 
+               3.14159)
 str(mixed2)
 ```
 
@@ -952,7 +954,8 @@ The function returns for each element in the vector, whether the pattern appears
 Let us first define a string vector with the five elements.
 
 ```{r}
-s <- c("May 17, 2019", "Certified mail", "FL 33333", "Oppa Locka", "to Mr. Haan", "arrived")
+s <- c("May 17, 2019", "Certified mail", "FL 33333", 
+       "Oppa Locka", "to Mr. Haan", "arrived")
 s
 ```
 
@@ -1125,7 +1128,8 @@ The first three functions execute substitutions to parts of each string.
 -   `str_sub() <- VALUE`: Here the `str_sub()` part follows the syntax of the method we earlier discussed - the substrings with specific range of indexes inside strings. After this action, each substring will become `VALUE`.
 
 ```{r}
-s <- c("May 17, 2019", "Certified mail", "FL 33333", "Oppa Locka", "to Mr. Haan", "arrived")
+s <- c("5/17/2019", "Certified mail", "FL 33333", 
+       "Oppa Locka", "to Mr. Haan", "arrived")
 ```
 
 Since the `str_sub() <- VALUE` modifies the original, let us copy `s` to `scopy` and then execute the action on the copy, not the original.
@@ -1219,7 +1223,8 @@ Recall that `str_locate_all` is a method for working with strings; it returns th
 Let's try to use what we know to extract common bird names.
 
 ```{r}
-birds <- c("Black-crowned Night-Heron-Nycticorax", "Little-egret-Egretta garzetta")
+birds <- c("Black-crowned Night-Heron-Nycticorax", 
+           "Little-egret-Egretta garzetta")
 ```
 
 The common names are `Black-crowned Night-Heron` and `Little-egret`.
@@ -1318,7 +1323,7 @@ str3 <- "Office"
 Do the following three tasks with these three strings:
 
 * Inquire the length of each string, and store the three length values to `l1`, `l2`, and `l3`, respectively.
-* Connect the three strings in the order of `str1`, `str2`, and `str3` using `paste` and `paste0`, and store the two results in `join1` and `join2`.
+* Connect the three strings in the order of `str1`, `str2`, and `str3` using `str_c` and `str_c` with `sep = " "`, and store the two results in `join1` and `join2`.
 * Obtain the substrings of `join1` between position pairs $(4,10)$, $(-7, -1)$, and $(8, 8)$. Store the substrings in `sub1`, `sub2`, and `sub3`, respectively.
 
 
@@ -1328,20 +1333,20 @@ Do the following three tasks with these three strings:
 
 **Question 6.** Suppose we have three Boolean names `tf1`, `tf2`, and `tf3`. Suppose we assign the following eight value pairs to them.
 
-* `FALSE`, `FALSE`, and `FALSE`
-* `FALSE`, `FALSE`, and `TRUE`
-* `FALSE`, `TRUE`, and `FALSE`
-* `FALSE`, `TRUE`, and `TRUE`
-* `TRUE`, `FALSE`, and `FALSE`
-* `TRUE`, `FALSE`, and `TRUE`
-* `TRUE`, `TRUE`, and `FALSE`
-* `TRUE`, `TRUE`, and `TRUE`
+  * `FALSE`, `FALSE`, and `FALSE`
+  * `FALSE`, `FALSE`, and `TRUE`
+  * `FALSE`, `TRUE`, and `FALSE`
+  * `FALSE`, `TRUE`, and `TRUE`
+  * `TRUE`, `FALSE`, and `FALSE`
+  * `TRUE`, `FALSE`, and `TRUE`
+  * `TRUE`, `TRUE`, and `FALSE`
+  * `TRUE`, `TRUE`, and `TRUE`
 
 Answer the value of `tf1 | !tf2 & tf3` in the four combinations, and store them in eight names `bool1`, `bool2`, ..., `bool8`.
 
 **Question 7.** Following are three Boolean expressions that evaluate to either `TRUE` or `FALSE`. Explain every step in the evaluation process before `TRUE` or `FALSE` is ultimately returned. 
 
-```{r warning=FALSE, message=FALSE}
+```{r eval=FALSE, warning=FALSE, message=FALSE}
 (2 - 1) == ((TRUE == TRUE) != FALSE)
 (10 - (FALSE/2 + max(TRUE, FALSE))) >= (TRUE + 1)
 (Inf > 5) == ((Inf > Inf) | (Inf >= Inf))
@@ -1365,7 +1370,7 @@ s4 <- "Wine"
 We then apply the following function and store the result in the name `snew`:
 
 ```{r warning=FALSE, message=FALSE}
-snew <- paste(s1, s2, s3, s4)
+snew <- str_c(s1, s2, s3, s4, sep = " ")
 snew
 ```
 
@@ -1395,14 +1400,9 @@ snew
 
 * **Question 12.1**  Let us compute the interest on several loans at once. 
 
-    - **Question 12.1.1** The vector `bank_loans` from the package `edsdata` contains 100,000 different loans. Here are the first few:  
+    - **Question 12.1.1** The vector `bank_loans` from the package `edsdata` contains 100,000 different loans. Assuming an annual simple interest rate of 4%, compute the amount each borrower would owe after one year if no payments were made during that time toward the loan. That means we can multiply the loan amount by $1.04$ to get the amount owed after one year. Compute the amount owed for each loan in `bank_loans` after one year. Assign your answer to the name `amount_owed`.
 
-      ```{r eval=FALSE, warning=FALSE, message=FALSE}
-      bank_loans[1:14]
-      ```
-    - __Question 12.1.2__ Assuming an annual simple interest rate of 4%, compute the amount each borrower would owe after one year if no payments were made during that time toward the loan. That means we can multiply the loan amount by $1.04$ to get the amount owed after one year. Compute the amount owed for each loan in `bank_loans` after one year. Assign your answer to the name `amount_owed`.
-
-    - __Question 12.1.3__ What is the total amount of *interest* collected by the bank from all these loans after one year? Assign your answer to `total_interest_amount`. 
+    - __Question 12.1.2__ What is the total amount of *interest* collected by the bank from all these loans after one year? Assign your answer to `total_interest_amount`. 
 
 * **Question 12.2** Suppose the population of Datatopia is growing steadily at 3% annually. On 1/1/2021, Datatopia had 1,821,411,277 people. Calculate the expected population of the country for the next 20 years. 
 
@@ -1427,12 +1427,7 @@ snew
 
 **Question 13: Exploring `stringr`.**  We have already learned how to do basic tasks with strings like inquiring about the number of characters in the string and finding substrings. But data science work often involves doing much more advanced tasks, e.g., splitting strings, replacing certain characters that match some pattern, etc. The `stringr` package from the tidyverse brings a suite of modern tools to use for working with strings in data science. Let's explore some of them in this second part. Be sure to bookmark [its cheatsheet for reference](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf). 
 
-`bands` is a character vector in the package `edsdata` that contains some band names:  
-
-```{r warning=FALSE, message=FALSE}
-library(edsdata)
-bands
-```
+`bands` is a character vector in the package `edsdata` that contains some band names. 
 
 * **Question 13.1**  Obtain two copies of `bands`, one with every character in uppercase (e.g., LIKE THIS) and another with every character in lowercase (e.g., like this). Store the results in `upper` and `lower`, respectively. Use a `stringr` function. 
 
@@ -1445,22 +1440,22 @@ bands
   bird_in_a_hand
   ```
 
-* **Question 13.3**  Repeat **Question 17.1**, but for `bird_in_a_hand`. Assign your answers to the names `upper_bird` and `lower_bird`, respectively.  
+* **Question 13.3**  Repeat **Question 13.1**, but for `bird_in_a_hand`. Assign your answers to the names `upper_bird` and `lower_bird`, respectively.  
 
 * **Question 13.4** The `stringr` function `str_remove_all()` can be used to remove matched patterns in a string. For instance, we could remove all lowercase a's and b's from the character vector `bird_in_a_hand` as follows: 
 
-  ```{r warning=FALSE, message=FALSE}
+  ```{r eval=FALSE, warning=FALSE, message=FALSE}
   str_remove_all(bird_in_a_hand, "[ab]")
   ```
 
-Now take `bands` and modify it by removing each occurrence of a vowel in lowercase (`'a', 'e', 'i', 'o', 'u'`). Store the result in `devoweled`.
+  Now take `bands` and modify it by removing each occurrence of a vowel in lowercase (`'a', 'e', 'i', 'o', 'u'`). Store the result in `devoweled`.
 
 **Question 14: Lists.** This exercise gives practice with the `list` data type. 
 
 * **Question 14.1** Using the function `list` create a list `courses` whose elements are `"MTH118"`, `"GEG2490"`, `"CSC160"`, `"CSC353"`, `"ACC419"`, `"PSC356"`, and `"BIL155"`. Then:
 
-* Sort the list using the function `str_sort()` and store the result in `courses_sorted`.
-* Apply `str_sub` from position 4 to position 6 to the elements of `courses` and apply `str_sort` to the result. Store it in `numbers_sorted`.
+  * Sort the list using the function `str_sort()` and store the result in `courses_sorted`.
+  * Apply `str_sub` from position 4 to position 6 to the elements of `courses` and apply `str_sort` to the result. Store it in `numbers_sorted`.
 
 * **Question 14.2** The name `fruits` is a character vector with some fruits.  
 
@@ -1494,7 +1489,7 @@ Now take `bands` and modify it by removing each occurrence of a vowel in lowerca
 
 **Question 15: More `stringr`.** Let's return to `stringr` again, this time looking at a few more functions that work with *regular expressions*. We actually saw one already when we worked on "devoweling" band names. Be sure you have read the textbook section on `stringr` before continuing with this part.  
 
-As a real-world example, here is a string about the ["Band of the Hour"](https://en.wikipedia.org/wiki/Band_of_the_Hour) at the University of Miami. The string is available in the `edsdata` package.
+As a real-world example, the name `band_of_the_hour` is a string about the ["Band of the Hour"](https://en.wikipedia.org/wiki/Band_of_the_Hour) at the University of Miami. The string is available in the `edsdata` package.
 
 * **Question 15.1**   The function `str_match( s, p )` finds the first occurrence of the pattern `p` in the string `s`. Find the following patterns in `band_of_the_hour` using `str_match` and store the results in variables `m1`, ..., `m3`: 
 
@@ -1508,16 +1503,16 @@ As a real-world example, here is a string about the ["Band of the Hour"](https:/
 
 * **Question 15.4**  The `stringr` function `str_subset()` keeps strings that match a pattern. For example:
 
-```{r warning=FALSE, message=FALSE}
-str_subset(c("x", "y", "xx", "yy"), "x")
-```
+  ```{r eval=FALSE, warning=FALSE, message=FALSE}
+  str_subset(c("x", "y", "xx", "yy"), "x")
+  ```
 
-Now answer how you might obtain the elements in the list `band_of_the_hour_split` that have 
+  Now answer how you might obtain the elements in the list `band_of_the_hour_split` that have 
 a `"0"` in it. Store the result in `zero_elements`.
 
 **Question 16.** Suppose we have a vector of course IDs:
 
-```{r warning=FALSE, message=FALSE}
+```{r eval=FALSE, warning=FALSE, message=FALSE}
 badly_formed_ids <- c("CSC_100", "BIO 111", "MTH161H", 
                       "ECO--220", "MUS..160A")
 badly_formed_ids
@@ -1534,7 +1529,7 @@ Unfortunately, this format is not very good for data science. While it allows fo
 
 Let us "standardize" these course IDs into a uniform format consisting solely of the initial three letters followed by three numerals. After application of the function, the above IDs should look like:
 
-```{r warning=FALSE, message=FALSE}
+```{r eval=FALSE, warning=FALSE, message=FALSE}
 c("CSC100", "BIO111", "MTH161", "ECO220", "MUS160")
 ```
 

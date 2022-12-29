@@ -162,7 +162,8 @@ set.seed(1)
 
 ```{r}
 num_repetitions <- 1000
-sample_stats  <- replicate(n = num_repetitions, one_simulated_statistic())
+sample_stats  <- replicate(n = num_repetitions, 
+                           one_simulated_statistic())
 ```
 
 ### Chance of the observed value of the test statistic occurring
@@ -182,7 +183,8 @@ Where does the observed value fall in this histogram? We can plot it easily.
 ggplot(tibble(sample_stats)) +
   geom_histogram(aes(x = sample_stats, y = after_stat(density)), 
                  fill = "darkcyan", color = 'gray', bins = 12) +
-  geom_point(aes(x = observed_heads, y = 0), size = 3, color = "salmon") +
+  geom_point(aes(x = observed_heads, y = 0), size = 3, 
+             color = "salmon") +
   labs(x = "Number of heads")
 ```
 
@@ -387,7 +389,8 @@ Re-running the simulation is easy. Note that instead of passing `class_props` as
 
 ```{r}
 num_repetitions <- 10000
-sample_class_tvds <- replicate(n = num_repetitions, one_simulated_class(class_props_asian))
+sample_class_tvds <- replicate(n = num_repetitions, 
+                        one_simulated_class(class_props_asian))
 ```
 
 We again visualize the result. 
@@ -526,7 +529,8 @@ It seems that the grades cluster around 72. Where does the actual section H sect
 ggplot(tibble(sample_means)) +
   geom_histogram(aes(x = sample_means, y = after_stat(density)), 
                  bins = 15, fill = "darkcyan", color = 'gray') + 
-  geom_point(aes(x = observed_statistic, y = 0), size = 3, color = "salmon")
+  geom_point(aes(x = observed_statistic, y = 0), 
+             size = 3, color = "salmon")
 ```
 
 It seems that the observed statistic is "close" to the center of randomly sampled scores. 
@@ -800,7 +804,8 @@ Let's visualize the results.
 ggplot(tibble(differences)) + 
   geom_histogram(aes(x = differences, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 20) +
-  geom_point(aes(x = observed_statistic, y = 0), color = "salmon", size = 3)
+  geom_point(aes(x = observed_statistic, y = 0), 
+             color = "salmon", size = 3)
 ```
 
 First, observe how the distribution is centered around 0. Under the assumption of the null hypothesis, there is no difference between the final exam averages in the two course offerings and, therefore, the difference clusters around 0. 
@@ -817,7 +822,7 @@ If we were to demand a higher significance level, say 95%, our observed statisti
 
 The problem here is a lack of evidence. A lack of evidence does not prove that something *does not* exist, e.g., the tutoring program is *not* effective; it very well could be, but our study missed it. Indeed, our permutation test only evaluated one criteria -- that is, difference in final exam scores -- as a measure for improvement. There are other test statistics or criteria we could have considered, like class participation, which may have benefited from the program. It would be up to the judgment of the department on how to use these results in deciding the merit of the tutoring program. 
 
-### Another permutation test: Summer and Winter Olympic athletes 
+### Comparing Summer and Winter Olympic athletes 
 
 We end this section with one more example of a permutation test: comparing the weight information of Summer and Winter Olympic athletes. The dataset is available in the name `athletes` from the `edsdata` package.
 
@@ -841,7 +846,8 @@ We observe that Summer athletes make up the bulk of this dataset. Before proceed
 ```{r dpi=80, fig.align="center", message = FALSE}
 my_athletes |>
   ggplot() + 
-    geom_histogram(aes(x = Weight, y = after_stat(density), fill = Season),
+    geom_histogram(aes(x = Weight, y = after_stat(density), 
+                       fill = Season),
                    bins = 13, color = "gray",
                    alpha = 0.7, position = "identity")
 ```
@@ -894,7 +900,7 @@ set.seed(3)
 
 ```{r}
 differences <- replicate(n = 10000, 
-                one_difference(winter_weights, summer_weights, mean_abs_diff))
+        one_difference(winter_weights, summer_weights, mean_abs_diff))
 ```
 
 ### Conclusion
@@ -905,7 +911,8 @@ We are ready to visualize the results.
 ggplot(tibble(differences)) + 
   geom_histogram(aes(x = differences, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 15) +
-  geom_point(aes(x = observed_statistic, y = 0), color = "salmon", size = 3)
+  geom_point(aes(x = observed_statistic, y = 0), 
+             color = "salmon", size = 3)
 ```
 
 The observed statistic is quite far away from the distribution of simulated test statistics. Let's do a numerical check. 
@@ -948,9 +955,9 @@ galaxy_acceptance
 
   Thus, you offer the null hypothesis: 
 
-  > **Null hypothesis:** "The distribution of ethnicities of accepted applicants at the College of Galaxy was a random sample from the population of accepted applicants at degree-granting institutions in the United States."
+  * **Null hypothesis:** "The distribution of ethnicities of accepted applicants at the College of Galaxy was a random sample from the population of accepted applicants at degree-granting institutions in the United States."
 
-  **Question 1.2** With every *null hypothesis* we write down a corresponding **alternative hypothesis**. What is the alternative hypothesis in this case? 
+* **Question 1.2** With every *null hypothesis* we write down a corresponding **alternative hypothesis**. What is the alternative hypothesis in this case? 
 
   We have that there are 1533 accepted applicants at the College of Galaxy. Imagine drawing a random sample of 1533 students from among the admitted students at universities across the United States. This is one student admissible pool we could see if the null hypothesis were true.
 
@@ -1223,7 +1230,7 @@ In this question, we will examine whether women are underrepresented in the cham
 
 * **Question 4.6** Simulate 10,000 different test statistics under the null hypothesis. Store the results to a vector named `test_stats`. 
 
-The following `ggplot2` code visualizes your results: 
+  The following `ggplot2` code visualizes your results: 
 
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
   ggplot(tibble(test_stats)) + 
@@ -1254,16 +1261,17 @@ The following `ggplot2` code visualizes your results:
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
   ggplot(tibble(test_stats)) + 
     geom_histogram(aes(x = test_stats), bins=18, color="gray") + 
-    geom_point(aes(x = observed_value_house, y = 0), size=2, color="red")
+    geom_point(aes(x = observed_value_house, y = 0), 
+               size=2, color="red")
   ```
 
 * **Question 4.10**  Compute the p-value using the `test_stats` you generated by comparing it with `observed_value_house`. Assign your answer to `p_value`. 
 
-**Question 4.11** Why is it that in the first histogram the simulated test statistics cluster around 0 and in the second histogram the simulated values cluster around a value much greater? Is the statement of the null hypothesis the same in both cases? 
+* **Question 4.11** Why is it that in the first histogram the simulated test statistics cluster around 0 and in the second histogram the simulated values cluster around a value much greater? Is the statement of the null hypothesis the same in both cases? 
 
 * **Question 4.12** Now that we have analyzed the data in two ways, are women equally represented in the House? Why or why not? 
 
-* **Question 5.** Cathy recently received from a friend a replica dollar coin which appears to be slightly biased towards "Heads". Cathy tosses the coin 20 times in a row counts how many times "Heads" turns up. She repeats this for 10 trials. Her results are summarized in the following tibble: 
+**Question 5.** Cathy recently received from a friend a replica dollar coin which appears to be slightly biased towards "Heads". Cathy tosses the coin 20 times in a row counts how many times "Heads" turns up. She repeats this for 10 trials. Her results are summarized in the following tibble: 
 
 ```{r message=FALSE, warning=FALSE}
 cathy_heads_game <- tibble(
@@ -1337,9 +1345,9 @@ We will use a permutation test to see if the scores for Sections A and C are ind
 
 * **Question 6.6**  Write a function `scores_permute_test` that does the following:
 
-* From `csc1234` form a new variable that shuffles the values in `Score` using `sample`. Overwrite the variable `Score` with the shuffled values. 
-* Call `mean_differences` on this shuffled tibble. 
-* Return the vector of differences. 
+  * From `csc1234` form a new variable that shuffles the values in `Score` using `sample`. Overwrite the variable `Score` with the shuffled values. 
+  * Call `mean_differences` on this shuffled tibble. 
+  * Return the vector of differences. 
 
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
   
