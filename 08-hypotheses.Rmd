@@ -199,9 +199,12 @@ The value we get is 0.19, or about 19%. We interpret this value as stating the *
 
 To compute a *p-value*, we take the following steps:
 
-1. Establish some model that is possibly describing a quantifiable phenomenon.
-2. Run a simulation to obtain a histogram of the quantifiable phenomenon under the model.
-3. Compare the observation and examine where in the histogram the observation stands.
+|       1. Establish some model that is possibly describing a 
+|          quantifiable phenomenon.
+|       2. Run a simulation to obtain a histogram of the quantifiable 
+|          phenomenon under the model.
+|       3. Compare the observation and examine where in the histogram 
+|          the observation stands.
 
 More specifically, we estimate how far the observation is from the central portion of the histogram by splitting the histogram at the point of observation. As shown in the following figure, the portion less than or equal to the observation (in dark cyan) and the portion greater than or equal to the observation (in orange). Note that we can include the equality, when the sampled value equals the observed value, on either side. 
 
@@ -1021,8 +1024,8 @@ galaxy_acceptance
 
 * **Question 1.9**  Determine whether the following conclusions can be drawn from these data. Explain your answer. 
 
-  1. The ethnicity distribution of the admitted applicant pool at the College of Galaxy does not look like that of U.S. universities. 
-  2. The ethnicity distribution of the admitted applicant pool at the College of Galaxy is biased toward white applicants. 
+  * The ethnicity distribution of the admitted applicant pool at the College of Galaxy does not look like that of U.S. universities. 
+  * The ethnicity distribution of the admitted applicant pool at the College of Galaxy is biased toward white applicants. 
 
 **Question 2: A strange dice.** Your friend Jerry invites you to a game of dice. He asks you to roll a dice 10 times and says that he wins \$1 each time a `3` turns up and loses \$1 on any other face. Jerry's dice is six-sided, however, the `"2"` and `"4"` faces have been replaced with `"3"`'s. The following code chunk simulates the results after one game:  
 
@@ -1142,10 +1145,10 @@ While the game seems like an obvious scam, Jerry claims that his dice is no diff
 
 * **Question 2.10** Which of the following statements are __FALSE__? Indicate them by including its number in the following vector `pvalue_answers`.  
 
-  1. The p-value printed is the probability that the die is fair.
-  2. The p-value printed is the probability that the die is NOT fair.
-  3. The p-value cutoff (5%) is the probability that the die is NOT fair.
-  4. The p-value cutoff (5%) is the probability of seeing a test statistic as extreme or more extreme than this one if the null hypothesis were true.
+  * The p-value printed is the probability that the die is fair.
+  * The p-value printed is the probability that the die is NOT fair.
+  * The p-value cutoff (5%) is the probability that the die is NOT fair.
+  * The p-value cutoff (5%) is the probability of seeing a test statistic as extreme or more extreme than this one if the null hypothesis were true.
 
 * **Question 2.11** For the statements you selected to be FALSE, explain why they are wrong.  
 
@@ -1288,12 +1291,12 @@ cathy_heads_game
 
 * **Question 5.2** Given the outcome of 20 trials, which of the following test statistics would be reasonable for this hypothesis test?
 
-  1. The total number of heads.
-  2. The total number of heads minus the total number of tails.
-  3. Whether there is at least one head.
-  4. Whether there is at least one tail.
-  5. The total variation distance between the probability distribution of a fair coin and the observed distribution of heads and tails.
-  6. The trial with the minimum number of heads.
+  * The total number of heads.
+  * The total number of heads minus the total number of tails.
+  * Whether there is at least one head.
+  * Whether there is at least one tail.
+  * The total variation distance between the probability distribution of a fair coin and the observed distribution of heads and tails.
+  * The trial with the minimum number of heads.
 
   Assign the name `good_test_stats` to a vector of integers corresponding to these test statistics.
 

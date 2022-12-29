@@ -485,10 +485,14 @@ Write the code for doing the calculation. After completing the assignments to al
   4 <- 2 + 1
   ```
 
-  1. `4` is not `2 + 1` so R does not allow us to assign `2 + 1` to `4`.
-  2. The issue is that this needs to be rewritten as `2 + 1 <- 4` because the code is trying to say that `4` is the result of adding together the numbers `2` and `1`. 
-  3. `4` is a number, and we cannot make a number a name for some quantity. 
-  4. `<-` is not valid here. We need to replace the `<-` symbol with `=` because we are trying to show that `4` is equivalent to the expression `2 + 1`.
+|     1. `4` is not `2 + 1` so R does not allow us to assign `2 + 1` to `4`.
+|     2.  The issue is that this needs to be rewritten as `2 + 1 <- 4` because 
+|         the code is trying to say that `4` is the result of adding together 
+|         the numbers `2` and `1`. 
+|     3. `4` is a number, and we cannot make a number a name for some quantity. 
+|     4. `<-` is not valid here. We need to replace the `<-` symbol with `=` 
+|         because we are trying to show that `4` is equivalent to the 
+|         expression `2 + 1`.
 
 * **Question 2.2**
 
@@ -498,10 +502,13 @@ Write the code for doing the calculation. After completing the assignments to al
   eight <- fifty divides ten
   ```
 
-1. On the third line, the name `fifty` cannot be followed directly by another name.
-2. Fifty divides ten is five, not eight.
-3. The `divides` operation only applies to numbers; it does not work for the names "fifty" and "ten".
-4. On the second line, the name "ten" can only be assigned to the number 10; it cannot be assigned to another number, e.g., 9.
+|     1. On the third line, the name `fifty` cannot be followed directly by 
+|        another name.
+|     2. Fifty divides ten is five, not eight.
+|     3. The `divides` operation only applies to numbers; it does not work 
+|        for the names "fifty" and "ten".
+|     4. On the second line, the name "ten" can only be assigned to the 
+|        number 10; it cannot be assigned to another number, e.g., 9.
 
 **Question 3: A Smoothie Difference** Suppose you'd like to *quantify* how *dissimilar* two Smoothie Queen drinks (20 oz.) are, using three quantitative characteristics. We are told the following important traits about these smoothies (among many others). 
 
@@ -517,10 +524,10 @@ You decide to define the dissimilarity between two smoothies as the maximum of t
 
 * **Question 3.2**  [The American Heart Association (AHA) suggests](https://www.hsph.harvard.edu/nutritionsource/carbohydrates/added-sugar-in-the-diet/) an added-sugar limit of no more than 36 grams of sugar for most men. If the added sugar amount in the table above was measured as a *percentage* of the added-sugar limit for men rather than an amount in grams, what would be the dissimilarity between these two smoothies? Assign either 1, 2, 3, or 4 to the name `smoothies_q2` below.
 
-  1. 0
-  2. 8
-  3. 16
-  4. 141
+|         1. 0
+|         2. 8
+|         3. 16
+|         4. 141
 
 **Question 4: Signing a Loan** Suppose you are signing a loan in the amount of $1,000 with a 3% monthly interest rate. On the day you received the borrowed money, the loan starts. At each monthly anniversary the money you own is updated with the multiplication by 1.03. You may choose to pay money at that point, and, if so, your payment is subtracted from the updated amount. Naturally, if you choose to make no payments, the amount you owe keeps growing.
 

@@ -20,11 +20,12 @@ These methods have important implications in an area known as the [Digital Human
 
 ## Tidy Text 
 
-We begin this chapter by studying what tidy text looks like, which is an extension of the tidy data principles we saw earlier when working with `dplyr`. Recall that tidy data has three principles:
+We begin this chapter by studying what tidy text looks like, which is an extension of the tidy data principles we saw earlier when working with `dplyr`. Recall that tidy data has four principles:
 
-1. Each *variable* forms a column. 
-2. Each *observation* forms a row. 
-3. Each type of observational unit forms a table. 
+|       1. Each *variable* forms a column. 
+|       2. Each *observation* forms a row. 
+|       3. Each value must have its own cell.
+|       4. Each type of observational unit forms a table. 
 
 Much like what we saw when keeping tibbles tidy, tidy text provides a way to deal with text data in a straightforward and consistent manner.   
 

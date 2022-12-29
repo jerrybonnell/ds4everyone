@@ -916,11 +916,11 @@ penguins
 
 * **Question 3.4** What is the size of the resampled tibble when `one_sample` is passed as an argument? Assign your answer to the name `resampled_size_answer`.
 
-  1. 342 
-  2. 684 
-  3. 50
-  4. 100 
-  5. 1
+|         1. 342 
+|         2. 684 
+|         3. 50
+|         4. 100 
+|         5. 1
 
 * **Question 3.5** Using `replicate`, create 1,000 resampled mean statistics from `one_sample` using the variable `body_mass_g`. Assign your answer to the name `resampled_means`.
 

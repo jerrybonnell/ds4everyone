@@ -62,10 +62,10 @@ This dataset contains 352 values representing 11 variables and 32 observations. 
 
 We are now ready to provide a definition of tidy data. We defer to [Hadley Wickham (2014)](https://vita.had.co.nz/papers/tidy-data.pdf) for a definition. We say that data is "tidy" when it satisfies four conditions: 
 
-1. Each *variable* forms a column. 
-2. Each *observation* forms a row. 
-3. Each value must have its own cell.
-4. Each type of observational unit forms a table. 
+|       1. Each *variable* forms a column. 
+|       2. Each *observation* forms a row. 
+|       3. Each value must have its own cell.
+|       4. Each type of observational unit forms a table. 
 
 Data that exists in any other arrangement is, consequently, *messy*. A critical aspect in distinguishing between tidy and messy data forms is defining the __observational unit__. This can look different depending on the statistical question being asked. In fact, defining the observational unit is so important because data that is "tidy" in one application can be "messy" in another.  
 
@@ -641,9 +641,9 @@ Let us revise a bit our previous study. Curious about the joint effect of the nu
 
 Your analysis pipeline, then, would be composed of three steps: 
 
-1. Group rows by `cyl` and `am`, the number of cylinders. 
-2. Summarize to calculate the average miles per gallon per group. 
-3. Filter out rows that are below the average miles per gallon. 
+|       1. Group rows by `cyl` and `am`, the number of cylinders. 
+|       2. Summarize to calculate the average miles per gallon per group. 
+|       3. Filter out rows that are below the average miles per gallon. 
 
 A first solution for this task might look like the following. 
 
@@ -997,8 +997,8 @@ mtcars_tibble
 
 We can spot two areas that require transformation: 
 
-1. Convert the `wt` column from pounds to kilograms.  
-2. Cut off the values in `displ` so that no car model has a value larger than `400`.
+* Convert the `wt` column from pounds to kilograms.  
+* Cut off the values in `displ` so that no car model has a value larger than `400`.
 
 We can address the first one by writing a function that multiples each value in the argument received by the conversion factor for kilograms. Let us test it out first with a simple vector.
 
@@ -1257,15 +1257,15 @@ Let us state the __observational unit__ to be an individual student assessment a
 
 We can see the current format of the dataset violates all three principles of tidy data. Those problems being: 
 
-1. The observational unit is the *student* which is spread across three different tables.
-2. There is missing data present which, by definition, is not tidy.
-3. We would like to keep the scale of the scores the same for each assessment, i.e., labs, homeworks, and quizzes should all be on a 100 point scale. 
-4. Both the student *number* and *score* appears in each column and multiple observations appear in each row. 
+* The observational unit is the *student* which is spread across three different tables.
+* There is missing data present which, by definition, is not tidy.
+* We would like to keep the scale of the scores the same for each assessment, i.e., labs, homeworks, and quizzes should all be on a 100 point scale. 
+* Both the student *number* and *score* appears in each column and multiple observations appear in each row. 
 
 Once we have tided the data, we would like to answer the following questions:  
 
-1. What is average lab, homework, and quiz score for each of the students? What are the overall averages for the class? 
-2. Which students performed poorly in the course? 
+* What is average lab, homework, and quiz score for each of the students? What are the overall averages for the class? 
+* Which students performed poorly in the course? 
 
 We will address each of these in turn. 
 
@@ -1561,9 +1561,9 @@ tuition_tidy
 
 With our tibble in tidy format, we are ready to use it for data analysis. We are interested in learning more about the following:
 
-1. What is the average net tuition for public and private institutions in each zip code area? Which ZIP codes see the highest average net tuition?
-2. Are private institutions more expensive to attend in the Miami area? 
-3. Which institutions are below the average net tuition for that ZIP code area? 
+* What is the average net tuition for public and private institutions in each zip code area? Which ZIP codes see the highest average net tuition?
+* Are private institutions more expensive to attend in the Miami area? 
+* Which institutions are below the average net tuition for that ZIP code area? 
 
 The first two points can be addressed using the following `dplyr` work. We group observations by ZIP code and type of institution, compute the mean net tuition for each group, and sort the table according to these values.
 
@@ -1612,10 +1612,10 @@ library(gapminder)
 
 **Question 1** Recall from the textbook that data is *tidy* when it satisfies four conditions:
 
-1.  Each variable forms a column.
-2.  Each observation forms a row.
-3.  Each value must have its own cell.
-4.  Each type of observational unit forms a table.
+|         1.  Each variable forms a column.
+|         2.  Each observation forms a row.
+|         3.  Each value must have its own cell.
+|         4.  Each type of observational unit forms a table.
 
 ```{r warning=FALSE, message=FALSE}
 is_it_tidy <- list(table5, table1, table3, table2)

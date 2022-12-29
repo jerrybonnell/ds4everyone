@@ -1307,10 +1307,11 @@ double_trouble <- 81.9
 
 Here are some findings based on the above functions. Which of the following statements are `TRUE`? 
 
-1. `as.double(a_happy_string)` produces an error because we cannot covert a string to a double. 
-2. `as.integer(a_happy_string)`  returns the value $-4.5$. 
-3. `as.character(double_trouble)` returns the value $"81.9"$. 
-4. `is.integer(1)` returns `TRUE`. 
+|       1. `as.double(a_happy_string)` produces an error because we cannot 
+|           covert a string to a double. 
+|       2. `as.integer(a_happy_string)`  returns the value $-4.5$. 
+|       3. `as.character(double_trouble)` returns the value $"81.9"$. 
+|       4. `is.integer(1)` returns `TRUE`. 
 
 **Question 3.** Let us extract some information from strings. Following are three strings stored in three separate names. 
 
@@ -1493,9 +1494,9 @@ As a real-world example, the name `band_of_the_hour` is a string about the ["Ban
 
 * **Question 15.1**   The function `str_match( s, p )` finds the first occurrence of the pattern `p` in the string `s`. Find the following patterns in `band_of_the_hour` using `str_match` and store the results in variables `m1`, ..., `m3`: 
 
-1. any uppercase alphabet `"[A-Z]"`, 
-2. any series of lowercase alphabetical characters `"[a-z]+"`,
-3. any numeral `"[0-9]"`.
+|       1. any uppercase alphabet `"[A-Z]"`, 
+|       2. any series of lowercase alphabetical characters `"[a-z]+"`,
+|       3. any numeral `"[0-9]"`.
 
 * **Question 15.2**   Now use `str_match_all()` to find the occurrences of the following two patterns and store them in `ma1` and `ma2`: (a) any series of numerals and (b) any word that begins with an uppercase letter (e.g., "Fiesta", "Band", "University", etc.). Verify your answer by examining the contents of `ma1` and `ma2`.
 

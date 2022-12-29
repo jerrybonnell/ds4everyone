@@ -718,9 +718,9 @@ We are interested in simulating the number of grains the minister receives at th
 
 We imagine the variability in the clerk's calculation for the number of grains a minister receives. Based on what we know from the story, three actions are possible:
 
-1. The clerk counts one less grain. 
-2. The clerk counts the right amount of grains.
-3. The clerk counts one extra grain.
+* The clerk counts one less grain. 
+* The clerk counts the right amount of grains.
+* The clerk counts one extra grain.
 
 We will assume that "getting it right" has a slightly higher chance of occurring ($2/4$) with the other two actions having an equal chance of occurring ($1/4$). We can simulate the clerk's action using `sample` and setting the `prob` argument.  
 
@@ -929,15 +929,15 @@ Sometimes the minister received few to no grains at the end of the 10th day and 
 
 This section discussed multiple iteration constructs for building simulations. The following list clarifies when to use each.  
 
-1. `map_*` 
+* `map_*` 
     + __Arguments:__ (1) a sequence (2) a function that receives as an argument an element from that sequence
     + __Returns:__ List or vector the same length as the input sequence
     + __When to use?__ Applying a function to a sequence or a tibble column
-2. `replicate` 
+* `replicate` 
     + __Arguments:__ (1) Number of repetitions (`reps`) (2) a function to repeat
     + __Returns:__ Vector of length `reps` that can be stored for later analysis
     + __When to use?__ *Repeating* a function some fixed number of times
-3. `accumulate` 
+* `accumulate` 
     + __Arguments:__ (1) a sequence (2) a two-argument function; first argument is an *accumulator* and the second argument an element from the sequence
     + __Returns:__ Vector the same length as the input sequence that contains the results of the accumulation at each step (or one longer if `.init` argument is set)
     + __When to use?__ Applying a function where some value needs to be updated through the duration of the simulation
@@ -1410,8 +1410,8 @@ simulate_dice_roll()
 
 * **Question 5.8** A fellow classmate claims that the above simulation is unable to disprove the Chavalier's flawed reasoning. He cites two reasons for his claim:
 
-  1. The "first event" and "second event" bars are too close to each other to say anything with confidence. 
-  2. Because we repeated the simulation a large number of times, there is too much variability in the results. 
+  * The "first event" and "second event" bars are too close to each other to say anything with confidence. 
+  * Because we repeated the simulation a large number of times, there is too much variability in the results. 
 
   Which of his reasons, if any, are valid? Explain your reasoning. 
 

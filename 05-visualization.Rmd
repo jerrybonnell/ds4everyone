@@ -1073,13 +1073,13 @@ The meaning of assigning 5 to the bin width is that each bin covers 5 consecutiv
 
 More specifically, we execute the following steps.
 
-1. Using `bin_width` as a parameter, we create a sequence `bins` of bin boundaries from 10 to 50.
+* Using `bin_width` as a parameter, we create a sequence `bins` of bin boundaries from 10 to 50.
 
   ```{r}
   bins <- seq(10, 50, bin_width)
   ```
 
-2. Like before, when we "cut" the `hwy` values using `bins` as break points, we get the bins and their counts under variables `bin` and `n`, respectively.
+* Like before, when we "cut" the `hwy` values using `bins` as break points, we get the bins and their counts under variables `bin` and `n`, respectively.
 
   ```{r}
   binned <- mpg_sub |>
@@ -1088,7 +1088,7 @@ More specifically, we execute the following steps.
   binned
   ```
 
-3. We obtain the proportions of the counts in the entire cars appearing in the tibble `mpg_sub` by dividing the counts by `nrow(mpg_sub)`.
+* We obtain the proportions of the counts in the entire cars appearing in the tibble `mpg_sub` by dividing the counts by `nrow(mpg_sub)`.
 
   ```{r}
   binned <- binned |>
@@ -1096,7 +1096,7 @@ More specifically, we execute the following steps.
   binned
   ```
 
-4. For each bin, split the proportion in the bin among the 5 units the bin contains.
+* For each bin, split the proportion in the bin among the 5 units the bin contains.
 
   ```{r}
   binned <- binned |>
@@ -1104,7 +1104,7 @@ More specifically, we execute the following steps.
   binned
   ```
 
-5. Plot `density` against `bin`, and done! 
+* Plot `density` against `bin`, and done! 
 
   ```{r dpi=80,  fig.align="center", warning=FALSE, message = FALSE}
   ggplot(binned, aes(x = bin, y = density)) +
@@ -1942,11 +1942,12 @@ longjump
 
 * **Question 3.5** Following are some statements about the above two distributions. Select those that are *FALSE* by including its corresponding number in the following *vector* `jump_answers`. 
 
-  1. We used histograms because both of these variables are categorical. 
-  2. Both of these distributions are skewed. 
-  3. We observe the histogram for the qualifier event follows a left-tailed distribution. 
-  4. We can color the different category storms using the variable `status` 
-     because it is a numerical variable. 
+|     1. We used histograms because both of these variables are categorical. 
+|     2. Both of these distributions are skewed. 
+|     3. We observe the histogram for the qualifier event follows a 
+|        left-tailed distribution. 
+|     4. We can color the different category storms using the variable 
+|        `status` because it is a numerical variable. 
 
 * **Question 3.6** The following code visualizes a map of the world. Annotate this map with the countries that participated in the men's long jump event in the London 2012 Games using a point or polygon geom (use `long` for x and `lat` for y). You will first need to join the map data in `world` with `longjump2012`. Then extend the plot in the name `world_map` by adding a new geom layer; set the data for this new layer to use the joined data.   
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
@@ -1996,10 +1997,10 @@ g +
 
 * **Question 5.4**  Using the above two visualizations, select which of the following statements can be correctly inferred by including them in the following *vector* `gap_answers`. For those that you did not select, if any, explain why the statement cannot be made.
 
-  1. We observe more populous countries in the "Europe" cluster than in the "Asia" cluster. 
-  2. Countries with higher GDP per capita are associated with higher life expectancies, and we can also observe that countries in Asia are more correlated with lower GDP per capita than countries in Europe in 1987.  
-  3. Moving a unit of distance along the x-axis has the same effect in both visualizations.    
-  4. The GDP per capita for the majority of countries in Asia are practically 0 according to the first visualization. 
+  * We observe more populous countries in the "Europe" cluster than in the "Asia" cluster. 
+  * Countries with higher GDP per capita are associated with higher life expectancies, and we can also observe that countries in Asia are more correlated with lower GDP per capita than countries in Europe in 1987.  
+  * Moving a unit of distance along the x-axis has the same effect in both visualizations.    
+  * The GDP per capita for the majority of countries in Asia are practically 0 according to the first visualization. 
 
 * **Question 5.5**  The tibble `gapminder` contains five variables: `country`, `continent`, `year`, `lifeExp`, and `pop`. Are any of these categorical variables and, if so, what kind (e.g., nominal, ordinal, binary)? Are there any numerical variables and, if so, what kind (e.g., continuous, discrete)? 
 

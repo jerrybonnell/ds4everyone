@@ -957,10 +957,12 @@ library(gapminder)
 
 **Question 1** Following are some samples of students in a Data Science course named "CSC100": 
 
-1. All CSC100 students who attended office hours in the third week of classes
-2. All undergraduate freshmen in CSC100
-3. Every 11th person starting with the first person in the classroom on a random day of lecture
-4. 11 students picked randomly from the course roster
+|       1. All CSC100 students who attended office hours in the third week 
+|          of classes
+|       2. All undergraduate freshmen in CSC100
+|       3. Every 11th person starting with the first person in the classroom 
+|          on a random day of lecture
+|       4. 11 students picked randomly from the course roster
 
 Which of these samples are *random samples*, if any? 
 
@@ -981,10 +983,13 @@ Let us determine the *mean* value of a twenty-sided die by simulation.
 
 * **Question 2.3** Which of the following statements, if any, are true? 
 
-  1. The value of `twenty_sided_die_expected_value` is an element in `sample_rolls`. 
-  2. The distribution of `sample_rolls` is roughly uniform and symmetric around the mean.  
-  3. The value of `twenty_sided_die_expected_value` is at the midpoint between 1 and 20.
-  4. The computed mean does not carry a unit. 
+|         1. The value of `twenty_sided_die_expected_value` is an element 
+|            in `sample_rolls`. 
+|         2. The distribution of `sample_rolls` is roughly uniform and 
+|            symmetric around the mean.  
+|         3. The value of `twenty_sided_die_expected_value` is at the 
+|            midpoint between 1 and 20.
+|         4. The computed mean does not carry a unit. 
 
 
 **Question 3: Convenience sampling.** The tibble `sf_salary` from the package `edsdata` gives compensation information (names, job titles, salaries) of all employees of the City of San Francisco from 2011 to 2014 at annual intervals. The data is sourced from the Nevada Policy Research Institute's [Transparent California](https://transparentcalifornia.com/salaries/san-francisco/) database and then tidied by [Kaggle](https://www.kaggle.com/datasets/kaggle/sf-salaries).
@@ -1117,9 +1122,9 @@ To make the analysis easier, we will assume that each penguin has already been i
 
 * **Question 4.11** Consider the following statements about the two estimators. For each of these statements, state whether or not you think it is correct and explain your reasoning.
 
-  1. The max-based estimator is *biased*, that is, it almost always underestimates.
-  2. The max-based estimator has *higher* variability than the mean-based estimator.
-  3. The mean-based estimator is *unbiased*, that is, it overestimates about as often as it underestimates. 
+  * The max-based estimator is *biased*, that is, it almost always underestimates.
+  * The max-based estimator has *higher* variability than the mean-based estimator.
+  * The mean-based estimator is *unbiased*, that is, it overestimates about as often as it underestimates. 
 
 **Question 5** This question is a continuation of the City of San Francisco compensation data from *Question 3* and assumes that the function `filter_letter()` exists and that the names `sf_salary11` and `pop_mean_salary11` have already been assigned.  
 
