@@ -999,11 +999,11 @@ penguins
 
 * **Question 4.3** We can now package all the actions into one function. Call the function `conf_interval_test`. The function receives the same arguments as `get_quantile` with one new argument, `num_intervals`, the number of confidence intervals to generate. The function performs the following actions (in order):
 
-  * Compute the population parameter from `pop_df` (assuming access to the population is possible in `pop_df`) by running the function `stat_func` on the variable `label`. Recall the use of `{{` to refer to `label` properly. Assign this number to the name `pop_stat`.   
+  * Compute the population parameter from `pop_df` (assuming access to the population is possible in `pop_df`) by running the function `stat_func` on the variable `label`. Recall the use of `{{` to refer to `label` properly. Assign this number to the name `pop_stat`.
   * Obtain `num_intervals` many confidence intervals by repeated calls to the function `get_quantile`. Assign the resulting intervals to the name `intervals`.
   * Arrange the results in `intervals` into a tibble named `interval_df` with three variables: `replication`, `left`, and `right`.
-  * Print the number of confidence intervals that capture the parameter `pop_stat`. 
-  * Visualize the intervals with a vertical red line showing where the parameter is. 
+  * Print the number of confidence intervals that capture the parameter `pop_stat`.
+  * Visualize the intervals with a vertical red line showing where the parameter is.
 
   __NOTE__: If writing this function seems daunting, don't worry! All of the code you need is already written. You should be able to simply copy your work from this question and from the steps in **Question 3**.
 

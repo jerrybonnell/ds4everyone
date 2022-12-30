@@ -311,7 +311,7 @@ tibble(x = seq(1,4,0.5),
 
 ### Loading data from an external source
 
-Usually data scientists need to load data from files. The package `readr` of `tidyverse` offers ways for that.With the package `readr` you can read from, among others, comma-separated files (CSV files) and tab-separated files (TSV files).
+Usually data scientists need to load data from files. The package `readr` of `tidyverse` offers ways for that. With the package `readr` you can read from, among others, comma-separated files (CSV files) and tab-separated files (TSV files).
 
 To read files, we specify a string the location of the file and then use the function for reading the file, `read_csv` if it is a CSV file and `read_tab` if it is a TSV file. If you have a file that uses another delimiter, a more general `read_delim` function exists as well.  
 Here is an example of reading a CSV file from a URL available on the internet.
@@ -860,19 +860,19 @@ There are two details to note when working with the pivot functions.
 
 * `pivot_wider` should not be thought of as an "undo" operation. Like `pivot_longer` its primary purpose is also to make data tidy. Consider the following table and observe how each observation is scattered across two rows. The appropriate means to bring this data into tidiness is through an application of `pivot_wider`.   
 
-```{r}
-slice_head(table2, n = 5)
-```
+  ```{r}
+  slice_head(table2, n = 5)
+  ```
 
 * `pivot_longer` and `pivot_wider` are not perfectly symmetrical operations. That is, there are cases where applying `pivot_wider`, followed by `pivot_longer`, will not reproduce the exact same dataset. Consider such an application on the following dataset. Keep in mind the column names and how the column data types change at each pivot step.
 
-```{r}
-sales <- tibble(
-  year     = c(2020, 2021, 2020, 2021),
-  quarter  = c(1, 2, 1, 2),
-  sale     = c(70, 80, 62, 100)
-)
-```
+  ```{r}
+  sales <- tibble(
+    year     = c(2020, 2021, 2020, 2021),
+    quarter  = c(1, 2, 1, 2),
+    sale     = c(70, 80, 62, 100)
+  )
+  ```
 
 ## Applying Functions to Columns 
 

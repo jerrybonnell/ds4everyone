@@ -262,7 +262,7 @@ This raises another danger when working with R notebooks: evaluating code chunks
 Re-define `a` as follows. 
 
 ```{r}
-a <- 15
+a <- 10
 ```
 
 Then consider the following code chunk.

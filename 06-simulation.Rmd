@@ -639,7 +639,7 @@ If the coin is fair, for all number $d$, the event that we see $50-d$ "Heads" is
 The symmetry that we observe confirms the hypothesis.
 We also see that about 8% (i.e., 0.08 on the y-axis) of the simulation results produced 50.
 Furthermore, we see that very few times we see occurrences of numbers less than 35 or greater than 65.
-We thus conclude from the experiment that the range of thew number is likely to reside in the range $[35,65]$.
+We thus conclude from the experiment that the range of the number is likely to reside in the range $[35,65]$.
 
 ### Not-so-doubling rewards
 

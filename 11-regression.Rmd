@@ -954,7 +954,7 @@ g2 <- ggplot(lmod_aug_factor,
 g1 + g2
 ```
 
-When `species` is *excluded* from the model, we find a negative estimate for the slope. When `species` is included, as in the one-factor model, the sign of the slope is flipped. This effect is also called __Simpson's paradox__.
+When `species` is *excluded* from the model, we find a negative estimate for the slope. When `species` is included, as in the one-factor model, the sign of the slope is flipped. This effect is known as __Simpson's paradox__.
 
 While the inclusion of `species` seemed obvious for this dataset, we are often unaware of critical variables like these that are "missing" in real-world datasets. These kinds of variables are either neglected from the analysis or were simply not measured. Yet, when included, they can have dramatic effects such as flipping the sign of the slope in a regression model. We call these __confounding variables__ because said variables implicate the relationship between two observed variables. For instance, `species` is *confounding* in the relationship between `bill_depth_mm` and `bill_length_mm`. 
 
@@ -1085,7 +1085,7 @@ $$
 
 So an athlete that is 190 centimeters tall has an expected weight of about 86.8 kilograms.  
 
-We can accomplish the working with `tidymodels` using the function `predict`. Note that this function receives a dataset in the form of a data frame or tibble, and returns the prediction(s) as a tibble.  
+We can accomplish the work with `tidymodels` using the function `predict`. Note that this function receives a dataset in the form of a data frame or tibble, and returns the prediction(s) as a tibble.  
 
 ```{r}
 test_data_tib <- tibble(

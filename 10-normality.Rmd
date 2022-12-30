@@ -1064,10 +1064,10 @@ applications
 
 * **Question 3.3** Which of the following statements, if any, are accurate based on the tibble `with_scaled`? 
 
-  * Arnold's scaled Judge Mary score is about 1.9 standard deviations higher than the mean score Arnold received from the four different judges.  
-  * The score Judge Mary gave to Baxter is roughly 0.02 standard deviations below Judge Mary's mean score over all applicants. 
-  * Based on the raw score alone, we can tell the score Arnold received from Judge Mary is higher than the average score Judy Mary gave. 
-  * The standard deviation of Judge Mary's scaled scores is higher than the standard deviation of Judge Olivia's scaled scores. 
+  * Arnold's scaled Judge Mary score is about 1.9 standard deviations higher than the mean score Arnold received from the four different judges.
+  * The score Judge Mary gave to Baxter is roughly 0.02 standard deviations below Judge Mary's mean score over all applicants.
+  * Based on the raw score alone, we can tell the score Arnold received from Judge Mary is higher than the average score Judy Mary gave.
+  * The standard deviation of Judge Mary's scaled scores is higher than the standard deviation of Judge Olivia's scaled scores.
 
 * **Question 3.4** Add two new variables to `with_scaled`, `Total Raw` and `Total Scaled`, that gives the total raw score and total scaled score, respectively, for each applicant. Save the resulting tibble to the name `total_scores`. 
 
