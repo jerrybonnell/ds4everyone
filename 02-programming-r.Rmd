@@ -5,7 +5,7 @@ output:
 ---
 # (PART) Programming Fundamentals {-} 
 
-# Introduction to R
+# Introduction to R {-}
 
 The work of a data scientist consists of many aspects:
 
