@@ -18,7 +18,7 @@ options(tinytex.clean = FALSE)
 Data science is a field of science that aims at discovering patterns and extracting knowledge through analysis of data and developing methods to support such investigation. The field is rooted in mathematics, statistics, computer science, and vision science and has contributed to a wide array of disciplines, e.g.,  biology, chemistry, economics, literary studies, medicine, physical sciences, and psychology. 
 
 
-## Game of the Name 
+## Game of the Name {-}
 
 What does data science look like? Here is a short list of some examples, followed by a discipline that appears most relevant to the problem. 
 
@@ -42,7 +42,7 @@ One such tool that we will study is the programming language R. R has its roots 
 
 After completing the text, students will be able to keep running and modifying their notebooks with new data sources and ideas.
 
-## Package Installation
+## Package Installation {-}
 
 The bare-bones version of R, sometimes called *base* R, is complete but requires a bit more effort to write code for data analysis. People have developed code in R for serving certain purposes and have shared it as *packages*. Using packages is key to successful application of R; you can load a package someone else has written into your R programming environment and use it for your coding.
 
@@ -72,7 +72,7 @@ devtools::install_github("jerrybonnell/edsdata")
 
 We will see examples that use the `edsdata` package later in the text. For now, let us see an example of how to plot some data using code from the `tidyverse`. 
 
-### The world's telephones
+### The world's telephones {-}
 
 Base R ships with a number of off-the-shelf data sets you can play with. One of them is `WordPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
 
@@ -135,11 +135,11 @@ We call this one a *stacked bar chart*, which we will also see later. Every plot
 
 Can you spot some other differences between the two plots, especially in regards to what the visualizations say about the data?
 
-## Processing Text 
+## Processing Text {-}
 
 Here is another example where we play with a textual dataset. As before, do not pay attention to the details of the code and what it is doing. Rather, familiarize yourself with the output of each code "block" and observe how it builds up toward accomplishing the goal. 
 
-### The classics: Herman Melville's Moby Dick  
+### The classics: Herman Melville's Moby Dick {-}
 
 [The Gutenberg Project](http://www.gutenberg.org/) is an international project to provide literary texts in a variety of formats for public use. One of the main literary works the site offers is "Moby Dick" by Herman Melville. You can download from the website by providing its link.
 
@@ -200,7 +200,7 @@ knitr::kable(
 ```
 
 
-### Plotting word relationships 
+### Plotting word relationships {-}
 
 Now that we have the main text stored in tabular form, we are ready to do some analysis. Let us look at some associations between words in the text, for instance, between "ship" and "sea", and between "god" and "sea".
 
@@ -236,7 +236,7 @@ We see a strong association between "sea" and "ship" since chapters that mention
 
 Indeed, word counts can only take us so far. But they are a first step in the interpretative process. For instance, why does it seem that there is no relationship between the sea, where most of the action takes place, and religion, as exemplified by the occurrences of the word "god"? Machine-assisted analysis of texts in this manner, which extends well beyond word counts, has become so popular that an interdisciplinary field called [Digital Humanities](https://en.wikipedia.org/wiki/Digital_humanities)  has become dedicated to its study. 
 
-### A rough outline
+### A rough outline {-}
 
 Our two introductory examples have hopefully shown you a glimpse of what data science work looks like. Here is an outline of what you will learn in this textbook: 
 
@@ -247,11 +247,11 @@ Our two introductory examples have hopefully shown you a glimpse of what data sc
 
 We hope that you will find the journey interesting.
 
-## Setting Up a Workflow 
+## Setting Up a Workflow {-}
 
 RStudio is an integrated development environment (also known as an IDE) popularly used among data scientists for writing R code. It is a powerful tool that can be used to write and debug code, view visualizations, pull up documentation, write "notebooks", and much more which we will probably not get to see! In this section we will go over setting up RStudio on your machine. 
 
-### Posit Cloud and RStudio 
+### Posit Cloud and RStudio {-}
 
 There are two ways to work with R. The first option is Posit Cloud, a lightweight and cloud-based interface to RStudio. If you use Posit Cloud, you can code right from your favorite browser! However, because Posit Cloud is cloud-based, the code you write is not executed on your machine and, instead, uses someone else's computational resources. Posit Cloud offers a "free tier" that gives access to limited resources (1GB memory and 1 CPU per project) with 25 project hours/month. This should be sufficient for the examples and exercises covered in this text, but you may run up against the project hour quota. A paid tier is available that gives more project hours and computational power. We recommend Posit Cloud to students with older machines and anyone who prefers a zero-installation setup for getting started. Posit Cloud is available here:
 
@@ -262,7 +262,7 @@ The second option is to install R and RStudio Desktop directly to your system. T
 * R: https://cloud.r-project.org
 * RStudio: https://posit.co/download/rstudio-desktop/#download
 
-### Creating a RStudio Project 
+### Creating a RStudio Project {-}
 
 If you are working on Posit Cloud, navigate to your workspace and create a new RStudio project by clicking "New Project" and then "New RStudio Project". This should bring you into a RStudio environment. Once there, feel free to skip to the next section.  
 
@@ -282,7 +282,7 @@ In the input box that asks for a "Directory name", you can name it however you l
 
 When you are ready, go ahead and select `Create Project`. 
 
-### Meet RStudio 
+### Meet RStudio {-}
 
 You should now be presented with a view that looks like the following: 
 
@@ -319,7 +319,7 @@ Let us navigate to the __help tab__, which should be one or two tabs down from t
 
 An equivalent, and perhaps more straightforward, way of looking up documentation is right from the console. Just type in `?plot`, and hit enter.  
 
-### Organizing your work 
+### Organizing your work {-}
 
 We can create folders in our project to better organize our work. We recommend the following structure. You can use the `New Folder` button in the file explorer view to create these directories. 
 
@@ -334,7 +334,7 @@ This folder structure can be useful if you are taking a course that requires usi
 * `notes`, for your own notes. 
 * `project`, for working on projects.  
 
-### R markdown notebooks 
+### R markdown notebooks {-}
 
 R markdown notebooks allow users to intersperse code with prose in an intuitive manner. This is great to use in practice for sharing and communicating your work to peers.
 
@@ -358,7 +358,7 @@ If you navigate to the `notes` directory in the File Explorer (or wherever you c
 
 What RStudio did was take our R markdown file and convert it to a PDF using [LaTeX](https://en.wikipedia.org/wiki/LaTeX). Beneath each code block is the corresponding output, interspersed neatly with the surrounding prose -- all formatting taken care of for you :-)
 
-### Preferences settings 
+### Preferences settings {-}
 
 Before we end this tutorial, we also need to set two RStudio settings. This will help to avoid any heartache when working through this text. 
 
@@ -369,7 +369,7 @@ Open up `Preferences` in RStudio. Do the following in the `General` tab:
 
 This completes the setup! 
 
-## Exercises 
+## Exercises {-}
 
 Be sure to install and load the following packages into your R environment before beginning this exercise set.
 

@@ -1471,7 +1471,7 @@ with_election |>
 <br />
 For instance, this map reveals election results for the Tampa Bay and Brandenton areas.  
 
-## Case Study: Exploring the US Census 
+## Case Study: Exploring the US Census {-}
 
 The [United States Census Bureau](https://www.census.gov/) conducts a survey of the population in the United States called the US Census. The Center for Optimization and Data Science (CODS) in the Bureau supports data scientists by providing access to the survey results. 
 
@@ -1479,7 +1479,7 @@ In this section, we present a worked example of applying different data transfor
 
 As we will see, the difficulty of the work is not the tools themselves, but figuring out how to transform the data into the right forms at each step.  
 
-### Prerequisites
+### Prerequisites {-}
 
 We will make use of several packages in this section. 
 
@@ -1527,7 +1527,7 @@ census_api_key("YOUR API KEY", install = TRUE)
 
 Note the double quotation marks that surround the key. The second argument `install = TRUE` is necessary if you want to keep the key in your machine; with this option, you do not need to register the key again.
 
-### Census datasets
+### Census datasets {-}
 
 There are 20 census datasets available. The vector below gives the names of the different datasets.  
 
@@ -1542,7 +1542,7 @@ datasets <- c("sf1", "sf2", "sf3", "sf4", "pl",
 
 For example, the dataset `acs5` covers five years of survey data. A census survey is conducted through a survey form delivered to each house. Since the survey may miss some households and the response may be inaccurate, the published numbers are given as estimates with a corresponding "confidence interval". Confidence intervals are a statistical tool we will explore later; for now, just know that there is some level of uncertainty that corresponds to the values reported by the census. 
 
-### Census data variables
+### Census data variables {-}
 
 Each census dataset contains a series of variables. We can get a listing of these using the function `load_variables`, which returns a tibble containing the results. As of the writing of this textbook, the 2020 data is the latest dataset available for access so we set year to `2019`. 
 
@@ -1579,7 +1579,7 @@ acs1_variables_median_income <- acs1_variables |>
 acs1_variables_median_income
 ```
 
-### Loading a census dataset 
+### Loading a census dataset {-}
 
 Using a function `get_acs`, it is possible to query a census dataset over a five year span. The default range of years is (currently) 2016-2020. The arguments that can be specified for the query include:
 
@@ -1667,7 +1667,7 @@ fl_races_county <- get_acs(
 fl_races_county
 ```
 
-### Incorporating shape data 
+### Incorporating shape data {-}
 
 When the option `geometry = TRUE` is included at the query call, the output includes additional "shape" information of each geographical area. Let us modify the racial composition query so that we can supply this geometry argument. 
 
@@ -1735,7 +1735,7 @@ with_race_percent <- with_race_percent |>
   inner_join(race_variables, by = c("variable" = "name"))
 ```
 
-### Choropleth maps for racial composition
+### Choropleth maps for racial composition {-}
 
 We can generate a choropleth map of the six racial groups. Note that the titles of each figure are an aid to understand the variable visualized and are based on the truncated concept names developed earlier.
 
@@ -1751,7 +1751,7 @@ with_race_percent |>
 
 The visualization points out that "Whites alone" form the bulk of the racial composition proportion across the state. We can also observe that "Hispanics or Latino" see significant representation in South and Central Florida and "Black or African American alone" in Northern Florida.    
 
-### Visualizing net tuition disparity
+### Visualizing net tuition disparity {-}
 
 In this next segment of the exploration, we overlay the US census data in Florida with the net tuition education data analyzed in Section 4.7. That way, we can explore questions like the difference between net tuition and median family income, say, at the ZIP code level. This step assumes the `tuition_tidy` has already been formed and is available in your R environment. 
 

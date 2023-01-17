@@ -1220,11 +1220,11 @@ trouble_temps |>
 ```
 
 
-## Case Study: Tidy Assessments
+## Case Study: Tidy Assessments {-}
 
 In this section, we present a larger dataset and apply transformations that are necessary to bring it into tidy data to facilitate further analysis. The goal of this exercise is to demonstrate how the transformations we have learned in this chapter are not tools meant to be used in isolation, but work best when used together to fulfill a complex goal.  
 
-### Prerequisites
+### Prerequisites {-}
 
 As always, we will need the `tidyverse` to accomplish our task. We will also load in the `edsdata` package that contains the datasets we will be working with. 
 
@@ -1233,7 +1233,7 @@ library(tidyverse)
 library(edsdata)
 ```
 
-### The tibbles `csc_course_lab`, `csc_course_hw`, and `csc_course_qz`
+### The tibbles `csc_course_lab`, `csc_course_hw`, and `csc_course_qz` {-}
 
 We will examine three datasets that contain assessment results from a hypothetical introductory course in Computer Science. These datasets come from the `edsdata` package.
 
@@ -1270,7 +1270,7 @@ Once we have tided the data, we would like to answer the following questions:
 
 We will address each of these in turn. 
 
-### Joining like data together 
+### Joining like data together {-}
 
 To resolve the first problem, we should merge the data from each of the three tibbles into one single tibble. We know how to do this using the *join* operation.
 
@@ -1285,7 +1285,7 @@ csc_course_merged
 
 Note that even though we used `inner_join` here, the resulting tibble would have been the same if we had used any of the other styles of join. Why might that be? 
 
-### Addressing missing data 
+### Addressing missing data {-}
 
 Now that we have the data in a single table, we can address the problem of missing data. As we noted earlier, the missing values have a meaning in the dataset: the student did not turn in the associated assessment. The appropriate way to handle this is to substitute each missing value with a 0 -- sorry folks!  
 
@@ -1299,7 +1299,7 @@ csc_course_merged
 
 Missing values, begone! 
 
-### Scaling scores to the same point scale 
+### Scaling scores to the same point scale {-}
 
 Next, we turn to scaling the points so that everything is on the 100 point scale. To accomplish this, we need to convert all of the labs and homeworks column from a 10 point to a 100 point scale. 
 
@@ -1322,7 +1322,7 @@ csc_course_merged
 
 Note that the function `matches("lab")` looks for all columns that have the name `"lab"` in it, which will return the twelve lab columns. Ditto `matches("hw")` and the homework columns. 
 
-### Pivoting 
+### Pivoting {-}
 
 We will now resolve our fourth stated problem. To overcome this, we can use the *pivot* transformation so that the three variables become apparent in the table: `number`, `assessment`, and `score`. 
 
@@ -1360,7 +1360,7 @@ csc_course_merged
 
 Looks great! Let us finish by answering some questions about the data. 
 
-### The good stuff: summarizing information  
+### The good stuff: summarizing information {-} 
 
 We are now ready to answer some of the questions we proposed at the outset of this section. Our first question: what is average lab, homework, and quiz score for each of the students; what are the overall averages for the class? 
 
@@ -1402,11 +1402,11 @@ csc_summary |>
 
 You can imagine how such an analysis could be useful when used mid-semester -- we could check in with those students to investigate further.
 
-## Case Study: Exploring the College Scorecard
+## Case Study: Exploring the College Scorecard {-}
 
 Before closing the chapter, we present one more application of data transformation techniques in a real-world setting. This time, we turn to a much larger dataset and appeal to the [annual College Scorecard](https://collegescorecard.ed.gov) published by the Department of Education on recent institution-level data. We will use this dataset to explore the average annual cost of attending public and private institutions in the Miami area. 
 
-### Prerequisites
+### Prerequisites {-}
 
 As before, let us load `tidyverse`. 
 
@@ -1425,7 +1425,7 @@ The information is divided into small specific categories. Have a look at the [a
 
 Indeed, the number of variables present in this dataset is very large (2,989) and certainly beyond any inspection we could accomplish by hand.
 
-### Net Tuition of Four-Year Institutions in Miami
+### Net Tuition of Four-Year Institutions in Miami {-}
 
 We will concentrate specifically on variables that correspond to the average *net price* for students who receive some kind of financial aid for one year of academic study. Therefore, we will collect the following from the large number of variables present in the dataset: 
 
@@ -1452,7 +1452,7 @@ For the purposes of this analysis, we would like to perform the following to bri
 * Filter down the institutions to those that are based in Miami. 
 * Create a dedicated column that expresses whether the institution is private or public. 
 
-### Handling missing values 
+### Handling missing values {-}
 
 We would like to focus only on those institutions that have a recorded four-year net tuition (public or private). We would expect, then, to be able to eliminate the observations that do not by keeping only those observations where a missing value is *not* present in one of the two net tuition variables (`NPT4_PUB` and `NPT4_PRIV`). 
 
@@ -1501,7 +1501,7 @@ with_net_tuition <- scorecard_relevant |>
 with_net_tuition
 ```
 
-### ZIP code information 
+### ZIP code information {-}
 
 We turn to cleaning the ZIP code information in the dataset. Let us examine some of these ZIP codes in `ZIP`: 
 
@@ -1536,7 +1536,7 @@ with_clean_zip <- with_net_tuition |>
 with_clean_zip
 ```
 
-### Uniting the tuition columns  
+### Uniting the tuition columns  {-}
 
 Next, we unite the net tuition columns together into a single new column named `NPT4`. We can accomplish this work using the `tidyr` verb `unite`.
 
@@ -1558,7 +1558,7 @@ tuition_tidy
 ```
 
 
-### ZIP code versus net tuition 
+### ZIP code versus net tuition {-}
 
 With our tibble in tidy format, we are ready to use it for data analysis. We are interested in learning more about the following:
 

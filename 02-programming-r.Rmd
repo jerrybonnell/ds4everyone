@@ -19,13 +19,13 @@ Some of these steps are quite mechanical or cumbersome, and may repeat the same 
 
 However, to err is human. So how can you minimize the chance of those errors occurring? That's where computer programming come to the rescue.
 
-## A Fast History of Computing
+## A Fast History of Computing {-}
 
 A computer program is a sequence of characters with which to tell a computer how to perform its task. The history of computers is kind of long. Early in the 1800s, Charles Babbage invented a machine for calculation, calling it the ["Difference Engine"](https://www.computerhistory.org/babbage/engines/). Ada Lovelace, a daughter of English poet Lord Byron, collaborated with Babbage to develop ideas about what the engine could compute beyond addition and multiplication.
 
 Several attempts to build such mechanical systems to perform calculation had emerged until the first half of the 1900s during which a series of innovations resulted in the invention of "computers". The new inventions used electricity as the source of energy, vacuum tubes for regulating electrical currents, separation between the "brain" that is responsible for computation and the storage for holding the final and intermediate results of computation, and punch cards for defining the calculation steps to follow.
 
-### Programming languages and scripting languages
+### Programming languages and scripting languages {-}
 
 In the early days of modern computing, programmers had to provide instructions to computers using languages specific to the computers. However, as new computers emerged and the number of computers in use grew, there arose a need for languages that programmers can use in describing the instructions.
 
@@ -37,7 +37,7 @@ Many types of programming languages exist. One type is the *scripting language*.
 
 A *line* of a program is a sequence of characters which is syntactically complete according to the syntax of the language. In scripting language programming, a programmer completes writing of a line by pressing the *return key* (and the like), and then the environment immediately parses the line the programmer has entered regarding the syntax of the language and performs any action the line expresses.
 
-### Programming in R
+### Programming in R {-}
 
 We will use the programming language [R](https://www.r-project.org/) in this text. There are four major reasons to choose R as our language.
 
@@ -46,7 +46,7 @@ We will use the programming language [R](https://www.r-project.org/) in this tex
 * R comes with dozens of datasets that you play with.
 * There exists an easy-to-install R programming environment [RStudio](https://rstudio.com/products/rstudio/download/), where not only can you write code but also can create notebooks in which R code and prose alternate.
 
-## First Steps: Expressions
+## First Steps: Expressions {-}
 
 In R, executable "lines" must conform to the syntax of the language. If a programmer enters a syntactically incorrect line, the environment usually issues an "error message" with some information about why the line failed.
 
@@ -56,7 +56,7 @@ A line of an R code consists of what we call *expressions*. Several types of exp
 
 Let us begin with the simple ones: numerals and arithmetic expressions.
 
-### Numerical literals
+### Numerical literals {-}
 
 *Numerical literals* are expressions of numbers with exact specifications of their values. There is no ambiguity in the expressions.
 
@@ -84,7 +84,7 @@ A slight detail that you may want to keep in mind is that each value carries a f
 
 The value turns out to be slightly off! 
 
-### Arithmetic expressions
+### Arithmetic expressions {-}
 
 You can construct mathematical expressions combining numerical literals and mathematical operators `+`, `-`, `*`, and `/` as we use in mathematics. Also, `^` represents exponentiation.
 
@@ -140,7 +140,7 @@ Here is an example that shows the difference of having parentheses in the expres
 2 + (3 * 4 * 5 / 6) ** 2
 ```
 
-### Giving names to results
+### Giving names to results {-}
 
 When you enter a mathematical expression like the one we presented in the above, R responds by printing the value resulting from its evaluation of the expression, but you cannot recall the value. Meaning, we can easily compute the value of the following expression. 
 
@@ -190,7 +190,7 @@ a_tasty_pie
 
 A name may not contain spaces or start with a numeral.
 
-### Using objects in expressions 
+### Using objects in expressions {-}
 
 When an R environment evaluates an expression and encounters a name, it tries to see whether an object by the name exists and, if so, substitutes all of its occurrences in the expression with the present value of the object. 
 
@@ -204,7 +204,7 @@ If the object cannot be found, the environment produces an error message.
 a <- barnie * 3
 ```
 
-### Expressions and R notebook gotchas 
+### Expressions and R notebook gotchas {-}
 
 There are a few gotchas that you should be aware of when working with expressions in a R notebook environment. We  illustrate these issues by example. 
 
@@ -280,7 +280,7 @@ Therefore, you should __avoid executing code chunks out-of-order as much as poss
 
 One benefit of *knitting* is that the knitting process always clears the R environment and runs code chunks top-down. If the knitting process ever picks up an error, there is likely one or more code chunks that are dependent on out-of-order execution! Be careful with this! 
 
-### Function calls
+### Function calls {-}
 
 Another type of expression is a *function*, which has the same meaning as the *functions* you learned in math class: something that takes some input, does something with it, and produces an output. In R, a function is an object which takes a certain number of objects/values for its execution. 
 
@@ -324,7 +324,7 @@ min(1, 2, 3, 4, 5, 6)
 
 These functions accept any number of arguments.
 
-### Example: Pay your debt!
+### Example: Pay your debt! {-}
 
 You may have heard from friends and family the importance of paying debt. You can use R to do a hypothetical calculation of how quickly your debt would accumulate if you do not pay it.
 
@@ -412,7 +412,7 @@ In other words, we obtain the conclusion:
 
 6% does not sound like a significant amount if the principal is small, but what if the principal is 20,000 dollars? Try it out!
 
-## R Packages
+## R Packages {-}
 
 The designers of R had statistical computing in mind. Because of the motivation, many mathematical functions are available as we have seen in the above. There are also, as mentioned earlier, groups of codes that you can use when necessary. We call these *packages*. Here is a list of [R packages](https://cran.r-project.org/web/packages/available_packages_by_name.html); the list is quite long.
 
@@ -435,7 +435,7 @@ install.packages("tidyverse")
 library(tidyverse)
 ```
 
-### What is the `tidyverse`?
+### What is the `tidyverse`? {-}
 
 The [tidyverse](https://www.tidyverse.org) is a collection of packages, each having to do with data processing, transformation, and visualization. The packages in the suite include:
 
@@ -451,7 +451,7 @@ The list seems quite long, but don't worry; we will introduce them gradually thr
 
 Note that once we have loaded the tidyverse, we can call any of the functions from the individual packages. 
 
-## Exercises 
+## Exercises {-}
 
 Be sure to install and load the following packages into your R environment before beginning this exercise set.
 
