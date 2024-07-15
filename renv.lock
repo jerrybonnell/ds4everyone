@@ -765,6 +765,21 @@
       ],
       "Hash": "1046cb48d06cb40c2900d8878f03a0fe"
     },
+    "edsdata": {
+      "Package": "edsdata",
+      "Version": "0.0.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "edsdata",
+      "RemoteUsername": "jerrybonnell",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "0c8db282e1bd6ebcfc660069a320d5e258568964",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "9dfccbfa4ae29e55c5b55d7108c28e33"
+    },
     "ellipsis": {
       "Package": "ellipsis",
       "Version": "0.3.2",
