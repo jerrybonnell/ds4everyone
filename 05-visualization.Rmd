@@ -1497,7 +1497,7 @@ library(edsdata)
 scorecard_relevant <- scorecard_fl |>
   select(INSTNM:NPT4_PRIV) 
 with_net_tuition <- scorecard_relevant |>
-  mutate(across(everything(), function(x) na_if(x, "NULL"))) |> 
+  mutate(across(where(is_character), function(x) na_if(x, "NULL"))) |> 
   filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) |>
   mutate(NPT4_PUB = as.double(NPT4_PUB),
          NPT4_PRIV = as.double(NPT4_PRIV))

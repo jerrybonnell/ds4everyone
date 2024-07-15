@@ -1476,11 +1476,11 @@ scorecard_relevant |>
 
 The College Scorecard chooses to present missing values in a non-standard form using the special string `"NULL"`. While human users of this table will have no trouble understanding the meaning of this keyword, R is unable to distinguish `"NULL"` from any other string that may be present. Therefore, as far as our `dplyr` code is concerned, there are no "missing values" in this dataset.  
 
-We can remedy the problem by converting all instances of `"NULL"` to proper missing values so that these can be detected appropriately by our `dplyr` verbs. The function we use is `na_if`, which is similar to the `replace_na` function shown earlier. 
+We can remedy the problem by converting all instances of `"NULL"` that may appear in a string column to proper missing values so that these can be detected appropriately by our `dplyr` verbs. The function we use is `na_if`, which is similar to the `replace_na` function shown earlier. Note that this transformation is applied specifically to all string columns using the helper `dplyr` verb `where`. 
 
 ```{r}
 scorecard_relevant <- scorecard_relevant |>
-  mutate(across(everything(), \(x) na_if(x, "NULL")))
+  mutate(across(where(is_character), \(x) na_if(x, "NULL")))
 ```
 
 By running our prior code chunk again, the irrelevant institutions are now properly removed. 
@@ -1494,7 +1494,7 @@ We can combine our steps to form a strategy for handling missing values in this 
 
 ```{r}
 with_net_tuition <- scorecard_relevant |>
-  mutate(across(everything(), \(x) na_if(x, "NULL"))) |> 
+  mutate(across(where(is_character), \(x) na_if(x, "NULL"))) |> 
   filter(!is.na(NPT4_PUB) | !is.na(NPT4_PRIV)) |>
   mutate(NPT4_PUB = as.double(NPT4_PUB),
          NPT4_PRIV = as.double(NPT4_PRIV))

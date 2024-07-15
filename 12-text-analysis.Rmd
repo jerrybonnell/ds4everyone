@@ -47,17 +47,18 @@ library(gutenbergr)
 
 To learn about tidy text, we need a subject for study. We will return to Herman Melville's epic novel [*Moby Dick*](http://www.gutenberg.org/ebooks/15), which we worked with briefly in Chapter 1. Since this work is in the public domain, we can use the `gutenbergr` package to download the text from the Project Gutenberg database and load it into R. 
 
-We can use the function `gutenberg_works` to confirm that [*Moby Dick*](http://www.gutenberg.org/ebooks/15) is indeed in the database and fetch its corresponding Gutenberg ID. 
+We can reference the tibble `gutenberg_metadata` to confirm that [*Moby Dick*](http://www.gutenberg.org/ebooks/15) is indeed in the database and fetch its corresponding Gutenberg ID. Here, we look up all texts available in the repository that have been authored by Melville.
 
 ```{r}
-gutenberg_works(title == "Moby Dick")
+gutenberg_metadata |>
+  filter(author == "Melville, Herman")
 ```
 
 Using its ID `15`, we can proceed with retrieving the text into a variable called `moby_dick`. Observe how the data returned is in the form of a tibble -- a format we are well familiar with -- with one row per each line of the text.  
 
 ```{r message=FALSE}
 moby_dick <- gutenberg_download(gutenberg_id = 15, 
-                  mirror = "http://mirrors.xmission.com/gutenberg/")
+                  mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
 moby_dick
 ```
 
@@ -246,7 +247,7 @@ We will study Herman Melville's works again in this section. However, unlike bef
 
 ```{r message=FALSE}
 melville <- gutenberg_download(c(11231, 15, 10712, 1900), 
-              mirror = "http://mirrors.xmission.com/gutenberg/")
+              mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
 ```
 
 We will tidy it up as before and filter the text for stopwords. We will also add one more step to the preprocessing where we extract words that are strictly alphabetical. This is accomplished with a `mutate` call using `str_extract` and the regular expression `[a-z]+`.  
@@ -378,6 +379,10 @@ We end this chapter with a preview of an advanced technique in text analysis kno
 
 Let us load in the main packages we have been using throughout this chapter. We will also need one more package this time, `topicmodels`, which has the functions we need for topic modeling. 
 
+```{r echo = FALSE}
+set.seed(1000)
+```
+
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
 library(tidytext)
@@ -389,7 +394,7 @@ We will continue with our running example of Herman Melville's *Moby Dick*. Let 
 
 ```{r message=FALSE}
 melville <- gutenberg_download(15, 
-              mirror = "http://mirrors.xmission.com/gutenberg/")
+              mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
 ```
 
 We will tidy the text as usual and, this time, partition the text into chapters. 
@@ -412,9 +417,11 @@ Since topic modeling is the subject of this section, let us see if we can apply 
 We begin as always: loading the texts, tidying them, splitting according to chapter, and filtering out preface material. Let us start with Whitman's *Leaves of Grass*.
 
 ```{r}
-whitman <- gutenberg_works(title == "Leaves of Grass") |>
+whitman <- gutenberg_metadata |> 
+  filter(title == "Leaves of Grass") |>
+  first() |>
   gutenberg_download(meta_fields = "title", 
-    mirror = "http://mirrors.xmission.com/gutenberg/")
+    mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
 ```
 
 ```{r}
@@ -430,9 +437,11 @@ Note that we have adjusted the regular expression here so that it is appropriate
 On to Hawthorne's *The Scarlet Letter*. 
 
 ```{r}
-hawthorne <- gutenberg_works(title == "The Scarlet Letter") |>
+hawthorne <- gutenberg_metadata |>
+  filter(title == "The Scarlet Letter") |>
+  first() |>
   gutenberg_download(meta_fields = "title", 
-    mirror = "http://mirrors.xmission.com/gutenberg/")
+    mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
 ```
 
 ```{r}
@@ -670,14 +679,15 @@ library(topicmodels)
 **Question 1. Jane Austen Letters** Jane Austen (December 17, 1775 - July 18, 1817) was an English novelist. Her well-known novels include "Pride and Prejudice" and "Sense and Sensibility". The Project Gutenberg has all her novels as well as a collection of her letters. The collection, "The Letters of Jane Austen, " is from the compilation by her great nephew "Edward Lord Bradbourne".
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE}
-gutenberg_works(author == "Austen, Jane")
+gutenberg_metadata |>
+  filter(author == "Austen, Jane")
 ```
 
 The project ID for the letter collection is 42078. Using the ID, load the project text as `austen_letters`.
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE}
 austen_letters <- gutenberg_download(gutenberg_id = 42078,
-  "http://mirrors.xmission.com/gutenberg/")
+  "http://mirror.csclub.uwaterloo.ca/gutenberg")
 austen_letters
 ```
 
