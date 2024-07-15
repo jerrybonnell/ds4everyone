@@ -82,11 +82,11 @@ regex <- "^CHAPTER "
 ```
 
 ```{r message=FALSE}
-str_view_all("CHAPTER CXVI. THE DYING WHALE", regex) # match
+str_view("CHAPTER CXVI. THE DYING WHALE", regex) # match
 ```
 
 ```{r message=FALSE}
-str_view_all("Beloved shipmates, clinch the last verse of the
+str_view("Beloved shipmates, clinch the last verse of the
 first chapter of Jonah—", regex)  # no match
 ```
 
@@ -378,10 +378,6 @@ We end this chapter with a preview of an advanced technique in text analysis kno
 ### Prerequisites
 
 Let us load in the main packages we have been using throughout this chapter. We will also need one more package this time, `topicmodels`, which has the functions we need for topic modeling. 
-
-```{r echo = FALSE}
-set.seed(1000)
-```
 
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)

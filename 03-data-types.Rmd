@@ -818,7 +818,7 @@ The following function is a helpful diagnostic tool to view matched patterns.
 
 | **Function**               | **Description**                              |
 |----------------------------|----------------------------------------------|
-| `str_view_all(x, pattern)` | Visualizes all pattern matches in vector `x` |
+| `str_view(x, pattern)` | Visualizes all pattern matches in vector `x` |
 
 ## Lists
 
@@ -995,10 +995,10 @@ So, the syntax is:
 * use the caret `"\^"` and the dollar sign to specify the start and the end of string, respectively
 * use `\*` to specify any number of repetitions, including 0 repetitions.
 
-A useful diagnostic tool to visualize matches against a pattern is the function `str_view_all`, which highlights any matches hit by the regular expression. For instance: 
+A useful diagnostic tool to visualize matches against a pattern is the function `str_view`, which highlights any matches hit by the regular expression. For instance: 
 
 ```{r warning=FALSE, message=FALSE}
-str_view_all(s, "[aeiou].[aeiou]", html = TRUE)
+str_view(s, "[aeiou].[aeiou]", html = TRUE)
 ```
 
 In the square brackets you can specify a range using a dash and the caret to mean "not".
@@ -1229,7 +1229,7 @@ We can extract this by looking for the *last* occurrence of the dash (`-`).
 Here they are:
 
 ```{r warning=FALSE, message=FALSE}
-str_view_all(birds, "-", html=TRUE)
+str_view(birds, "-", html=TRUE)
 ```
 
 The `str_locate_all` function can tell us the starting and ending positions of all occurrences of the dash.
