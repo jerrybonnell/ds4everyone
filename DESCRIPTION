@@ -17,6 +17,7 @@ Imports:
   faraway,
   nycflights13,
   htmlwidgets,
+  NHANES,
   tidytext,
   mapview,
   patchwork,
