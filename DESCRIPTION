@@ -37,6 +37,7 @@ Imports:
   lterdatasampler,
   tidycensus,
   tigris,
+  downlit,
   quanteda,
   topicmodels,
   datasauRus,
