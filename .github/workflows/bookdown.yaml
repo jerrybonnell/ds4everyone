@@ -28,6 +28,7 @@ jobs:
         run: |
           sudo apt-get install libgdal-dev
           sudo apt-get install libudunits2-dev
+          sudo apt-get install build-essential libpoppler-cpp-dev pkg-config python-dev
 
       - uses: r-lib/actions/setup-renv@v2
 
