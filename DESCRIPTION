@@ -25,6 +25,7 @@ Imports:
   tm,
   gridExtra,
   reshape2,
+  lterdatasampler,
   quanteda,
   topicmodels,
   datasauRus,
