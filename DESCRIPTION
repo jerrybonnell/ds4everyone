@@ -8,6 +8,11 @@ Authors@R:
 Imports:
   tidyverse,
   tidymodels,
+  bookdown,
+  gutenbergr,
+  triebeard,
+  urltools,
+  xaringan,
   svglite,
   pdftools,
   kableExtra,
