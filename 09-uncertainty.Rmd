@@ -636,14 +636,12 @@ With this information, we perform some basic preprocessing of the data:
 * Create a new Boolean variable `healthy_sleep` that indicates whether a participant gets a healthy amount of sleep. 
 
 ```{r}
-# BEGIN SOLUTION
 NHANES_relevant <- NHANES |>
   drop_na(c(SleepHrsNight)) |>
   filter(between(Age, 18, 60)) |> 
   mutate(healthy_sleep = between(SleepHrsNight, 7, 9)) |>
   relocate(healthy_sleep, .before = SurveyYr)
 NHANES_relevant
-# END SOLUTION
 ```
 
 We can inspect the resulting table. Note that there are 5,748 observations in the tibble.

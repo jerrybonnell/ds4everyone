@@ -654,9 +654,9 @@ chapter_label |>
 
 ### The glue: Digital Humanities 
 
-Sometimes "errors" when a model goes wrong can be more revealing than where it found success. The conflation we see in some of the *Moby Dick* chapters with *The Scarlet Letter* and *Leaves of Grass* points to a connection among the three authors. In fact, Melville and Hawthorne shared [such a close writing relationship](https://scholarworks.boisestate.edu/cgi/viewcontent.cgi?article=1164&context=mcnair_journal) that it was Hawthorne's influence on Melville that led him to evolve *Moby Dick* from adventure tale into a creative, philosophically rich story. So it is interesting to see so many of the *Moby Dick* chapters mislabeled as *The Scarlet Letter*.  
+Sometimes "errors" when a model goes wrong can be more revealing than where it found success. The conflation we see in some of the *Moby Dick* chapters with *The Scarlet Letter* and *Leaves of Grass* points to a connection among the three authors. For instance, Melville and Hawthorne shared [such a close writing relationship](https://scholarworks.boisestate.edu/cgi/viewcontent.cgi?article=1164&context=mcnair_journal) that some scholars posit that Hawthorne's influence on Melville led him to evolve *Moby Dick* from adventure tale into a creative, philosophically rich story. So it is interesting to see several of the *Moby Dick* chapters mislabeled as *The Scarlet Letter*.  
 
-This connection between data and interpretation is the impetus for a field of study known as [Digital Humanities](https://en.wikipedia.org/wiki/Digital_humanities) (DH). While the text analysis techniques we have covered in this chapter can produce exciting results, they are worth little without context. That context, the authors would argue, is made possible by the work of DH scholars.    
+This connection between data and interpretation is the impetus for a field of study known as [Digital Humanities](https://en.wikipedia.org/wiki/Digital_humanities) (DH). While the text analysis techniques we have covered in this chapter can produce exciting results, they are worth little without situating these in context. That context, the authors would argue, is made possible by the work of DH scholars.    
 
 ### Further reading
 
