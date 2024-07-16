@@ -37,6 +37,10 @@ We will continue making use of the tidyverse in this chapter, so let us load tha
 * The `tidytext` package, which contains the functions we need for working with tidy text and to make text tidy. 
 * The `gutenbergr` package, which allows us to search and download public domain works from the [Project Gutenberg](http://www.gutenberg.org/) collection. 
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+stringi::stri_locale_set("en_US")
+```
+
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
 library(tidytext)
