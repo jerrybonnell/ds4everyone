@@ -354,7 +354,7 @@ Note the pattern in the fill strength of points as dictated by `eff_type` -- the
 
 ## Line and Smooth Geoms
 
-In the last section we introduced scatter plots and how to interpret them using `ggplot` with the point geom. In this section we introduce two new geoms, the point and smooth geoms, to build another (hopefully familiar) visualization: the line chart.    
+In the last section we introduced scatter plots and how to interpret them using `ggplot` with the point geom. In this section we introduce two new geoms, the line and smooth geoms, to build another (hopefully familiar) visualization: the line chart.    
 
 ### Prerequisites
 
@@ -689,7 +689,7 @@ Note how we provide both `x` and `y` aesthetics when using the `identity` stat.
 
 ### Dealing with categorical variables
 
-Let us turn to the `happy` data frame. We can consider the *categories* to be points on the 10-point scale, and the *individuals* the students in each interval. Let us determine this distribution using `group_by` and `sumarrize`.
+Let us turn to the `happy` data frame. We can consider the *categories* to be points on the 10-point scale, and the *individuals* the students in each interval. Let us determine this distribution using `group_by` and `summarize`.
 
 Below, we take the `happy` data set and execute grouping by `happy`. The category for the happy value is `happiness` in this new dataset `happy_students`. We summarize in terms of the counts `n()` and we state the count as an attribute `number`.
 

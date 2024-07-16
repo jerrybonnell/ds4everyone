@@ -142,7 +142,7 @@ corr_tibble |>
             y_su = scale(y)) 
 ```
 
-We weill modify the above code to add one more column, `prod`, that takes the product of the columns `x_su` and `y_su`. We will also save the resulting tibble to a variable called `linear_df_standard`.
+We will modify the above code to add one more column, `prod`, that takes the product of the columns `x_su` and `y_su`. We will also save the resulting tibble to a variable called `linear_df_standard`.
 
 ```{r}
 linear_df_standard <- corr_tibble |> 

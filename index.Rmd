@@ -27,7 +27,7 @@ This is the first edition of "Exploring Data Science with R and the Tidyverse: A
 
 This textbook was originally developed to teach the courses *Data Science for the World* (CSC100/CSC113) and *Introduction to Data Science in R* (CSC200) at the University of Miami in Fall 2021 and Fall 2022.
 
-The online version of the text will be updated regularly. You don't have to wait until the next edition for errors to be resolved or new methods to be discussed. Helpful readers have let us know of any typos or errors they found. Please continue to [let us know](https://forms.gle/c3YgzCPkk3HQx7b2A) about such things.
+The online version of the text is updated regularly. Helpful readers have let us know of any typos or errors they found in past versions. Please continue to [let us know](https://forms.gle/c3YgzCPkk3HQx7b2A) about such things.
 
 __Colophon__
 

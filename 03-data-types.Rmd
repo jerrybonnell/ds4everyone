@@ -951,7 +951,7 @@ Here are some examples of regular expressions and how one of the `stringr` funct
 The function `str_detect` receives two arguments.
 The first is a string (or a string vector) and the second is the pattern.
 The function returns for each element in the vector, whether the pattern appears.
-Let us first define a string vector with the five elements.
+Let us first define a string vector with the six elements.
 
 ```{r}
 s <- c("May 17, 2019", "Certified mail", "FL 33333", 

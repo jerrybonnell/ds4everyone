@@ -1043,17 +1043,17 @@ The error, actually, is not in anything we wrote *per se*, but in how R *process
 
 While this was no problem for the `wt_conversion` function, `cutoff_400` is not capable of handling a *vector* as an argument *and* returning a *vector* back. 
 
-To clarify the point, compare the result of these two functions after receiving the vector `395:410`. 
+To clarify the point, compare the result of these two functions after receiving the vector `399:405`. 
 
 ```{r}
 wt_conversion(399:405)
 ```
 
 ```{r}
-cutoff_400(398:405)
+cutoff_400(399:405)
 ```
 
-`wt_conversion` performs an element-wise operation to each element of the sequence and, therefore, the first example works as intended. In the second, `cutoff_400` computes the minimum of the vector (398) and returns the result of just that computation; no element-wise comparison is made. 
+`wt_conversion` performs an element-wise operation to each element of the sequence and, therefore, the first example works as intended. In the second, `cutoff_400` computes the minimum of the vector (399) and returns the result of just that computation; no element-wise comparison is made. 
 
 To make `cutoff_400` work as intended, we turn to a new programming construct called the *map*, prepared by the package [purrr](https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf). 
 
@@ -1069,7 +1069,7 @@ The main construct we will be using from `purrr` is called the *map*. A map appl
 * `map_chr()` outputs a character vector.
 * `map()` outputs a list.
 
-Here are some more examples of using map. Let us apply the `wt_conversion` to an input vector containing a sequence of values from 95 to 105. 
+Here are some more examples of using map. Let us apply the `wt_conversion` to an input vector containing a sequence of values from 399 to 405. 
 
 ```{r}
 map_dbl(399:405, wt_conversion)
@@ -1127,7 +1127,7 @@ knitr::include_graphics('images/csc100-Page-2.drawio.png')
 
 Note that the use of map allows a vector to be returned by the `cutoff_400` function, which can then be used as a column in the `mutate` call. 
 
-__Pop quiz:__ In our two examples of applying a function to `wt` and `disp`, the new tibble (stored in `mtcars_transformed`) lost information about the values of `wt` and `disp` before the transformation. How could we amend our examples to still preserve the old information in case we would like to make comparisons between the before and after?  
+__Pop quiz:__ In our two examples of applying a function to `wt` and `disp`, the new tibble (stored in `mtcars_transformed`) lost information about the values of `wt` and `disp` before the transformation. How could we amend our examples to still preserve the original information in case we would like to make comparisons between the before and after?  
 
 ## Handling Missing Values
 

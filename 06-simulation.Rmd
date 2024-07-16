@@ -988,7 +988,7 @@ By combining all of these for the 23 students, we have that the number of possib
 
 
 \[
-365 \cdot 364 \cdot 363 \cdot \cdots \cdot 353.
+365 \cdot 364 \cdot 363 \cdot \cdots \cdot 343.
 \]
 
 
