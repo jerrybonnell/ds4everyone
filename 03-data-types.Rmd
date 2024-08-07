@@ -701,7 +701,7 @@ greetings == "hello"
 sum(greetings == "hello")
 ```
 
-### Functions on vectors
+### Functions on numeric vectors
 
 R provides programmers with convenient and powerful functions for creating and manipulating vectors.
 
@@ -729,7 +729,6 @@ diff(temps)
 ```
 
 Following are some more commonly used functions that work over vectors.
-The list includes many functions that we have not gone over yet, especially those that work on *character* vectors.
 Learning this vocabulary is an important part of learning R, so refer to this list often as you work through examples and problems.
 
 Please note: you **do NOT need to memorize these**!
@@ -766,8 +765,74 @@ Each of these functions takes some vector `x` as an argument and returns a vecto
 | `sort(x)`     | Sort the elements                                                   |
 +---------------+---------------------------------------------------------------------+
 
-The `stringr` package from the tidyverse provides us a collection of useful functions for working with character vectors.
-A full cheat sheet can be found [here](https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf), but listed here are some of the commonly used ones.
+### Working with character vectors {-} 
+
+The `stringr` package from the tidyverse provides us a collection of useful functions for working with character vectors. Here, we show some examples. We will study these in greater detail in a following section. 
+
+The name `letters` is a part of `stringr` and is a character vector containing the letters of the English alphabet.    
+
+```{r}
+letters
+```
+
+We saw in a previous section that the function `str_c` concatenates strings together. It can also be used element-wise to append some string to each element of a character vector. 
+
+```{r}
+str_c(letters, "end")
+```
+
+As we will see, all `stringr` functions can be used element-wise. 
+
+When the `collapse` argument is set, `str_c` combines output into a single string. By setting it to the empty string (`""`), the `letters` vector can be collapsed into one continuous string. 
+
+```{r}
+alphabet_string <-str_c(letters, collapse = "")
+alphabet_string
+```
+
+The `str_length` function inquires the length of a string.
+
+```{r}
+str_length(alphabet_string)
+```
+
+That's the number of characters in the English alphabet!  
+
+When used element-wise, the function outputs the length of each string in a vector. 
+
+```{r}
+str_length(letters)
+```
+
+A similar function, `str_count`, counts the occurrence of some pattern. We can confirm that only one "b" exists in the English alphabet. 
+
+```{r}
+str_count(letters, "b")
+```
+
+We could replace the lowercase "b" with its uppercase counterpart. We first generate a Boolean vector that selects elements from `letters` that are equal to "b" and then provide the replacement with an assignment. 
+
+```{r}
+letters[letters == "b"] <- str_to_upper("b")
+letters
+```
+
+Alternatively, the `stringr` function `str_replace_all` can be used to provide one or more replacements.
+
+```{r}
+str_replace_all(alphabet_string, c("b" = "B", "c" = "C"))
+```
+
+The `stringr` function `str_split` divides a string into multiple segments. For example, it can split the alphabet string into two parts at the letter "g". 
+
+```{r}
+str_split(alphabet_string, "g")
+```
+
+The output returned is in the form of a *list*, which we haven't seen before! We will cover lists in the next section.
+
+A full cheat sheet of `stringr` functions can be found [here](https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf), but listed below are some of the commonly used ones. The list includes several functions that we have not gone over yet.
+
 Following are functions that take a character vector `x` as an argument and return a vector.
 
 | **Function**      | **Description**                                           |
@@ -789,7 +854,7 @@ The following function takes a character vector `x` with additional arguments, b
 +------------------------------+----------------------------------------------------------------------------+
 
 The following functions take both a character vector `x` and a *pattern string* to search for.
-Pattern strings can be more general like `"[:alpha:]"` or `"[:digit:]"` from the above list (these are also called [regular expressions](https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf) or regexp for short, which we won't cover in detail :-).
+Pattern strings can be more general like `"[:alpha:]"` or `"[:digit:]"` from the above list (these are also called [regular expressions](https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf) or RegEx for short, which we won't cover in detail :-).
 Each of these functions returns a vector.
 
 +-------------------------------+----------------------------------------------------------------------------+
@@ -806,12 +871,13 @@ Each of these functions returns a vector.
 
 The following function also takes a vector `x` of strings and a pattern string.
 However, unlike the above table, this function returns a *list*.
-We will cover lists in the next section.
 
 +------------------------------+-----------------------------------------------------------+
 | **Function**                 | **Description**                                           |
 +==============================+===========================================================+
 | `str_locate_all(x, pattern)` | The positions within each element that a pattern is found |
++------------------------------+-----------------------------------------------------------+
+| `str_split(x, pattern)`      | Split each string into a varying number of pieces         |
 +------------------------------+-----------------------------------------------------------+
 
 The following function is a helpful diagnostic tool to view matched patterns.
@@ -920,7 +986,7 @@ Groovy! The ["pepper shaker photos" in R for Data Science](https://r4ds.had.co.n
 
 As we mentioned earlier, `tidyverse` is a collection of packages.
 One of the packages `tidyverse` contains is `stringr`, which offers a variety of methods for manipulating strings.
-Like numbers, a string is a vector of strings with just one string.
+Just as a single number can be seen as a vector containing one number, a single string can be viewed as a vector containing one string.
 So, applying a function to a string is the same as applying a function to a string vector.
 
 Depending on what we are interested in doing, we can classify the functions in `stringr` into the following categories:
@@ -944,7 +1010,7 @@ library(tidyverse)
 
 ### Regular expressions
 
-The pattern matching functions of `stringr` accept *regular expressions*.
+The pattern matching functions of `stringr` accept *regular expressions*.  
 
 A regular expression is a string that specifies a collection of strings in a possibly compact manner.
 Here are some examples of regular expressions and how one of the `stringr` functions `str_detect` uses it find patterns in string vector `c("May 17, 2019", "Certified mail", "FL 33333", "Oppa Locka", "to Mr. Haan", "arrived")`.
