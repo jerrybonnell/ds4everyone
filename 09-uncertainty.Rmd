@@ -424,8 +424,8 @@ df <- tibble(bstrap_means)
 
 ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 8) +
-  geom_segment(aes(x = middle95[1], y = 0, 
-                   xend = middle95[2], yend = 0), 
+  annotate("segment", x = middle95[1], y = 0, 
+                   xend = middle95[2], yend = 0, 
                    size = 2, color = "salmon") 
 ```
 
@@ -492,10 +492,10 @@ df <- tibble(bstrap_means)
 
 ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 8) +
-  geom_segment(aes(x = middle95[1], y = 0, 
-                   xend = middle95[2], yend = 0), 
+  annotate("segment", x = middle95[1], y = 0, 
+                   xend = middle95[2], yend = 0, 
                    size = 2, color = "salmon") +
-  geom_point(aes(x = pop_mean, y = 0), color = "red", size = 3)
+  annotate("point", x = pop_mean, y = 0, color = "red", size = 3)
 ```
 
 The population mean of 149.6 minutes falls in this interval. We conclude that the "middle 95%" interval of bootstrapped means successfully captured the parameter. 
@@ -690,8 +690,8 @@ Let us plot the sampling histogram and annotate the interval on this histogram.
 df <- tibble(bstrap_means)
 ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
-  geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
-                   size = 2, color = "salmon") +
+  annotate("segment", x = middle[1], y = 0, xend = middle[2], 
+           yend = 0, size = 2, color = "salmon") +
   labs(x = "Proportion of healthy sleepers")
 ```
 
@@ -714,7 +714,7 @@ middle
 df <- tibble(bstrap_means)
 ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
-  geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
+  annotate("segment", x = middle[1], y = 0, xend = middle[2], yend = 0, 
                    size = 2, color = "salmon") +
   labs(x = "Proportion of healthy sleepers")
 ```
@@ -734,7 +734,7 @@ middle
 df <- tibble(bstrap_means)
 ggplot(df, aes(x = bstrap_means, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
-  geom_segment(aes(x = middle[1], y = 0, xend = middle[2], yend = 0), 
+  annotate("segment", x = middle[1], y = 0, xend = middle[2], yend = 0, 
                    size = 2, color = "salmon") +
   labs(x = "Proportion of healthy sleepers")
 ```

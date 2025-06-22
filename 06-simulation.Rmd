@@ -816,7 +816,7 @@ Finally, we visualize our results.
 ggplot(results) + 
   geom_histogram(aes(x = num_grains, y = after_stat(density)), 
                  color = "gray", fill = "darkcyan", bins = 18) + 
-  geom_point(aes(x = 1023, y = 0), color = "salmon", size = 3)
+  annotate("point", x = 1023, y = 0, color = "salmon", size = 3)
 ```
 
 We observe that the number of grains cluster around 1023, as expected (see the orange dot). In general, each round after the first can create a difference of at most 1, so with $N$ rounds, the difference is at most $N - 1$. Our simulation confirms this fact. 
@@ -920,7 +920,7 @@ grains |>
   ggplot() + 
   geom_histogram(aes(x = grains, y = after_stat(density)), 
                  bins = 18, color = "gray", fill = "darkcyan") +
-  geom_point(aes(x = 1023, y = 0), color = "salmon", size = 3)
+  annotate("point", x = 1023, y = 0, color = "salmon", size = 3)
 ```
 
 Sometimes the minister received few to no grains at the end of the 10th day and sometimes he received much more than he asked for! Like the first scenario, we see the simulated values cluster again around the expected amount. 
@@ -1101,7 +1101,7 @@ ggplot(results) +
   geom_histogram(aes(x = proportions, y = after_stat(density)), 
                  color = "gray", fill = "darkcyan", 
                  breaks = seq(0.35, 0.65, 0.01)) + 
-  geom_point(aes(x = 0.51, y = 0), color = "salmon", size = 3)
+  annotate("point", x = 0.51, y = 0, color = "salmon", size = 3)
 ```
 
 We see that the histogram looks symmetric and centered around 0.51 (see the orange dot), as expected. Neat!

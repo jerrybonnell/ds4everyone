@@ -598,7 +598,7 @@ toy_df %>%
   geom_line(aes(x = x, y = y),
             color = "darkcyan",
             size = 2) + 
-  geom_point(aes(x = 1, y = my_quadratic_equation(1)),
+  annotate("point", x = 1, y = my_quadratic_equation(1),
              color = "salmon",
              size = 4) 
 ```
@@ -667,12 +667,12 @@ ggplot(girth_height_su) +
   geom_abline(aes(slope = 0, intercept = 0), color = "gray", alpha = 1) +
   geom_vline(xintercept = -1, color = "blue") + 
   geom_vline(xintercept = 1, color = "blue") + 
-  geom_point(aes(x = -1, y = 0), size = 2, color = "blue") + 
-  geom_point(aes(x = -1, y = -0.5), size = 2, color = "blue") + 
-  geom_point(aes(x = -1, y = -1), size = 2, color = "blue") + 
-  geom_point(aes(x = 1, y = 0), size = 2, color = "blue") + 
-  geom_point(aes(x = 1, y = 0.5), size = 2, color = "blue") + 
-  geom_point(aes(x = 1, y = 1), size = 2, color = "blue") + 
+  annotate("point", x = -1, y = 0, size = 2, color = "blue") + 
+  annotate("point", x = -1, y = -0.5, size = 2, color = "blue") + 
+  annotate("point", x = -1, y = -1, size = 2, color = "blue") + 
+  annotate("point", x = 1, y = 0, size = 2, color = "blue") + 
+  annotate("point", x = 1, y = 0.5, size = 2, color = "blue") + 
+  annotate("point", x = 1, y = 1, size = 2, color = "blue") + 
   geom_segment(aes(x = Height_su, y = Girth_su,
                    xend = Height_su, yend = 1 * Height_su + 0), color = "blue", alpha = 0)
 ```
@@ -1175,8 +1175,8 @@ Let us plot a sampling histogram of the predictions and annotate the confidence 
 ggplot(bstrap_predictions, 
        aes(x = prediction, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
-  geom_segment(aes(x = middle[1][[1]], y = 0, 
-                   xend = middle[2][[1]], yend = 0), 
+  annotate("segment", x = middle[1][[1]], y = 0, 
+                   xend = middle[2][[1]], yend = 0, 
                    size = 2, color = "salmon") 
 ```
 
@@ -1244,8 +1244,8 @@ Following is the sampling histogram of the bootstrapped slopes with the annotate
 ggplot(bstrap_slopes, 
        aes(x = prediction, y = after_stat(density))) + 
   geom_histogram(col="grey", fill = "darkcyan", bins = 13) +
-  geom_segment(aes(x = middle[1][[1]], y = 0, 
-                   xend = middle[2][[1]], yend = 0), 
+  annotate("segment", x = middle[1][[1]], y = 0, 
+                   xend = middle[2][[1]], yend = 0, 
                    size = 2, color = "salmon") 
 ```
 

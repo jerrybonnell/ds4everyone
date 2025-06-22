@@ -183,7 +183,7 @@ Where does the observed value fall in this histogram? We can plot it easily.
 ggplot(tibble(sample_stats)) +
   geom_histogram(aes(x = sample_stats, y = after_stat(density)), 
                  fill = "darkcyan", color = 'gray', bins = 12) +
-  geom_point(aes(x = observed_heads, y = 0), size = 3, 
+  annotate("point", x = observed_heads, y = 0, size = 3, 
              color = "salmon") +
   labs(x = "Number of heads")
 ```
@@ -206,6 +206,7 @@ To compute a *p-value*, we take the following steps:
 |       3. Compare the observation and examine where in the histogram 
 |          the observation stands.
 
+
 More specifically, we estimate how far the observation is from the central portion of the histogram by splitting the histogram at the point of observation. As shown in the following figure, the portion less than or equal to the observation (in dark cyan) and the portion greater than or equal to the observation (in orange). Note that we can include the equality, when the sampled value equals the observed value, on either side. 
 
 ```{r dpi=80, fig.align="center", echo = FALSE, message = FALSE}
@@ -214,7 +215,7 @@ colors <- c(rep("salmon",4), rep("darkcyan",8))
 ggplot(tibble(sample_stats)) +
   geom_histogram(aes(x = sample_stats, y = after_stat(density)), 
                  bins = 12, fill = colors, color = 'gray') +
-  geom_point(aes(x = observed_heads, y = 0), size = 3, color = "red") +
+  annotate("point", x = observed_heads, y = 0, size = 3, color = "red") +
   labs(x = "Number of heads")
 ```
 
@@ -351,7 +352,7 @@ Where does the true Harvard class lie on this histogram? We can plot a point geo
 ggplot(tibble(sample_class_tvds)) +
   geom_histogram(aes(x = sample_class_tvds, y = after_stat(density)), 
                  bins = 70, fill = "darkcyan", color = 'gray') +
-  geom_point(aes(x = harvard_diff, y = 0), size = 3, color = "salmon")
+  annotate("point", x = harvard_diff, y = 0, size = 3, color = "salmon")
 ```
 
 The orange dot shows the distance value of the Harvard value from the Almanac value. What we see is that the proportion of the races at Harvard is nothing like the national proportion.
@@ -410,7 +411,7 @@ Where does the observed value fall in this histogram?
 ggplot(tibble(sample_class_tvds)) +
   geom_histogram(aes(x = sample_class_tvds, y = after_stat(density)), 
                  binwidth=0.002, fill = "darkcyan", color = 'gray') +
-  geom_point(aes(x = harvard_diff, y = 0), size = 3, color = "salmon")
+  annotate("point", x = harvard_diff, y = 0, size = 3, color = "salmon")
 ```
 
 We find that the result is the same; the Harvard proportion of Asian American students is not at all like the national value. We can state, with great confidence, that Harvard enrolls much more Asian students than the national average. 
@@ -532,7 +533,7 @@ It seems that the grades cluster around 72. Where does the actual section H sect
 ggplot(tibble(sample_means)) +
   geom_histogram(aes(x = sample_means, y = after_stat(density)), 
                  bins = 15, fill = "darkcyan", color = 'gray') + 
-  geom_point(aes(x = observed_statistic, y = 0), 
+  annotate("point", x = observed_statistic, y = 0, 
              size = 3, color = "salmon")
 ```
 
@@ -605,7 +606,7 @@ ggplot(tibble(sample_means)) +
                  fill = "darkcyan", color = 'gray') +
   geom_vline(xintercept = sorted_samples[length(sorted_samples)*0.05], 
              size = 2, color = "purple") + 
-  geom_point(aes(x = observed_statistic, y = 0), size = 3, color = "red")
+  annotate("point", x = observed_statistic, y = 0, size = 3, color = "red")
 ```
 
 We see that the point does not cross the vertical purple line. We can check numerically how much area "is in the tail". 
@@ -615,7 +616,7 @@ colors <- c(rep("salmon",8), rep("darkcyan",7))
 ggplot(tibble(sample_means)) +
   geom_histogram(aes(x = sample_means, y = after_stat(density)), bins = 15,
                  fill = colors, color = 'gray') +
-  geom_point(aes(x = observed_statistic, y = 0), size = 3, color = "red")
+  annotate("point", x = observed_statistic, y = 0, size = 3, color = "red")
 ```
 
 ```{r}
@@ -807,7 +808,7 @@ Let's visualize the results.
 ggplot(tibble(differences)) + 
   geom_histogram(aes(x = differences, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 20) +
-  geom_point(aes(x = observed_statistic, y = 0), 
+  annotate("point", x = observed_statistic, y = 0, 
              color = "salmon", size = 3)
 ```
 
@@ -914,7 +915,7 @@ We are ready to visualize the results.
 ggplot(tibble(differences)) + 
   geom_histogram(aes(x = differences, y = after_stat(density)), 
                  col="grey", fill = "darkcyan", bins = 15) +
-  geom_point(aes(x = observed_statistic, y = 0), 
+  annotate("point", x = observed_statistic, y = 0, 
              color = "salmon", size = 3)
 ```
 

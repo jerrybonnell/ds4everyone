@@ -453,7 +453,7 @@ tibble(some_numbers) |>
   ggplot() + 
   geom_histogram(aes(x = some_numbers, y = after_stat(density)),
                  color = "gray", fill = "darkcyan", binwidth = 1) +
-  geom_point(aes(x = mean(some_numbers), y = -0.02), 
+  annotate("point", x = mean(some_numbers), y = -0.02, 
              color = "salmon", shape = 17, size = 4)
 ```
 
@@ -476,7 +476,7 @@ ggplot(tibble(symmetric)) +
 geom_histogram(aes(x = symmetric, y = after_stat(density)),
                bins = 3,
                color = "gray", fill = "darkcyan") +
-geom_point(aes(x = mean(symmetric), y = -0.02), 
+annotate("point", x = mean(symmetric), y = -0.02, 
            color = "salmon", shape = 17, size = 4)
 ```
 
