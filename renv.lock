@@ -3207,7 +3207,7 @@
     },
     "topicmodels": {
       "Package": "topicmodels",
-      "Version": "0.2-16",
+      "Version": "0.2-17",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -3218,7 +3218,7 @@
         "stats4",
         "tm"
       ],
-      "Hash": "a9c7f5256c6f12e26bee546c92851781"
+      "Hash": "d18ad8211a478d33299d789b905f06a0"
     },
     "triebeard": {
       "Package": "triebeard",
