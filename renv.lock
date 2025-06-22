@@ -3174,7 +3174,7 @@
     },
     "tm": {
       "Package": "tm",
-      "Version": "0.7-11",
+      "Version": "0.7-16",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -3190,7 +3190,7 @@
         "utils",
         "xml2"
       ],
-      "Hash": "625329dd66ec8e8fbeb5ea6003e9be0a"
+      "Hash": "210ad587f23ea10b3d79c41ac0d02fe9"
     },
     "tokenizers": {
       "Package": "tokenizers",
@@ -3520,7 +3520,7 @@
     },
     "xml2": {
       "Package": "xml2",
-      "Version": "1.3.6",
+      "Version": "1.3.8",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -3529,7 +3529,7 @@
         "methods",
         "rlang"
       ],
-      "Hash": "1d0336142f4cd25d8d23cd3ba7a8fb61"
+      "Hash": "f5130b2f3d461964bac93cc618013231"
     },
     "yaml": {
       "Package": "yaml",
