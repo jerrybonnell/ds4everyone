@@ -86,7 +86,7 @@ The antonym of "deterministic" is "non-deterministic", which is a concept that p
 
 The pool of subjects from which we draw samples is called the *population*. There are multiple types of populations and the determining factors of the types is its quantity and the way the samples are generated. 
 
-When we draw a *random sample*, there are two questions that must be answered before the sampling is done: (1) what is the *population* being measured, and (2) what is the the *chance of selection* for each group in that population? If either of these points are not known beforehand, the sample obtained is __NOT__ a random sample! This is an important point to emphasize because sometimes a sample can appear "random" even though it is not.   
+When we draw a *random sample*, there are two questions that must be answered before the sampling is done: (1) what is the *population* being measured, and (2) what is the *chance of selection* for each group in that population? If either of these points are not known beforehand, the sample obtained is __NOT__ a random sample! This is an important point to emphasize because sometimes a sample can appear "random" even though it is not.   
 
 Following are some (non-comprehensive) examples of populations and how sampling might be carried out.
 
@@ -549,7 +549,7 @@ In many situations we do not know the value of a parameter of a population. Yet,
 Before jumping into the tidyverse, first some vocabulary: 
 
 * A *parameter* is some useful quantitative evaluation criteria about a population. For instance, a parameter is the mean height of all individuals in the United States. This is typically unknown to us. 
-* A *statistic* is a value obtained from an sampling distribution (which we can generate). The purpose of a statistic is to *estimate* a parameter. When we compute the mean or median from an sampling distribution, we call these statistics the *sample* mean and median, respectively.  
+* A *statistic* is a value obtained from a sampling distribution (which we can generate). The purpose of a statistic is to *estimate* the parameter of interest. When we compute the mean or median from a sampling distribution, we call such statistics the *sample* mean and median, respectively.  
 
 
 ### Prerequisites

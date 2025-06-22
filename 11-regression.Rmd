@@ -312,9 +312,9 @@ There seems to be some correlation between the two -- taller trees tend to have 
 
 ## First approach: nearest neighbors regression
 
-One way to make a prediction about the outcome of some individual is to first find others who are similiar to that individual and whose outcome you do know. We can then use those outcomes to guide the prediction. 
+One way to make a prediction about the outcome of some individual is to first find others who are similar to that individual and whose outcome you do know. We can then use those outcomes to guide the prediction. 
 
-Say we have a new black cherry tree whose height is 65 ft. We can look at trees that are "close" to 65 ft, say, within 1 feet. We can find these individuals using `dplyr`:
+Say we have a new black cherry tree whose height is 75 ft. We can look at trees that are "close" to 75 ft, say, within 1 foot. We can find these individuals using `dplyr`:
 
 ```{r}
 trees_data |> 
@@ -1191,7 +1191,7 @@ lmod_parsnip |>
           level = 0.95)
 ```
 
-`predict` obtains the interval by means of statistical theory, and we can see that the result is very close to what we found using the the bootstrap. Formally, these intervals go by a special name: *confidence intervals for the mean response*. That's a mouthful!
+`predict` obtains the interval by means of statistical theory, and we can see that the result is very close to what we found using the bootstrap. Formally, these intervals go by a special name: *confidence intervals for the mean response*. That's a mouthful!
 
 ### How significant is the slope? 
 
@@ -1263,7 +1263,7 @@ Indeed, they are quite close! As a bonus, we also get a confidence interval for 
 
 ## Graphical Diagnostics 
 
-An important part of using regression analysis well is understanding how to apply it. Many situations will present itself to you as what seems a golden opportunity for applying linear regression only to find out that the data does not meet any of the assumptions. Do not despair -- there are many transformation techniques and diagnostics available that can render linear regression suitable. However, using any of them first requires a realization that there is a problem at hand with the current linear model. 
+An important part of using regression analysis well is understanding how to apply it. Many situations will present themselves to you as what seems a golden opportunity for applying linear regression only to find out that the data does not meet any of the assumptions. Do not despair -- there are many transformation techniques and diagnostics available that can render linear regression suitable. However, using any of them first requires a realization that there is a problem at hand with the current linear model. 
 
 Detecting problems with a regression model is the job of diagnostics. We can broadly categorize them as two kinds -- numerical and graphical. We find graphical diagnostics easier to digest because they are visual and, hence, is what we will cover in this section. 
 
@@ -1471,7 +1471,7 @@ candy
 
 * **Question 1.3** Make a scatter plot of `winpercent` versus `sugarpercent`. By convention, the variable we will try to predict is on the vertical axis and the other variable -- the *predictor* -- is on the horizontal axis.
 
-* **Question 1.4** Is the percentile of sugar and the overall win percentage roughly linearly associated?  Do you observe a correlation that is positive, negative, or neither? Moreover, would you guess that correlation to be closer to 1, -1, or 0? 
+* **Question 1.4** Are the percentile of sugar and the overall win percentage roughly linearly associated?  Do you observe a correlation that is positive, negative, or neither? Moreover, would you guess that correlation to be closer to 1, -1, or 0? 
 
 * **Question 1.5** Create a tibble called `candy_standard` containing the percentile of sugar and the overall win percentage *in standard units*. There should be two variables in this tibble: `winpercent_su` and `sugarpercent_su`. 
 

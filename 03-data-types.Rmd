@@ -72,7 +72,7 @@ Like integer, the double type thus has a range of numbers it can record an appro
 
 If you are interested in learning more about digital representations of numbers, sign up for a course in computer organization and architecture!
 
-### Specifiying integers and doubles in R
+### Specifying integers and doubles in R
 
 Our brief dive into how integers and doubles are represented boils down to two basic ideas:
 
@@ -280,7 +280,7 @@ For example, the substring from position 2 to position 3 of the string "song" is
 str_sub("song", 2, 3)
 ```
 
-The syntax is `str_sub(some_string, start, end)` where `some_string` from which we will build a substring, `start` is the staring position, and `end` is the ending position.
+The syntax is `str_sub(some_string, start, end)` where `some_string` from which we will build a substring, `start` is the starting position, and `end` is the ending position.
 
 You can omit the ending position if it is the last position of the string.
 
@@ -515,7 +515,7 @@ What are these?
 Once you get to length 0, `[1]` becomes `NA` but `[0]` produces `numeric(0)`.
 
 `numeric(N)` with `N` produces a sequence having length `N` where each element is 0.
-Here is an example which creates a vector of six 0s.
+Here is an example which creates a vector of five 0s.
 
 ```{r}
 my_vec2 <- numeric(5)
@@ -635,7 +635,7 @@ a %% b
 ```
 
 You can access some properties of the vector.
-`length`, `max`, and `min` provide the legnth of a vector, the maximum among the elements in a vector, and the minimum among the elements in it, respectively.
+`length`, `max`, and `min` provide the length of a vector, the maximum among the elements in a vector, and the minimum among the elements in it, respectively.
 
 ```{r}
 length(a)
@@ -1173,7 +1173,7 @@ Both `str_extract` and `str_match` have their version for "apply to all matches"
 The following functions belong to this category.
 
 -   `str_length(STRING)`: Returns the length of each element.
--   `str_pad(STRING, WIDTH, side=OPTION, pad=X)`:Appends the string `X` to both or either side of each element of `STRING` as many times as necessary so as to inflate the length of element to at least `WIDTH`. The `OPTION` is one of `"left"`, `"right"`, and `"both"` to indicate where the padding should occur. They respectively represent "the left side only", "the right side only", and "both sides so as to center the original". If the original has length greater than or equal to `WIDTH` no padding occurs. In the case of "both", if the number of necessary padding is an odd number to make the length equal to `WIDTH`, the right side receives one more than the left side. The padding sTring `X` must be a single character. You may omit the specification part `pad=` in `pad=X`.
+-   `str_pad(STRING, WIDTH, side=OPTION, pad=X)`:Appends the string `X` to both or either side of each element of `STRING` as many times as necessary so as to inflate the length of element to at least `WIDTH`. The `OPTION` is one of `"left"`, `"right"`, and `"both"` to indicate where the padding should occur. They respectively represent "the left side only", "the right side only", and "both sides so as to center the original". If the original has length greater than or equal to `WIDTH` no padding occurs. In the case of "both", if the number of necessary padding is an odd number to make the length equal to `WIDTH`, the right side receives one more than the left side. The padding string `X` must be a single character. You may omit the specification part `pad=` in `pad=X`.
 -   `str_trunc(STRING, WIDTH, side=OPTION, ellipsis=E)`: This is in some sense at the opposite of `str_pad`. The function shrinks each string to length `WIDTH` with the single-character string `E` for replacement. The `side=` specification states where the replacement occurs and should be one of `"left"`, `"right"`, and `"center"`. You may omit the `ellipsis=` prefix.
 -   `str_trim(STRING, side=OPTION)`: Trims the white space at the end. The option value is one of `"left"`, `"right"`, and `"both"`, which correspond to "the left side only", "the right side only", and "both sides".
 
@@ -1246,7 +1246,7 @@ There are three more string mutation functions.
 We only show two functions in this category.
 
 * `str_dup(STRING, TIMES)`: Create from a vector `STRING`, a new vector where each element appears consecutively, without a gap, `TIMES` times.
-* `str_c(STRING)`: Collpoase the elements column-wise into a single dimensional vector.
+* `str_c(STRING)`: Collapse the elements column-wise into a single dimensional vector.
 * `str_c(STRING, collapse=X)`: Concatenate the elements column-wise with `X` in between and then concatenate the elements row-wise with `X` in between, thereby generating a single-element vector.
 
 Below are examples.

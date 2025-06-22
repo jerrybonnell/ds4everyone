@@ -175,7 +175,7 @@ Thus, we can figure quite easily the value of the $?$.
 \text{ ?} = 6 * 4 - (2 + 8 + 4) = 10 
 \]
 
-The phenomena we observed is representative of a general fact. In the formula that involves $\mu$ and $x_1, \ldots, x_N$, like the one for variance, there are no longer $N$ independent values, there are only $N-1$ of them.
+The phenomenon we observed is representative of a general fact. In the formula that involves $\mu$ and $x_1, \ldots, x_N$, like the one for variance, there are no longer $N$ independent values, there are only $N-1$ of them.
 
 The difference in quantity by using $N-1$ instead of $N$ may not be large, specifically, when $N$ is large and the differences are small. Still, for an accurate understanding of the data spread, the choice can be highly critical. For this reason, statisticians prefer to work with the sample standard deviation when dealing with samples. We will do so as well for the remainder of this text.  
 
@@ -733,7 +733,7 @@ ggplot(results) +
                  color = "gray", fill = "darkcyan", bins = 15)
 ```
 
-We observe a bell-shaped curve, even though the distribution we drew from does not look bell-shaped. Note the the distribution is __centered__ around 64 days, as expected. With kudos to the clerk for a job well done, we note that accomplishing such a feat in reality would be impossible.    
+We observe a bell-shaped curve, even though the distribution we drew from does not look bell-shaped. Note the distribution is __centered__ around 64 days, as expected. With kudos to the clerk for a job well done, we note that accomplishing such a feat in reality would be impossible.    
 
 To understand the __spread__, look for the inflection point in this histogram. That point occurs at around 70 days, which means the SD is the distance from the center to this point -- that looks to be about 5.6 days. 
 
@@ -1103,7 +1103,7 @@ flights <- flights |>
 
 * **Question 4.4** Plot a histogram of `dep_arr_abs_diff` from `flights_with_diff` in density scale with 30 bins. Add to the histogram the point on the x-axis indicating the max, the mean, the 0.5 quantile, and the 0.99 quantile. Use `"black"` for the 0.99 quantile and `"red"` for the max. Use two other different colors for the mean and the median.
 
-* **Question 4.5** Write a function `var_from_sample` that receives a single argument `n_sample`. The function samples `n_samples` from the the tibble `flights_with_diff` without replacement, and computes the *sample variance* in the new variable `dep_arr_abs_diff` we created. The sample variance is then returned. 
+* **Question 4.5** Write a function `var_from_sample` that receives a single argument `n_sample`. The function samples `n_samples` from the tibble `flights_with_diff` without replacement, and computes the *sample variance* in the new variable `dep_arr_abs_diff` we created. The sample variance is then returned. 
 
   ```{r eval=FALSE, message=FALSE, warning=FALSE}
   

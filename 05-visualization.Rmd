@@ -59,7 +59,7 @@ library(tidyverse)
 
 We will use the `mpg` dataset as our source for this section. This dataset is collected by the US Environmental Protection Agency and shows information about 38 models of car between 1999 and 2008. We have visited this data in earlier sections. Use `?mpg` to open its help page for more information.
 
-The table `mpg` has 234 rows and 11 columns. Use  Let us have a look at a snapshot of the data again.  
+The table `mpg` has 234 rows and 11 columns. Let us have a look at a snapshot of the data again.  
 
 ```{r}
 mpg

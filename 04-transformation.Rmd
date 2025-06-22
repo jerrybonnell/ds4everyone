@@ -432,7 +432,7 @@ The regular expression here means return any columns that have "lowercase name w
 
 Let us turn our attention now to the rows. The function `filter` allows us to select rows using some criteria. The syntax is to provide a Boolean expression for what should be included in the filtered dataset. 
 
-We can select all car models with 8 cylinders. Note how `cyl == 8` is an expression that evalutes to either `TRUE` or `FALSE` depending on whether the the attribute `cyl` of the row has a value of `8`. 
+We can select all car models with 8 cylinders. Note how `cyl == 8` is an expression that evalutes to either `TRUE` or `FALSE` depending on whether the attribute `cyl` of the row has a value of `8`. 
 
 ```{r}
 filter(mtcars_tibble, cyl == 8)
@@ -898,7 +898,7 @@ mtcars_tibble <- mtcars |>
 
 We have used several times by now the word "function". Here are some basic rules about functions.
 
-* _A function is a block of code with a name that allows execution from other codes._ This mean that you can take any part of a working (i.e., all parentheses and brackets in the part have matching counterparts in the same part) and specify it to be a function.
+* _A function is a block of code with a name that allows execution from other codes._ This mean that you can take any part of a working block of code (i.e., all parentheses and brackets in the part have matching counterparts in the same part) and specify it to be a function.
 * _If the function is active in the present run of R, each time a code call the function, the code of the function runs._ This means that R suspends the execution of the present code and processes the execution of the code of the function. When it finishes running the code of the function, it returns to the execution of the one it has suspended.
 * _A function may take upon the role of computing a value._ You can design a function so that it uses a special function `return` at the end so as to specify the value it has computed. Note that the use of `return` is __optional__ and, by default, R returns the last line of computation performed in the function. 
 * _If a function has the role of returning a value, the call itself represents the value it computes._ So you store the value the function computes in a variable using an assignment.

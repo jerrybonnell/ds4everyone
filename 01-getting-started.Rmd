@@ -242,7 +242,7 @@ Our two introductory examples have hopefully shown you a glimpse of what data sc
 
 * We begin with a coverage of the fundamentals of R programming.
 * We will move on to learning how the `tidyverse` can be used for data tidying and visualization.
-* We then study how to extract *insights* from our data using statistical inferencing technioques. 
+* We then study how to extract *insights* from our data using statistical inferencing techniques. 
 * We end with generating *models* from data. We then use these to make *predictions* about possible outcomes for "unknown" observations using regression and text analysis techniques.  
 
 We hope that you will find the journey interesting.

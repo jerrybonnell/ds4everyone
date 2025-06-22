@@ -6,11 +6,11 @@ output:
 
 # Quantifying Uncertainty
 
-So far we have developed ways to show how to use data to decide between competing questions about the world. For instance, does Harvard enroll proportionately less Asian Americans than other private universities in the United States; are the exam grades in one lab section of a course too low when compared to other lab sections; can an experimental drug bring an improvement to patients recovering from brain trauma? We evaluated questions like these by means of an *hypothesis test* where we put forward two hypotheses: a *null* hypothesis and an *alternative* hypothesis.  
+So far we have developed ways to show how to use data to decide between competing questions about the world. For instance, does Harvard enroll proportionately less Asian Americans than other private universities in the United States; are the exam grades in one lab section of a course too low when compared to other lab sections; can an experimental drug bring an improvement to patients recovering from brain trauma? We evaluated questions like these by means of a *hypothesis test* where we put forward two hypotheses: a *null* hypothesis and an *alternative* hypothesis.  
 
 Often we are just interested in what a value looks like. For instance, airlines might be interested in the median flight delay of their flights to preserve customer satisfaction; political candidates may look to the percentage of voters favoring them to gauge how aggressive their campaigning should be. 
 
-Put in the language of statistics, we are interested in *estimating* some unknown *parameter* about a population. If all the data has been made available to us, we could compute the parameter directly with ease. However, we often do not have access to the full population (as is the case with polling voters) or there may be too much data to work with that it becomes computationally prohibitive (as is the case with flights).  
+Put in the language of statistics, we are interested in *estimating* some unknown *parameter* about a population. If all the data have been made available to us, we could compute the parameter directly with ease. However, we often do not have access to the full population (as is the case with polling voters) or there may be too much data to work with that it becomes computationally prohibitive (as is the case with flights).  
 
 We have seen before that sampling distributions can provide reliable approximations to the true (and usually unknown) distribution and that, likewise, a statistic computed from it can provide a reliable estimate of the parameter in question. However, the value of a statistic can turn out *differently* depending on the random samples that are drawn to compose a sampling distribution. How much can the value of a statistic vary? Could we quantify this uncertainty?  
 
@@ -78,7 +78,7 @@ There is quite a bit of discrepancy between the two. Observe that the histogram 
 
 When the distribution is "skewed" like the one here, the median can be a stronger indicator of central tendency. 
 
-There are cases, by the way, where two median exists. Such an event occurs exactly when the number of values is an even number. If there are 10 values, the 5th and the 6th values in the ascending order are the two medians. The one at the lower position in the order is the *odd median* and the other one, i.e., the one at the higher position in the order, is the *even median*. To compute the median in this case, we usually take the average of the odd and even median.  
+There are cases, by the way, where two medians exist. Such an event occurs exactly when the number of values is an even number. If there are 10 values, the 5th and the 6th values in the ascending order are the two medians. The one at the lower position in the order is the *odd median* and the other one, i.e., the one at the higher position in the order, is the *even median*. To compute the median in this case, we usually take the average of the odd and even median.  
 
 ### `min` and `max` 
 
@@ -741,7 +741,7 @@ ggplot(df, aes(x = bstrap_means, y = after_stat(density))) +
 
 This interval is *much* narrower than the 99% interval and estimates 59.3% to 60.9% healthy sleepers in the population. This is a much tighter set of estimates, but we traded a narrower interval for lower confidence. This interval has a chance of missing the parameter 20% of the time. 
 
-### Confidence intervals as an hypothesis test
+### Confidence intervals as a hypothesis test
 
 Confidence intervals can be used for more than trying to estimate a population parameter. One popular use case for the confidence interval is something we saw in the previous chapter: the hypothesis test. 
 

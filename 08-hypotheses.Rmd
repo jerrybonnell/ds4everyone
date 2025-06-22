@@ -8,7 +8,7 @@ output:
 
 In the previous chapters, we learned about randomness and sampling. Quite often, a data scientist receives some data and must make some assertion about it. There are typically two kinds of situations:
 
-* She has one dataset and a model that the data should have followed. She needs to decide if it is likely that the dataset indeed follows the model?
+* She has one dataset and a model that the data should have followed. She needs to decide if it is likely that the dataset indeed follows the model.
 * She has two datasets. She needs to decide if it is possible to explain the two datasets using a single model.
 
 Here are examples of the two situations.
@@ -445,7 +445,7 @@ set.seed(1)
 
 ### A midterm grumble? 
 
-A hypothetical Computer Science course had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads each section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following a exam?
+A hypothetical Computer Science course had 40 enrolled students and was divided into 3 lab sections. A Teaching Assistant (TA) leads each section. After a midterm exam was given, the students in one section noticed that their midterm scores were lower compared to students in the other two lab sections. They complained that their performance was due to the TA's teaching. The professor faced a dilemma: is it the case that the TA is at fault for poor teaching or are the students from that section more vocal about their grumbles following an exam?
 
 If we were to fill that lab section with randomly selected students from the class, it is possible that their average midterm grade will look a lot like the score the grumbling students are unhappy about. It turns out that what we have stated here is a chance model that we can simulate. 
 
@@ -557,7 +557,7 @@ ggplot(tibble(sample_means)) +
              size = 2, color = "purple")
 ```
 
-This means that 10% of our simulated mean statistics are equal to or less than 63. Put differently, the chance of a an average midterm score *lower* than 63 occurring, under the assumption of a TA teaching in good faith, is around 10%. 
+This means that 10% of our simulated mean statistics are equal to or less than 63. Put differently, the chance of an average midterm score *lower* than 63 occurring, under the assumption of a TA teaching in good faith, is around 10%. 
 
 The situation is not much different if we look at the value 5% from the bottom, which we find to be about 61. We redraw the situation in on our sampling histogram. 
 

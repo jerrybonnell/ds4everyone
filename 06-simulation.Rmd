@@ -645,7 +645,7 @@ We thus conclude from the experiment that the range of the number is likely to r
 
 There is a famous story of a king awarding a minister with doubling amount of grains. There are many versions of the story, but the gist is like this: one day a king has decided to award a minister for his great work.
 
-* The kind asks, "Great work, what do you want from me as a reward? You name it, I will make your wish come true."
+* The king asks, "Great work, what do you want from me as a reward? You name it, I will make your wish come true."
 * The minister says, "Your Majestry, what an honor! If you are so kind as to indulge me, may I ask to receive grains of rice on a board of chess. We will start with one grain on a space on the board, given one day. The next day, I would like two grains on the next space. The following day, I would like four grains on the third space. Each day, I would like twice as many grains as you have given me on the previous day. In this manner, for the next 64 days, you would be so generous to give me grains of rice. Would that be too imposing to ask?"
 * The king says, "You ask so little. That would be so easy to do. Of course, this great King will grant you your request."
 
