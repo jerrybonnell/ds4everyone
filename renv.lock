@@ -2756,7 +2756,7 @@
     },
     "sp": {
       "Package": "sp",
-      "Version": "2.1-2",
+      "Version": "2.2-0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2769,7 +2769,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "40a9887191d33b2521a1d741f8c8aea2"
+      "Hash": "d9ff3b753db98bc50650314c8782abe6"
     },
     "stopwords": {
       "Package": "stopwords",
