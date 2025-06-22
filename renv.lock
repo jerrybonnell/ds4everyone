@@ -563,14 +563,14 @@
     },
     "data.table": {
       "Package": "data.table",
-      "Version": "1.14.8",
+      "Version": "1.17.6",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
       ],
-      "Hash": "b4c06e554f33344e044ccd7fdca750a9"
+      "Hash": "9ac198420cc2aa0327a0c62cfa16b580"
     },
     "datasauRus": {
       "Package": "datasauRus",
