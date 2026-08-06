@@ -21,6 +21,23 @@ description: "Exploring Data Science with R and the Tidyverse: A Concise Introdu
 
 # Welcome {-}
 
+```{r include=FALSE}
+gutenberg_download <- function(gutenberg_id, mirror = NULL,
+                               meta_fields = character(), ...) {
+  ids <- if (is.data.frame(gutenberg_id)) gutenberg_id[[1]] else gutenberg_id
+  out <- purrr::map_dfr(as.integer(ids), \(id) {
+    f <- file.path("data/gutenberg", paste0(id, ".rds"))
+    if (!file.exists(f)) stop("No cached Gutenberg text for id ", id, call. = FALSE)
+    readRDS(f)
+  })
+  if (length(meta_fields)) {
+    out <- dplyr::left_join(out, dplyr::select(gutenbergr::gutenberg_metadata,
+      gutenberg_id, dplyr::all_of(meta_fields)), by = "gutenberg_id")
+  }
+  out
+}
+```
+
 <a href="https://a.co/d/bjsSreP"><img src="images/cover.png" width="350" height="460" alt="Buy from Amazon" class="cover" /></a>
 
 This is the first edition of "Exploring Data Science with R and the Tidyverse: A Concise Introduction", published by CRC Press. 

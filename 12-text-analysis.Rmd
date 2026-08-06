@@ -61,8 +61,7 @@ gutenberg_metadata |>
 Using its ID `15`, we can proceed with retrieving the text into a variable called `moby_dick`. Observe how the data returned is in the form of a tibble -- a format we are well familiar with -- with one row per each line of the text.  
 
 ```{r message=FALSE}
-moby_dick <- gutenberg_download(gutenberg_id = 15, 
-                  mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
+moby_dick <- gutenberg_download(gutenberg_id = 15)
 moby_dick
 ```
 
@@ -73,7 +72,7 @@ by_chapter <- moby_dick |>
   select(-gutenberg_id) |>
   mutate(document = 'Moby Dick', 
          linenumber = row_number(),
-         chapter = cumsum(str_detect(text, regex('^CHAPTER '))))
+         chapter = cumsum(str_detect(text, regex('^\\s*CHAPTER '))))
 by_chapter
 ```
 
@@ -250,8 +249,7 @@ library(gutenbergr)
 We will study Herman Melville's works again in this section. However, unlike before, we will include many more texts from his oeuvre of prose. We will collect: *Moby Dick*, *Bartleby, the Scrivener: A Story of Wall-Street*, *White Jacket*, and *Typee: A Romance of the South Seas*. 
 
 ```{r message=FALSE}
-melville <- gutenberg_download(c(11231, 15, 10712, 1900), 
-              mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
+melville <- gutenberg_download(c(11231, 15, 10712, 1900))
 ```
 
 We will tidy it up as before and filter the text for stopwords. We will also add one more step to the preprocessing where we extract words that are strictly alphabetical. This is accomplished with a `mutate` call using `str_extract` and the regular expression `[a-z]+`.  
@@ -393,8 +391,7 @@ library(topicmodels)
 We will continue with our running example of Herman Melville's *Moby Dick*. Let us load it in. 
 
 ```{r message=FALSE}
-melville <- gutenberg_download(15, 
-              mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
+melville <- gutenberg_download(15)
 ```
 
 We will tidy the text as usual and, this time, partition the text into chapters. 
@@ -419,9 +416,8 @@ We begin as always: loading the texts, tidying them, splitting according to chap
 ```{r}
 whitman <- gutenberg_metadata |> 
   filter(title == "Leaves of Grass") |>
-  first() |>
-  gutenberg_download(meta_fields = "title", 
-    mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
+  slice(1) |>
+  gutenberg_download(meta_fields = "title")
 ```
 
 ```{r}
@@ -439,9 +435,8 @@ On to Hawthorne's *The Scarlet Letter*.
 ```{r}
 hawthorne <- gutenberg_metadata |>
   filter(title == "The Scarlet Letter") |>
-  first() |>
-  gutenberg_download(meta_fields = "title", 
-    mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg")
+  slice(1) |>
+  gutenberg_download(meta_fields = "title")
 ```
 
 ```{r}
@@ -686,8 +681,7 @@ gutenberg_metadata |>
 The project ID for the letter collection is 42078. Using the ID, load the project text as `austen_letters`.
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE}
-austen_letters <- gutenberg_download(gutenberg_id = 42078,
-  "http://mirror.csclub.uwaterloo.ca/gutenberg")
+austen_letters <- gutenberg_download(gutenberg_id = 42078)
 austen_letters
 ```
 
