@@ -72,7 +72,7 @@ by_chapter <- moby_dick |>
   select(-gutenberg_id) |>
   mutate(document = 'Moby Dick', 
          linenumber = row_number(),
-         chapter = cumsum(str_detect(text, regex('^\\s*CHAPTER '))))
+         chapter = cumsum(str_detect(text, regex('^CHAPTER '))))
 by_chapter
 ```
 

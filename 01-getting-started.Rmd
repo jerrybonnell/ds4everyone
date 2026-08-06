@@ -152,8 +152,14 @@ library(readtext)
 
 We load the data from the Gutenberg Project and remove any preface or introductory material; we designate the loaded text with the name `moby`, so that we can refer to it again later on. 
 
-```{r}
+```{r eval=FALSE}
 url <- "https://www.gutenberg.org/files/2701/2701-0.txt"
+moby <- readtext(url) |>
+  str_sub(27780)
+```
+
+```{r echo=FALSE}
+url <- "data/gutenberg/2701-0.txt"
 moby <- readtext(url) |>
   str_sub(27780)
 ```
