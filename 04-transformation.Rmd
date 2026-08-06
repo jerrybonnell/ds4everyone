@@ -906,7 +906,7 @@ We have used several times by now the word "function". Here are some basic rules
 
 ### A very simple function
 
-Here is a very simple function, `one_to_ten`, which prints the sequence of integers from 1 to 10. The definition of the function takes the form `one_ten <- function() { ... }`.
+Here is a very simple function, `one_to_ten`, which prints the sequence of integers from 1 to 10. The definition of the function takes the form `one_to_ten <- function() { ... }`.
 
 ```{r, error = TRUE}
 one_to_ten <- function() { 

@@ -781,7 +781,7 @@ shuffled[6:10] # shuffled group B
 
 The remaining work then is to compute the difference in means between the shuffled groups. 
 
-The function `one_mean_difference` puts everything together. It receives two vectors, `a` and `b`, puts them together in a pot, and deals out two shuffled vectors with the same size as `a` and `b`, respectively. The function returns the value of the simulated statistic by calling the functional `compute_statistic`. For this example, we use `mean_diff`. 
+The function `one_difference` puts everything together. It receives two vectors, `a` and `b`, puts them together in a pot, and deals out two shuffled vectors with the same size as `a` and `b`, respectively. The function returns the value of the simulated statistic by calling the functional `compute_statistic`. For this example, we use `mean_diff`. 
 
 ```{r}
 one_difference <- function(a, b, compute_statistic) {

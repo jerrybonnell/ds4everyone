@@ -312,7 +312,7 @@ str2 <- "science"
 str3 <- "rocks"
 ```
 
-There are two types of concatenation. One type connects strings with no gap, the other connects strings with on white space inserted in between. We can perform these actions using the `str_c` function from `stringr`. 
+There are two types of concatenation. One type connects strings with no gap, the other connects strings with one white space inserted in between. We can perform these actions using the `str_c` function from `stringr`. 
 
 Below, we think of concatenating three strings `"data"`, `"science"`, and `"rocks"` with the two functions individually.
 
@@ -1155,7 +1155,7 @@ str_locate_all(s, "[A-Za-z][aeiou]+")
 
 Here are the functions in this category.
 
--   `str_sub(STRING, START, END)`: Creates a new vector consisting of the substrings of the elements of `STRING` with `START` and `END` as the staring and ending positions, respectively.
+-   `str_sub(STRING, START, END)`: Creates a new vector consisting of the substrings of the elements of `STRING` with `START` and `END` as the starting and ending positions, respectively.
 -   `str_subset(STRING, pattern)`: Creates a new vector keeping only those elements in `s` matching the pattern.
 -   `str_extract(STRING, pattern)`: The same as `str_subset` concerning what to find, but the function returns a table not a one-dimensional vector. See the examples below to examine the differences among `str_subset`, `str_extract`, and `str_match`.
 

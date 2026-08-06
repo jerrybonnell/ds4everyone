@@ -582,7 +582,7 @@ ggplot(no_sports_cars,
     geom_smooth(se = FALSE)
 ```
 
-What if we wanted a smoother for *each* type of car? The `color` aesthetic can also be moved into the `ggplot` function call. While we are it, we set the smoother to use linear regression for the smoothing. 
+What if we wanted a smoother for *each* type of car? The `color` aesthetic can also be moved into the `ggplot` function call. While we are at it, we set the smoother to use linear regression for the smoothing. 
 
 ```{r message = FALSE, warning = FALSE, fig.align="center", dpi=80}
 ggplot(no_sports_cars, 

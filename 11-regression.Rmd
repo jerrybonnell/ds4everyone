@@ -330,7 +330,7 @@ trees_data |>
     geom_point(aes(x = Height, y = Girth, color = close_to_75))
 ```
 
-We can take the mean of the outcomes for those observations to obtain a *prediction* for the *average* diameter of a black cherry tree whose height is 65 ft. Let us amend our `dplyr` code to compute this value. 
+We can take the mean of the outcomes for those observations to obtain a *prediction* for the *average* diameter of a black cherry tree whose height is 75 ft. Let us amend our `dplyr` code to compute this value. 
 
 ```{r}
 trees_data |> 

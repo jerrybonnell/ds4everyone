@@ -229,7 +229,7 @@ We end this section with another example, this time comparing strings.
 ```{r}
 get_capital <- function(x) {
   if (x == "Florida") {
-    return("Talahassee")
+    return("Tallahassee")
   } else if (x == "Georgia") {
     return("Atlanta")
   } else if (x == "Alabama") {
@@ -497,7 +497,7 @@ The second step is to figure out how to generate values for the numerical repres
 
 ### Step 3: Run the simulation and visualize!
 
-The fourth step is to run the simulation and develop insights from the result, often using visualization. During this step we also must decide the number of times to simulate the quantity from the second step. To get a sense of how variable a quantity is, we must run step 2 a large number of times. We saw that in the previous section with simulating bet wins/losses we ran the experiment 1,000 times. But we may need to run a simulation even more, say hundreds of thousands or millions of times.
+The third step is to run the simulation and develop insights from the result, often using visualization. During this step we also must decide the number of times to simulate the quantity from the second step. To get a sense of how variable a quantity is, we must run step 2 a large number of times. We saw that in the previous section with simulating bet wins/losses we ran the experiment 1,000 times. But we may need to run a simulation even more, say hundreds of thousands or millions of times.
 
 ### Putting the steps together in R 
 

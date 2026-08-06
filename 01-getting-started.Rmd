@@ -74,7 +74,7 @@ We will see examples that use the `edsdata` package later in the text. For now, 
 
 ### The world's telephones {-}
 
-Base R ships with a number of off-the-shelf data sets you can play with. One of them is `WordPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
+Base R ships with a number of off-the-shelf data sets you can play with. One of them is `WorldPhones`, which provides the number of telephones in some large geographical regions of the world in 1951 and 1956-1961.
 
 The analysis begins by loading the package into your programming environment.
 
